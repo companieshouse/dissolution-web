@@ -1,0 +1,42 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from 'govuk/components/button/macro.njk'      import govukButton %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{
+    govukBreadcrumbs({
+      items: [
+        { href: 'https://www.gov.uk/', text: 'Home' },
+        { href: 'https://www.gov.uk/browse/business', text: 'Business and self-employed' },
+        { href: 'https://www.gov.uk/browse/business/limited-company', text: 'Running a limited company' }
+      ]
+    })
+  }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">{{ serviceName }}</h1>
+      <p class="govuk-body-l">Use this service to get your NodeJS application up and running.</p>
+      <p>An example form submission with validation is included</p>
+      <form method="post">
+        {{
+          govukButton({
+            text: 'Start now',
+            isStartButton: true,
+            attributes: {
+              id: 'start-now',
+              onclick: '_paq.push(["trackGoal", 1]);' if piwik
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

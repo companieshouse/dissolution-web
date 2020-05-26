@@ -1,0 +1,9 @@
+const TYPES = {
+  PORT: 'PORT',
+  NODE_ENV: 'NODE_ENV',
+  CDN_HOST: 'CDN_HOST',
+  PIWIK_URL: 'PIWIK_URL',
+  PIWIK_SITE_ID: 'PIWIK_SITE_ID'
+}
+
+export default TYPES
