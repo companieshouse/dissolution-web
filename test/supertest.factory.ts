@@ -1,4 +1,4 @@
-import {Application} from 'express'
+import { Application } from 'express'
 import supertest from 'supertest'
 
 export const setupSuperTest = (app: Application) => {

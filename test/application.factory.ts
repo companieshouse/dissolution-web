@@ -1,7 +1,8 @@
 import * as bodyParser from 'body-parser'
-import {Application} from 'express'
-import {Container} from 'inversify'
-import {InversifyExpressServer} from 'inversify-express-utils'
+import { Application } from 'express'
+import { Container } from 'inversify'
+import { buildProviderModule } from 'inversify-binding-decorators'
+import { InversifyExpressServer } from 'inversify-express-utils'
 import { Environment } from 'nunjucks'
 import * as nunjucks from 'nunjucks'
 
@@ -11,8 +12,13 @@ function addFilters(env: Environment): void {
   env.addFilter('asGovUKErrorList', asGovUKErrorList)
 }
 
-export const createApp = (): Application => {
+// tslint:disable-next-line: no-empty
+export const createApp = (configureBindings: (container: Container) => void = () => {
+}): Application => {
   const container: Container = new Container()
+  container.load(buildProviderModule())
+  configureBindings(container)
+
   return new InversifyExpressServer(container)
     .setConfig(server => {
 
