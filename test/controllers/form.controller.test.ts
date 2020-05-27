@@ -2,6 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import request from 'supertest'
 import { deepEqual, instance, mock, when } from 'ts-mockito'
 
 import { createApp } from 'app/application.factory'
@@ -11,16 +12,12 @@ import { FORM_PAGE_URI } from 'app/paths'
 import formSchema from 'app/schemas/form.schema'
 import FormValidator from 'app/utils/formValidator.util'
 
-import { setupSuperTest } from 'test/supertest.factory'
-
-const req = setupSuperTest()
-
 describe('FormController', () => {
   describe('GET - ensure that page loads correctly', () => {
     it('should render the form page', async () => {
       const app = createApp()
 
-      const res = await req(app).get(FORM_PAGE_URI).expect(OK)
+      const res = await request(app).get(FORM_PAGE_URI).expect(OK)
 
       assert.include(res.text, 'Tell us some details')
     })
@@ -37,7 +34,7 @@ describe('FormController', () => {
         container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
       })
 
-      const res = await req(app).post(FORM_PAGE_URI).send(testObject).expect(MOVED_TEMPORARILY)
+      const res = await request(app).post(FORM_PAGE_URI).send(testObject).expect(MOVED_TEMPORARILY)
 
       assert.include(res.text, 'Found. Redirecting to /form')
     })
@@ -55,7 +52,7 @@ describe('FormController', () => {
       container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
     })
 
-    const res = await req(app).post(FORM_PAGE_URI).send(testData).expect(BAD_REQUEST)
+    const res = await request(app).post(FORM_PAGE_URI).send(testData).expect(BAD_REQUEST)
 
     assert.include(res.text, 'You must enter at least 3 characters')
   })
