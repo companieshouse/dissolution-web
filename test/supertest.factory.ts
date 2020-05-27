@@ -1,8 +1,7 @@
-import { Application } from 'express'
 import supertest from 'supertest'
 
-export const setupSuperTest = (app: Application) => {
+export const setupSuperTest = () => {
   // Insert generic supertest configuration here
 
-  return supertest(app)
+  return supertest
 }

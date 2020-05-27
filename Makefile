@@ -1,4 +1,4 @@
-artifact_name       := node-skeleton-frontend
+artifact_name       := dissolution-web
 version             := "unversioned"
 
 .PHONY: all

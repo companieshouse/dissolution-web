@@ -1,5 +1,5 @@
-# Node Skeleton Frontend
-This repo contains a skeleton Companies House NodeJS frontend project.
+# Dissolution Web
+This repo contains the frontend code for the dissolution web service. It's currenty `WIP`.
 
 ## Technologies
 
@@ -16,6 +16,7 @@ We recommend the use of Visual Studio Code for development as it allows the inst
 IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provide syntax highlighting using Twig plugin
 
 ## How to run it
+*This is subject to change when Docker containerization is implemented*
 
 1. Clone the repository
 2. Make sure you have Node installed (Node 12 with NVM (node version manager) recommended)

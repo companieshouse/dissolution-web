@@ -6,10 +6,10 @@ import { provide } from 'inversify-binding-decorators'
 import nunjucks from 'nunjucks'
 import * as path from 'path'
 
-import { asGovUKErrorList } from 'app/filters/asGovUKErrorList.filter'
 import Optional from 'app/models/optional'
 import { ROOT_URI } from 'app/paths'
 import TYPES from 'app/types'
+import { addFilters } from 'app/utils/nunjucks.util'
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
@@ -17,7 +17,8 @@ export default class NunjucksLoader {
   public constructor(
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
     @inject(TYPES.PIWIK_URL) private PIWIK_URL: Optional<string>,
-    @inject(TYPES.PIWIK_SITE_ID) private PIWIK_SITE_ID: Optional<string>) {}
+    @inject(TYPES.PIWIK_SITE_ID) private PIWIK_SITE_ID: Optional<string>) {
+  }
 
   public configureNunjucks(app: express.Application, directory: string): void {
     app.use(ROOT_URI, express.static(path.join(directory, '/node_modules/govuk-frontend')))
@@ -28,9 +29,9 @@ export default class NunjucksLoader {
 
     const env: nunjucks.Environment = nunjucks.configure(
       [
-          'dist/views',
-          'node_modules/govuk-frontend',
-          'node_modules/govuk-frontend/components',
+        'dist/views',
+        'node_modules/govuk-frontend',
+        'node_modules/govuk-frontend/components',
       ],
       {
         autoescape: true,
@@ -38,13 +39,9 @@ export default class NunjucksLoader {
       }
     )
 
-    this.addFilters(env)
+    addFilters(env)
 
     this.addLocals(app)
-  }
-
-  private addFilters(env: nunjucks.Environment): void {
-    env.addFilter('asGovUKErrorList', asGovUKErrorList)
   }
 
   private addLocals(app: express.Application): void {

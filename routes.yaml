@@ -1,4 +1,4 @@
-app_name: node-skeleton-frontend
+app_name: dissolution-web
 group: web
 weight: 900
 routes:

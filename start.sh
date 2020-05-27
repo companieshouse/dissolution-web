@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Start script for lfp-appeals-frontend
+# Start script for dissolution-web
 
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -9,7 +9,7 @@ if [[ -z "${MESOS_SLAVE_PID}" ]]; then
     source ~/.chs_env/private_env
     source ~/.chs_env/global_env
 
-    export PORT="${LFP_APPEALS_FRONTEND_PORT}"
+    export PORT="${DISSOLUTION_WEB_FRONTEND_PORT}"
 
     exec npm run start -- --PORT=$PORT
 else

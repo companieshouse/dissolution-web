@@ -3,14 +3,9 @@ import { Application } from 'express'
 import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import { InversifyExpressServer } from 'inversify-express-utils'
-import { Environment } from 'nunjucks'
 import * as nunjucks from 'nunjucks'
 
-import { asGovUKErrorList } from 'app/filters/asGovUKErrorList.filter'
-
-function addFilters(env: Environment): void {
-  env.addFilter('asGovUKErrorList', asGovUKErrorList)
-}
+import { addFilters } from 'app/utils/nunjucks.util'
 
 // tslint:disable-next-line: no-empty
 export const createApp = (configureBindings: (container: Container) => void = () => {
