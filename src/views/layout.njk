@@ -1,0 +1,90 @@
+{% extends 'govuk/template.njk' %}
+
+{% from 'govuk/components/footer/macro.njk'       import govukFooter %}
+{% from 'govuk/components/header/macro.njk'       import govukHeader %}
+{% from 'govuk/components/phase-banner/macro.njk' import govukPhaseBanner %}
+
+{% set serviceName = 'Some CH Service' %}
+
+{% block head %}
+  <!--[if !IE 8]><!-->
+  <link href="//{{ cdn.host }}/stylesheets/govuk-frontend/v3.6.0/govuk-frontend-3.6.0.min.css" rel="stylesheet"/>
+  <!--<![endif]-->
+
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+          integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+          crossorigin="anonymous"></script>
+
+  {% block download %}{% endblock %}
+{% endblock %}
+
+{% block header %}
+  {{
+    govukHeader({
+      homepageUrl: paths.ROOT_URI,
+      serviceName: serviceName,
+      serviceUrl: paths.ROOT_URI,
+      containerClasses: 'govuk-width-container'
+    })
+  }}
+{% endblock %}
+
+{% set mainClasses = mainClasses | default('govuk-main-wrapper--auto-spacing') %}
+
+{% block beforeContent %}
+  {{
+    govukPhaseBanner({
+      tag: {
+        text: 'Beta'
+      },
+      html: 'This is a new service – your <a class="govuk-link" href="https://www.research.net/r/alfp-feedback" target="_blank">feedback</a> will help us to improve it.'
+    })
+  }}
+  {% block backLink %}{% endblock %}
+{% endblock %}
+
+{% block footer %}
+  {{
+    govukFooter({
+      meta: {
+        items: [
+          {
+            href: 'http://resources.companieshouse.gov.uk/legal/termsAndConditions.shtml',
+            text: 'Policies'
+          },
+          {
+            href: 'https://www.gov.uk/help/cookies',
+            text: 'Cookies'
+          },
+          {
+            href: 'https://www.gov.uk/contact',
+            text: 'Contact us'
+          },
+          {
+            href: 'https://developer.companieshouse.gov.uk/',
+            text: 'Developers'
+          }
+        ]
+      }
+    })
+  }}
+{% endblock %}
+
+{% block bodyEnd %}
+  {# Run JavaScript at end of the <body>, to avoid blocking the initial render. #}
+  <script src="//{{ cdn.host }}/javascripts/govuk-frontend/v3.6.0/govuk-frontend-3.6.0.min.js"></script>
+  <script>window.GOVUKFrontend.initAll()</script>
+  {% if piwik %}
+    <script src="//{{ cdn.host }}/javascripts/app/piwik-enable.js"></script>
+    <script type="application/javascript">
+      (function() {
+        bindPiwikListener('appeals', '{{ piwik.url }}', {{ piwik.site }});
+      }());
+    </script>
+    <noscript>
+      <p>
+        <img src="{{ piwik.url }}/piwik.php?idsite={{ piwik.site }}" style="border:0;" alt="" />
+      </p>
+    </noscript>
+  {% endif %}
+{% endblock %}

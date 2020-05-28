@@ -1,0 +1,77 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/back-link/macro.njk'     import govukBackLink %}
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from 'govuk/components/input/macro.njk'         import govukInput %}
+{% from 'govuk/components/button/macro.njk'        import govukButton %}
+
+{% block pageTitle %}
+  Tell us some details
+{% endblock %}
+
+{% block backLink %}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: '/'
+    })
+  }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">
+        What are the details?
+      </h1>
+      <form method="post" action="">
+        {{
+          govukInput({
+            label: {
+              text: 'Some text field'
+            },
+            hint: {
+              text: 'This is a mandatory text field that must be > 3 characters long'
+            },
+            errorMessage: {
+              text: errors.someTextField
+            } if errors.someTextField,
+            classes: 'govuk-input--company-number',
+            id: 'some-text-field',
+            name: 'someTextField',
+            value: data.someTextField
+          })
+        }}
+
+        {{
+          govukInput({
+            label: {
+              text: 'Some email field'
+            },
+            hint: {
+              text: 'This is a mandatory email field'
+            },
+            errorMessage: {
+              text: errors.someEmailField
+            } if errors.someEmailField,
+            id: 'some-email-field',
+            name: 'someEmailField',
+            value: data.someEmailField
+          })
+        }}
+
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}
