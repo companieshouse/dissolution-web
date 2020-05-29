@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 
 services:
   dissolution-web:
@@ -6,6 +6,8 @@ services:
     image: dissolution-web:1.0
     ports:
       - 3001:3000
+    networks:
+      - chs-dev
     working_dir: /app
     environment:
       CACHE_SERVER: 0.0.0.0:6379
@@ -40,3 +42,15 @@ services:
 
       LOG_LEVEL: info
       HUMAN_LOG: 1
+  cdn-ch-gov-uk:
+    container_name: chs-cdn-ch-gov-uk
+    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/cdn.ch.gov.uk:latest
+    # labels:
+    #   - traefik.http.routers.cdn-ch-gov-uk.rule=Host(`cdn.chs-dev`)
+    networks:
+      - chs-dev
+    expose:
+      - 80
+
+networks:
+  chs-dev: {}
