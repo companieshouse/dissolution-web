@@ -23,7 +23,7 @@ FROM node:14-alpine as runtime
 
 WORKDIR /app
 
-COPY --from=build-image /node_modules/ ./node_modules
+COPY --from=prod-deps-image /build/node_modules/ ./node_modules
 COPY --from=build-image /build/dist/ ./dist
 
 EXPOSE 3000
