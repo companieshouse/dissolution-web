@@ -1,29 +1,29 @@
 version: "3.8"
 
 services:
-  ingress-proxy:
-    container_name: dissolution-ingress-proxy
-    image: traefik:v2.2
-    command: --api.insecure=true --providers.docker
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
-    networks:
-      - chs-dev
-    ports:
-      - 80:80
-      - 8080:8080 # Web UI (enabled by --api.insecure=true)
+  # ingress-proxy:
+  #   container_name: dissolution-ingress-proxy
+  #   image: traefik:v2.2
+  #   command: --api.insecure=true --providers.docker
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+  #   networks:
+  #     - chs-dev
+  #   ports:
+  #     - 80:80
+  #     - 8080:8080 # Web UI (enabled by --api.insecure=true)
   dissolution-web:
     build: .
     image: dissolution-web:1.0
-    labels:
-      - traefik.http.routers.lfp-appeals-frontend.rule=Host(`chs-dev`) && PathPrefix(`/dissolution-web/`)
+    # labels:
+    #   - traefik.http.routers.lfp-appeals-frontend.rule=Host(`chs-dev`) && PathPrefix(`/dissolution-web/`)
     ports:
       - 3000:3000
     networks:
       - chs-dev
     working_dir: /app
     environment:
-      - CDN_HOST=cdn.chs-dev
+      - CDN_HOST=0.0.0.0:80
       - CACHE_SERVER=0.0.0.0:6379
       - CACHE_DB=0
       - CACHE_PASSWORD=''
@@ -55,33 +55,33 @@ services:
   cdn-ch-gov-uk:
     container_name: chs-cdn-ch-gov-uk
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/cdn.ch.gov.uk:latest
-    labels:
-      - traefik.http.routers.cdn-ch-gov-uk.rule=Host(`cdn.chs-dev`)
+    # labels:
+    #   - traefik.http.routers.cdn-ch-gov-uk.rule=Host(`cdn.chs-dev`)
     networks:
       - chs-dev
     expose:
       - 80
-  ch-gov-uk:
-    container_name: chs-ch-gov-uk
-    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/ch.gov.uk:latest
-    labels:
-      - traefik.http.routers.ch-gov-uk.rule=Host(`chs-dev`)
-    environment:
-      - ACCOUNT_URL=http://account.chs-dev
-      - ACCOUNT_LOCAL_URL=http://account-ch-gov-uk:4000
-      - CACHE_SERVER=redis:6379
-      - CDN_HOST=cdn.chs-dev
-      - CH_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
-      - CHS_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
-      - CHS_CH_CLIENT_SECRET=M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1
-      - CHS_URL=http://chs-dev
-      - COOKIE_DOMAIN=chs-dev
-      - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
-      - URL_SIGNING_SALT=F2V3S21sqrxArLn1Pr4B[S6ewO)|21nUD02132ByFrr3YrEgaw7HJhTcGrkEmxJH
-    networks:
-      - chs-dev
-    expose:
-      - 2000
+  # ch-gov-uk:
+  #   container_name: chs-ch-gov-uk
+  #   image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/ch.gov.uk:latest
+  #   # labels:
+  #   #   - traefik.http.routers.ch-gov-uk.rule=Host(`chs-dev`)
+  #   environment:
+  #     - ACCOUNT_URL=http://account.chs-dev
+  #     - ACCOUNT_LOCAL_URL=http://account-ch-gov-uk:4000
+  #     - CACHE_SERVER=redis:6379
+  #     - CDN_HOST=cdn.chs-dev
+  #     - CH_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
+  #     - CHS_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
+  #     - CHS_CH_CLIENT_SECRET=M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1
+  #     - CHS_URL=http://chs-dev
+  #     - COOKIE_DOMAIN=chs-dev
+  #     - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
+  #     - URL_SIGNING_SALT=F2V3S21sqrxArLn1Pr4B[S6ewO)|21nUD02132ByFrr3YrEgaw7HJhTcGrkEmxJH
+  #   networks:
+  #     - chs-dev
+  #   expose:
+  #     - 2000
 
 networks:
   chs-dev: {}
