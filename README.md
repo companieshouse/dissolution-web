@@ -15,7 +15,7 @@ We recommend the use of Visual Studio Code for development as it allows the inst
 
 IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provide syntax highlighting using Twig plugin
 
-## Running locally with Docker
+## Running locally with Docker
 
 Required tools:
 - [Docker for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
