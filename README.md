@@ -24,5 +24,5 @@ IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provid
 
 If you want to make a change:
 
-1. CTRL-C to to stop the docker-compose process
+1. CTRL-C to stop the docker-compose process
 2. Run `docker-compose up`
