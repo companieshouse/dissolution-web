@@ -15,14 +15,24 @@ We recommend the use of Visual Studio Code for development as it allows the inst
 
 IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provide syntax highlighting using Twig plugin
 
-## How to run it
+## Running locally with Docker
 
-1. Clone the repository
-2. Run `docker-compose up`
-3. Navigate to `localhost:3000`
-4. You should see the landing page
+Required tools:
+- [Docker for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
+- [Docker-Compose](https://docs.docker.com/compose/install/)
 
-If you want to make a change:
+Once installed in Docker for Mac navigate to Preferences -> Resources and change the settings to Memory => 4 GB, CPUs 4, SWAP = 1 GB
 
-1. CTRL-C to stop the docker-compose process
-2. Run `docker-compose up`
+Make sure 127.0.0.1 chs-dev cdn.chs-dev account.chs-dev exists in /etc/hosts
+
+Login to the Companies House AWS account and run the following command in a fresh terminal session:
+
+`docker login -u AWS -p "$(aws ecr get-login-password)" https://169942020521.dkr.ecr.eu-west-1.amazonaws.com`
+
+To bring the environment up, in the same folder as the project run:
+
+`docker-compose up`
+
+Make local changes to the app, Cntr+C on the running `docker-compose` terminal session and re-run the command.
+
+Navigate to `localhost:3000` to see the landing page
