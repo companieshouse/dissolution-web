@@ -33,6 +33,6 @@ To bring the environment up, in the same folder as the project run:
 
 `docker-compose up`
 
-Make local changes to the app, Ctrl+C on the running `docker-compose` terminal session and re-run the command.
+Make local changes to the app, Ctrl/+C on the running `docker-compose` terminal session and re-run the command.
 
 Navigate to `localhost:3000` to see the landing page

@@ -24,12 +24,12 @@ services:
     working_dir: /app
     environment:
       - CDN_HOST=cdn.chs-dev
-      - CACHE_SERVER=0.0.0.0:6379
+      - CACHE_SERVER=redis
       - CACHE_DB=0
       - CACHE_PASSWORD=''
 
       - COOKIE_NAME=SID
-      - COOKIE_DOMAIN=chs-dev.internal
+      - COOKIE_DOMAIN=chs-dev
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
@@ -87,22 +87,22 @@ services:
     labels:
       - traefik.http.routers.account-ch-gov-uk.rule=Host(`account.chs-dev`)
     environment:
-      - ACCOUNT_CH_CLIENT_ID=${OAUTH2_CLIENT_ID}
-      - ACCOUNT_CH_CLIENT_SECRET=${OAUTH2_CLIENT_SECRET}
-      - ACCOUNT_OAUTH2_REQUEST_KEY=${OAUTH2_REQUEST_KEY}
-      - ACCOUNT_OAUTH2_TOKEN_KEY=${OAUTH2_TOKEN_KEY}
+      - ACCOUNT_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
+      - ACCOUNT_CH_CLIENT_SECRET=M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1
+      - ACCOUNT_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
+      - ACCOUNT_OAUTH2_TOKEN_KEY=8sjqDklsgnwe98htthwAzp==
       - ACCOUNT_URL=http://account.chs-dev
       - API_LOCAL_URL=http://localhost?API_LOCAL_URL
       - CACHE_SERVER=redis:6379
       - CDN_HOST=cdn.chs-dev
-      - CHS_API_KEY
+      - CHS_API_KEY=MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz
       - CHS_BACKEND_URL=http://localhost?CHS_BACKEND_URL
       - CHS_KAFKA_API_LOCAL_URL=http://localhost?CHS_KAFKA_API_LOCAL_URL
       - CHS_MONITOR_API_LOCAL_URL=http://localhost?CHS_MONITOR_API_LOCAL_URL
       - CHS_MONITOR_GUI_URL=http://localhost?CHS_MONITOR_GUI_URL
       - CHS_URL=http://localhost?CHS_URL
       - COOKIE_DOMAIN=chs-dev
-      - COOKIE_SECRET
+      - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DISABLE_FOLLOW=0
       - DOCUMENT_API_LOCAL_URL=http://localhost?DOCUMENT_API_LOCAL_URL
       - MONGODB_URL=mongodb://mongo
@@ -112,11 +112,28 @@ services:
       - QUEUE_API_LOCAL_URL=http://localhost?QUEUE_API_LOCAL_URL
       - STATSD_HOST=localhost
       - STATSD_PORT=8125
-      - URL_SIGNING_SALT
+      - URL_SIGNING_SALT=F2V3S21sqrxArLn1Pr4B[S6ewO)|21nUD02132ByFrr3YrEgaw7HJhTcGrkEmxJH
     networks:
       - chs-dev
     expose:
       - 4000
+  redis:
+    container_name: chs-redis
+    image: redis:6-alpine
+    networks:
+      - chs-dev
+    expose:
+      - 6379
+  mongo:
+    image: mongo:4
+    environment:
+      - MONGO_INITDB_DATABASE=account
+    volumes:
+      - ./services/infrastructure/mongo.initdb.js:/docker-entrypoint-initdb.d/mongo.initdb.js
+    networks:
+      - chs-dev
+    expose:
+      - 27017
 
 networks:
   chs-dev: {}
