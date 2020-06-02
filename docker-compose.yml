@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  ingress-proxy:
+    container_name: dissolution-ingress-proxy
+    image: traefik:v2.2
+    command: --api.insecure=true --providers.docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    networks:
+      - chs-dev
+    ports:
+      - 80:80
+      - 8080:8080 # Web UI (enabled by --api.insecure=true)
+  dissolution-web:
+    build: .
+    image: dissolution-web:1.0
+    labels:
+      - traefik.http.routers.dissolution-web.rule=Host(`chs-dev`) && PathPrefix(`/dissolution-web/`)
+    ports:
+      - 3000:3000
+    networks:
+      - chs-dev
+    working_dir: /app
+    environment:
+      - CDN_HOST=cdn.chs-dev
+      - CACHE_SERVER=0.0.0.0:6379
+      - CACHE_DB=0
+      - CACHE_PASSWORD=''
+
+      - COOKIE_NAME=SID
+      - COOKIE_DOMAIN=chs-dev.internal
+      - COOKIE_SECURE_ONLY=0
+      - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
+      - DEFAULT_SESSION_EXPIRATION=3600
+
+      - LOG_LEVEL=info
+      - HUMAN_LOG=1
+  cdn-ch-gov-uk:
+    container_name: chs-cdn-ch-gov-uk
+    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/cdn.ch.gov.uk:latest
+    labels:
+      - traefik.http.routers.cdn-ch-gov-uk.rule=Host(`cdn.chs-dev`)
+    networks:
+      - chs-dev
+    expose:
+      - 80
+networks:
+  chs-dev: {}

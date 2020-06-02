@@ -15,24 +15,22 @@ We recommend the use of Visual Studio Code for development as it allows the inst
 
 IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provide syntax highlighting using Twig plugin
 
-## How to run it
-*This is subject to change when Docker containerization is implemented*
+## Running locally with Docker  
 
-1. Clone the repository
-2. Make sure you have Node installed (Node 12 with NVM (node version manager) recommended)
-3. `npm install`
-4. Change line 27 in .env.vagrant file - `CDN_HOST=chs-dev.internal:8080` to `CDN_HOST=assets`
-6. Change 3 lines in layout.njk from `//{{ cdn.host }}` -> `{{ cdn.host }}` (just remove //)
-7. `npm run build`
-8. Clone this repo - https://github.com/companieshouse/cdn.ch.gov.uk
-9. Copy the `app/assets` folder and place it in `dissolution-web/dist/assets`
-10. `npm run start`
-11. Navigate to `localhost:3000`
-12. You should see the landing page
+Required tools:
+- [Docker for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
+- [Docker-Compose](https://docs.docker.com/compose/install/)
 
-If you want to make a change:
+Once installed, open Docker for Mac and navigate to Preferences -> Resources and change the settings to Memory => 4 GB, CPUs 4, SWAP = 1 GB.
 
-1. Stop the server
-2. Make change
-3. npm run build
-4. npm run start
+Add `127.0.0.1 chs-dev cdn.chs-dev account.chs-dev` to your `/etc/hosts` file.
+
+Login to the Companies House AWS account and run the following command in a fresh terminal session:
+
+`docker login -u AWS -p "$(aws ecr get-login-password)" https://169942020521.dkr.ecr.eu-west-1.amazonaws.com`
+
+To bring the environment up, run `docker-compose up` in the project folder.
+
+After making local changes to the app, Ctrl+C on the running `docker-compose` terminal session and re-run `docker-compose up` command.
+
+Navigate to `localhost:3000` to see the landing page.
