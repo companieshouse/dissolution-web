@@ -1,4 +1,3 @@
-# Base build image
 FROM node:14-alpine as build-base
 
 RUN apk add --update-cache git python make g++ && rm -rf /var/cache/apk/*
@@ -7,12 +6,10 @@ RUN git config --global url."https://github.com/".insteadOf 'ssh://git@github.co
 WORKDIR /build
 COPY package.json package-lock.json ./
 
-## Image with runtime dependencies
 FROM build-base as prod-deps-image
 
 RUN npm install --production
 
-## Build image
 FROM prod-deps-image as build-image
 
 RUN npm install
