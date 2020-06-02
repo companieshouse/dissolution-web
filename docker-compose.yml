@@ -32,8 +32,6 @@ services:
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
-      - LOG_LEVEL=info
-      - HUMAN_LOG=1
   cdn-ch-gov-uk:
     container_name: chs-cdn-ch-gov-uk
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/cdn.ch.gov.uk:latest
