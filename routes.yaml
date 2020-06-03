@@ -2,6 +2,5 @@ app_name: dissolution-web
 group: web
 weight: 900
 routes:
-  1: /perform-ch-task
-  2: /perform-ch-task/.*
-
+  1: /close-a-company
+  2: /close-a-company/.*
