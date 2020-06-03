@@ -8,14 +8,14 @@
   },
   "license": "MIT",
   "scripts": {
-    "start": "NODE_ENV=vagrant node dist/app.js",
+    "start": "node dist/app.js",
     "build": "gulp build",
     "watch": "npm run build:clean && gulp start:watch",
     "build:clean": "gulp build:clean",
     "sass:watch": "gulp sass:watch",
     "lint": "tsc --project tsconfig.json --noEmit && tslint --project tsconfig.json --config tslint.json",
     "lint:scss": "sass-lint './src/public/sass/**/*.scss' --verbose --ignore 'node_modules/**/*.scss'",
-    "test": "NODE_ENV=vagrant mocha 'test/**/*.test.ts'",
+    "test": "mocha 'test/**/*.test.ts'",
     "test:coverage": "nyc npm test",
     "analyse-code": "sonar-scanner"
   },
