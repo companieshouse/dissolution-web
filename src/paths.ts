@@ -4,3 +4,4 @@ export const HEALTHCHECK_URI = `${ROOT_URI}/healthcheck`
 
 // Pages
 export const FORM_PAGE_URI = `${ROOT_URI}/form`
+export const SEARCH_COMPANY_URI = `${ROOT_URI}/search-company`

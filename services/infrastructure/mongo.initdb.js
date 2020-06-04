@@ -4,7 +4,8 @@ db.api_clients.insert({
   "client_secret" : "M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1",
   "user_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MT",
   "redirect_uris" : [
-    "http://chs-dev/oauth2/user/callback"
+    "http://chs-dev/oauth2/user/callback",
+    "http://account.chs-dev/oauth2/user/callback"
   ],
   "type" : "web",
   "is_internal_app": true
