@@ -16,7 +16,7 @@ services:
     build: .
     image: dissolution-web:1.0
     labels:
-      - traefik.http.routers.dissolution-web.rule=Host(`chs-dev`) && PathPrefix(`/dissolution-web/`)
+      - traefik.http.routers.dissolution-web.rule=Host(`chs-dev`) && PathPrefix(`/close-a-company/`)
     ports:
       - 3000:3000
     networks:

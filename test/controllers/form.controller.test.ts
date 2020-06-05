@@ -36,7 +36,7 @@ describe('FormController', () => {
 
       const res = await request(app).post(FORM_PAGE_URI).send(testObject).expect(MOVED_TEMPORARILY)
 
-      assert.include(res.text, 'Found. Redirecting to /form')
+      assert.include(res.text, 'Found. Redirecting to /close-a-company/form')
     })
   })
 
