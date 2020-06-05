@@ -3,7 +3,6 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
-import { AuthMiddleware } from 'app/middleware/auth.middleware';
 import { FormFormModel } from 'app/models/form.model'
 import Optional from 'app/models/optional'
 import ValidationErrors from 'app/models/validationErrors'
@@ -16,7 +15,7 @@ interface FormViewModel {
   errors?: ValidationErrors
 }
 
-@controller(FORM_PAGE_URI, AuthMiddleware)
+@controller(FORM_PAGE_URI)
 export class FormController extends BaseController {
 
   public constructor(@inject(FormValidator) private validator: FormValidator) {

@@ -1,10 +1,9 @@
 import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
-import { AuthMiddleware } from 'app/middleware/auth.middleware'
 import { SEARCH_COMPANY_URI } from 'app/paths'
 
-@controller(SEARCH_COMPANY_URI, AuthMiddleware)
+@controller(SEARCH_COMPANY_URI)
 export class SearchCompanyController extends BaseController {
 
   @httpGet('')

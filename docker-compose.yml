@@ -28,14 +28,13 @@ services:
       - CACHE_SERVER=redis
       - CACHE_DB=0
       - CACHE_PASSWORD=''
-      - COOKIE_NAME=SID
+      - COOKIE_NAME=__SID
       - COOKIE_DOMAIN=chs-dev
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
-      - OAUTH2_TOKEN_URI=account.chs-dev/oauth2/token
-      - OAUTH2_CLIENT_ID=
-      - OAUTH2_CLIENT_SECRET=
+      - LOG_LEVEL=info
+      - HUMAN_LOG=1
   cdn-ch-gov-uk:
     container_name: chs-cdn-ch-gov-uk
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/cdn.ch.gov.uk:latest
