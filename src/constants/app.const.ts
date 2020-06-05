@@ -1,1 +1,1 @@
-export const APP_NAME = 'example-ch-service-name'
+export const APP_NAME = 'dissolution-web'
