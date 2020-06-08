@@ -14,8 +14,6 @@ import { addFilters } from 'app/utils/nunjucks.util'
 
 import { createSession } from 'test/utils/session/SessionFactory'
 
-// import { getEnvOrThrow } from 'app/utils/env.util'
-
 // tslint:disable-next-line: no-empty
 export const createApp = (configureBindings: (container: Container) => void = () => {
 }): Application => {
