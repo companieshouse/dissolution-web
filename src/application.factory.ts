@@ -19,60 +19,60 @@ import { createSession } from 'test/utils/session/SessionFactory'
 // tslint:disable-next-line: no-empty
 export const createApp = (configureBindings: (container: Container) => void = () => {
 }): Application => {
-    const container: Container = new Container()
-    container.load(buildProviderModule())
-    configureBindings(container)
+  const container: Container = new Container()
+  container.load(buildProviderModule())
+  configureBindings(container)
 
-    return new InversifyExpressServer(container)
-        .setConfig(server => {
+  return new InversifyExpressServer(container)
+    .setConfig(server => {
 
-            server.use(bodyParser.json())
-            server.use(bodyParser.urlencoded({extended: false}))
+      server.use(bodyParser.json())
+      server.use(bodyParser.urlencoded({extended: false}))
 
-            server.set('view engine', 'njk')
+      server.set('view engine', 'njk')
 
-            const env: nunjucks.Environment = nunjucks.configure(
-                [
-                    'src/views',
-                    'node_modules/govuk-frontend',
-                    'node_modules/govuk-frontend/components',
-                ],
-                {
-                    autoescape: true,
-                    express: server
-                }
-            )
+      const env: nunjucks.Environment = nunjucks.configure(
+        [
+          'src/views',
+          'node_modules/govuk-frontend',
+          'node_modules/govuk-frontend/components',
+        ],
+        {
+          autoescape: true,
+          express: server
+        }
+      )
 
-            addFilters(env)
-        })
-        .build()
+      addFilters(env)
+    })
+    .build()
 }
 
 // tslint:disable-next-line: no-empty
 export const createAppWithFakeSession = (configureBindings: (container: Container) => void = () => {
 }): Application => {
-    return createApp(container => {
-        const cookieName = '__SID'
-        const cookieSecret = 'ChGovUk-XQrbf3sLj2abFxIY2TlapsJ '
+  return createApp(container => {
+    const cookieName = '__SID'
+    const cookieSecret = 'ChGovUk-XQrbf3sLj2abFxIY2TlapsJ '
 
-        const session: Session = createSession(cookieSecret)
+    const session: Session = createSession(cookieSecret)
 
-        const sessionId = session.data[SessionKey.Id]
-        const signature = session.data[SessionKey.ClientSig]
+    const sessionId = session.data[SessionKey.Id]
+    const signature = session.data[SessionKey.ClientSig]
 
-        const cookie = Cookie.createFrom(sessionId! + signature)
+    const cookie = Cookie.createFrom(sessionId! + signature)
 
-        const sessionStore = mock(SessionStore)
-        when(sessionStore.load(deepEqual(cookie))).thenResolve(session.data)
-        const mockSessionStore = instance(sessionStore)
+    const sessionStore = mock(SessionStore)
+    when(sessionStore.load(deepEqual(cookie))).thenResolve(session.data)
+    const mockSessionStore = instance(sessionStore)
 
-        container.bind(ApplicationLogger).toConstantValue(mock(instance(ApplicationLogger)))
-        container.bind(SessionMiddleware).toConstantValue((req: Request, res: Response, next: NextFunction) => {
-            req.cookies = {}
-            req.cookies[cookieName] = cookie.value
-            SessionMiddleware({cookieName, cookieSecret}, mockSessionStore)(req, res, next)
-        })
-
-        configureBindings(container)
+    container.bind(ApplicationLogger).toConstantValue(mock(instance(ApplicationLogger)))
+    container.bind(SessionMiddleware).toConstantValue((req: Request, res: Response, next: NextFunction) => {
+      req.cookies = {}
+      req.cookies[cookieName] = cookie.value
+      SessionMiddleware({cookieName, cookieSecret}, mockSessionStore)(req, res, next)
     })
+
+    configureBindings(container)
+  })
 }
