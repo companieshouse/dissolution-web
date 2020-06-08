@@ -7,47 +7,36 @@
   {{ serviceName }}
 {% endblock %}
 
-{% block beforeContent %}
-  {{
-    govukBreadcrumbs({
-      items: [
-        { href: 'https://www.gov.uk/', text: 'Home' },
-        { href: 'https://www.gov.uk/browse/business', text: 'Business and self-employed' },
-        { href: 'https://www.gov.uk/browse/business/limited-company', text: 'Running a limited company' }
-      ]
-    })
-  }}
-{% endblock %}
-
 {% block content %}
   <main class="govuk-main-wrapper">
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-xl">{{ serviceName }}</h1>
-      <p class="govuk-body-l">Use this service to apple to close a company, also known as striking a company off the register or dissolution.</p>
-      <p class="govuk-body">It costs £8 to close a company and you'll need:</p>
-      <ul class="govuk-list govuk-list--bullet">
-        <li>the company number</li>
-        <li>a Companies House password - you'll be able to register if you don't have one</li>
-        <li>the company authentication code</li>
-        <li>an email address or each director if the company has more than one</li>
-        <li>a credit or debit card</li>
-      </ul>
-      <form method="post">
-        {{
-          govukButton({
-            text: 'Start now',
-            isStartButton: true,
-            attributes: {
-              id: 'start-now',
-              onclick: '_paq.push(["trackGoal", 1]);' if piwik
-            }
-          })
-        }}
-      </form>
-      <p class="govuk-body govuk-!-font-weight-bold govuk-!-font-size-24">Before you start</p>
-      <p class="govuk-body-s">Read the <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration" class="govuk-link">guidance for closing a company (opens in a new tab).</a></p>
-    </div>
-      </main>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+       <h1 class="govuk-heading-xl">{{ serviceName }}</h1>
+       <p class="govuk-body-l">Use this service to apple to close a company, also known as striking a company off the register or dissolution.</p>
+       <p class="govuk-body">It costs £8 to close a company and you'll need:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>the company number</li>
+          <li>a Companies House password - you'll be able to register if you don't have one</li>
+         <li>the company authentication code</li>
+         <li>an email address or each director if the company has more than one</li>
+          <li>a credit or debit card</li>
+        </ul>
+        <form method="post">
+         {{
+            govukButton({
+              text: 'Start now',
+              href: "/who-to-tell`",
+              isStartButton: true,
+              attributes: {
+               id: 'start-now',
+               onclick: '_paq.push(["trackGoal", 1]);' if piwik
+             }
+            })
+         }}
+        </form>
+        <p class="govuk-body govuk-!-font-weight-bold govuk-!-font-size-24">Before you start</p>
+        <p class="govuk-body-s">Read the <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration" target="_blank" class="govuk-link">guidance for closing a company (opens in a new tab).</a></p>
+      </div>
+    </main>
   </div>
 {% endblock %}
