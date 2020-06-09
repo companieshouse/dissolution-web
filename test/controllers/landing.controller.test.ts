@@ -2,7 +2,7 @@ import "reflect-metadata";
 
 import { assert } from "chai";
 import { Application } from "express";
-import { OK, MOVED_TEMPORARILY } from "http-status-codes";
+import { MOVED_TEMPORARILY, OK } from "http-status-codes";
 import request from "supertest";
 
 import { createApp } from "app/application.factory";
