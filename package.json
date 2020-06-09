@@ -37,7 +37,7 @@
     "reflect-metadata": "^0.1.13",
     "tsconfig-paths": "^3.9.0",
     "tslib": "^2.0.0",
-    "web-security-node": "git@github.com:companieshouse/web-security-node.git"
+    "web-security-node": "git@github.com:companieshouse/web-security-node.git#e35f2199b35f729eec2445d38d2b40a588e85ece"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",

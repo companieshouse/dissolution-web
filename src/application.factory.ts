@@ -1,25 +1,22 @@
+import { AuthMiddleware } from 'app/middleware/auth.middleware'
 import * as bodyParser from 'body-parser'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { Session, SessionMiddleware, SessionStore } from 'ch-node-session-handler'
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
-import { Cookie } from 'ch-node-session-handler/lib/session/model/Cookie'
+import { SessionMiddleware } from 'ch-node-session-handler'
 import { Application, NextFunction, Request, Response } from 'express'
 import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import { InversifyExpressServer } from 'inversify-express-utils'
 import * as nunjucks from 'nunjucks'
-import { deepEqual, instance, mock, when } from 'ts-mockito'
+import { anything, instance, mock, when, } from 'ts-mockito'
 
 import { addFilters } from 'app/utils/nunjucks.util'
 
-import { createSession } from 'test/utils/session/SessionFactory'
 
 // tslint:disable-next-line: no-empty
-export const createApp = (configureBindings: (container: Container) => void = () => {
-}): Application => {
+export const createApp = (configureBindings?: (container: Container) => void): Application => {
   const container: Container = new Container()
   container.load(buildProviderModule())
-  configureBindings(container)
+  configureBindings?.(container)
 
   return new InversifyExpressServer(container)
     .setConfig(server => {
@@ -46,31 +43,19 @@ export const createApp = (configureBindings: (container: Container) => void = ()
     .build()
 }
 
-// tslint:disable-next-line: no-empty
-export const createAppWithFakeSession = (configureBindings: (container: Container) => void = () => {
-}): Application => {
+export const createAppWithFakeSession = (configureBindings?: (container: Container) => void): Application => {
   return createApp(container => {
-    const cookieName = '__SID'
-    const cookieSecret = 'ChGovUk-XQrbf3sLj2abFxIY2TlapsJ '
-
-    const session: Session = createSession(cookieSecret)
-
-    const sessionId = session.data[SessionKey.Id]
-    const signature = session.data[SessionKey.ClientSig]
-
-    const cookie = Cookie.createFrom(sessionId! + signature)
-
-    const sessionStore = mock(SessionStore)
-    when(sessionStore.load(deepEqual(cookie))).thenResolve(session.data)
-    const mockSessionStore = instance(sessionStore)
+    const authMiddleware: AuthMiddleware = mock(AuthMiddleware)
+    when(authMiddleware.handler(anything(), anything(), anything)).thenCall((_1, _2, next) => {
+      console.log('auth middleware hit!')
+      next()
+    })
+    container.rebind(AuthMiddleware).toConstantValue(instance(authMiddleware))
 
     container.bind(ApplicationLogger).toConstantValue(mock(instance(ApplicationLogger)))
-    container.bind(SessionMiddleware).toConstantValue((req: Request, res: Response, next: NextFunction) => {
-      req.cookies = {}
-      req.cookies[cookieName] = cookie.value
-      SessionMiddleware({cookieName, cookieSecret}, mockSessionStore)(req, res, next)
-    })
+    container.bind(SessionMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
 
-    configureBindings(container)
+
+    configureBindings?.(container)
   })
 }

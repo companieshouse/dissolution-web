@@ -1,4 +1,5 @@
 import 'reflect-metadata'
+import { UriFactory } from 'app/utils/uri.factory'
 
 import { createLogger } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
@@ -21,9 +22,11 @@ export function initContainer(): Container {
   container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow('CDN_HOST'))
   container.bind<Optional<string>>(TYPES.PIWIK_SITE_ID).toConstantValue(getEnv('PIWIK_SITE_ID'))
   container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
+  container.bind<Optional<string>>(TYPES.ACCOUNT_WEB_URL).toConstantValue(getEnv('ACCOUNT_WEB_URL'))
 
   // Utils
   container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(createLogger(APP_NAME))
+  container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory())
 
   // Session
   const config: CookieConfig = {
