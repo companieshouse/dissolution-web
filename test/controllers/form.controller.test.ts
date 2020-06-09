@@ -5,7 +5,7 @@ import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { deepEqual, instance, mock, when } from 'ts-mockito'
 
-import { createApp } from 'app/application.factory'
+import { createApp } from './application.factory'
 import 'app/controllers/form.controller'
 import ValidationErrors from 'app/models/validationErrors'
 import { FORM_PAGE_URI } from 'app/paths'

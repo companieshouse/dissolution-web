@@ -5,7 +5,7 @@ import { Application } from 'express'
 import { OK } from 'http-status-codes'
 import request from 'supertest'
 
-import { createApp } from 'app/application.factory'
+import { createApp } from './application.factory'
 import 'app/controllers/landing.controller'
 
 const app: Application = createApp()
