@@ -38,7 +38,7 @@ export function initContainer(): Container {
   container.bind(SessionStore).toConstantValue(sessionStore)
   container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(config, sessionStore))
   container.bind(TYPES.AuthMiddleware).toConstantValue(AuthMiddleware(
-    getEnvOrThrow('ACCOUNT_WEB_URL'),
+    getEnvOrThrow('CHS_URL'),
     new UriFactory(),
     commonAuthMiddleware
   ))
