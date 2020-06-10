@@ -1,14 +1,14 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
+import { NextFunction, Request, RequestHandler, Response } from 'express'
 import * as sinon from 'sinon'
 import { instance, mock, when } from 'ts-mockito'
+import { AuthOptions } from 'web-security-node'
 
 import AuthMiddleware from 'app/middleware/auth.middleware'
-import UriFactory from 'app/utils/uri.factory'
-import { RequestHandler, Request, Response, NextFunction } from 'express'
-import { AuthOptions } from 'web-security-node'
 import { SEARCH_COMPANY_URI } from 'app/paths'
+import UriFactory from 'app/utils/uri.factory'
 
 describe('AuthMiddleware', () => {
 
