@@ -4,8 +4,8 @@ import { assert } from 'chai'
 import { Application } from 'express'
 import { MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
+import { createApp } from './application.factory'
 
-import { createApp } from 'app/application.factory'
 import 'app/controllers/landing.controller'
 import { ROOT_URI, WHO_TO_TELL_URI } from 'app/paths'
 
