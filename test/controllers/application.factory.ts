@@ -5,8 +5,8 @@ import { buildProviderModule } from 'inversify-binding-decorators'
 import { InversifyExpressServer } from 'inversify-express-utils'
 import * as nunjucks from 'nunjucks'
 
+import TYPES from 'app/types'
 import { addFilters } from 'app/utils/nunjucks.util'
-import TYPES from '../../src/types'
 
 export const createApp = (configureBindings?: (container: Container) => void): Application => {
   const container: Container = new Container()
