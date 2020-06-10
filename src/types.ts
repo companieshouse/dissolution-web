@@ -3,7 +3,10 @@ const TYPES = {
   NODE_ENV: 'NODE_ENV',
   CDN_HOST: 'CDN_HOST',
   PIWIK_URL: 'PIWIK_URL',
-  PIWIK_SITE_ID: 'PIWIK_SITE_ID'
+  PIWIK_SITE_ID: 'PIWIK_SITE_ID',
+  ACCOUNT_WEB_URL: 'ACCOUNT_WEB_URL',
+  SessionMiddleware: 'SessionMiddleware',
+  AuthMiddleware: 'AuthMiddleware'
 }
 
 export default TYPES

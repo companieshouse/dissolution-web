@@ -6,11 +6,14 @@ import { CookieConfig, SessionMiddleware, SessionStore } from 'ch-node-session-h
 import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
-import Optional from './models/optional'
+import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
 
 import { APP_NAME } from 'app/constants/app.const'
+import AuthMiddleware from 'app/middleware/auth.middleware'
+import Optional from 'app/models/optional'
 import TYPES from 'app/types'
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from 'app/utils/env.util'
+import UriFactory from 'app/utils/uri.factory'
 
 export function initContainer(): Container {
   const container: Container = new Container()
@@ -24,6 +27,7 @@ export function initContainer(): Container {
 
   // Utils
   container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(createLogger(APP_NAME))
+  container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory())
 
   // Session
   const config: CookieConfig = {
@@ -32,7 +36,12 @@ export function initContainer(): Container {
   }
   const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow('CACHE_SERVER')}`))
   container.bind(SessionStore).toConstantValue(sessionStore)
-  container.bind(SessionMiddleware).toConstantValue(SessionMiddleware(config, sessionStore))
+  container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(config, sessionStore))
+  container.bind(TYPES.AuthMiddleware).toConstantValue(AuthMiddleware(
+    getEnvOrThrow('ACCOUNT_WEB_URL'),
+    new UriFactory(),
+    commonAuthMiddleware
+  ))
 
   container.load(buildProviderModule())
 
