@@ -7,13 +7,14 @@ import request from 'supertest'
 import { createApp } from './application.factory'
 
 import 'app/controllers/landing.controller'
+import { ROOT_URI } from 'app/paths'
 
 const app: Application = createApp()
 
 describe('LandingController', () => {
   it('should render the landing page', async () => {
-    const res = await request(app).get('/close-a-company').expect(OK)
+    const res = await request(app).get(ROOT_URI).expect(OK)
 
-    assert.include(res.text, 'Use this service to get your NodeJS application up and running.')
+    assert.include(res.text, 'Use this service to get your NodeJS application up and running')
   })
 })
