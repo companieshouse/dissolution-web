@@ -139,12 +139,12 @@ services:
     container_name: chs-company-profile-api
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/chs-company-profile-api:latest
     labels:
-      - traefik.http.routers.account-ch-gov-uk.rule=Host(`chs-company-profile-api`)
+      - traefik.http.routers.chs-company-profile-api.rule=Host(`chs-company-profile-api`)
     environment:
       - CHS_COMPANY_PROFILE_API_PORT=18222
-      - CHS_COMPANY_PROFILE_API_LOCAL_URL=http://wswebdev2.orctel.internal:18222
+      - CHS_COMPANY_PROFILE_API_LOCAL_URL=http://localhost?CHS_COMPANY_PROFILE_API_PORT
       - MONGODB_URL=mongodb://mongo
-      - API_LOCAL_URL=http://localhost?API_LOCAL_URL
+      - API_LOCAL_URL=http://localhost?CHS_COMPANY_PROFILE_API_PORT
       - COOKIE_SECRET=abcdef123456
     depends_on:
       - mongo
