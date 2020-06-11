@@ -1,7 +1,9 @@
 {% extends 'layout.njk' %}
 
 {% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
-{% from 'govuk/components/button/macro.njk'      import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
 
 {% block pageTitle %}
   {{ serviceName }}
@@ -22,7 +24,21 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-xl">Search Company Placeholder</h1>
+      <h1 class="govuk-heading-xl">What is the company number?</h1>
+      {{ govukInput({
+        label: {
+          text: "This is the character 8 character reference issued by Companies House when the company was set up."
+        },
+        id: "reference-number",
+        name: "reference-number"
+      }) }}
+      {{ govukDetails({
+        summaryText: "Help with company number",
+        text: "You can find it using the <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration" target="_blank" class="govuk-link">Companues House Service (opens in a window or tab).</a>"</p>
+      }) }}
+      {{ govukButton({
+         text: "Continue"
+      }) }}
     </div>
   </div>
 {% endblock %}
