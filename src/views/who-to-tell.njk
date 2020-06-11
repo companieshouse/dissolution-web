@@ -1,0 +1,66 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set documentationUrl = 'https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#how-to-apply-for-strike-off-and-who-to-tell' %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: "Back",
+      href: backUri
+    })
+  }}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">Who to tell about the company closing</h1>
+      <p class="govuk-body">Directors must give a copy of this to all interested parties within 7 days of it being submitted.</p>
+      <p class="govuk-body">Read the <a href="{{ documentationUrl }}">full list of parties you must tell about the company closing (opens in a new tab)</a>.</p>
+
+      {{
+        govukWarningText({
+          text: "Directors can be fined or imprisoned if they do not inform all interested parties.",
+          iconFallbackText: "Warning"
+        })
+      }}
+
+      <form method="post">
+        {{ 
+          govukCheckboxes({
+            idPrefix: "confirmation",
+            name: "confirmation",
+            errorMessage: {
+              text: errors.confirmation
+            } if errors.confirmation,
+            items: [
+              {
+                value: "understood",
+                text: "The directors understand that they are responsible for notifying all interested parties."
+              }
+            ]
+          })
+        }}
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}
