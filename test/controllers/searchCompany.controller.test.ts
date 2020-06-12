@@ -15,7 +15,6 @@ describe('SearchCompanyController', () => {
 
     const res = await request(app).get(SEARCH_COMPANY_URI).expect(OK)
 
-    // TODO Replace with actual page components
-    assert.include(res.text, 'Search Company Placeholder')
+    assert.include(res.text, 'What is the company number?')
   })
 })
