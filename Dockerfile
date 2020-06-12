@@ -1,7 +1,15 @@
 FROM node:14-alpine as build-base
 
-RUN apk add --update-cache git python make g++ && rm -rf /var/cache/apk/*
-RUN git config --global url."https://github.com/".insteadOf 'ssh://git@github.com/'
+RUN apk add --update-cache git python make g++ openssh-client && rm -rf /var/cache/apk/*
+# RUN git config --global url."https://github.com/".insteadOf 'ssh://git@github.com/'
+
+RUN mkdir .ssh && \
+    mkdir ~/.ssh && \
+    ssh-keyscan github.com > ~/.ssh/known_hosts
+
+COPY ./.ssh ./.ssh
+
+RUN cp .ssh/id_rsa ~/.ssh/id_rsa
 
 WORKDIR /build
 COPY package.json package-lock.json ./
