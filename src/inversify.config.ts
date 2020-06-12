@@ -1,4 +1,5 @@
 import 'reflect-metadata'
+import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
 
 import { createLogger } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
@@ -42,6 +43,9 @@ export function initContainer(): Container {
     new UriFactory(),
     commonAuthMiddleware
   ))
+  container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
+    CompanyAuthMiddleware(config, createLogger(APP_NAME)))
+
 
   container.load(buildProviderModule())
 
