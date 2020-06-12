@@ -42,20 +42,29 @@ IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provid
     $ ln ~/.ssh/id_rsa .ssh/id_rsa
     ```
     
-6. Clone [Dissolution API](https://github.com/companieshouse/dissolution-api) and ensure you have the following folder structure locally:
+6. Clone [Dissolution API](https://github.com/companieshouse/dissolution-api) and [Company Profile API](https://github.com/companieshouse/chs-company-profile-api) and ensure you have the following folder structure locally:
     ```
     companies-house
     |- dissolution-web
     |- dissolution-api
+    |- chs-company-profile-api
     ```
 
-7. Run the following in the `dissolution-web` directory to bring the environment up:
+7. In your local `chs-company-profile-api` directory, link your AWS credentials
+
+
+    ```
+    $ mkdir keys
+    $ cp -R ~/.aws keys/.aws
+    ```
+
+8. Run the following in the `dissolution-web` directory to bring the environment up:
 
     ```
     $ docker-compose up
     ```
 
-8. Navigate to `http://chs-dev/close-a-company/` to see the landing page
+9. Navigate to `http://chs-dev/close-a-company/` to see the landing page
 
 ## To make local changes
 

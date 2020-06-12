@@ -1,13 +1,12 @@
 FROM node:14-alpine as build-base
 
 RUN apk add --update-cache git python make g++ openssh-client && rm -rf /var/cache/apk/*
-# RUN git config --global url."https://github.com/".insteadOf 'ssh://git@github.com/'
 
 RUN mkdir .ssh && \
     mkdir ~/.ssh && \
     ssh-keyscan github.com > ~/.ssh/known_hosts
 
-COPY ./.ssh ./.ssh
+COPY ./.ssh/id_rsa ./.ssh/id_rsa
 
 RUN cp .ssh/id_rsa ~/.ssh/id_rsa
 
