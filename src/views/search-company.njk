@@ -3,7 +3,10 @@
 {% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
 {% block pageTitle %}
   {{ serviceName }}
@@ -22,23 +25,45 @@
 {% endblock %}
 
 {% block content %}
+  {{
+    govukBackLink({
+      text: "Back",
+      href: backUri
+    })
+  }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
       <h1 class="govuk-heading-xl">What is the company number?</h1>
-      {{ govukInput({
+
+      <form method="post">
+        {{ govukInput({
         label: {
           text: "This is the character 8 character reference issued by Companies House when the company was set up."
-        },
-        id: "reference-number",
-        name: "reference-number"
-      }) }}
-      {{ govukDetails({
-        summaryText: "Help with company number",
-        text: "You can find it using the <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration" target="_blank" class="govuk-link">Companues House Service (opens in a window or tab).</a>"</p>
-      }) }}
-      {{ govukButton({
-         text: "Continue"
-      }) }}
+          },
+          errorMessage: {
+           text: "Enter the reference number in the correct format"
+            } if errors.event-name,
+             classes: "govuk-input--width-10",
+             id: "exceeding-characters",
+             name: "event-name",
+             length: 8
+          })   
+        }}
+        {{ govukDetails({
+           summaryText: "Help with company number",
+           text: "You can find it using the Companies House Service (opens in a window or tab)."
+           })
+        }}
+        {{ govukButton({
+           text: 'Continue',
+           attributes: {
+           id: 'submit'
+            }
+         }) 
+        }}
+      </form>
     </div>
   </div>
 {% endblock %}
