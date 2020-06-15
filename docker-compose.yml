@@ -34,6 +34,7 @@ services:
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
+      - CHS_COMPANY_PROFILE_API_LOCAL_URL=http://chs-company-profile-api:3054
       - LOG_LEVEL=info
       - HUMAN_LOG=1
     depends_on:
@@ -44,7 +45,7 @@ services:
       - chs-company-profile-api
       - dissolution-api
   dissolution-api:
-    build: .
+    build: ../dissolution-api/.
     image: dissolution-api:latest
     container_name: dissolution-api
     labels:
@@ -55,7 +56,7 @@ services:
       - CACHE_SERVER=redis
       - CACHE_DB=0
       - CACHE_PASSWORD=''
-      - COOKIE_NAME=SID
+      - COOKIE_NAME=__SID
       - COOKIE_DOMAIN=chs-dev
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
@@ -136,20 +137,20 @@ services:
     expose:
       - 2000
   chs-company-profile-api:
+    build: ../chs-company-profile-api/.
     container_name: chs-company-profile-api
-    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/chs-company-profile-api:latest
+    # image: chs-company-profile-api:latest
     labels:
       - traefik.http.routers.chs-company-profile-api.rule=Host(`chs-company-profile-api`)
-    environment:
-      - CHS_COMPANY_PROFILE_API_PORT=18222
-      - CHS_COMPANY_PROFILE_API_LOCAL_URL=http://localhost?CHS_COMPANY_PROFILE_API_PORT
+    environment: 
+      - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
+      - PERL5LIB=local/lib/perl5
+      - PORT=3054
       - MONGODB_URL=mongodb://mongo
-      - API_LOCAL_URL=http://localhost?CHS_COMPANY_PROFILE_API_PORT
-      - COOKIE_SECRET=abcdef123456
     depends_on:
       - mongo
     expose:
-      - 18222
+      - 3054
     networks:
       - chs-dev
   api.ch.gov.uk:
