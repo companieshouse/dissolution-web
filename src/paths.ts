@@ -6,3 +6,4 @@ export const HEALTHCHECK_URI = `${ROOT_URI}/healthcheck`
 export const FORM_PAGE_URI = `${ROOT_URI}/form`
 export const WHO_TO_TELL_URI = `${ROOT_URI}/who-to-tell`
 export const SEARCH_COMPANY_URI = `${ROOT_URI}/search-company`
+export const VIEW_COMPANY_INFORMATION_URI = `${ROOT_URI}/view-company-information`
