@@ -23,6 +23,7 @@ export function initContainer(): Container {
   container.bind<number>(TYPES.PORT).toConstantValue(Number(getEnvOrDefault('PORT', '3000')))
   container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv('NODE_ENV'))
   container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow('CDN_HOST'))
+  container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow('CHS_COMPANY_PROFILE_API_LOCAL_URL'))
   container.bind<Optional<string>>(TYPES.PIWIK_SITE_ID).toConstantValue(getEnv('PIWIK_SITE_ID'))
   container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
 
@@ -33,7 +34,7 @@ export function initContainer(): Container {
   // Session
   const config: CookieConfig = {
     cookieName: getEnvOrThrow('COOKIE_NAME'),
-    cookieSecret: getEnvOrThrow('COOKIE_SECRET'),
+    cookieSecret: getEnvOrThrow('COOKIE_SECRET')
   }
   const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow('CACHE_SERVER')}`))
   container.bind(SessionStore).toConstantValue(sessionStore)
