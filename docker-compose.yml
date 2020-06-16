@@ -24,6 +24,7 @@ services:
       - chs-dev
     working_dir: /app
     environment:
+      - API_URL=http://api.chs-dev:18001
       - CHS_URL=http://chs-dev
       - CDN_HOST=cdn.chs-dev
       - CACHE_SERVER=redis
@@ -46,7 +47,6 @@ services:
       - dissolution-api
   dissolution-api:
     build: ../dissolution-api/.
-    image: dissolution-api:latest
     container_name: dissolution-api
     labels:
       - traefik.http.routers.dissolution-api.rule=Host(`chs-dev`) && PathPrefix(`/dissolution-api/`)
@@ -137,12 +137,10 @@ services:
     expose:
       - 2000
   chs-company-profile-api:
-    build: ../chs-company-profile-api/.
-    container_name: chs-company-profile-api
-    # image: chs-company-profile-api:latest
+    container_name: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/chs-company-profile-api:latest
     labels:
       - traefik.http.routers.chs-company-profile-api.rule=Host(`chs-company-profile-api`)
-    environment: 
+    environment:
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - PERL5LIB=local/lib/perl5
       - PORT=3054
@@ -153,6 +151,26 @@ services:
       - 3054
     networks:
       - chs-dev
+  api.ch.gov.uk:
+    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/api.ch.gov.uk:latest
+    container_name: api.ch.gov.uk
+    labels:
+      - traefik.http.routers.api.ch.gov.uk.rule=Host(`api.ch.gov.uk`)
+    environment:
+      - CUSTOMER_FEEDBACK_EMAIL_ADDRESS=kochab@companieshouse.gov.uk
+      - ELASTIC_SEARCH_VERSION=5
+      - SHARED_MEMORY_PERCENTAGE=25
+      - MAX_MEMORY_USAGE=262144
+      - COOKIE_DOMAIN=chs-dev
+      - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
+      - ELASTIC_SEARCH_ALL_INDEX=primary_search
+      - ELASTIC_SEARCH_PRIMARY_INDEX=primary_search
+      - MONGODB_URL=mongodb://mongo
+    ports:
+      - 18001:18001
+    networks:
+      - chs-dev
+    working_dir: /app
   # Infrastructure
   redis:
     container_name: redis
