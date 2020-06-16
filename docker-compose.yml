@@ -152,11 +152,11 @@ services:
       - 3054
     networks:
       - chs-dev
-  api.ch.gov.uk:
+  api-ch-gov-uk:
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/api.ch.gov.uk:latest
-    container_name: api.ch.gov.uk
+    container_name: api-ch-gov-uk
     labels:
-      - traefik.http.routers.api.ch.gov.uk.rule=Host(`api.ch.gov.uk`)
+      - traefik.http.routers.api-ch-gov-uk.rule=Host(`api.chs-dev`)
     environment:
       - CUSTOMER_FEEDBACK_EMAIL_ADDRESS=kochab@companieshouse.gov.uk
       - ELASTIC_SEARCH_VERSION=5
