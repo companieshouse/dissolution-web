@@ -26,7 +26,7 @@ IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provid
 3. Add the following to your `/etc/hosts` file:
 
     ```
-    127.0.0.1 chs-dev cdn.chs-dev account.chs-dev chs-company-profile-api
+    127.0.0.1 chs-dev cdn.chs-dev account.chs-dev api.chs-dev chs-company-profile-api
     ```
 
 4. Login to the Companies House AWS account and run the following command in a fresh terminal session:
@@ -35,36 +35,27 @@ IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provid
     $ docker login -u AWS -p "$(aws ecr get-login-password)" https://169942020521.dkr.ecr.eu-west-1.amazonaws.com
     ```
 
-5. Link your GitHub SSH key to to `dissolution-web` directory to access private dependencies in Docker:
+5. Link your GitHub SSH key to to `dissolution-web` directory to access private NPM dependencies in Docker:
 
     ```
     $ mkdir .ssh
     $ ln ~/.ssh/id_rsa .ssh/id_rsa
     ```
     
-6. Clone [Dissolution API](https://github.com/companieshouse/dissolution-api) and [Company Profile API](https://github.com/companieshouse/chs-company-profile-api) and ensure you have the following folder structure locally:
+6. Clone [Dissolution API](https://github.com/companieshouse/dissolution-api) and ensure you have the following folder structure locally:
     ```
     companies-house
     |- dissolution-web
     |- dissolution-api
-    |- chs-company-profile-api
     ```
 
-7. In your local `chs-company-profile-api` directory, link your AWS credentials
-
-
-    ```
-    $ mkdir keys
-    $ cp -R ~/.aws keys/.aws
-    ```
-
-8. Run the following in the `dissolution-web` directory to bring the environment up:
+7. Run the following in the `dissolution-web` directory to bring the environment up:
 
     ```
     $ docker-compose up
     ```
 
-9. Navigate to `http://chs-dev/close-a-company/` to see the landing page
+8. Navigate to `http://chs-dev/close-a-company/` to see the landing page
 
 ## To make local changes
 
