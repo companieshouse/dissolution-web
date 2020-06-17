@@ -6,7 +6,9 @@ import { JWE, JWK } from 'node-jose'
  * https://github.com/companieshouse/web-security-java
  */
 
-const PAYLOAD_NONCE_KEY = 'nonce'
+interface AuthPayload {
+  [key: string]: string
+}
 
 function generateNonce(): string {
   const bytes = randomBytes(5)
@@ -15,12 +17,13 @@ function generateNonce(): string {
 }
 
 async function jweEncodeWithNonce(returnUri: string, nonce: string, attributeName: string): Promise<string> {
-  const payloadObject = {}
-  payloadObject[PAYLOAD_NONCE_KEY] = nonce
-  payloadObject[attributeName] = returnUri
+  const payloadObject: AuthPayload = {
+    'nonce': nonce,
+    [attributeName]: returnUri
+  }
 
   const payload = JSON.stringify(payloadObject)
-  const decoded = Buffer.from(OAUTH2_REQUEST_KEY, 'base64')
+  const decoded = Buffer.from('pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=', 'base64') // TODO inject variable
 
   const ks = await JWK.asKeyStore([{
     alg: 'A128CBC-HS256',
@@ -30,17 +33,11 @@ async function jweEncodeWithNonce(returnUri: string, nonce: string, attributeNam
     use: 'enc',
   }])
 
-  const key = await ks.get('key')
+  const key = await JWK.asKey(ks.get('key'))
 
   return await JWE.createEncrypt({
-    format: 'compact',
-  }, {
-    header: {
-      alg: 'dir',
-      enc: 'A128CBC-HS256',
-    },
-    key,
-  }).update(payload).final()
+    format: 'compact'
+  }, key).update(payload).final()
 }
 
 export { jweEncodeWithNonce, generateNonce }

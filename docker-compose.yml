@@ -24,6 +24,8 @@ services:
       - chs-dev
     working_dir: /app
     environment:
+      - ACCOUNT_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
+      - ACCOUNT_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
       - API_URL=http://api.chs-dev:18001
       - CHS_URL=http://chs-dev
       - CDN_HOST=cdn.chs-dev
@@ -38,6 +40,7 @@ services:
       - CHS_COMPANY_PROFILE_API_LOCAL_URL=http://chs-company-profile-api:3054
       - LOG_LEVEL=info
       - HUMAN_LOG=1
+      - OAUTH2_AUTH_URI=chs-dev/oauth2/authorise
     depends_on:
       - mongo
       - cdn-ch-gov-uk
@@ -87,7 +90,7 @@ services:
       - ACCOUNT_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
       - ACCOUNT_OAUTH2_TOKEN_KEY=8sjqDklsgnwe98htthwAzp==
       - ACCOUNT_URL=http://account.chs-dev
-      - API_LOCAL_URL=http://localhost?API_LOCAL_URL
+      - API_LOCAL_URL=http://chs-company-profile-api:3054
       - CACHE_SERVER=redis:6379
       - CDN_HOST=cdn.chs-dev
       - CHS_API_KEY=MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz
@@ -95,7 +98,7 @@ services:
       - CHS_KAFKA_API_LOCAL_URL=http://localhost?CHS_KAFKA_API_LOCAL_URL
       - CHS_MONITOR_API_LOCAL_URL=http://localhost?CHS_MONITOR_API_LOCAL_URL
       - CHS_MONITOR_GUI_URL=http://localhost?CHS_MONITOR_GUI_URL
-      - CHS_URL=http://localhost?CHS_URL
+      - CHS_URL=http://chs-dev
       - COOKIE_DOMAIN=chs-dev
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DISABLE_FOLLOW=0

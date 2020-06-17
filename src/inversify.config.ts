@@ -1,5 +1,4 @@
 import 'reflect-metadata'
-import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
 
 import { createLogger } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
@@ -11,6 +10,7 @@ import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
+import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
 import Optional from 'app/models/optional'
 import TYPES from 'app/types'
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from 'app/utils/env.util'

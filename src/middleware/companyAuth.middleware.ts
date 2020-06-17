@@ -1,4 +1,3 @@
-import { generateNonce, jweEncodeWithNonce } from 'app/utils/jwt.encryption'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { CookieConfig } from 'ch-node-session-handler/lib/config/CookieConfig'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
@@ -6,7 +5,13 @@ import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInI
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
-import { ROOT_URI, SELECT_DIRECTOR_URI } from 'app/paths'
+import { generateNonce, jweEncodeWithNonce } from 'app/utils/jwt.encryption'
+
+interface ISignInInfoWithCompanyNumber extends ISignInInfo {
+  [SignInInfoKeys.CompanyNumber]?: string
+}
+
+const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
 export default function CompanyAuthMiddleware(config: CookieConfig,
                                               logger: ApplicationLogger): RequestHandler {
@@ -19,15 +24,14 @@ export default function CompanyAuthMiddleware(config: CookieConfig,
     const cookieId = req.cookies[config.cookieName]
     if (cookieId) {
       const signInInfo: ISignInInfo = req.session!.get<ISignInInfo>(SessionKey.SignInInfo) || {}
-      console.log(req.session)
       console.log(JSON.stringify(req.session, null, 2))
       if (isAuthorisedForCompany(signInInfo, companyNumber)) {
         logger.info(`User is authenticated for ${companyNumber}`)
         return next()
       } else {
         logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
-        return res.redirect(ROOT_URI + '/')
-        return res.redirect(await getAuthRedirectUri(req, companyNumber))
+        return res.redirect(
+          await getAuthRedirectUri(req, companyNumber))
       }
     } else {
       return next(new Error('No session present for company auth filter'))
@@ -35,8 +39,7 @@ export default function CompanyAuthMiddleware(config: CookieConfig,
   }
 }
 
-function isAuthorisedForCompany(signInInfo: ISignInInfo, companyNumber: string): boolean {
-  // @ts-ignore
+function isAuthorisedForCompany(signInInfo: ISignInInfoWithCompanyNumber, companyNumber: string): boolean {
   return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
 }
 
@@ -45,7 +48,7 @@ function getCompanyNumberFromPath(path: string): string {
 
   const found = path.match(regexPattern)
   if (found) {
-    return found[0]
+    return found[1]
   } else {
     return ''
   }
@@ -57,21 +60,21 @@ async function getAuthRedirectUri(req: Request, companyNumber?: string): Promise
   let scope = ''
 
   if (companyNumber != null) {
-    scope = 'chs-dev' + companyNumber
+    scope = OATH_SCOPE_PREFIX + companyNumber
   }
 
   const session = req.session
   const nonce = generateNonce()
-  session!.data[SessionKey.OAuth2Nonce] = nonce
+  session!.setExtraData(SessionKey.OAuth2Nonce, nonce)
   // await saveSession(session)
 
   return await createAuthUri(originalUrl, nonce, scope)
 }
 
 async function createAuthUri(originalUri: string, nonce: string, scope?: string): Promise<string> {
-  let authUri = OAUTH2_AUTH_URI.concat('?',
-    'client_id=', OAUTH2_CLIENT_ID,
-    '&redirect_uri=', SELECT_DIRECTOR_URI,
+  let authUri = 'http://account.chs-dev/oauth2/authorise'.concat('?', // TODO inject variable
+    'client_id=', '1234567890.apps.ch.gov.uk', // TODO inject variable
+    '&redirect_uri=', 'http://chs-dev/oauth2/user/callback',
     '&response_type=code')
 
   if (scope != null) {
