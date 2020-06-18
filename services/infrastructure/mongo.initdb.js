@@ -27,7 +27,7 @@ db.api_clients.insert({
 
 db.company_auth_codes.insert({
     "_id" : "01777777",
-    "auth_code" : "$2a$10$uS7dsFz8iIuNvXQK6dG1v.F//uQajFz0BLc60/B8qrGqsdFrU77MO",
+    "auth_code" : "$2a$10$uS7dsFz8iIuNvXQK6dG1v.F//uQajFz0BLc60/B8qrGqsdFrU77MO", // decrypted: 222222
     "is_active" : true
 })
 
