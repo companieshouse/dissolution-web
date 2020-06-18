@@ -1,7 +1,9 @@
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
+import { Session, SessionStore } from 'ch-node-session-handler'
 import { CookieConfig } from 'ch-node-session-handler/lib/config/CookieConfig'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInInfoKeys'
+import { Cookie } from 'ch-node-session-handler/lib/session/model/Cookie'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
@@ -11,10 +13,14 @@ interface ISignInInfoWithCompanyNumber extends ISignInInfo {
   [SignInInfoKeys.CompanyNumber]?: string
 }
 
+type Mutable<T> = {
+  -readonly [P in keyof T]: Mutable<T[P]>
+}
+
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
 export default function CompanyAuthMiddleware(config: CookieConfig,
-                                              logger: ApplicationLogger): RequestHandler {
+                                              logger: ApplicationLogger, sessionStore: SessionStore): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const companyNumber = getCompanyNumberFromPath(req.originalUrl)
     if (companyNumber === '') {
@@ -29,7 +35,7 @@ export default function CompanyAuthMiddleware(config: CookieConfig,
       } else {
         logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
         return res.redirect(
-          await getAuthRedirectUri(req, companyNumber))
+          await getAuthRedirectUri(req, cookieId, sessionStore, companyNumber,))
       }
     } else {
       return next(new Error('No session present for company auth filter'))
@@ -52,7 +58,8 @@ function getCompanyNumberFromPath(path: string): string {
   }
 }
 
-async function getAuthRedirectUri(req: Request, companyNumber?: string): Promise<string> {
+async function getAuthRedirectUri(req: Request, cookieId: string,
+                                  sessionStore: SessionStore, companyNumber?: string,): Promise<string> {
   const originalUrl = req.originalUrl
 
   let scope = ''
@@ -61,14 +68,18 @@ async function getAuthRedirectUri(req: Request, companyNumber?: string): Promise
     scope = OATH_SCOPE_PREFIX + companyNumber
   }
   const nonce = generateNonce()
-  req.session!.setExtraData(SessionKey.OAuth2Nonce, nonce)
+
+  const mutableSession = req.session as Mutable<Session>
+  mutableSession.data[SessionKey.OAuth2Nonce] = nonce
+
+  await sessionStore.store(Cookie.createFrom(cookieId), mutableSession.data)
   return await createAuthUri(originalUrl, nonce, scope)
 }
 
 async function createAuthUri(originalUri: string, nonce: string, scope?: string): Promise<string> {
   let authUri = 'http://account.chs-dev/oauth2/authorise'.concat('?', // TODO inject variable
     'client_id=', '1234567890.apps.ch.gov.uk', // TODO inject variable
-    '&redirect_uri=', 'http://account.chs-dev/oauth2/user/callback',
+    '&redirect_uri=', 'http://chs-dev/oauth2/user/callback',
     '&response_type=code')
 
   if (scope != null) {

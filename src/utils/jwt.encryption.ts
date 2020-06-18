@@ -38,7 +38,10 @@ async function jweEncodeWithNonce(returnUri: string, nonce: string): Promise<str
 
   return await JWE.createEncrypt({
     format: 'compact',
-    contentAlg: 'A128CBC-HS256',
+    fields: {
+      alg: 'dir',
+      enc: 'A128CBC-HS256'
+    }
   }, key).update(payload).final()
 }
 

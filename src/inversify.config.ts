@@ -45,7 +45,7 @@ export function initContainer(): Container {
     commonAuthMiddleware
   ))
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(config, createLogger(APP_NAME)))
+    CompanyAuthMiddleware(config, createLogger(APP_NAME), sessionStore))
 
 
   container.load(buildProviderModule())
