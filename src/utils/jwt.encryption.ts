@@ -1,6 +1,8 @@
 import { randomBytes } from 'crypto'
 import { JWE, JWK } from 'node-jose'
 
+import { AuthConfig } from 'app/middleware/companyAuth.middleware'
+
 /**
  * Implementation referenced from
  * https://github.com/companieshouse/web-security-java
@@ -17,14 +19,14 @@ function generateNonce(): string {
   return buffer.toString('base64')
 }
 
-async function jweEncodeWithNonce(returnUri: string, nonce: string): Promise<string> {
+async function jweEncodeWithNonce(returnUri: string, nonce: string, authConfig: AuthConfig): Promise<string> {
   const payloadObject: AuthPayload = {
     'nonce': nonce,
     'content': returnUri
   }
 
   const payload = JSON.stringify(payloadObject)
-  const decoded = Buffer.from('pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=', 'base64') // TODO inject variable
+  const decoded = Buffer.from(`${authConfig.accountRequestKey}`, 'base64')
 
   const ks = await JWK.asKeyStore([{
     alg: 'A128CBC-HS256',

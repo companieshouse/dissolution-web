@@ -27,6 +27,7 @@ services:
       - ACCOUNT_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
       - ACCOUNT_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
       - API_URL=http://api.chs-dev:18001
+      - ACCOUNT_URL=http://account.chs-dev
       - CHS_URL=http://chs-dev
       - CDN_HOST=cdn.chs-dev
       - CACHE_SERVER=redis
@@ -40,7 +41,6 @@ services:
       - CHS_COMPANY_PROFILE_API_LOCAL_URL=http://chs-company-profile-api:3054
       - LOG_LEVEL=info
       - HUMAN_LOG=1
-      - OAUTH2_AUTH_URI=chs-dev/oauth2/authorise
     depends_on:
       - mongo
       - cdn-ch-gov-uk

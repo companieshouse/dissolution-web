@@ -10,7 +10,7 @@ import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
-import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
+import CompanyAuthMiddleware, { AuthConfig } from 'app/middleware/companyAuth.middleware'
 import Optional from 'app/models/optional'
 import TYPES from 'app/types'
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from 'app/utils/env.util'
@@ -32,20 +32,27 @@ export function initContainer(): Container {
   container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory())
 
   // Session
-  const config: CookieConfig = {
+  const cookieConfig: CookieConfig = {
     cookieName: getEnvOrThrow('COOKIE_NAME'),
-    cookieSecret: getEnvOrThrow('COOKIE_SECRET')
+    cookieSecret: getEnvOrThrow('COOKIE_SECRET'),
+    cookieDomain: getEnvOrThrow('COOKIE_DOMAIN')
   }
   const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow('CACHE_SERVER')}`))
   container.bind(SessionStore).toConstantValue(sessionStore)
-  container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(config, sessionStore))
+  container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(cookieConfig, sessionStore))
   container.bind(TYPES.AuthMiddleware).toConstantValue(AuthMiddleware(
     getEnvOrThrow('CHS_URL'),
     new UriFactory(),
     commonAuthMiddleware
   ))
+  const authConfig: AuthConfig = {
+    accountUrl: getEnvOrThrow('ACCOUNT_URL'),
+    accountRequestKey: getEnvOrThrow('ACCOUNT_OAUTH2_REQUEST_KEY'),
+    accountClientId: getEnvOrThrow('ACCOUNT_CH_CLIENT_ID'),
+    chsUrl: getEnvOrThrow('CHS_URL'),
+  }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(config, createLogger(APP_NAME), sessionStore))
+    CompanyAuthMiddleware(cookieConfig, authConfig, createLogger(APP_NAME)))
 
 
   container.load(buildProviderModule())

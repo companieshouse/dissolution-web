@@ -1,26 +1,29 @@
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { Session, SessionStore } from 'ch-node-session-handler'
+import { Session } from 'ch-node-session-handler'
 import { CookieConfig } from 'ch-node-session-handler/lib/config/CookieConfig'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInInfoKeys'
-import { Cookie } from 'ch-node-session-handler/lib/session/model/Cookie'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
+import { Mutable } from 'app/models/mutable'
 import { generateNonce, jweEncodeWithNonce } from 'app/utils/jwt.encryption'
+
+export interface AuthConfig {
+  accountUrl: string,
+  accountRequestKey: string,
+  accountClientId: string,
+  chsUrl: string,
+}
 
 interface ISignInInfoWithCompanyNumber extends ISignInInfo {
   [SignInInfoKeys.CompanyNumber]?: string
 }
 
-type Mutable<T> = {
-  -readonly [P in keyof T]: Mutable<T[P]>
-}
-
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
-export default function CompanyAuthMiddleware(config: CookieConfig,
-                                              logger: ApplicationLogger, sessionStore: SessionStore): RequestHandler {
+export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: AuthConfig,
+                                              logger: ApplicationLogger): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const companyNumber = getCompanyNumberFromPath(req.originalUrl)
     if (companyNumber === '') {
@@ -35,7 +38,7 @@ export default function CompanyAuthMiddleware(config: CookieConfig,
       } else {
         logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
         return res.redirect(
-          await getAuthRedirectUri(req, cookieId, sessionStore, companyNumber,))
+          await getAuthRedirectUri(req, authConfig, companyNumber))
       }
     } else {
       return next(new Error('No session present for company auth filter'))
@@ -58,8 +61,7 @@ function getCompanyNumberFromPath(path: string): string {
   }
 }
 
-async function getAuthRedirectUri(req: Request, cookieId: string,
-                                  sessionStore: SessionStore, companyNumber?: string,): Promise<string> {
+async function getAuthRedirectUri(req: Request, authConfig: AuthConfig, companyNumber?: string,): Promise<string> {
   const originalUrl = req.originalUrl
 
   let scope = ''
@@ -71,21 +73,22 @@ async function getAuthRedirectUri(req: Request, cookieId: string,
 
   const mutableSession = req.session as Mutable<Session>
   mutableSession.data[SessionKey.OAuth2Nonce] = nonce
+  req.session = mutableSession as Session
 
-  await sessionStore.store(Cookie.createFrom(cookieId), mutableSession.data)
-  return await createAuthUri(originalUrl, nonce, scope)
+  return await createAuthUri(originalUrl, nonce, authConfig, scope)
 }
 
-async function createAuthUri(originalUri: string, nonce: string, scope?: string): Promise<string> {
-  let authUri = 'http://account.chs-dev/oauth2/authorise'.concat('?', // TODO inject variable
-    'client_id=', '1234567890.apps.ch.gov.uk', // TODO inject variable
-    '&redirect_uri=', 'http://chs-dev/oauth2/user/callback',
+async function createAuthUri(originalUri: string, nonce: string,
+                             authConfig: AuthConfig, scope?: string): Promise<string> {
+  let authUri = `${authConfig.accountUrl}/oauth2/authorise`.concat('?',
+    'client_id=', `${authConfig.accountClientId}`,
+    '&redirect_uri=', `${authConfig.chsUrl}/oauth2/user/callback`,
     '&response_type=code')
 
   if (scope != null) {
     authUri = authUri.concat('&scope=', scope)
   }
 
-  authUri = authUri.concat('&state=', await jweEncodeWithNonce(originalUri, nonce))
+  authUri = authUri.concat('&state=', await jweEncodeWithNonce(originalUri, nonce, authConfig))
   return authUri
 }
