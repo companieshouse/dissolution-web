@@ -16,7 +16,6 @@ const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 export default function CompanyAuthMiddleware(config: CookieConfig,
                                               logger: ApplicationLogger): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
-    logger.info(req.originalUrl)
     const companyNumber = getCompanyNumberFromPath(req.originalUrl)
     if (companyNumber === '') {
       return next(new Error('No Company Number in URL'))
@@ -24,7 +23,6 @@ export default function CompanyAuthMiddleware(config: CookieConfig,
     const cookieId = req.cookies[config.cookieName]
     if (cookieId) {
       const signInInfo: ISignInInfo = req.session!.get<ISignInInfo>(SessionKey.SignInInfo) || {}
-      console.log(JSON.stringify(req.session, null, 2))
       if (isAuthorisedForCompany(signInInfo, companyNumber)) {
         logger.info(`User is authenticated for ${companyNumber}`)
         return next()
@@ -62,25 +60,21 @@ async function getAuthRedirectUri(req: Request, companyNumber?: string): Promise
   if (companyNumber != null) {
     scope = OATH_SCOPE_PREFIX + companyNumber
   }
-
-  const session = req.session
   const nonce = generateNonce()
-  session!.setExtraData(SessionKey.OAuth2Nonce, nonce)
-  // await saveSession(session)
-
+  req.session!.setExtraData(SessionKey.OAuth2Nonce, nonce)
   return await createAuthUri(originalUrl, nonce, scope)
 }
 
 async function createAuthUri(originalUri: string, nonce: string, scope?: string): Promise<string> {
   let authUri = 'http://account.chs-dev/oauth2/authorise'.concat('?', // TODO inject variable
     'client_id=', '1234567890.apps.ch.gov.uk', // TODO inject variable
-    '&redirect_uri=', 'http://chs-dev/oauth2/user/callback',
+    '&redirect_uri=', 'http://account.chs-dev/oauth2/user/callback',
     '&response_type=code')
 
   if (scope != null) {
     authUri = authUri.concat('&scope=', scope)
   }
 
-  authUri = authUri.concat('&state=', await jweEncodeWithNonce(originalUri, nonce, 'content'))
+  authUri = authUri.concat('&state=', await jweEncodeWithNonce(originalUri, nonce))
   return authUri
 }

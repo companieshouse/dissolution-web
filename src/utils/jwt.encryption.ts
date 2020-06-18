@@ -7,7 +7,8 @@ import { JWE, JWK } from 'node-jose'
  */
 
 interface AuthPayload {
-  [key: string]: string
+  nonce: string,
+  content: string
 }
 
 function generateNonce(): string {
@@ -16,10 +17,10 @@ function generateNonce(): string {
   return buffer.toString('base64')
 }
 
-async function jweEncodeWithNonce(returnUri: string, nonce: string, attributeName: string): Promise<string> {
+async function jweEncodeWithNonce(returnUri: string, nonce: string): Promise<string> {
   const payloadObject: AuthPayload = {
     'nonce': nonce,
-    [attributeName]: returnUri
+    'content': returnUri
   }
 
   const payload = JSON.stringify(payloadObject)
@@ -36,7 +37,8 @@ async function jweEncodeWithNonce(returnUri: string, nonce: string, attributeNam
   const key = await JWK.asKey(ks.get('key'))
 
   return await JWE.createEncrypt({
-    format: 'compact'
+    format: 'compact',
+    contentAlg: 'A128CBC-HS256',
   }, key).update(payload).final()
 }
 
