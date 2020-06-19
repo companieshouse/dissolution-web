@@ -21,8 +21,8 @@ function generateNonce(): string {
 
 async function jweEncodeWithNonce(returnUri: string, nonce: string, authConfig: AuthConfig): Promise<string> {
   const payloadObject: AuthPayload = {
-    'nonce': nonce,
-    'content': returnUri
+    nonce,
+    content: returnUri
   }
 
   const payload = JSON.stringify(payloadObject)

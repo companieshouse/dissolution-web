@@ -28,7 +28,8 @@ export function initContainer(): Container {
   container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
 
   // Utils
-  container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(createLogger(APP_NAME))
+  const logger = createLogger(APP_NAME)
+  container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
   container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory())
 
   // Session
@@ -52,7 +53,7 @@ export function initContainer(): Container {
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(cookieConfig, authConfig, createLogger(APP_NAME)))
+    CompanyAuthMiddleware(cookieConfig, authConfig, logger))
 
 
   container.load(buildProviderModule())

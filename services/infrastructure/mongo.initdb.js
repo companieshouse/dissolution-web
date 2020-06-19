@@ -7,8 +7,7 @@ db.api_clients.insert({
   "client_secret" : "M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1",
   "user_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MT",
   "redirect_uris" : [
-    "http://chs-dev/oauth2/user/callback",
-    "http://account.chs-dev/oauth2/user/callback"
+    "http://chs-dev/oauth2/user/callback"
   ],
   "type" : "web",
   "is_internal_app": true
@@ -26,9 +25,9 @@ db.api_clients.insert({
 })
 
 db.company_auth_codes.insert({
-    "_id" : "01777777",
-    "auth_code" : "$2a$10$uS7dsFz8iIuNvXQK6dG1v.F//uQajFz0BLc60/B8qrGqsdFrU77MO", // decrypted: 222222
-    "is_active" : true
+  "_id" : "01777777",
+  "auth_code" : "$2a$10$uS7dsFz8iIuNvXQK6dG1v.F//uQajFz0BLc60/B8qrGqsdFrU77MO", // decrypted: 222222
+  "is_active" : true
 })
 
 db.users.insert({
