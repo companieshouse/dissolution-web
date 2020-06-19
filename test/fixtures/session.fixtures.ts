@@ -2,7 +2,7 @@ import { Session } from 'ch-node-session-handler'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import sinon from 'sinon'
 
-import { DissolutionSession } from 'app/models/dissolutionSession'
+import DissolutionSession from 'app/models/dissolutionSession'
 
 export function generateSession(): Session {
   return {
