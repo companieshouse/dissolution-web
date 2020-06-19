@@ -1,4 +1,3 @@
-import DissolutionSession from 'app/models/dissolutionSession'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { assert } from 'chai'
@@ -7,6 +6,7 @@ import sinon from 'sinon'
 import { generateRequest } from '../../fixtures/http.fixtures'
 import { generateDissolutionSession, generateISignInInfo } from '../../fixtures/session.fixtures'
 
+import DissolutionSession from 'app/models/dissolutionSession'
 import Optional from 'app/models/optional'
 import SessionService from 'app/services/session/session.service'
 

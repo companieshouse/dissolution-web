@@ -1,12 +1,12 @@
 import 'reflect-metadata'
 
 import 'ch-node-session-handler'
-import DissolutionSession from 'app/models/dissolutionSession'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { Request } from 'express'
 import { provide } from 'inversify-binding-decorators'
 
+import DissolutionSession from 'app/models/dissolutionSession'
 import Optional from 'app/models/optional'
 
 @provide(SessionService)
