@@ -33,7 +33,8 @@ export function initContainer(): Container {
   // Session
   const config: CookieConfig = {
     cookieName: getEnvOrThrow('COOKIE_NAME'),
-    cookieSecret: getEnvOrThrow('COOKIE_SECRET')
+    cookieSecret: getEnvOrThrow('COOKIE_SECRET'),
+    cookieDomain: getEnvOrThrow('COOKIE_DOMAIN')
   }
   const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow('CACHE_SERVER')}`))
   container.bind(SessionStore).toConstantValue(sessionStore)
