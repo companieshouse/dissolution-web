@@ -53,8 +53,64 @@ describe('asSelectDirectorList', () => {
 
     const result: (GovUKRadio | GovUKRadioDivider)[] = asSelectDirectorList(directors)
 
-    const dividerRadio: GovUKRadio = result[3] as GovUKRadio
-    assert.equal(dividerRadio.text, 'I am not a director of this company')
-    assert.equal(dividerRadio.value, 'other')
+    const defaultRadio: GovUKRadio = result[3] as GovUKRadio
+    assert.equal(defaultRadio.text, 'I am not a director of this company')
+    assert.equal(defaultRadio.value, 'other')
+  })
+
+  describe('checked', () => {
+    it('should not select any radio if nothing is previously selected', () => {
+      const directors: DirectorDetails[] = [
+        { ...generateDirectorDetails(), id: '123', name: 'Director One' },
+        { ...generateDirectorDetails(), id: '456', name: 'Director Two' }
+      ]
+
+      const result: (GovUKRadio | GovUKRadioDivider)[] = asSelectDirectorList(directors)
+
+      const director1Radio: GovUKRadio = result[0] as GovUKRadio
+      assert.isFalse(director1Radio.checked)
+
+      const director2Radio: GovUKRadio = result[1] as GovUKRadio
+      assert.isFalse(director2Radio.checked)
+
+      const defaultRadio: GovUKRadio = result[3] as GovUKRadio
+      assert.isFalse(defaultRadio.checked)
+    })
+
+    it('should select a director radio if previously selected', () => {
+      const directors: DirectorDetails[] = [
+        { ...generateDirectorDetails(), id: '123', name: 'Director One' },
+        { ...generateDirectorDetails(), id: '456', name: 'Director Two' }
+      ]
+
+      const result: (GovUKRadio | GovUKRadioDivider)[] = asSelectDirectorList(directors, '456')
+
+      const director1Radio: GovUKRadio = result[0] as GovUKRadio
+      assert.isFalse(director1Radio.checked)
+
+      const director2Radio: GovUKRadio = result[1] as GovUKRadio
+      assert.isTrue(director2Radio.checked)
+
+      const defaultRadio: GovUKRadio = result[3] as GovUKRadio
+      assert.isFalse(defaultRadio.checked)
+    })
+
+    it('should select the default radio if previously selected', () => {
+      const directors: DirectorDetails[] = [
+        { ...generateDirectorDetails(), id: '123', name: 'Director One' },
+        { ...generateDirectorDetails(), id: '456', name: 'Director Two' }
+      ]
+
+      const result: (GovUKRadio | GovUKRadioDivider)[] = asSelectDirectorList(directors, 'other')
+
+      const director1Radio: GovUKRadio = result[0] as GovUKRadio
+      assert.isFalse(director1Radio.checked)
+
+      const director2Radio: GovUKRadio = result[1] as GovUKRadio
+      assert.isFalse(director2Radio.checked)
+
+      const defaultRadio: GovUKRadio = result[3] as GovUKRadio
+      assert.isTrue(defaultRadio.checked)
+    })
   })
 })

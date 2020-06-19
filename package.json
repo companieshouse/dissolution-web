@@ -23,7 +23,7 @@
     "@hapi/joi": "^17.1.1",
     "body-parser": "^1.18.2",
     "ch-logging": "git+ssh://git@github.com/companieshouse/ch-structured-logging-node.git#a3e0dcc57f91f63803e02ceef2cc5e4038de9a19",
-    "ch-node-session-handler": "git+ssh://git@github.com/companieshouse/node-session-handler.git#2.1.1",
+    "ch-node-session-handler": "git+ssh://git@github.com/companieshouse/node-session-handler.git#3.0.1",
     "ch-sdk-node": "git+ssh://git@github.com/companieshouse/ch-sdk-node.git#4f57d67ee531cbc33ede007bc590ef4724c04c20",
     "cookie-parser": "^1.4.5",
     "dashify": "^2.0.0",
@@ -38,7 +38,7 @@
     "reflect-metadata": "^0.1.13",
     "tsconfig-paths": "^3.9.0",
     "tslib": "^2.0.0",
-    "web-security-node": "git@github.com:companieshouse/web-security-node.git#e35f2199b35f729eec2445d38d2b40a588e85ece"
+    "web-security-node": "git@github.com:companieshouse/web-security-node.git#0729df976b7273701ccef449e5a9a7818459dbaf"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",

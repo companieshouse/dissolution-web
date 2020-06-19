@@ -39,7 +39,7 @@
             errorMessage: {
               text: errors.director
             } if errors.director,
-            items: directors | asSelectDirectorList
+            items: directors | asSelectDirectorList(data.director)
           })
         }}
 

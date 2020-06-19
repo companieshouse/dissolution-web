@@ -4,6 +4,7 @@ import { controller, httpGet, httpPost, requestBody } from 'inversify-express-ut
 import BaseController from './base.controller'
 
 import DirectorDetails from 'app/models/directorDetails.model'
+import DissolutionSession from 'app/models/dissolutionSession'
 import Optional from 'app/models/optional'
 import SelectDirectorFormModel from 'app/models/selectDirector.model'
 import ValidationErrors from 'app/models/validationErrors'
@@ -16,8 +17,8 @@ import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
   directors: DirectorDetails[]
-  data?: SelectDirectorFormModel
-  errors?: ValidationErrors
+  data?: Optional<SelectDirectorFormModel>
+  errors?: Optional<ValidationErrors>
 }
 
 // TODO - include company auth middleware when available
@@ -33,10 +34,15 @@ export class SelectDirectorController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {
-    // TODO - get selection from session and prepopulate screen
+    const form: Optional<SelectDirectorFormModel> = this.getFormFromSession()
+
     const directors: DirectorDetails[] = await this.getDirectors()
 
-    return this.renderView(directors)
+    return this.renderView(directors, form)
+  }
+
+  private getFormFromSession(): Optional<SelectDirectorFormModel> {
+    return this.session.getDissolutionSession(this.httpContext.request)!.selectDirectorForm
   }
 
   @httpPost('')
@@ -48,20 +54,26 @@ export class SelectDirectorController extends BaseController {
       return this.renderView(directors, body, errors)
     }
 
-    // TODO - save selection to session
+    this.updateSession(body)
 
     return this.httpContext.response.redirect(this.getRedirectURI(directors, body))
   }
 
   private async getDirectors(): Promise<DirectorDetails[]> {
-    const companyNumber: string =  '01777777' // TODO read from session
+    const companyNumber: string =  this.getCompanyNumber()
     const token: string = this.session.getAccessToken(this.httpContext.request)
 
     return this.officerService.getActiveDirectorsForCompany(token, companyNumber)
   }
 
-  private async renderView(directors: DirectorDetails[], data?: SelectDirectorFormModel,
-    errors?: ValidationErrors): Promise<string> {
+  private getCompanyNumber(): string {
+    return this.session.getDissolutionSession(this.httpContext.request)!.companyNumber!
+  }
+
+  private async renderView(
+    directors: DirectorDetails[],
+    data?: Optional<SelectDirectorFormModel>,
+    errors?: Optional<ValidationErrors>): Promise<string> {
     const viewModel: ViewModel = {
       directors,
       data,
@@ -69,6 +81,12 @@ export class SelectDirectorController extends BaseController {
     }
 
     return super.render('select-director', viewModel, errors ? BAD_REQUEST : OK)
+  }
+
+  private updateSession(body: SelectDirectorFormModel): void {
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    session.selectDirectorForm = body
+    this.session.setDissolutionSession(this.httpContext.request, session)
   }
 
   private getRedirectURI(directors: DirectorDetails[], body: SelectDirectorFormModel): string {

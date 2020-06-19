@@ -1,15 +1,19 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
+import { Request } from 'express'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
-import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
+import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
+import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { generateDirectorDetails, generateSelectDirectorFormModel } from '../fixtures/companyOfficers.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
+import { generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import { HtmlAssertHelper } from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectDirector.controller'
+import DissolutionSession from 'app/models/dissolutionSession'
 import SelectDirectorFormModel from 'app/models/selectDirector.model'
 import ValidationErrors from 'app/models/validationErrors'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
@@ -27,16 +31,21 @@ describe('SelectDirectorController', () => {
   const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
 
+  let dissolutionSession: DissolutionSession
+
   beforeEach(() => {
     session = mock(SessionService)
     officerService = mock(CompanyOfficersService)
     validator = mock(FormValidator)
 
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
+
+    dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
   })
 
   describe('GET - ensure that page loads correctly', () => {
     it('should render the select director page with the relevant options', async () => {
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
         { ...generateDirectorDetails(), id: '123' },
         { ...generateDirectorDetails(), id: '456' }
@@ -58,9 +67,36 @@ describe('SelectDirectorController', () => {
       assert.equal(htmlAssertHelper.getValue('#select-director-2'), '456')
       assert.equal(htmlAssertHelper.getValue('#select-director-4'), 'other')
     })
+
+    it('should prepopulate the select director page with the selected director from session', async () => {
+      dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel('456')
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateDirectorDetails(), id: '123' },
+        { ...generateDirectorDetails(), id: '456' }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_DIRECTOR_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isFalse(htmlAssertHelper.hasAttribute('#select-director', 'checked'))
+      assert.isTrue(htmlAssertHelper.hasAttribute('#select-director-2', 'checked'))
+      assert.isFalse(htmlAssertHelper.hasAttribute('#select-director-4', 'checked'))
+    })
   })
 
   describe('POST - ensure form submission is handled correctly', () => {
+    beforeEach(() => when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession))
+
     it('should re-render the view with an error if validation fails', async () => {
       const form: SelectDirectorFormModel = generateSelectDirectorFormModel()
       const error: ValidationErrors = generateValidationError('director', 'some director error')
@@ -86,6 +122,33 @@ describe('SelectDirectorController', () => {
 
       assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
       assert.isTrue(htmlAssertHelper.containsText('#select-director-error', 'some director error'))
+    })
+
+    it('should store the form in session if validation passes', async () => {
+      const form: SelectDirectorFormModel = generateSelectDirectorFormModel('123')
+
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateDirectorDetails(), id: '123' }
+      ])
+      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+        container.rebind(FormValidator).toConstantValue(instance(validator))
+      })
+
+      await request(app)
+        .post(SELECT_DIRECTOR_URI)
+        .send(form)
+        .expect(MOVED_TEMPORARILY)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.deepEqual(updatedSession.selectDirectorForm, form)
     })
 
     it('should redirect to check your answers if company is single director and director is selected', async () => {
