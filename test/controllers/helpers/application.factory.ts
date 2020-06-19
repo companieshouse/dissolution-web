@@ -11,6 +11,7 @@ import { addFilters } from 'app/utils/nunjucks.util'
 export const createApp = (configureBindings?: (container: Container) => void): Application => {
   const container: Container = new Container()
 
+  mockEnvVars(container)
   mockMiddlewares(container)
 
   container.load(buildProviderModule())
@@ -39,6 +40,10 @@ export const createApp = (configureBindings?: (container: Container) => void): A
       addFilters(env)
     })
     .build()
+}
+
+const mockEnvVars = (container: Container): void => {
+  container.bind(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue('CHS_COMPANY_PROFILE_API_LOCAL_URL')
 }
 
 const mockMiddlewares = (container: Container): void => {

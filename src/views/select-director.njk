@@ -27,40 +27,19 @@
       <form method="post">
         {{
           govukRadios({
-            idPrefix: "where-do-you-live",
-            name: "where-do-you-live",
+            idPrefix: "select-director",
+            name: "director",
             fieldset: {
               legend: {
-                text: "Where do you live?",
+                text: "Which director are you?",
                 isPageHeading: true,
                 classes: "govuk-fieldset__legend--l"
               }
             },
-            items: [
-              {
-                value: "england",
-                text: "England"
-              },
-              {
-                value: "scotland",
-                text: "Scotland"
-              },
-              {
-                value: "wales",
-                text: "Wales"
-              },
-              {
-                value: "northern-ireland",
-                text: "Northern Ireland"
-              },
-              {
-                divider: "or"
-              },
-              {
-                value: "abroad",
-                text: "I am not a director of this company"
-              }
-            ]
+            errorMessage: {
+              text: errors.director
+            } if errors.director,
+            items: directors | asSelectDirectorList
           })
         }}
 

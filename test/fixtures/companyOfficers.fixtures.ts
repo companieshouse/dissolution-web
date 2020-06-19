@@ -3,6 +3,7 @@ import Resource from 'ch-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
 import DirectorDetails from 'app/models/directorDetails.model'
+import SelectDirectorFormModel from 'app/models/selectDirector.model'
 
 export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
   return {
@@ -91,5 +92,11 @@ export function generateDirectorDetails(): DirectorDetails {
   return {
     id: '123',
     name: 'Some Director'
+  }
+}
+
+export function generateSelectDirectorFormModel(director: string = '123'): SelectDirectorFormModel {
+  return {
+    director
   }
 }

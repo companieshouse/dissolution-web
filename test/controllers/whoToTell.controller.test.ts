@@ -4,6 +4,7 @@ import { assert } from 'chai'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { deepEqual, instance, mock, when } from 'ts-mockito'
+import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/whoToTell.controller'
 import ValidationErrors from 'app/models/validationErrors'
@@ -11,8 +12,6 @@ import WhoToTellFormModel from 'app/models/whoToTell.model'
 import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from 'app/paths'
 import formSchema from 'app/schemas/whoToTell.schema'
 import FormValidator from 'app/utils/formValidator.util'
-
-import { createApp } from 'test/controllers/application.factory.ts'
 
 describe('WhoToTellController', () => {
   describe('GET - ensure that page loads correctly', () => {
