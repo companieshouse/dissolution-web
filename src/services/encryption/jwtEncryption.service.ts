@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 import { randomBytes } from 'crypto'
 import { provide } from 'inversify-binding-decorators'
 import { JWE, JWK } from 'node-jose'
