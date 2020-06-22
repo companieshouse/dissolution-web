@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom'
 
 import Optional from 'app/models/optional'
 
-export class HtmlAssertHelper {
+export default class HtmlAssertHelper {
   private dom: JSDOM
 
   public constructor(html: string) {

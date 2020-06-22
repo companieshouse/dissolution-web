@@ -6,7 +6,7 @@ import { InversifyExpressServer } from 'inversify-express-utils'
 import * as nunjucks from 'nunjucks'
 
 import TYPES from 'app/types'
-import { addFilters } from 'app/utils/nunjucks.util'
+import { addFilters, addGlobals } from 'app/utils/nunjucks.util'
 
 export const createApp = (configureBindings?: (container: Container) => void): Application => {
   const container: Container = new Container()
@@ -38,6 +38,7 @@ export const createApp = (configureBindings?: (container: Container) => void): A
       )
 
       addFilters(env)
+      addGlobals(env)
     })
     .build()
 }

@@ -60,7 +60,7 @@ export class SelectDirectorController extends BaseController {
   }
 
   private async getDirectors(): Promise<DirectorDetails[]> {
-    const companyNumber: string =  this.getCompanyNumber()
+    const companyNumber: string = this.getCompanyNumber()
     const token: string = this.session.getAccessToken(this.httpContext.request)
 
     return this.officerService.getActiveDirectorsForCompany(token, companyNumber)
@@ -84,9 +84,11 @@ export class SelectDirectorController extends BaseController {
   }
 
   private updateSession(body: SelectDirectorFormModel): void {
-    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    session.selectDirectorForm = body
-    this.session.setDissolutionSession(this.httpContext.request, session)
+    const updatedSession: DissolutionSession = {
+      ...this.session.getDissolutionSession(this.httpContext.request),
+      selectDirectorForm: body
+    }
+    this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 
   private getRedirectURI(directors: DirectorDetails[], body: SelectDirectorFormModel): string {

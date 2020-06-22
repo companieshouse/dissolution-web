@@ -10,7 +10,7 @@ import { generateDirectorDetails, generateSelectDirectorFormModel } from '../fix
 import { generateValidationError } from '../fixtures/error.fixtures'
 import { generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
-import { HtmlAssertHelper } from './helpers/htmlAssert.helper'
+import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectDirector.controller'
 import DissolutionSession from 'app/models/dissolutionSession'
