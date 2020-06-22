@@ -3,7 +3,7 @@ import 'reflect-metadata'
 import { CompanyOfficer } from 'ch-sdk-node/dist/services/company-officers/types'
 import { provide } from 'inversify-binding-decorators'
 
-import DirectorDetails from 'app/models/directorDetails.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 
 @provide(DirectorDetailsMapper)
 export default class DirectorDetailsMapper {

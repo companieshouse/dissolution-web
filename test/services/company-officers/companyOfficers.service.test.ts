@@ -7,7 +7,7 @@ import { generateCompanyOfficer, generateCompanyOfficers, generateCompanyOfficer
   generateDirectorDetails } from '../../fixtures/companyOfficers.fixtures'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
-import DirectorDetails from 'app/models/directorDetails.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 import CompanyOfficersClient from 'app/services/clients/companyOfficers.client'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
 

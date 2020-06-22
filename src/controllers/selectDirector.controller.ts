@@ -3,11 +3,12 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
-import DirectorDetails from 'app/models/directorDetails.model'
-import DissolutionSession from 'app/models/dissolutionSession'
+import SelectDirectorFormModel from 'app/models/forms/selectDirector.model'
 import Optional from 'app/models/optional'
-import SelectDirectorFormModel from 'app/models/selectDirector.model'
-import ValidationErrors from 'app/models/validationErrors'
+import DirectorToSign from 'app/models/session/directorToSign.model'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import selectDirectorSchema from 'app/schemas/selectDirector.schema'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
@@ -54,9 +55,11 @@ export class SelectDirectorController extends BaseController {
       return this.renderView(directors, body, errors)
     }
 
-    this.updateSession(body)
+    const selectedDirector: Optional<DirectorDetails> = this.getSelectedDirector(directors, body)
 
-    return this.httpContext.response.redirect(this.getRedirectURI(directors, body))
+    this.updateSession(body, selectedDirector)
+
+    return this.httpContext.response.redirect(this.getRedirectURI(directors, selectedDirector))
   }
 
   private async getDirectors(): Promise<DirectorDetails[]> {
@@ -83,23 +86,33 @@ export class SelectDirectorController extends BaseController {
     return super.render('select-director', viewModel, errors ? BAD_REQUEST : OK)
   }
 
-  private updateSession(body: SelectDirectorFormModel): void {
+  private getSelectedDirector(directors: DirectorDetails[], body: SelectDirectorFormModel): Optional<DirectorDetails> {
+    return directors.find(director => director.id === body.director)
+  }
+
+  private updateSession(body: SelectDirectorFormModel, selectedDirector?: Optional<DirectorDetails>): void {
     const updatedSession: DissolutionSession = {
       ...this.session.getDissolutionSession(this.httpContext.request),
-      selectDirectorForm: body
+      selectDirectorForm: body,
+      directorsToSign: this.getDirectorsToSign(selectedDirector)
     }
+
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 
-  private getRedirectURI(directors: DirectorDetails[], body: SelectDirectorFormModel): string {
+  private getDirectorsToSign(selectedDirector?: Optional<DirectorDetails>): DirectorToSign[] {
+    return selectedDirector ? [{
+      id: selectedDirector.id,
+      name: selectedDirector.name,
+      email: this.session.getUserEmail(this.httpContext.request)
+    }] : []
+  }
+
+  private getRedirectURI(directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): string {
     if (directors.length > 1) {
       return SELECT_SIGNATORIES_URI
     }
 
-    return this.isADirector(directors, body) ? CHECK_YOUR_ANSWERS_URI : DEFINE_SIGNATORY_INFO_URI
-  }
-
-  private isADirector(directors: DirectorDetails[], body: SelectDirectorFormModel): boolean {
-    return directors.some(director => director.id === body.director)
+    return selectedDirector ? CHECK_YOUR_ANSWERS_URI : DEFINE_SIGNATORY_INFO_URI
   }
 }

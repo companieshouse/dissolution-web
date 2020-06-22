@@ -1,4 +1,4 @@
-import DirectorDetails from 'app/models/directorDetails.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export type GovUKRadio = {
   value: string

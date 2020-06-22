@@ -4,7 +4,7 @@ import Joi from '@hapi/joi'
 import { assert } from 'chai'
 
 import Optional from 'app/models/optional'
-import ValidationErrors from 'app/models/validationErrors'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 import FormValidator from 'app/utils/formValidator.util'
 
 describe('FormValidator', () => {
