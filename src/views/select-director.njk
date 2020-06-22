@@ -1,0 +1,57 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/back-link/macro.njk'     import govukBackLink %}
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from "govuk/components/radios/macro.njk"        import govukRadios %}
+{% from 'govuk/components/button/macro.njk'        import govukButton %}
+
+{% block pageTitle %}
+  Tell us some details
+{% endblock %}
+
+{% block backLink %}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: Paths.VIEW_COMPANY_INFORMATION_URI
+    })
+  }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% include 'components/errors/error-summary.njk' %}
+
+      <form method="post">
+        {{
+          govukRadios({
+            idPrefix: "select-director",
+            name: "director",
+            fieldset: {
+              legend: {
+                text: "Which director are you?",
+                isPageHeading: true,
+                classes: "govuk-fieldset__legend--l"
+              }
+            },
+            errorMessage: {
+              text: errors.director
+            } if errors.director,
+            items: directors | asSelectDirectorList(data.director)
+          })
+        }}
+
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

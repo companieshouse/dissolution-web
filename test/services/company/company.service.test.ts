@@ -3,7 +3,7 @@ import Resource from 'ch-sdk-node/dist/services/resource'
 import { assert } from 'chai'
 import { NOT_FOUND, OK } from 'http-status-codes'
 import { instance, mock, when } from 'ts-mockito'
-import { generateCompanyProfile, generateCompanyProfileResource } from '../../fixtures/company.fixtures'
+import { generateCompanyProfile, generateCompanyProfileResource } from '../../fixtures/companyProfile.fixtures'
 
 import CompanyProfileClient from 'app/services/clients/companyProfile.client'
 import CompanyService from 'app/services/company/company.service'

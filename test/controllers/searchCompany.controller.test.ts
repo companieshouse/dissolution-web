@@ -4,7 +4,7 @@ import { assert } from 'chai'
 import { Application } from 'express'
 import { OK } from 'http-status-codes'
 import request from 'supertest'
-import { createApp } from './application.factory'
+import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/searchCompany.controller'
 import { SEARCH_COMPANY_URI } from 'app/paths'

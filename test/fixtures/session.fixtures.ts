@@ -23,8 +23,8 @@ export function generateISignInInfo(): ISignInInfo {
   }
 }
 
-export function generateDissolutionSession(): DissolutionSession {
+export function generateDissolutionSession(companyNumber: string = '12345678'): DissolutionSession {
   return {
-    companyNumber: '12345678'
+    companyNumber
   }
 }

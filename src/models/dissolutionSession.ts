@@ -1,3 +1,6 @@
+import SelectDirectorFormModel from './selectDirector.model'
+
 export default interface DissolutionSession {
-  companyNumber: string
+  companyNumber?: string
+  selectDirectorForm?: SelectDirectorFormModel
 }
