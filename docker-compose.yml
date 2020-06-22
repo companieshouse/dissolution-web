@@ -54,7 +54,7 @@ services:
     labels:
       - traefik.http.routers.dissolution-api.rule=Host(`chs-dev`) && PathPrefix(`/dissolution-api/`)
     environment:
-      - DISSOLUTION_API_MONGODB_URL=mongodb://mongo/dissolutions
+      - DISSOLUTIONS_API_MONGODB_URL=mongodb://mongo/dissolutions
       - CDN_HOST=cdn.chs-dev
       - CACHE_SERVER=redis
       - CACHE_DB=0
@@ -155,11 +155,11 @@ services:
       - 3054
     networks:
       - chs-dev
-  api.ch.gov.uk:
+  api-ch-gov-uk:
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/api.ch.gov.uk:latest
-    container_name: api.ch.gov.uk
+    container_name: api-ch-gov-uk
     labels:
-      - traefik.http.routers.api.ch.gov.uk.rule=Host(`api.ch.gov.uk`)
+      - traefik.http.routers.api-ch-gov-uk.rule=Host(`api.chs-dev`)
     environment:
       - CUSTOMER_FEEDBACK_EMAIL_ADDRESS=kochab@companieshouse.gov.uk
       - ELASTIC_SEARCH_VERSION=5
@@ -194,6 +194,8 @@ services:
       - chs-dev
     expose:
       - 27017
+    ports:
+      - 27017:27017
 
 
 networks:
