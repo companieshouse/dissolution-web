@@ -6,8 +6,11 @@ import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInI
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
+import { DISSOLUTION_SESSION_KEY } from 'app/constants/app.const'
+import DissolutionSession from 'app/models/dissolutionSession'
 import { Mutable } from 'app/models/mutable'
-import { generateNonce, jweEncodeWithNonce } from 'app/utils/jwt.encryption'
+import Optional from 'app/models/optional'
+import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
 
 export interface AuthConfig {
   accountUrl: string,
@@ -23,14 +26,19 @@ interface ISignInInfoWithCompanyNumber extends ISignInInfo {
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
 export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: AuthConfig,
+                                              encryptionService: JwtEncryptionService,
                                               logger: ApplicationLogger): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const companyNumber = getCompanyNumberFromPath(req.originalUrl)
-    if (companyNumber === '') {
-      return next(new Error('No Company Number in URL'))
-    }
-    const cookieId = req.cookies[config.cookieName]
+    const cookieId: Optional<string> = req.cookies[config.cookieName]
     if (cookieId) {
+      const dissolutionSession: Optional<DissolutionSession> = req.session!.getExtraData(DISSOLUTION_SESSION_KEY)
+      if (!dissolutionSession) {
+        return next(new Error('No dissolution session data available'))
+      }
+      const companyNumber: Optional<string> = dissolutionSession!.companyNumber
+      if (!companyNumber) {
+        return next(new Error('No Company Number in session'))
+      }
       const signInInfo: ISignInInfo = req.session!.get<ISignInInfo>(SessionKey.SignInInfo) || {}
       if (isAuthorisedForCompany(signInInfo, companyNumber)) {
         logger.info(`User is authenticated for ${companyNumber}`)
@@ -38,7 +46,7 @@ export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: 
       } else {
         logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
         return res.redirect(
-          await getAuthRedirectUri(req, authConfig, companyNumber))
+          await getAuthRedirectUri(req, authConfig, encryptionService, companyNumber))
       }
     } else {
       return next(new Error('No session present for company auth filter'))
@@ -50,45 +58,31 @@ function isAuthorisedForCompany(signInInfo: ISignInInfoWithCompanyNumber, compan
   return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
 }
 
-function getCompanyNumberFromPath(path: string): string {
-  const regexPattern = /company=([0-9a-zA-Z]{8})/
-
-  const found = path.match(regexPattern)
-  if (found) {
-    return found[1]
-  } else {
-    return ''
-  }
-}
-
-async function getAuthRedirectUri(req: Request, authConfig: AuthConfig, companyNumber?: string,): Promise<string> {
+async function getAuthRedirectUri(req: Request, authConfig: AuthConfig,
+                                  encryptionService: JwtEncryptionService, companyNumber?: string): Promise<string> {
   const originalUrl = req.originalUrl
 
-  let scope = ''
+  const scope = OATH_SCOPE_PREFIX + companyNumber
 
-  if (companyNumber != null) {
-    scope = OATH_SCOPE_PREFIX + companyNumber
-  }
-  const nonce = generateNonce()
+  const nonce = encryptionService.generateNonce()
+  const encodedNonce = await encryptionService.jweEncodeWithNonce(originalUrl, nonce)
 
   const mutableSession = req.session as Mutable<Session>
   mutableSession.data[SessionKey.OAuth2Nonce] = nonce
   req.session = mutableSession as Session
 
-  return await createAuthUri(originalUrl, nonce, authConfig, scope)
+  return await createAuthUri(encodedNonce, authConfig, scope)
 }
 
-async function createAuthUri(originalUri: string, nonce: string,
-                             authConfig: AuthConfig, scope?: string): Promise<string> {
+async function createAuthUri(encodedNonce: string,
+                             authConfig: AuthConfig, scope: string): Promise<string> {
   let authUri = `${authConfig.accountUrl}/oauth2/authorise`.concat('?',
     'client_id=', `${authConfig.accountClientId}`,
     '&redirect_uri=', `${authConfig.chsUrl}/oauth2/user/callback`,
     '&response_type=code')
 
-  if (scope != null) {
-    authUri = authUri.concat('&scope=', scope)
-  }
-
-  authUri = authUri.concat('&state=', await jweEncodeWithNonce(originalUri, nonce, authConfig))
+  authUri = authUri
+    .concat('&scope=', scope)
+    .concat('&state=', encodedNonce)
   return authUri
 }

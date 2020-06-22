@@ -12,6 +12,7 @@ import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
 import CompanyAuthMiddleware, { AuthConfig } from 'app/middleware/companyAuth.middleware'
 import Optional from 'app/models/optional'
+import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
 import TYPES from 'app/types'
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from 'app/utils/env.util'
 import UriFactory from 'app/utils/uri.factory'
@@ -53,7 +54,7 @@ export function initContainer(): Container {
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(cookieConfig, authConfig, logger))
+    CompanyAuthMiddleware(cookieConfig, authConfig, new JwtEncryptionService(authConfig), logger))
 
 
   container.load(buildProviderModule())
