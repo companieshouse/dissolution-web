@@ -13,7 +13,7 @@ import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectDirector.controller'
-import SelectDirectorFormModel from 'app/models/forms/selectDirector.model'
+import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'

@@ -1,7 +1,7 @@
 import { ValidationResult } from '@hapi/joi'
 import { assert } from 'chai'
 
-import { FormFormModel } from 'app/models/forms/form.model'
+import { FormFormModel } from 'app/models/form/form.model'
 import formSchema from 'app/schemas/form.schema'
 
 describe('Form Schema', () => {

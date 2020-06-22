@@ -1,4 +1,4 @@
-import SelectDirectorFormModel from 'app/models/forms/selectDirector.model'
+import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 
 export default interface DissolutionSession {

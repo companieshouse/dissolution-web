@@ -2,7 +2,7 @@ import { ValidationResult } from '@hapi/joi'
 import { assert } from 'chai'
 import { generateSelectDirectorFormModel } from '../fixtures/companyOfficers.fixtures'
 
-import SelectDirectorFormModel from 'app/models/forms/selectDirector.model'
+import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import selectDirectorSchema from 'app/schemas/selectDirector.schema'
 
 describe('Select Director Schema', () => {

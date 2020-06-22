@@ -3,7 +3,7 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
-import { FormFormModel } from 'app/models/forms/form.model'
+import { FormFormModel } from 'app/models/form/form.model'
 import Optional from 'app/models/optional'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { FORM_PAGE_URI } from 'app/paths'

@@ -3,7 +3,7 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
-import WhoToTellFormModel from 'app/models/forms/whoToTell.model'
+import WhoToTellFormModel from 'app/models/form/whoToTell.model'
 import Optional from 'app/models/optional'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { ROOT_URI, SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from 'app/paths'

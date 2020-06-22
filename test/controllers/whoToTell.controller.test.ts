@@ -7,7 +7,7 @@ import { deepEqual, instance, mock, when } from 'ts-mockito'
 import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/whoToTell.controller'
-import WhoToTellFormModel from 'app/models/forms/whoToTell.model'
+import WhoToTellFormModel from 'app/models/form/whoToTell.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from 'app/paths'
 import formSchema from 'app/schemas/whoToTell.schema'

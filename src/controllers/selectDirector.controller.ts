@@ -3,7 +3,7 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
-import SelectDirectorFormModel from 'app/models/forms/selectDirector.model'
+import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
