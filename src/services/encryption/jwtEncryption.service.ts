@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto'
-import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import { JWE, JWK } from 'node-jose'
 
