@@ -19,10 +19,6 @@ export interface AuthConfig {
   chsUrl: string,
 }
 
-interface ISignInInfoWithCompanyNumber extends ISignInInfo {
-  [SignInInfoKeys.CompanyNumber]?: string
-}
-
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
 export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: AuthConfig,
@@ -54,7 +50,7 @@ export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: 
   }
 }
 
-function isAuthorisedForCompany(signInInfo: ISignInInfoWithCompanyNumber, companyNumber: string): boolean {
+function isAuthorisedForCompany(signInInfo: ISignInInfo, companyNumber: string): boolean {
   return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
 }
 
