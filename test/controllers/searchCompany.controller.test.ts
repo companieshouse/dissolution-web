@@ -4,7 +4,7 @@ import { assert } from 'chai'
 import { Application } from 'express'
 import { OK } from 'http-status-codes'
 import request from 'supertest'
-import { createApp } from './application.factory'
+import { createApp } from './helpers/application.factory'
 
 import ValidationErrors from 'app/models/validationErrors'
 import SearchCompanyFormModel from 'app/models/searchCompany.model'

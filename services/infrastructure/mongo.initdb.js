@@ -161,51 +161,191 @@ db.company_profile.insert({
 db = db.getSiblingDB('appointments')
 
 db.appointments.insert({
-  "_id":"hrFCOJq1nFmw098EXHEjoznA4K0",
-  "internal_id":"12346939",
-  "data":{
-     "updated_at":1432503011000,
-     "links":{
-        "officer":{
-           "appointments":"/officers/J18mXSM4WHz7Ms7st0guroWwJRM/appointments",
-           "self":"/officers/J18mXSM4WHz7Ms7st0guroWwJRM"
-        },
-        "self":"/company/01777777/appointments/hrFCOJq1nFmw098EXHEjoznA4K0"
-     },
-     "is_pre_1992_appointment":true,
-     "etag":"015ab53552e02f53c8d92e50a678d30628256e73",
-     "appointed_before":"1992-07-31",
-     "forename":"Michael",
-     "nationality":"British",
-     "surname":"ANGUS",
-     "date_of_birth":-1251590400000,
-     "resigned_on":963273600000,
-     "title":"Sir",
-     "other_forenames":"Richardson",
-     "officer_role":"director",
-     "occupation":"Chairman Unilever",
-     "company_number":"01777777",
-     "service_address":{
-        "region":"Gloucestershire",
-        "postal_code":"GL7 7BX",
-        "locality":"Cirencester",
-        "address_line_2":"North Cerney",
-        "address_line_1":"Cerney House"
-     }
-  },
-  "appointment_id":"hrFCOJq1nFmw098EXHEjoznA4K0",
-  "officer_id":"J18mXSM4WHz7Ms7st0guroWwJRM",
-  "updated":{
-     "at":1433406704142
-  },
-  "delta_at":"20150524213011092709",
-  "created":{
-     "at":1433406704142
-  },
-  "officer_role_sort_order":200,
-  "company_name":"BRITISH AIRWAYS PLC",
-  "company_number":"01777777",
-  "company_status":"active"
+   "_id": "app1",
+   "internal_id": "12346939",
+   "data": {
+      "updated_at": 1432503011000,
+      "links": {
+         "officer": {
+            "appointments": "/officers/resignedOfficer1/appointments",
+            "self": "/officers/resignedOfficer1"
+         },
+         "self": "/company/01777777/appointments/app1"
+      },
+      "is_pre_1992_appointment": true,
+      "etag": "015ab53552e02f53c8d92e50a678d30628256e73",
+      "appointed_before": "1992-07-31",
+      "forename": "Michael",
+      "nationality": "British",
+      "surname": "ANGUS",
+      "date_of_birth": -1251590400000,
+      "resigned_on": 963273600000,
+      "title": "Sir",
+      "other_forenames": "Richardson",
+      "officer_role": "director",
+      "occupation": "Chairman Unilever",
+      "company_number": "01777777",
+      "service_address": {
+         "region": "Gloucestershire",
+         "postal_code": "GL7 7BX",
+         "locality": "Cirencester",
+         "address_line_2": "North Cerney",
+         "address_line_1": "Cerney House"
+      }
+   },
+   "appointment_id": "app1",
+   "officer_id": "resignedOfficer1",
+   "updated": {
+      "at": 1433406704142
+   },
+   "delta_at": "20150524213011092709",
+   "created": {
+      "at": 1433406704142
+   },
+   "officer_role_sort_order": 200,
+   "company_name": "BRITISH AIRWAYS PLC",
+   "company_number": "01777777",
+   "company_status": "active"
+})
+
+db.appointments.insert({
+   "_id": "app2",
+   "internal_id": "12346939",
+   "data": {
+      "updated_at": 1432503011000,
+      "links": {
+         "officer": {
+            "appointments": "/officers/activeOfficer1/appointments",
+            "self": "/officers/activeOfficer1"
+         },
+         "self": "/company/01777777/appointments/app2"
+      },
+      "is_pre_1992_appointment": true,
+      "etag": "015ab53552e02f53c8d92e50a678d30628256e73",
+      "appointed_before": "1992-07-31",
+      "forename": "John",
+      "nationality": "British",
+      "surname": "DOE",
+      "date_of_birth": -1251590400000,
+      "other_forenames": "James",
+      "officer_role": "director",
+      "occupation": "Chairman Unilever",
+      "company_number": "01777777",
+      "service_address": {
+         "region": "Gloucestershire",
+         "postal_code": "GL7 7BX",
+         "locality": "Cirencester",
+         "address_line_2": "North Cerney",
+         "address_line_1": "Cerney House"
+      }
+   },
+   "appointment_id": "app2",
+   "officer_id": "activeOfficer1",
+   "updated": {
+      "at": 1433406704142
+   },
+   "delta_at": "20150524213011092709",
+   "created": {
+      "at": 1433406704142
+   },
+   "officer_role_sort_order": 200,
+   "company_name": "BRITISH AIRWAYS PLC",
+   "company_number": "01777777",
+   "company_status": "active"
+})
+
+db.appointments.insert({
+   "_id": "app3",
+   "internal_id": "12346939",
+   "data": {
+      "updated_at": 1432503011000,
+      "links": {
+         "officer": {
+            "appointments": "/officers/activeOfficer2/appointments",
+            "self": "/officers/activeOfficer2"
+         },
+         "self": "/company/01777777/appointments/app3"
+      },
+      "is_pre_1992_appointment": true,
+      "etag": "015ab53552e02f53c8d92e50a678d30628256e73",
+      "appointed_before": "1992-07-31",
+      "forename": "Jane",
+      "nationality": "British",
+      "surname": "SMITH",
+      "date_of_birth": -1251590400000,
+      "title": "Miss",
+      "other_forenames": "Janet",
+      "officer_role": "director",
+      "occupation": "Chairman Unilever",
+      "company_number": "01777777",
+      "service_address": {
+         "region": "Gloucestershire",
+         "postal_code": "GL7 7BX",
+         "locality": "Cirencester",
+         "address_line_2": "North Cerney",
+         "address_line_1": "Cerney House"
+      }
+   },
+   "appointment_id": "app3",
+   "officer_id": "activeOfficer2",
+   "updated": {
+      "at": 1433406704142
+   },
+   "delta_at": "20150524213011092709",
+   "created": {
+      "at": 1433406704142
+   },
+   "officer_role_sort_order": 200,
+   "company_name": "BRITISH AIRWAYS PLC",
+   "company_number": "01777777",
+   "company_status": "active"
+})
+
+db.appointments.insert({
+   "_id": "app4",
+   "internal_id": "12346939",
+   "data": {
+      "updated_at": 1432503011000,
+      "links": {
+         "officer": {
+            "appointments": "/officers/secretary1/appointments",
+            "self": "/officers/secretary1"
+         },
+         "self": "/company/01777777/appointments/app4"
+      },
+      "is_pre_1992_appointment": true,
+      "etag": "015ab53552e02f53c8d92e50a678d30628256e73",
+      "appointed_before": "1992-07-31",
+      "forename": "Tim",
+      "nationality": "British",
+      "surname": "COOK",
+      "date_of_birth": -1251590400000,
+      "title": "Mr",
+      "other_forenames": "Bill",
+      "officer_role": "secretary",
+      "occupation": "Chairman Unilever",
+      "company_number": "01777777",
+      "service_address": {
+         "region": "Gloucestershire",
+         "postal_code": "GL7 7BX",
+         "locality": "Cirencester",
+         "address_line_2": "North Cerney",
+         "address_line_1": "Cerney House"
+      }
+   },
+   "appointment_id": "app4",
+   "officer_id": "secretary1",
+   "updated": {
+      "at": 1433406704142
+   },
+   "delta_at": "20150524213011092709",
+   "created": {
+      "at": 1433406704142
+   },
+   "officer_role_sort_order": 200,
+   "company_name": "BRITISH AIRWAYS PLC",
+   "company_number": "01777777",
+   "company_status": "active"
 })
 
 /*

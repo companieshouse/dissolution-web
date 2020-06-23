@@ -9,7 +9,7 @@ import * as path from 'path'
 import Optional from 'app/models/optional'
 import { ROOT_URI } from 'app/paths'
 import TYPES from 'app/types'
-import { addFilters } from 'app/utils/nunjucks.util'
+import { addFilters, addGlobals } from 'app/utils/nunjucks.util'
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
@@ -40,6 +40,7 @@ export default class NunjucksLoader {
     )
 
     addFilters(env)
+    addGlobals(env)
 
     this.addLocals(app)
   }

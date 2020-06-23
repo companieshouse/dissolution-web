@@ -24,7 +24,7 @@ services:
       - chs-dev
     working_dir: /app
     environment:
-      - API_URL=http://api.chs-dev:18001
+      - API_URL=http://api-ch-gov-uk:18001
       - CHS_URL=http://chs-dev
       - CDN_HOST=cdn.chs-dev
       - CACHE_SERVER=redis
