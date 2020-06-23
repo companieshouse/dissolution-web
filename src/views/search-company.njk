@@ -19,6 +19,7 @@
       href: backUri
     })
   }}
+  
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
@@ -26,34 +27,36 @@
       <h1 class="govuk-heading-xl">What is the company number?</h1>
 
       <form method="post">
-  {{
-    govukInput({
-        label: {
-            text: "This is the character 8 character reference issued by Companies House when the company was set up."
-        },
-        errorMessage: {
-            text: "Enter the reference number in the correct format"
-        } if errors.companyNumber,
-        classes: "govuk-input--width-10",
-        id: "company-number",
-        name: "companyNumber",
-        value: data.companyNumber
-    })   
-   }}
-   {{  
-     govukDetails({
-           summaryText: "Help with company number",
-           html: '<p>You can find it using the <a href="https://beta.companieshouse.gov.uk/" class="govuk-link" rel="noreferrer noopener" target="_blank">Companies House Service (opens in new tab)</a> </p>'
-     })
-  }}
-  {{ 
-     govukButton({
-           text: 'Continue',
-           attributes: {
-           id: 'submit'
+        {{
+          govukInput({
+            label: {
+              text: "This is the character 8 character reference issued by Companies House when the company was set up."
+            },
+            errorMessage: {
+              text: errors.companyNumber
+            } if errors.companyNumber,
+            classes: "govuk-input--width-10",
+            id: "company-number",
+            name: "companyNumber",
+            value: data.companyNumber
+          })   
+        }}
+
+        {{  
+          govukDetails({
+            summaryText: "Help with company number",
+            html: '<p>You can find it using the <a href="https://beta.companieshouse.gov.uk/" class="govuk-link" rel="noreferrer noopener" target="_blank">Companies House Service (opens in new tab)</a> </p>'
+          })
+        }}
+
+        {{ 
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
             }
-    }) 
-  }}
+          }) 
+        }}
       </form>
     </div>
   </div>

@@ -3,10 +3,10 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
-import DissolutionSession from 'app/models/dissolutionSession'
+import SearchCompanyFormModel from 'app/models/form/searchCompany.model'
 import Optional from 'app/models/optional'
-import SearchCompanyFormModel from 'app/models/searchCompany.model'
-import ValidationErrors from 'app/models/validationErrors'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 import { SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } from 'app/paths'
 import formSchema from 'app/schemas/searchCompany.schema'
 import CompanyService from 'app/services/company/company.service'
@@ -27,7 +27,7 @@ export class SearchCompanyController extends BaseController {
     @inject(FormValidator) private validator: FormValidator,
     @inject(CompanyService) private companyService: CompanyService,
     @inject(SessionService) private session: SessionService) {
-  super()
+    super()
   }
 
   @httpGet('')
@@ -47,6 +47,7 @@ export class SearchCompanyController extends BaseController {
     }
 
     this.updateSession(body)
+
     return this.httpContext.response.redirect(VIEW_COMPANY_INFORMATION_URI)
   }
 
