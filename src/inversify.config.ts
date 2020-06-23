@@ -54,7 +54,7 @@ export function initContainer(): Container {
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(cookieConfig, authConfig, new JwtEncryptionService(authConfig), logger))
+    CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), logger))
 
 
   container.load(buildProviderModule())

@@ -1,6 +1,5 @@
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { Session } from 'ch-node-session-handler'
-import { CookieConfig } from 'ch-node-session-handler/lib/config/CookieConfig'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInInfoKeys'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
@@ -21,20 +20,15 @@ export interface AuthConfig {
 
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
-export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: AuthConfig,
+export default function CompanyAuthMiddleware(authConfig: AuthConfig,
                                               encryptionService: JwtEncryptionService,
                                               logger: ApplicationLogger): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const cookieId: Optional<string> = req.cookies[config.cookieName]
-    if (cookieId) {
       const dissolutionSession: Optional<DissolutionSession> = req.session!.getExtraData(DISSOLUTION_SESSION_KEY)
-      if (!dissolutionSession) {
-        return next(new Error('No dissolution session data available'))
-      }
-      const companyNumber: Optional<string> = dissolutionSession!.companyNumber
-      if (!companyNumber) {
+      if (!dissolutionSession?.companyNumber) {
         return next(new Error('No Company Number in session'))
       }
+      const companyNumber: Optional<string> = dissolutionSession!.companyNumber
       const signInInfo: ISignInInfo = req.session!.get<ISignInInfo>(SessionKey.SignInInfo) || {}
       if (isAuthorisedForCompany(signInInfo, companyNumber)) {
         logger.info(`User is authenticated for ${companyNumber}`)
@@ -44,9 +38,6 @@ export default function CompanyAuthMiddleware(config: CookieConfig, authConfig: 
         return res.redirect(
           await getAuthRedirectUri(req, authConfig, encryptionService, companyNumber))
       }
-    } else {
-      return next(new Error('No session present for company auth filter'))
-    }
   }
 }
 
