@@ -32,11 +32,11 @@
           },
           errorMessage: {
            text: "Enter the reference number in the correct format"
-            } if errors.event-name,
+            } if errors.companyNumber,
              classes: "govuk-input--width-10",
-             id: "exceeding-characters",
-             name: "event-name",
-             length: 8
+             id: "company-number",
+             name: "companyNumber",
+             value: data.companyNumber
           })   
         }}
         {{ govukDetails({

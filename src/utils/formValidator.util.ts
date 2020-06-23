@@ -18,7 +18,7 @@ export default class FormValidator {
     if (!result.error) {
       return null
     }
-
+    console.log(JSON.stringify(result.error.details, null, 2))
     return this.mapJoiErrorsToValidationErrors(result.error!.details)
   }
 

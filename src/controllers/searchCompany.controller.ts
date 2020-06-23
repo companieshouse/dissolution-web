@@ -1,15 +1,18 @@
 import { BAD_REQUEST, OK } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
-import BaseController from 'app/controllers/base.controller'
 
+import BaseController from 'app/controllers/base.controller'
 import Optional from 'app/models/optional'
+import SearchCompanyFormModel from 'app/models/searchCompany.model'
 import ValidationErrors from 'app/models/validationErrors'
 import { SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } from 'app/paths'
 import formSchema from 'app/schemas/searchCompany.schema'
-import FormValidator from 'app/utils/formValidator.util'
+import CompanyService from 'app/services/company/company.service'
+import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
-import SearchCompanyFormModel from 'app/models/searchCompany.model'
+import FormValidator from 'app/utils/formValidator.util'
+import DissolutionSession from 'app/models/dissolutionSession'
 
 interface ViewModel {
   backUri?: string
@@ -20,9 +23,11 @@ interface ViewModel {
 @controller(SEARCH_COMPANY_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
 export class SearchCompanyController extends BaseController {
 
-  public constructor(@inject(FormValidator) private validator: FormValidator) {
+  public constructor(@inject(FormValidator) private validator: FormValidator,
+                     @inject(CompanyService) private companyService: CompanyService,
+                     @inject(SessionService) private session: SessionService) {
   super()
-}
+  }
 
   @httpGet('')
   public async get(): Promise<string> {
@@ -34,9 +39,13 @@ export class SearchCompanyController extends BaseController {
     const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
     if (errors) {
       return this.renderView(body, errors)
-    }
+  }
 
-    this.httpContext.response.redirect(VIEW_COMPANY_INFORMATION_URI)
+    if (!await this.doesCompanyExist(body.companyNumber!)) {
+      return this.renderView(body, { companyNumber : 'Company Number does not exist'})
+    }
+    this.updateSession(body)
+    return this.httpContext.response.redirect(VIEW_COMPANY_INFORMATION_URI)
   }
 
   private async renderView(data?: SearchCompanyFormModel, errors?: ValidationErrors): Promise<string> {
@@ -46,6 +55,19 @@ export class SearchCompanyController extends BaseController {
       errors
     }
 
-    return super.render('search-company-information', viewModel, errors ? BAD_REQUEST : OK)
+    return super.render('search-company', viewModel, errors ? BAD_REQUEST : OK)
+  }
+
+  private async doesCompanyExist(companyNumber: string): Promise<boolean> {
+    const token: string = this.session.getAccessToken(this.httpContext.request)
+    return this.companyService.doesCompanyExist(token, companyNumber)
+  }
+
+  private updateSession(body: SearchCompanyFormModel): void {
+    const updatedSession: DissolutionSession = {
+      ...this.session.getDissolutionSession(this.httpContext.request),
+      companyNumber: body.companyNumber!
+    }
+    this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 }

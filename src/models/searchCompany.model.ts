@@ -1,3 +1,3 @@
 export default interface SearchCompanyFormModel {
-    companyNumberField?: string
+    companyNumber?: string
   }
