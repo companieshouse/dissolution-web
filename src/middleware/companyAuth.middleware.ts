@@ -6,9 +6,9 @@ import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionIn
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
 import { DISSOLUTION_SESSION_KEY } from 'app/constants/app.const'
-import DissolutionSession from 'app/models/dissolutionSession'
 import { Mutable } from 'app/models/mutable'
 import Optional from 'app/models/optional'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
 
 export interface AuthConfig {

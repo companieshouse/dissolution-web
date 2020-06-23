@@ -4,15 +4,15 @@ import { CompanyProfile } from 'ch-sdk-node/dist/services/company-profile/types'
 import Resource from 'ch-sdk-node/dist/services/resource'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
-import APIClient from '../clients/api.client'
+import APIClientFactory from './apiClient.factory'
 
 @provide(CompanyProfileClient)
 export default class CompanyProfileClient {
 
-  public constructor(@inject(APIClient) private client: APIClient) {}
+  public constructor(@inject(APIClientFactory) private factory: APIClientFactory) {}
 
   public async getCompanyProfile(token: string, companyNumber: string): Promise<Resource<CompanyProfile>> {
-    return this.client
+    return this.factory
       .getCompanyProfileService(token)
       .getCompanyProfile(companyNumber)
   }

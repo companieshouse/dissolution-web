@@ -9,7 +9,7 @@ import sinon from 'sinon'
 import { mock } from 'ts-mockito'
 
 import CompanyAuthMiddleware, { AuthConfig } from 'app/middleware/companyAuth.middleware'
-import DissolutionSession from 'app/models/dissolutionSession'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
 
 import { generateRequest } from 'test/fixtures/http.fixtures'

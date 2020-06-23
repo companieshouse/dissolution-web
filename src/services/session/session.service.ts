@@ -7,14 +7,18 @@ import { Request } from 'express'
 import { provide } from 'inversify-binding-decorators'
 
 import { DISSOLUTION_SESSION_KEY } from 'app/constants/app.const'
-import DissolutionSession from 'app/models/dissolutionSession'
 import Optional from 'app/models/optional'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 @provide(SessionService)
 export default class SessionService {
 
   public getAccessToken(req: Request): string {
-    return req.session!.get<ISignInInfo>(SessionKey.SignInInfo)!.access_token!.access_token!
+    return this.getSignInInfo(req).access_token!.access_token!
+  }
+
+  public getUserEmail(req: Request): string {
+    return this.getSignInInfo(req).user_profile!.email!
   }
 
   public getDissolutionSession(req: Request): Optional<DissolutionSession> {
@@ -23,5 +27,9 @@ export default class SessionService {
 
   public setDissolutionSession(req: Request, updatedSession: DissolutionSession): void {
     req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
+  }
+
+  private getSignInInfo(req: Request): ISignInInfo {
+    return req.session!.get<ISignInInfo>(SessionKey.SignInInfo)!
   }
 }
