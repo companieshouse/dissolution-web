@@ -43,7 +43,7 @@ export class SearchCompanyController extends BaseController {
     }
 
     if (!await this.doesCompanyExist(body.companyNumber!)) {
-      return this.renderView(body, { companyNumber : 'Company Number does not exist'})
+      return this.renderView(body, { companyNumber : 'Company number does not exist or is incorrect' })
     }
 
     this.updateSession(body)

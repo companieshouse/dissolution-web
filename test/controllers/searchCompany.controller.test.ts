@@ -95,7 +95,7 @@ describe('SearchCompanyController', () => {
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'What is the company number?'))
       assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
-      assert.isTrue(htmlAssertHelper.containsText('#company-number-error', 'Company Number does not exist'))
+      assert.isTrue(htmlAssertHelper.containsText('#company-number-error', 'Company number does not exist or is incorrect'))
     })
 
     it('should save the company number in session if company exists', async () => {
