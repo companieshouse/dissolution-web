@@ -2,7 +2,7 @@ import { assert } from 'chai'
 import { generateDirectorDetails } from '../fixtures/companyOfficers.fixtures'
 
 import { asSelectDirectorList, GovUKRadio, GovUKRadioDivider } from 'app/filters/asSelectDirectorList.filter'
-import DirectorDetails from 'app/models/directorDetails.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 
 describe('asSelectDirectorList', () => {
   it('should create a radio button for each director, then a divider, then a default', () => {

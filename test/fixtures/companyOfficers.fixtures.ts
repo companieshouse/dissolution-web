@@ -2,8 +2,8 @@ import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Iden
 import Resource from 'ch-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
-import DirectorDetails from 'app/models/directorDetails.model'
-import SelectDirectorFormModel from 'app/models/selectDirector.model'
+import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
   return {

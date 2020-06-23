@@ -7,7 +7,7 @@ import { provide } from 'inversify-binding-decorators'
 import CompanyOfficersClient from '../clients/companyOfficers.client'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
-import DirectorDetails from 'app/models/directorDetails.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 
 @provide(CompanyOfficersService)
 export default class CompanyOfficersService {

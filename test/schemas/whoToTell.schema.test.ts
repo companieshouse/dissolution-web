@@ -1,7 +1,7 @@
 import { ValidationResult } from '@hapi/joi'
 import { assert } from 'chai'
 
-import WhoToTellFormModel from 'app/models/whoToTell.model'
+import WhoToTellFormModel from 'app/models/form/whoToTell.model'
 import formSchema from 'app/schemas/whoToTell.schema'
 
 describe('Who To Tell Schema', () => {

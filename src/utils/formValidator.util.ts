@@ -2,7 +2,7 @@ import { AnySchema, ValidationErrorItem, ValidationOptions, ValidationResult } f
 import { provide } from 'inversify-binding-decorators'
 
 import Optional from 'app/models/optional'
-import ValidationErrors from 'app/models/validationErrors'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 
 @provide(FormValidator)
 export default class FormValidator {
