@@ -5,7 +5,7 @@ import { VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import TYPES from 'app/types'
 
 @controller(VIEW_COMPANY_INFORMATION_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
-export class SearchCompanyController extends BaseController {
+export class ViewCompanyInformationController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {

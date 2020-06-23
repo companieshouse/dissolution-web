@@ -3,6 +3,7 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
+import DissolutionSession from 'app/models/dissolutionSession'
 import Optional from 'app/models/optional'
 import SearchCompanyFormModel from 'app/models/searchCompany.model'
 import ValidationErrors from 'app/models/validationErrors'
@@ -12,7 +13,6 @@ import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
-import DissolutionSession from 'app/models/dissolutionSession'
 
 interface ViewModel {
   backUri?: string
@@ -23,15 +23,16 @@ interface ViewModel {
 @controller(SEARCH_COMPANY_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
 export class SearchCompanyController extends BaseController {
 
-  public constructor(@inject(FormValidator) private validator: FormValidator,
-                     @inject(CompanyService) private companyService: CompanyService,
-                     @inject(SessionService) private session: SessionService) {
+  public constructor(
+    @inject(FormValidator) private validator: FormValidator,
+    @inject(CompanyService) private companyService: CompanyService,
+    @inject(SessionService) private session: SessionService) {
   super()
   }
 
   @httpGet('')
   public async get(): Promise<string> {
-    return super.render('search-company')
+    return this.renderView()
   }
 
   @httpPost('')
@@ -39,11 +40,12 @@ export class SearchCompanyController extends BaseController {
     const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
     if (errors) {
       return this.renderView(body, errors)
-  }
+    }
 
     if (!await this.doesCompanyExist(body.companyNumber!)) {
       return this.renderView(body, { companyNumber : 'Company Number does not exist'})
     }
+
     this.updateSession(body)
     return this.httpContext.response.redirect(VIEW_COMPANY_INFORMATION_URI)
   }
