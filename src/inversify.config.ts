@@ -10,9 +10,11 @@ import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
-import CompanyAuthMiddleware, { AuthConfig } from 'app/middleware/companyAuth.middleware'
+import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
+import AuthConfig from 'app/models/authConfig'
 import Optional from 'app/models/optional'
 import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
+import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from 'app/utils/env.util'
 import UriFactory from 'app/utils/uri.factory'
@@ -42,6 +44,8 @@ export function initContainer(): Container {
   const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow('CACHE_SERVER')}`))
   container.bind(SessionStore).toConstantValue(sessionStore)
   container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(cookieConfig, sessionStore))
+
+  // Auth
   container.bind(TYPES.AuthMiddleware).toConstantValue(AuthMiddleware(
     getEnvOrThrow('CHS_URL'),
     new UriFactory(),
@@ -54,8 +58,7 @@ export function initContainer(): Container {
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), logger))
-
+    CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), new SessionService(), logger))
 
   container.load(buildProviderModule())
 

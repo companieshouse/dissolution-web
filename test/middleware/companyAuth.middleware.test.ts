@@ -1,16 +1,19 @@
 import 'reflect-metadata'
 
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
+import { Session } from 'ch-node-session-handler'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { assert } from 'chai'
 import { RequestHandler, Response } from 'express'
 import sinon from 'sinon'
-import { mock } from 'ts-mockito'
+import { anything, instance, mock, when } from 'ts-mockito'
 
-import CompanyAuthMiddleware, { AuthConfig } from 'app/middleware/companyAuth.middleware'
+import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
+import AuthConfig from 'app/models/authConfig'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
+import SessionService from 'app/services/session/session.service'
 
 import { generateRequest } from 'test/fixtures/http.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
@@ -20,24 +23,31 @@ describe('AuthMiddleware', () => {
   let middleware: RequestHandler
 
   let encryptionService: JwtEncryptionService
+  let sessionService: SessionService
   let logger: ApplicationLogger
   let authConfig: AuthConfig
 
-  const COMPANY_NUMBER = '12345678'
-
   beforeEach(() => {
     encryptionService = mock(JwtEncryptionService)
+    sessionService = mock(SessionService)
     logger = mock(ApplicationLogger)
 
+    when(sessionService.getSession(anything())).thenReturn(
+      {
+        data:
+          {
+            [SessionKey.OAuth2Nonce]: ''
+          }
+      } as Session)
     authConfig = {
-      chsUrl: '',
-      accountClientId: '',
+      chsUrl: 'http://chs-dev',
+      accountClientId: '123456.gov.uk',
       accountRequestKey: 'pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=',
-      accountUrl: ''
+      accountUrl: 'http://account.chs-dev'
     }
 
     middleware = CompanyAuthMiddleware(
-      authConfig, encryptionService, logger
+      authConfig, encryptionService, instance(sessionService), logger
     )
   })
 
@@ -56,31 +66,30 @@ describe('AuthMiddleware', () => {
 
   it('should invoke next() function if user is authenticated for company number', () => {
     const signInInfo: ISignInInfo = {
-      company_number: COMPANY_NUMBER
+      company_number: '12345678'
     }
-
     const dissolutionSession: DissolutionSession = generateDissolutionSession()
-    const getExtraDataStub: sinon.SinonStub = sinon.stub().returns(dissolutionSession)
-    const getSignInInfoStub: sinon.SinonStub = sinon.stub().withArgs(SessionKey.SignInInfo).returns(signInInfo)
 
     const req = generateRequest()
-    req.session!.getExtraData = getExtraDataStub
-    req.session!.get = getSignInInfoStub
 
     const res = {} as Response
     const next = sinon.stub().withArgs()
+
+    when(sessionService.getDissolutionSession(req)).thenReturn(dissolutionSession)
+    when(sessionService.getSignInInfo(req)).thenReturn(signInInfo)
 
     middleware(req, res, next)
 
     assert.isTrue(next.calledOnce)
   })
 
-  it('should redirect if user is not authenticated for company number', async() => {
+  it('should redirect if user is not authenticated for company number', async () => {
+    const signInInfo: ISignInInfo = {
+      company_number: 'false_number'
+    }
     const dissolutionSession: DissolutionSession = generateDissolutionSession()
-    const getExtraDataStub: sinon.SinonStub = sinon.stub().returns(dissolutionSession)
 
     const req = generateRequest()
-    req.session!.getExtraData = getExtraDataStub
 
     const res = {} as Response
     const redirectStub: sinon.SinonStub = sinon.stub()
@@ -88,7 +97,14 @@ describe('AuthMiddleware', () => {
 
     const next = sinon.stub()
 
+    when(sessionService.getDissolutionSession(req)).thenReturn(dissolutionSession)
+    when(sessionService.getSignInInfo(req)).thenReturn(signInInfo)
+
     await middleware(req, res, next)
     assert.isTrue(redirectStub.calledOnce)
+
+    const redirectUrl: string = redirectStub.args[0][0]
+
+    assert.include(redirectUrl, 'http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://api.companieshouse.gov.uk/company/12345678')
   })
 })

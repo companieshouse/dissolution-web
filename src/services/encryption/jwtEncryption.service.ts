@@ -4,7 +4,8 @@ import { randomBytes } from 'crypto'
 import { provide } from 'inversify-binding-decorators'
 import { JWE, JWK } from 'node-jose'
 
-import { AuthConfig } from 'app/middleware/companyAuth.middleware'
+import AuthConfig from 'app/models/authConfig'
+
 
 interface AuthPayload {
   nonce: string,

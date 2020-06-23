@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 
 import 'ch-node-session-handler'
+import { Session } from 'ch-node-session-handler'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { Request } from 'express'
@@ -14,11 +15,11 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 export default class SessionService {
 
   public getAccessToken(req: Request): string {
-    return this.getSignInInfo(req).access_token!.access_token!
+    return this.getSignInInfo(req)!.access_token!.access_token!
   }
 
   public getUserEmail(req: Request): string {
-    return this.getSignInInfo(req).user_profile!.email!
+    return this.getSignInInfo(req)!.user_profile!.email!
   }
 
   public getDissolutionSession(req: Request): Optional<DissolutionSession> {
@@ -29,7 +30,15 @@ export default class SessionService {
     req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
   }
 
-  private getSignInInfo(req: Request): ISignInInfo {
+  public setSession(req: Request, updatedSession: Session): void {
+    req.session = updatedSession
+  }
+
+  public getSession(req: Request): Session {
+    return req.session!
+  }
+
+  public getSignInInfo(req: Request): ISignInInfo {
     return req.session!.get<ISignInInfo>(SessionKey.SignInInfo)!
   }
 }
