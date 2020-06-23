@@ -3,7 +3,7 @@ import { assert } from 'chai'
 import { generateCompanyOfficer } from '../../fixtures/companyOfficers.fixtures'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
-import DirectorDetails from 'app/models/directorDetails.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 
 describe('DirectorDetailsMapper', () => {
 

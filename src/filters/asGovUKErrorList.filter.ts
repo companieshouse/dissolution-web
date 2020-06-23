@@ -1,6 +1,6 @@
 import dashify from 'dashify'
 
-import ValidationErrors from 'app/models/validationErrors'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 
 export interface GovUKError {
   href: string

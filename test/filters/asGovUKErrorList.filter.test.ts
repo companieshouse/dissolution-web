@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 
 import { asGovUKErrorList, GovUKError } from 'app/filters/asGovUKErrorList.filter'
-import ValidationErrors from 'app/models/validationErrors'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 
 describe('asGovUKErrorListFilter', () => {
   it('should transform validationErrors object to a list of GovUKErrors', () => {

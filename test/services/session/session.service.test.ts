@@ -6,16 +6,13 @@ import sinon from 'sinon'
 import { generateRequest } from '../../fixtures/http.fixtures'
 import { generateDissolutionSession, generateISignInInfo } from '../../fixtures/session.fixtures'
 
-import DissolutionSession from 'app/models/dissolutionSession'
 import Optional from 'app/models/optional'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import SessionService from 'app/services/session/session.service'
 
 describe('SessionService', () => {
 
   let service: SessionService
-
-  const TOKEN = 'some-token'
-  const COMPANY_NUMBER = '12345678'
 
   let getSessionStub: sinon.SinonStub
 
@@ -26,6 +23,8 @@ describe('SessionService', () => {
   })
 
   describe('getAccessToken', () => {
+    const TOKEN = 'some-token'
+
     it('should retrieve the access token from the session', () => {
       const signInInfo: ISignInInfo = generateISignInInfo()
       signInInfo.access_token!.access_token = TOKEN
@@ -39,10 +38,25 @@ describe('SessionService', () => {
     })
   })
 
+  describe('getUserEmail', () => {
+    const EMAIL = 'some@mail.com'
+
+    it(`should retrieve the logged in users email from the session`, () => {
+      const signInInfo: ISignInInfo = generateISignInInfo()
+      signInInfo.user_profile!.email = EMAIL
+
+      const req: Request = generateRequest()
+      req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(signInInfo)
+
+      const result: string = service.getUserEmail(req)
+
+      assert.equal(result, EMAIL)
+    })
+  })
+
   describe('getDissolutionSession', () => {
     it('should retrieve the dissolution object from the session', () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
-      dissolutionSession.companyNumber = COMPANY_NUMBER
 
       const req: Request = generateRequest()
       req.session!.getExtraData = getSessionStub.withArgs('dissolution').returns(dissolutionSession)
@@ -56,7 +70,6 @@ describe('SessionService', () => {
   describe('setDissolutionSession', () => {
     it('should set the dissolution object in the session', () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
-      dissolutionSession.companyNumber = COMPANY_NUMBER
 
       const req: Request = generateRequest()
 

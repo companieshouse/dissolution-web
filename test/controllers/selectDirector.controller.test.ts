@@ -13,9 +13,9 @@ import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectDirector.controller'
-import DissolutionSession from 'app/models/dissolutionSession'
-import SelectDirectorFormModel from 'app/models/selectDirector.model'
-import ValidationErrors from 'app/models/validationErrors'
+import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import selectDirectorSchema from 'app/schemas/selectDirector.schema'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
@@ -30,6 +30,10 @@ describe('SelectDirectorController', () => {
 
   const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
+
+  const DIRECTOR_1_ID = '123'
+  const DIRECTOR_2_ID = '456'
+  const NOT_A_DIRECTOR_ID = 'other'
 
   let dissolutionSession: DissolutionSession
 
@@ -47,8 +51,8 @@ describe('SelectDirectorController', () => {
     it('should render the select director page with the relevant options', async () => {
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' },
-        { ...generateDirectorDetails(), id: '456' }
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
       ])
 
       const app = createApp(container => {
@@ -63,18 +67,18 @@ describe('SelectDirectorController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Which director are you?'))
-      assert.equal(htmlAssertHelper.getValue('#select-director'), '123')
-      assert.equal(htmlAssertHelper.getValue('#select-director-2'), '456')
-      assert.equal(htmlAssertHelper.getValue('#select-director-4'), 'other')
+      assert.equal(htmlAssertHelper.getValue('#select-director'), DIRECTOR_1_ID)
+      assert.equal(htmlAssertHelper.getValue('#select-director-2'), DIRECTOR_2_ID)
+      assert.equal(htmlAssertHelper.getValue('#select-director-4'), NOT_A_DIRECTOR_ID)
     })
 
     it('should prepopulate the select director page with the selected director from session', async () => {
-      dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel('456')
+      dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel(DIRECTOR_2_ID)
 
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' },
-        { ...generateDirectorDetails(), id: '456' }
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
       ])
 
       const app = createApp(container => {
@@ -102,8 +106,8 @@ describe('SelectDirectorController', () => {
       const error: ValidationErrors = generateValidationError('director', 'some director error')
 
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' },
-        { ...generateDirectorDetails(), id: '456' }
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
       ])
       when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(error)
 
@@ -124,117 +128,182 @@ describe('SelectDirectorController', () => {
       assert.isTrue(htmlAssertHelper.containsText('#select-director-error', 'some director error'))
     })
 
-    it('should store the form in session if validation passes', async () => {
-      const form: SelectDirectorFormModel = generateSelectDirectorFormModel('123')
+    describe('session', () => {
+      it('should store the form in session if validation passes', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
 
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' }
-      ])
-      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
+
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+
+        verify(session.setDissolutionSession(anything(), anything())).once()
+
+        const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+        const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+        assert.deepEqual(updatedSession.selectDirectorForm, form)
       })
 
-      await request(app)
-        .post(SELECT_DIRECTOR_URI)
-        .send(form)
-        .expect(MOVED_TEMPORARILY)
+      it('should store the director details and email if applicant is a director', async () => {
+        const directorName: string = 'Some Director'
+        const directorEmail: string = 'some@mail.com'
 
-      verify(session.setDissolutionSession(anything(), anything())).once()
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
 
-      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID, name: directorName }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(session.getUserEmail(anything())).thenReturn(directorEmail)
 
-      assert.deepEqual(updatedSession.selectDirectorForm, form)
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
+
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+
+        verify(session.setDissolutionSession(anything(), anything())).once()
+
+        const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+        const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+        assert.equal(updatedSession.directorsToSign!.length, 1)
+        assert.equal(updatedSession.directorsToSign![0].id, DIRECTOR_1_ID)
+        assert.equal(updatedSession.directorsToSign![0].name, directorName)
+        assert.equal(updatedSession.directorsToSign![0].email, directorEmail)
+      })
+
+      it('should not store the director details if applicant is not a director', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
+
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
+
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+
+        verify(session.setDissolutionSession(anything(), anything())).once()
+
+        const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+        const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+        assert.isEmpty(updatedSession.directorsToSign)
+      })
     })
 
-    it('should redirect to check your answers if company is single director and director is selected', async () => {
-      const form: SelectDirectorFormModel = generateSelectDirectorFormModel('123')
+    describe('redirect', () => {
+      it('should redirect to check your answers if company is single director and director is selected', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
 
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' }
-      ])
-      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
+
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+          .expect('Location', CHECK_YOUR_ANSWERS_URI)
       })
 
-      await request(app)
-        .post(SELECT_DIRECTOR_URI)
-        .send(form)
-        .expect(MOVED_TEMPORARILY)
-        .expect('Location', CHECK_YOUR_ANSWERS_URI)
-    })
+      it('should redirect to signatory info if company is single director and director is not selected', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
 
-    it('should redirect to signatory info if company is single director and director is not selected', async () => {
-      const form: SelectDirectorFormModel = generateSelectDirectorFormModel('other')
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' }
-      ])
-      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
 
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+          .expect('Location', DEFINE_SIGNATORY_INFO_URI)
       })
 
-      await request(app)
-        .post(SELECT_DIRECTOR_URI)
-        .send(form)
-        .expect(MOVED_TEMPORARILY)
-        .expect('Location', DEFINE_SIGNATORY_INFO_URI)
-    })
+      it('should redirect to select signatories if company is multi director and director is selected', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
 
-    it('should redirect to select signatories if company is multi director and director is selected', async () => {
-      const form: SelectDirectorFormModel = generateSelectDirectorFormModel('123')
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+          { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' },
-        { ...generateDirectorDetails(), id: '456' }
-      ])
-      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
 
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+          .expect('Location', SELECT_SIGNATORIES_URI)
       })
 
-      await request(app)
-        .post(SELECT_DIRECTOR_URI)
-        .send(form)
-        .expect(MOVED_TEMPORARILY)
-        .expect('Location', SELECT_SIGNATORIES_URI)
-    })
+      it('should redirect to select signatories if company is multi director and director is not selected', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
 
-    it('should redirect to select signatories if company is multi director and director is not selected', async () => {
-      const form: SelectDirectorFormModel = generateSelectDirectorFormModel('other')
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+          { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: '123' },
-        { ...generateDirectorDetails(), id: '456' }
-      ])
-      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
 
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+          .expect('Location', SELECT_SIGNATORIES_URI)
       })
-
-      await request(app)
-        .post(SELECT_DIRECTOR_URI)
-        .send(form)
-        .expect(MOVED_TEMPORARILY)
-        .expect('Location', SELECT_SIGNATORIES_URI)
     })
   })
 })

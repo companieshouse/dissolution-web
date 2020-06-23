@@ -7,7 +7,7 @@ import { deepEqual, instance, mock, when } from 'ts-mockito'
 import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/form.controller'
-import ValidationErrors from 'app/models/validationErrors'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 import { FORM_PAGE_URI } from 'app/paths'
 import formSchema from 'app/schemas/form.schema'
 import FormValidator from 'app/utils/formValidator.util'
