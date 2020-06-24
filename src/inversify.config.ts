@@ -54,7 +54,7 @@ export function initContainer(): Container {
   const authConfig: AuthConfig = {
     accountUrl: getEnvOrThrow('ACCOUNT_URL'),
     accountRequestKey: getEnvOrThrow('OAUTH2_REQUEST_KEY'),
-    accountClientId: getEnvOrThrow('ACCOUNT_CH_CLIENT_ID'),
+    accountClientId: getEnvOrThrow('OAUTH2_CH_CLIENT_ID'),
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
