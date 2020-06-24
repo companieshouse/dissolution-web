@@ -1,29 +1,52 @@
 {% extends 'layout.njk' %}
 
 {% from 'govuk/components/back-link/macro.njk'     import govukBackLink %}
-{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
-{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/summary-list/macro.njk"  import govukSummaryList %}
 
 
 {% block pageTitle %}
   Check your answers
 {% endblock %}
 
-{% block backLink %}
+{% block content %}
   {{ govukBackLink({
     text: 'Back',
     href: Paths.SELECT_DIRECTOR_URI
   }) }}
-{% endblock %}
-
-{% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-
-      {% include 'components/errors/error-summary.njk' %}
-
-      <h2 class="govuk-heading-l">Robin Smith</h2>
+      <h1 class="govuk-heading-xl">Check your answers</h1>
+      {% for director in directors %}
+        <h2 class="govuk-heading-m">{{ director.name }}</h2>
+        {{ 
+          govukSummaryList({
+            classes: 'govuk-!-margin-bottom-0',
+            attributes: { id: 'director-details' },
+            rows: [
+              {
+                key: {
+                  text: "Will sign"
+                },
+                value: {
+                  text: director.isDirectorSigning
+                },
+                classes: "director-signing"
+              },
+              {
+                key: {
+                  text: "Email address"
+                },
+                value: {
+                  text: director.email
+                },
+                classes: "director-email"
+              }
+            ]
+          })
+        }}
+        <p class="govuk-!-margin-bottom-9"><a class="govuk-link" href="{{ Paths.SELECT_DIRECTOR_URI }}">Change</a></p>
+      {% endfor %}
 
       <form method="post">
         {{ govukButton({
