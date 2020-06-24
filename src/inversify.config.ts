@@ -53,7 +53,7 @@ export function initContainer(): Container {
   ))
   const authConfig: AuthConfig = {
     accountUrl: getEnvOrThrow('ACCOUNT_URL'),
-    accountRequestKey: getEnvOrThrow('ACCOUNT_OAUTH2_REQUEST_KEY'),
+    accountRequestKey: getEnvOrThrow('OAUTH2_REQUEST_KEY'),
     accountClientId: getEnvOrThrow('ACCOUNT_CH_CLIENT_ID'),
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
