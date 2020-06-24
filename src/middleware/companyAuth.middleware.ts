@@ -1,15 +1,12 @@
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { Session } from 'ch-node-session-handler'
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInInfoKeys'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
 import AuthConfig from 'app/models/authConfig'
-import { Mutable } from 'app/models/mutable'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
+import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
 import SessionService from 'app/services/session/session.service'
 
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
@@ -51,9 +48,7 @@ async function getAuthRedirectUri(req: Request, authConfig: AuthConfig,
   const nonce: string = encryptionService.generateNonce()
   const encodedNonce: string = await encryptionService.jweEncodeWithNonce(originalUrl, nonce)
 
-  const mutableSession = sessionService.getSession(req) as Mutable<Session>
-  mutableSession.data[SessionKey.OAuth2Nonce] = nonce
-  sessionService.setSession(req, mutableSession as Session)
+  sessionService.setCompanyAuthNonce(req, nonce)
 
   return await createAuthUri(encodedNonce, authConfig, scope)
 }

@@ -2,7 +2,6 @@ import 'reflect-metadata'
 
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { Session } from 'ch-node-session-handler'
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import { assert } from 'chai'
 import { RequestHandler, Response } from 'express'
@@ -12,11 +11,11 @@ import { anything, instance, mock, when } from 'ts-mockito'
 import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
 import AuthConfig from 'app/models/authConfig'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
+import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
 import SessionService from 'app/services/session/session.service'
 
 import { generateRequest } from 'test/fixtures/http.fixtures'
-import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
+import { generateDissolutionSession, generateSession } from 'test/fixtures/session.fixtures'
 
 describe('AuthMiddleware', () => {
 
@@ -26,19 +25,16 @@ describe('AuthMiddleware', () => {
   let sessionService: SessionService
   let logger: ApplicationLogger
   let authConfig: AuthConfig
+  let session: Session
 
   beforeEach(() => {
     encryptionService = mock(JwtEncryptionService)
     sessionService = mock(SessionService)
     logger = mock(ApplicationLogger)
+    session = generateSession()
 
-    when(sessionService.getSession(anything())).thenReturn(
-      {
-        data:
-          {
-            [SessionKey.OAuth2Nonce]: ''
-          }
-      } as Session)
+    when(sessionService.getSession(anything())).thenReturn(session)
+
     authConfig = {
       chsUrl: 'http://chs-dev',
       accountClientId: '123456.gov.uk',

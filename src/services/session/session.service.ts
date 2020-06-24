@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 
 import 'ch-node-session-handler'
+import { Mutable } from 'app/models/mutable'
 import { Session } from 'ch-node-session-handler'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
@@ -40,5 +41,11 @@ export default class SessionService {
 
   public getSignInInfo(req: Request): ISignInInfo {
     return req.session!.get<ISignInInfo>(SessionKey.SignInInfo)!
+  }
+
+  public setCompanyAuthNonce(req: Request, nonce: string): void {
+    const mutableSession = req.session as Mutable<Session>
+    mutableSession.data[SessionKey.OAuth2Nonce] = nonce
+    req.session = mutableSession as Session
   }
 }

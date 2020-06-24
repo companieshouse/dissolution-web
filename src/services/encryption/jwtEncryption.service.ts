@@ -6,14 +6,13 @@ import { JWE, JWK } from 'node-jose'
 
 import AuthConfig from 'app/models/authConfig'
 
-
 interface AuthPayload {
   nonce: string,
   content: string
 }
 
 @provide(JwtEncryptionService)
-export class JwtEncryptionService {
+export default class JwtEncryptionService {
   public constructor(private authConfig: AuthConfig) {}
 
   public generateNonce(): string {

@@ -1,4 +1,5 @@
 import { Session } from 'ch-node-session-handler'
+import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import sinon from 'sinon'
 
@@ -7,7 +8,9 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 export function generateSession(): Session {
   return {
     get: sinon.stub(),
-    data: {},
+    data: {
+      [SessionKey.OAuth2Nonce]: ''
+    },
     getExtraData: sinon.stub(),
     setExtraData: sinon.stub(),
     deleteExtraData: sinon.stub(),

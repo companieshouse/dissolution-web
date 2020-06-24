@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 
-import { JwtEncryptionService } from 'app/services/encryption/jwtEncryption.service'
+import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
 
 describe('JwtEncryptionService', () => {
   let service: JwtEncryptionService
