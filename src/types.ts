@@ -7,7 +7,8 @@ const TYPES = {
   CHS_URL: 'CHS_URL',
   CHS_COMPANY_PROFILE_API_LOCAL_URL: 'CHS_COMPANY_PROFILE_API_LOCAL_URL',
   SessionMiddleware: 'SessionMiddleware',
-  AuthMiddleware: 'AuthMiddleware'
+  AuthMiddleware: 'AuthMiddleware',
+  CompanyAuthMiddleware: 'CompanyAuthMiddleware'
 }
 
 export default TYPES

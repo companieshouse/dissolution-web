@@ -22,8 +22,7 @@ interface ViewModel {
   errors?: Optional<ValidationErrors>
 }
 
-// TODO - include company auth middleware when available
-@controller(SELECT_DIRECTOR_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
+@controller(SELECT_DIRECTOR_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class SelectDirectorController extends BaseController {
 
   public constructor(

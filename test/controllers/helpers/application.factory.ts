@@ -50,4 +50,5 @@ const mockEnvVars = (container: Container): void => {
 const mockMiddlewares = (container: Container): void => {
   container.bind(TYPES.SessionMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
   container.bind(TYPES.AuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
+  container.bind(TYPES.CompanyAuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
 }

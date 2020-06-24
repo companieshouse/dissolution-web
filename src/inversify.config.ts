@@ -10,7 +10,11 @@ import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
+import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
+import AuthConfig from 'app/models/authConfig'
 import Optional from 'app/models/optional'
+import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
+import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from 'app/utils/env.util'
 import UriFactory from 'app/utils/uri.factory'
@@ -27,23 +31,34 @@ export function initContainer(): Container {
   container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
 
   // Utils
-  container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(createLogger(APP_NAME))
+  const logger = createLogger(APP_NAME)
+  container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
   container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory())
 
   // Session
-  const config: CookieConfig = {
+  const cookieConfig: CookieConfig = {
     cookieName: getEnvOrThrow('COOKIE_NAME'),
     cookieSecret: getEnvOrThrow('COOKIE_SECRET'),
     cookieDomain: getEnvOrThrow('COOKIE_DOMAIN')
   }
   const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow('CACHE_SERVER')}`))
   container.bind(SessionStore).toConstantValue(sessionStore)
-  container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(config, sessionStore))
+  container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(cookieConfig, sessionStore))
+
+  // Auth
   container.bind(TYPES.AuthMiddleware).toConstantValue(AuthMiddleware(
     getEnvOrThrow('CHS_URL'),
     new UriFactory(),
     commonAuthMiddleware
   ))
+  const authConfig: AuthConfig = {
+    accountUrl: getEnvOrThrow('ACCOUNT_URL'),
+    accountRequestKey: getEnvOrThrow('ACCOUNT_OAUTH2_REQUEST_KEY'),
+    accountClientId: getEnvOrThrow('ACCOUNT_CH_CLIENT_ID'),
+    chsUrl: getEnvOrThrow('CHS_URL'),
+  }
+  container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
+    CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), new SessionService(), logger))
 
   container.load(buildProviderModule())
 
