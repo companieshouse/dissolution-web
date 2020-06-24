@@ -24,8 +24,6 @@ services:
       - chs-dev
     working_dir: /app
     environment:
-      - ACCOUNT_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
-      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
       - ACCOUNT_URL=http://account.chs-dev
       - API_URL=http://api-ch-gov-uk:18001
       - CHS_URL=http://chs-dev
@@ -41,6 +39,8 @@ services:
       - DEFAULT_SESSION_EXPIRATION=3600
       - LOG_LEVEL=info
       - HUMAN_LOG=1
+      - OAUTH2_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
+      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
     depends_on:
       - mongo
       - cdn-ch-gov-uk
