@@ -25,7 +25,7 @@ services:
     working_dir: /app
     environment:
       - ACCOUNT_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
-      - ACCOUNT_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
+      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
       - ACCOUNT_URL=http://account.chs-dev
       - API_URL=http://api-ch-gov-uk:18001
       - CHS_URL=http://chs-dev
