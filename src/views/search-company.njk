@@ -1,28 +1,63 @@
 {% extends 'layout.njk' %}
 
 {% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
-{% from 'govuk/components/button/macro.njk'      import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
 {% block pageTitle %}
   {{ serviceName }}
 {% endblock %}
 
-{% block beforeContent %}
+{% block content %}
   {{
-    govukBreadcrumbs({
-      items: [
-        { href: 'https://www.gov.uk/', text: 'Home' },
-        { href: 'https://www.gov.uk/browse/business', text: 'Business and self-employed' },
-        { href: 'https://www.gov.uk/browse/business/limited-company', text: 'Running a limited company' }
-      ]
+    govukBackLink({
+      text: "Back",
+      href: backUri
     })
   }}
-{% endblock %}
-
-{% block content %}
+  
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-xl">Search Company Placeholder</h1>
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">What is the company number?</h1>
+
+      <form method="post">
+        {{
+          govukInput({
+            label: {
+              text: "This is the 8 character reference issued by Companies House when the company was set up."
+            },
+            errorMessage: {
+              text: errors.companyNumber
+            } if errors.companyNumber,
+            classes: "govuk-input--width-10",
+            id: "company-number",
+            name: "companyNumber",
+            value: data.companyNumber
+          })   
+        }}
+
+        {{  
+          govukDetails({
+            summaryText: "Help with company number",
+            html: '<p>You can find it using the <a href="https://beta.companieshouse.gov.uk/" class="govuk-link" rel="noreferrer noopener" target="_blank">Companies House Service (opens in new tab)</a> </p>'
+          })
+        }}
+
+        {{ 
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          }) 
+        }}
+      </form>
     </div>
   </div>
 {% endblock %}

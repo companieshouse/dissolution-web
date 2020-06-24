@@ -2,6 +2,8 @@ import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddres
 import Resource from 'ch-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
+import SearchCompanyFormModel from 'app/models/form/searchCompany.model'
+
 export function generateCompanyProfileResource(): Resource<CompanyProfile> {
   return {
     httpStatusCode: OK,
@@ -57,5 +59,11 @@ export function generateConfirmationStatement(): ConfirmationStatement {
   return {
     nextDue: `${new Date()}`,
     overdue: false
+  }
+}
+
+export function generateSearchCompanyForm(companyNumber: string = '1234'): SearchCompanyFormModel {
+  return {
+    companyNumber
   }
 }
