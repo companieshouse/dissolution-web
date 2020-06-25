@@ -1,6 +1,7 @@
 import { BAD_REQUEST, OK } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
+import { RedirectResult } from 'inversify-express-utils/dts/results'
 
 import BaseController from 'app/controllers/base.controller'
 import SearchCompanyFormModel from 'app/models/form/searchCompany.model'
@@ -36,7 +37,7 @@ export class SearchCompanyController extends BaseController {
   }
 
   @httpPost('')
-  public async post(@requestBody() body: SearchCompanyFormModel): Promise<string | void> {
+  public async post(@requestBody() body: SearchCompanyFormModel): Promise<string | RedirectResult> {
     const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
     if (errors) {
       return this.renderView(body, errors)
@@ -48,7 +49,7 @@ export class SearchCompanyController extends BaseController {
 
     this.updateSession(body)
 
-    return this.httpContext.response.redirect(VIEW_COMPANY_INFORMATION_URI)
+    return this.redirect(VIEW_COMPANY_INFORMATION_URI)
   }
 
   private async renderView(data?: SearchCompanyFormModel, errors?: ValidationErrors): Promise<string> {
