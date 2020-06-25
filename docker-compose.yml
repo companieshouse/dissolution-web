@@ -24,8 +24,6 @@ services:
       - chs-dev
     working_dir: /app
     environment:
-      - ACCOUNT_CH_CLIENT_ID=1234567890.apps.ch.gov.uk
-      - ACCOUNT_OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
       - ACCOUNT_URL=http://account.chs-dev
       - API_URL=http://api-ch-gov-uk:18001
       - CHS_URL=http://chs-dev
@@ -39,8 +37,11 @@ services:
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
+      - DISSOLUTIONS_API_URL=http://eric:4001
       - LOG_LEVEL=info
       - HUMAN_LOG=1
+      - OAUTH2_CLIENT_ID=1234567890.apps.ch.gov.uk
+      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
     depends_on:
       - mongo
       - cdn-ch-gov-uk
@@ -66,6 +67,8 @@ services:
       - DEFAULT_SESSION_EXPIRATION=3600
     ports:
       - 3001:3001
+    expose:
+      - 3001
     networks:
       - chs-dev
     working_dir: /app
@@ -139,6 +142,20 @@ services:
       - chs-dev
     expose:
       - 2000
+  eric:
+    container_name: chs-eric
+    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/eric:latest
+    environment:
+      - ACCOUNT_API_URL=http://account-ch-gov-uk:4000
+      - AES256_KEY=lwmso88WvX5Nubs3QWkq45YZq3W6gx8jregjeOKTqnc=
+      - API_KEY=MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz
+      - CACHE_URL=redis:6379
+      - DEVELOPER_HUB_URL=http://localhost?DEVELOPER_HUB_URL
+      - PROXY_TARGET_URLS=http://dissolution-api:3001
+    networks:
+      - chs-dev
+    expose:
+      - 4001
   chs-company-profile-api:
     container_name: chs-company-profile-api
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/chs-company-profile-api:latest
