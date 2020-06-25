@@ -194,7 +194,6 @@ services:
     working_dir: /app
   payments-api:
     container_name: payments-api
-    build: .
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/payments.api.ch.gov.uk:latest
     labels:
       - traefik.http.routers.payments-api.rule=Host(`payments-api`)
