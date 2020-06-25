@@ -211,7 +211,7 @@ services:
       - GOV_PAY_URL=http://payments-web
   payments-web:
     container_name: payments-web
-    image: payments-web:latest
+    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/payments.web.ch.gov.uk:latest
     labels:
       - traefik.http.routers.payments-web.rule=Host(`payments-web`)
     ports:
