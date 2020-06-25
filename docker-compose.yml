@@ -209,6 +209,26 @@ services:
       - MONGODB_DATABASE=payments
       - MONGODB_COLLECTION=payments
       - GOV_PAY_URL=http://payments-web
+  payments-web:
+    container_name: payments-web
+    image: payments-web:latest
+    labels:
+      - traefik.http.routers.payments-web.rule=Host(`payments-web`)
+    ports:
+      - 3056:3056
+    expose:
+      - 3056
+    networks:
+      - chs-dev
+    environment:
+      - API_URL=http://payments-api
+      - COOKIE_NAME=__SID
+      - COOKIE_DOMAIN=chs-dev
+      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
+      - OAUTH2_AUTH_URI=http://account.chs-dev/oauth2/authorise
+      - OAUTH2_CLIENT_ID=p3miN5P59lqINmK9lco/fBEmVVOYwa7yjIiFnshrOg8=
+      - OAUTH2_REDIRECT_URI=http://chs-dev/oauth2/user/callback
+      - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
   # Infrastructure
   redis:
     container_name: redis
