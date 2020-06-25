@@ -30,7 +30,7 @@ export default class CompanyDetailsMapper {
       company.registeredOfficeAddress.postalCode,
       company.registeredOfficeAddress.premises,
       company.registeredOfficeAddress.region]
-    .filter(el => el != null)
+    .filter(el => el != null && el.trim() !== '')
     .join(', ')
   }
 
