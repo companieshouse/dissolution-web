@@ -1,6 +1,7 @@
 import { BAD_REQUEST, OK } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
+import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
 import WhoToTellFormModel from 'app/models/form/whoToTell.model'
@@ -29,13 +30,13 @@ export class WhoToTellController extends BaseController {
   }
 
   @httpPost('')
-  public async post(@requestBody() body: WhoToTellFormModel): Promise<string | void> {
+  public async post(@requestBody() body: WhoToTellFormModel): Promise<string | RedirectResult> {
     const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
     if (errors) {
       return this.renderView(body, errors)
     }
 
-    this.httpContext.response.redirect(SEARCH_COMPANY_URI)
+    return this.redirect(SEARCH_COMPANY_URI)
   }
 
   private async renderView(data?: WhoToTellFormModel, errors?: ValidationErrors): Promise<string> {

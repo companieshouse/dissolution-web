@@ -1,6 +1,7 @@
 import { BAD_REQUEST, OK } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
+import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
@@ -46,7 +47,7 @@ export class SelectDirectorController extends BaseController {
   }
 
   @httpPost('')
-  public async post(@requestBody() body: SelectDirectorFormModel): Promise<string | void> {
+  public async post(@requestBody() body: SelectDirectorFormModel): Promise<string | RedirectResult> {
     const directors: DirectorDetails[] = await this.getDirectors()
 
     const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema)
@@ -58,7 +59,7 @@ export class SelectDirectorController extends BaseController {
 
     this.updateSession(body, selectedDirector)
 
-    return this.httpContext.response.redirect(this.getRedirectURI(directors, selectedDirector))
+    return this.redirect(this.getRedirectURI(directors, selectedDirector))
   }
 
   private async getDirectors(): Promise<DirectorDetails[]> {
