@@ -2,6 +2,7 @@ import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddres
 import Resource from 'ch-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
+import CompanyDetails from 'app/models/companyDetails.model'
 import SearchCompanyFormModel from 'app/models/form/searchCompany.model'
 
 export function generateCompanyProfileResource(): Resource<CompanyProfile> {
@@ -65,5 +66,17 @@ export function generateConfirmationStatement(): ConfirmationStatement {
 export function generateSearchCompanyForm(companyNumber: string = '1234'): SearchCompanyFormModel {
   return {
     companyNumber
+  }
+}
+
+export function generateCompanyDetails(): CompanyDetails {
+  return {
+    companyName: 'My Company',
+    companyNumber: '1234',
+    companyStatus: 'active',
+    companyType: 'ltd',
+    companyIncDate: new Date().toISOString(),
+    companyRegOffice: 'Some address',
+    canClose: true
   }
 }
