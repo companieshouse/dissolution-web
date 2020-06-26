@@ -1,8 +1,9 @@
-import { Session } from 'ch-node-session-handler'
+import { Session } from 'ch-node-session-handler/lib'
 import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import sinon from 'sinon'
 
+import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 export function generateSession(): Session {
@@ -31,6 +32,15 @@ export function generateISignInInfo(): ISignInInfo {
 
 export function generateDissolutionSession(companyNumber: string = '12345678'): DissolutionSession {
   return {
-    companyNumber
+    companyNumber,
+    directorsToSign: generateDirectorsToSign()
   }
+}
+
+export function generateDirectorsToSign(): DirectorToSign[] {
+  return [
+    {id: '1', name: 'Ashamed Alligator', email: 'ashameda@company.com'},
+    {id: '2', name: 'Sympathetic Hippopotamus', email: 'sympathetich@company.com'},
+    {id: '3', name: 'Radical Wombat', email: 'radicalw@company.com', onBehalfName: 'Mysterious Boar'}
+  ]
 }

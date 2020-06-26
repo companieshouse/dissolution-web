@@ -1,3 +1,4 @@
+import axios, { AxiosInstance } from 'axios'
 import * as bodyParser from 'body-parser'
 import { Application, NextFunction, Request, Response } from 'express'
 import { Container } from 'inversify'
@@ -45,6 +46,8 @@ export const createApp = (configureBindings?: (container: Container) => void): A
 
 const mockEnvVars = (container: Container): void => {
   container.bind(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue('CHS_COMPANY_PROFILE_API_LOCAL_URL')
+  container.bind(TYPES.DISSOLUTIONS_API_URL).toConstantValue('DISSOLUTIONS_API_URL')
+  container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
 }
 
 const mockMiddlewares = (container: Container): void => {

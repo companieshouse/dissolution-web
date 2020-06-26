@@ -24,27 +24,6 @@
       {% include 'components/errors/error-summary.njk' %}
 
       <h2 class="govuk-heading-l">Robin Smith</h2>
-      {{ govukTable({
-        firstCellIsHeader: true,
-        rows: [
-          [
-            {
-              text: "Will be signing"
-            },
-            {
-              text: "Yes"
-            }
-          ],
-          [
-            {
-              text: "Email address"
-            },
-            {
-              text: "user@testcompany.co.uk"
-            }
-          ],
-        ]
-      }) }}
 
       <form method="post">
         {{ govukButton({

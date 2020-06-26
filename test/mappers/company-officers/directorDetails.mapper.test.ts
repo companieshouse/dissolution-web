@@ -1,9 +1,10 @@
 import { CompanyOfficer } from 'ch-sdk-node/dist/services/company-officers/types'
 import { assert } from 'chai'
-import { generateCompanyOfficer } from '../../fixtures/companyOfficers.fixtures'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
 import DirectorDetails from 'app/models/view/directorDetails.model'
+
+import { generateCompanyOfficer } from 'test/fixtures/companyOfficers.fixtures'
 
 describe('DirectorDetailsMapper', () => {
 

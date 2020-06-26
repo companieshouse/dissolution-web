@@ -4,5 +4,6 @@ import DirectorToSign from 'app/models/session/directorToSign.model'
 export default interface DissolutionSession {
   companyNumber?: string
   selectDirectorForm?: SelectDirectorFormModel
-  directorsToSign?: DirectorToSign[]
+  directorsToSign?: DirectorToSign[],
+  companyReferenceNumber?: string
 }
