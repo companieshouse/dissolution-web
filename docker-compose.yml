@@ -209,6 +209,7 @@ services:
       - MONGODB_DATABASE=payments
       - MONGODB_COLLECTION=payments
       - GOV_PAY_URL=http://payments-web
+      - DOMAIN_WHITELIST=http://dissolution-api:3001
   payments-web:
     container_name: payments-web
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/payments.web.ch.gov.uk:latest
@@ -222,13 +223,16 @@ services:
       - chs-dev
     environment:
       - API_URL=http://payments-api
+      - CACHE_POOL_SIZE=1
+      - CACHE_SERVER=redis
       - COOKIE_NAME=__SID
       - COOKIE_DOMAIN=chs-dev
-      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
-      - OAUTH2_AUTH_URI=http://account.chs-dev/oauth2/authorise
-      - OAUTH2_CLIENT_ID=p3miN5P59lqINmK9lco/fBEmVVOYwa7yjIiFnshrOg8=
-      - OAUTH2_REDIRECT_URI=http://chs-dev/oauth2/user/callback
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
+      - DEFAULT_SESSION_EXPIRATION=500000000
+      - OAUTH2_AUTH_URI=http://account.chs-dev/oauth2/authorise
+      - OAUTH2_CLIENT_ID=1234567890.apps.ch.gov.uk
+      - OAUTH2_REDIRECT_URI=http://chs-dev/oauth2/user/callback
+      - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
   # Infrastructure
   redis:
     container_name: redis
