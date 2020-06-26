@@ -1,5 +1,6 @@
 import 'reflect-metadata'
 
+import axios, { AxiosInstance } from 'axios'
 import { createLogger } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { CookieConfig, SessionMiddleware, SessionStore } from 'ch-node-session-handler'
@@ -29,11 +30,13 @@ export function initContainer(): Container {
   container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow('CHS_COMPANY_PROFILE_API_LOCAL_URL'))
   container.bind<Optional<string>>(TYPES.PIWIK_SITE_ID).toConstantValue(getEnv('PIWIK_SITE_ID'))
   container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
+  container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
 
   // Utils
   const logger = createLogger(APP_NAME)
   container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
   container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory())
+  container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
 
   // Session
   const cookieConfig: CookieConfig = {
