@@ -5,5 +5,5 @@ export interface DissolutionCreateRequest {
 export interface DirectorRequest {
   name: string,
   email: string,
-  onBehalfName?: string
+  on_behalf_name?: string
 }

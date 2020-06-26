@@ -2,7 +2,6 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Request } from 'express'
-import { NO_CONTENT } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
@@ -46,7 +45,7 @@ describe('CheckYourAnswersController', () => {
 
       await request(app)
         .post(CHECK_YOUR_ANSWERS_URI)
-        .expect(NO_CONTENT)
+        .expect(302)
 
       verify(session.setDissolutionSession(anything(), anything())).once()
 
@@ -54,6 +53,8 @@ describe('CheckYourAnswersController', () => {
       const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
       assert.equal(updatedSession.companyReferenceNumber, REFERENCE_NUMBER)
+
+      // TODO Check if page has been rendered correctly (res.include())
     })
   })
 })

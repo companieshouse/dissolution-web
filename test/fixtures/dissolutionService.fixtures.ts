@@ -5,7 +5,7 @@ export function generateDissolutionCreateRequest(): DissolutionCreateRequest {
     directors: [
       {name: 'Ashamed Alligator', email: 'ashameda@company.com'},
       {name: 'Sympathetic Hippopotamus', email: 'sympathetich@company.com'},
-      {name: 'Radical Wombat', email: 'radicalw@company.com', onBehalfName: 'Mysterious Boar'}
+      {name: 'Radical Wombat', email: 'radicalw@company.com', on_behalf_name: 'Mysterious Boar'}
     ]
   }
 }

@@ -3,6 +3,7 @@ import { assert } from 'chai'
 import { instance, mock, verify, when } from 'ts-mockito'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
+import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -10,6 +11,7 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 
 import { generateAxiosResponse } from 'test/fixtures/axios.fixtures'
+import { generateDissolutionCreateRequest } from 'test/fixtures/dissolutionService.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('DissolutionService', () => {
@@ -22,13 +24,7 @@ describe('DissolutionService', () => {
 
   const REFERENCE_NUMBER = '123ABC'
   const TOKEN = 'some-token'
-  const MAPPED_BODY = {
-    directors: [
-      {name: 'Ashamed Alligator', email: 'ashameda@company.com'},
-      {name: 'Sympathetic Hippopotamus', email: 'sympathetich@company.com'},
-      {name: 'Radical Wombat', email: 'radicalw@company.com', onBehalfName: 'Mysterious Boar'}
-    ]
-  }
+  const MAPPED_BODY: DissolutionCreateRequest = generateDissolutionCreateRequest()
 
   beforeEach(() => {
     mapper = mock(DissolutionRequestMapper)
@@ -36,7 +32,6 @@ describe('DissolutionService', () => {
 
     dissolutionCreateResponse = generateAxiosResponse({application_reference_number: REFERENCE_NUMBER})
     dissolutionSession = generateDissolutionSession()
-
 
     when(mapper.mapToDissolutionRequest(dissolutionSession.directorsToSign!))
       .thenReturn(MAPPED_BODY)

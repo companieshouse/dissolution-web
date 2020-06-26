@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { assert } from 'chai'
 import sinon from 'sinon'
 
@@ -37,19 +37,15 @@ describe('DissolutionApiClient', () => {
       const response = await client.createDissolution(TOKEN, COMPANY_NUMBER, BODY)
 
       const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
-      const reqConfig: AxiosRequestConfig = {
-        headers: {
-          Authorization: 'Bearer ' + TOKEN,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
+
       assert.isTrue(postStub.called)
 
-      const [url, body, config] = postStub.args[0] // Get args from first call and marshal them into variables
+      const [url, body, config] = postStub.args[0]
       assert.equal(url, reqUrl)
       assert.equal(body, BODY)
-      assert.deepEqual(config, reqConfig)
+      assert.equal(config.headers.Authorization, 'Bearer ' + TOKEN)
+      assert.equal(config.headers['Content-Type'], 'application/json')
+      assert.equal(config.headers.Accept, 'application/json')
 
       assert.equal(response.data.application_reference_number, RESPONSE.data.application_reference_number)
     })
