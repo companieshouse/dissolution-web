@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import { AxiosInstance, AxiosResponse } from 'axios'
+import { AxiosInstance } from 'axios'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 
@@ -17,7 +17,7 @@ export class DissolutionApiClient {
   ) {}
 
   public async createDissolution(token: string, companyNumber: string,
-                                 body: DissolutionCreateRequest): Promise<AxiosResponse<DissolutionCreateResponse>> {
+                                 body: DissolutionCreateRequest): Promise<DissolutionCreateResponse> {
     return this.axios.post(
       `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`,
       body,

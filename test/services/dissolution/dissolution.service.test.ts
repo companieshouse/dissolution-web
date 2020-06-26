@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios'
 import { assert } from 'chai'
 import { instance, mock, verify, when } from 'ts-mockito'
 
@@ -19,7 +18,7 @@ describe('DissolutionService', () => {
   let client: DissolutionApiClient
   let service: DissolutionService
 
-  let dissolutionCreateResponse: AxiosResponse<DissolutionCreateResponse>
+  let dissolutionCreateResponse: DissolutionCreateResponse
   let dissolutionSession: DissolutionSession
 
   const REFERENCE_NUMBER = '123ABC'
@@ -30,10 +29,10 @@ describe('DissolutionService', () => {
     mapper = mock(DissolutionRequestMapper)
     client = mock(DissolutionApiClient)
 
-    dissolutionCreateResponse = generateAxiosResponse({application_reference_number: REFERENCE_NUMBER})
+    dissolutionCreateResponse = generateAxiosResponse({application_reference_number: REFERENCE_NUMBER}).data
     dissolutionSession = generateDissolutionSession()
 
-    when(mapper.mapToDissolutionRequest(dissolutionSession.directorsToSign!))
+    when(mapper.mapToDissolutionRequest(dissolutionSession))
       .thenReturn(MAPPED_BODY)
 
     when(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY))

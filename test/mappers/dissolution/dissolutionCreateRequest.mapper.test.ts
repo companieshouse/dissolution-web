@@ -3,6 +3,9 @@ import { assert } from 'chai'
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DirectorToSign from 'app/models/session/directorToSign.model'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
+
+import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('Dissolution Request Mapper', () => {
 
@@ -14,7 +17,10 @@ describe('Dissolution Request Mapper', () => {
 
       const director2: DirectorToSign = {id: '2', name: 'Sympathetic Hippopotamus', email: 'sympathetich@company.com'}
 
-      const result: DissolutionCreateRequest = mapper.mapToDissolutionRequest([director1, director2])
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      dissolutionSession.directorsToSign = [director1, director2]
+
+      const result: DissolutionCreateRequest = mapper.mapToDissolutionRequest(dissolutionSession)
 
       assert.equal(result.directors.length, 2)
 

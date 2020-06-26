@@ -2,13 +2,14 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Request } from 'express'
+import { MOVED_TEMPORARILY } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 
 import 'app/controllers/checkYourAnswers.controller'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { CHECK_YOUR_ANSWERS_URI } from 'app/paths'
+import { CHECK_YOUR_ANSWERS_URI, ROOT_URI } from 'app/paths'
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -45,14 +46,16 @@ describe('CheckYourAnswersController', () => {
 
       await request(app)
         .post(CHECK_YOUR_ANSWERS_URI)
-        .expect(302)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location',`${ROOT_URI}/endorse-company-closure-certificate`)
 
       verify(session.setDissolutionSession(anything(), anything())).once()
+      verify(service.createDissolution(TOKEN, dissolutionSession)).once()
 
       const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
       const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
-      assert.equal(updatedSession.companyReferenceNumber, REFERENCE_NUMBER)
+      assert.equal(updatedSession.applicationReferenceNumber, REFERENCE_NUMBER)
 
       // TODO Check if page has been rendered correctly (res.include())
     })

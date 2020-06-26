@@ -5,5 +5,5 @@ export default interface DissolutionSession {
   companyNumber?: string
   selectDirectorForm?: SelectDirectorFormModel
   directorsToSign?: DirectorToSign[],
-  companyReferenceNumber?: string
+  applicationReferenceNumber?: string
 }

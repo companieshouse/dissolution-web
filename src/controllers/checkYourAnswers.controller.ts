@@ -35,10 +35,10 @@ export class CheckYourAnswersController extends BaseController {
     return this.redirect(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
   }
 
-  private updateSession(companyReferenceNumber: string): void {
+  private updateSession(applicationReferenceNumber: string): void {
     const updatedSession: DissolutionSession = {
       ...this.session.getDissolutionSession(this.httpContext.request),
-      companyReferenceNumber
+      applicationReferenceNumber
     }
 
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)

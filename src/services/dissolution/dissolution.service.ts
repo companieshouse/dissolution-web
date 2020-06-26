@@ -1,6 +1,5 @@
 import 'reflect-metadata'
 
-import { AxiosResponse } from 'axios'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 
@@ -21,11 +20,11 @@ export class DissolutionService {
 
   public async createDissolution(token: string, dissolutionSession: DissolutionSession): Promise<Optional<string>> {
 
-    const body: DissolutionCreateRequest = this.dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession.directorsToSign!)
+    const body: DissolutionCreateRequest = this.dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)
     const companyNumber: string = dissolutionSession.companyNumber!
 
-    const response: AxiosResponse<DissolutionCreateResponse> =  await this.client.createDissolution(token, companyNumber, body)
+    const response: DissolutionCreateResponse =  await this.client.createDissolution(token, companyNumber, body)
 
-    return response.data.application_reference_number
+    return response.application_reference_number
   }
 }

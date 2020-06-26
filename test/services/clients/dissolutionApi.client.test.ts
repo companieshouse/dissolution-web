@@ -19,7 +19,7 @@ describe('DissolutionApiClient', () => {
   const BODY = generateDissolutionCreateRequest()
   const RESPONSE = generateAxiosResponse({
     application_reference_number: '123ABC'
-  })
+  }).data
 
   beforeEach(() => {
     axiosInstance = axios.create()
@@ -45,7 +45,7 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers['Content-Type'], 'application/json')
       assert.equal(config.headers.Accept, 'application/json')
 
-      assert.equal(response.data.application_reference_number, RESPONSE.data.application_reference_number)
+      assert.equal(response.application_reference_number, RESPONSE.application_reference_number)
     })
   })
 })
