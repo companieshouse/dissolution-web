@@ -14,8 +14,7 @@ export class DissolutionApiClient {
   public constructor(
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: Optional<string>,
     @inject(TYPES.AxiosInstance) private axios: AxiosInstance
-  ) {
-  }
+  ) {}
 
   public async createDissolution(token: string, companyNumber: string,
                                  body: DissolutionCreateRequest): Promise<AxiosResponse<DissolutionCreateResponse>> {
