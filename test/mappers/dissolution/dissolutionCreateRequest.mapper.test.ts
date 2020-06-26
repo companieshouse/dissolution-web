@@ -5,7 +5,7 @@ import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateReques
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
-import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
+import { generateDirectorToSign, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('Dissolution Request Mapper', () => {
 
@@ -13,9 +13,8 @@ describe('Dissolution Request Mapper', () => {
 
   describe('mapToDissolutionRequest', () => {
     it('should map director array to dissolution request', () => {
-      const director1: DirectorToSign = {id: '1', name: 'Ashamed Alligator', email: 'ashameda@company.com'}
-
-      const director2: DirectorToSign = {id: '2', name: 'Sympathetic Hippopotamus', email: 'sympathetich@company.com'}
+      const director1: DirectorToSign = generateDirectorToSign('Ashamed Alligator', '1')
+      const director2: DirectorToSign = generateDirectorToSign('Sympathetic Hippopotamus', '2')
 
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       dissolutionSession.directorsToSign = [director1, director2]

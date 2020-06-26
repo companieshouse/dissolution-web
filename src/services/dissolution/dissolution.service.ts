@@ -13,7 +13,7 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 @provide(DissolutionService)
 export class DissolutionService {
 
-  constructor(
+  public constructor(
     @inject(DissolutionRequestMapper) private dissolutionRequestMapper: DissolutionRequestMapper,
     @inject(DissolutionApiClient) private client: DissolutionApiClient
   ) {}

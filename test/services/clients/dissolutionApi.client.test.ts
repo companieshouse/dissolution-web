@@ -1,11 +1,15 @@
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import { assert } from 'chai'
 import sinon from 'sinon'
 
+import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 import { generateAxiosResponse } from 'test/fixtures/axios.fixtures'
-import { generateDissolutionCreateRequest } from 'test/fixtures/dissolutionApi.fixtures'
+import {
+  generateDissolutionCreateRequest,
+  generateDissolutionCreateResponse
+} from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
 
@@ -17,13 +21,11 @@ describe('DissolutionApiClient', () => {
   const TOKEN = 'some-token'
   const COMPANY_NUMBER = '12345678'
   const BODY = generateDissolutionCreateRequest()
-  const RESPONSE = generateAxiosResponse({
-    application_reference_number: '123ABC'
-  }).data
+  const RESPONSE: AxiosResponse<DissolutionCreateResponse> = generateAxiosResponse(generateDissolutionCreateResponse())
 
   beforeEach(() => {
     axiosInstance = axios.create()
-    postStub = sinon.stub().returns(RESPONSE)
+    postStub = sinon.stub().resolves(RESPONSE)
     axiosInstance.post = postStub
     dissolutionApiUrl = 'http://apiurl.com'
 
@@ -45,7 +47,7 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers['Content-Type'], 'application/json')
       assert.equal(config.headers.Accept, 'application/json')
 
-      assert.equal(response.application_reference_number, RESPONSE.application_reference_number)
+      assert.equal(response, RESPONSE.data)
     })
   })
 })

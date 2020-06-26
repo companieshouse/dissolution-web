@@ -6,6 +6,8 @@ import sinon from 'sinon'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
+import { generateEmail } from 'test/fixtures/util.fixtures'
+
 export function generateSession(): Session {
   return {
     get: sinon.stub(),
@@ -39,8 +41,16 @@ export function generateDissolutionSession(companyNumber: string = '12345678'): 
 
 export function generateDirectorsToSign(): DirectorToSign[] {
   return [
-    {id: '1', name: 'Ashamed Alligator', email: 'ashameda@company.com'},
-    {id: '2', name: 'Sympathetic Hippopotamus', email: 'sympathetich@company.com'},
-    {id: '3', name: 'Radical Wombat', email: 'radicalw@company.com', onBehalfName: 'Mysterious Boar'}
+    generateDirectorToSign('Ashamed Alligator', '1'),
+    generateDirectorToSign('Sympathetic Hippopotamus', '2'),
+    generateDirectorToSign('Radical Wombat', '3')
   ]
+}
+
+export function generateDirectorToSign(name: string, id: string): DirectorToSign {
+  return {
+    id,
+    name,
+    email: generateEmail(name)
+  }
 }

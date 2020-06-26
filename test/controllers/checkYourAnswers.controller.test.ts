@@ -56,8 +56,6 @@ describe('CheckYourAnswersController', () => {
       const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
       assert.equal(updatedSession.applicationReferenceNumber, REFERENCE_NUMBER)
-
-      // TODO Check if page has been rendered correctly (res.include())
     })
   })
 })

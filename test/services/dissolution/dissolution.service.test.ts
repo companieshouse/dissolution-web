@@ -9,8 +9,10 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 
-import { generateAxiosResponse } from 'test/fixtures/axios.fixtures'
-import { generateDissolutionCreateRequest } from 'test/fixtures/dissolutionApi.fixtures'
+import {
+  generateDissolutionCreateRequest,
+  generateDissolutionCreateResponse
+} from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('DissolutionService', () => {
@@ -29,7 +31,7 @@ describe('DissolutionService', () => {
     mapper = mock(DissolutionRequestMapper)
     client = mock(DissolutionApiClient)
 
-    dissolutionCreateResponse = generateAxiosResponse({application_reference_number: REFERENCE_NUMBER}).data
+    dissolutionCreateResponse = generateDissolutionCreateResponse()
     dissolutionSession = generateDissolutionSession()
 
     when(mapper.mapToDissolutionRequest(dissolutionSession))
