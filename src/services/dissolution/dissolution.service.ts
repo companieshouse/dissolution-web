@@ -6,7 +6,6 @@ import { provide } from 'inversify-binding-decorators'
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
-import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
@@ -18,7 +17,7 @@ export class DissolutionService {
     @inject(DissolutionApiClient) private client: DissolutionApiClient
   ) {}
 
-  public async createDissolution(token: string, dissolutionSession: DissolutionSession): Promise<Optional<string>> {
+  public async createDissolution(token: string, dissolutionSession: DissolutionSession): Promise<string> {
 
     const body: DissolutionCreateRequest = this.dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)
     const companyNumber: string = dissolutionSession.companyNumber!
