@@ -5,9 +5,7 @@ import sinon from 'sinon'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 import { generateAxiosResponse } from 'test/fixtures/axios.fixtures'
-import {
-  generateDissolutionCreateRequest,
-} from 'test/fixtures/dissolutionService.fixtures'
+import { generateDissolutionCreateRequest } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
 

@@ -11,7 +11,7 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 
 import { generateAxiosResponse } from 'test/fixtures/axios.fixtures'
-import { generateDissolutionCreateRequest } from 'test/fixtures/dissolutionService.fixtures'
+import { generateDissolutionCreateRequest } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('DissolutionService', () => {
