@@ -1,3 +1,5 @@
+#<Feature Title>
+
 -[] 3 Amigos
 -[] Verified Acceptance Criteria are met
 -[] You Pulled the Master Branch
@@ -5,7 +7,8 @@
 -[] You Reviewed Code 
 
 ##Testing
--[] WAVE Accessibility Testing
+-[] Tested manually in browser
 -[] You added Unit Tests and are passing
+-[] WAVE Accessibility Testing
 
 ##Screenshots of views
