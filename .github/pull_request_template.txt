@@ -1,14 +1,14 @@
 #<Feature Title>
 
 -[] 3 Amigos
--[] Verified Acceptance Criteria are met
--[] You Pulled the Master Branch
--[] You Manually Tested 
--[] You Reviewed Code 
+-[] Acceptance Criteria met
+-[] Pulled Master Branch
+-[] Manually Tested 
+-[] Reviewed Code 
 
 ##Testing
 -[] Tested manually in browser
--[] You added Unit Tests and are passing
+-[] Added Unit Tests and they are passing
 -[] WAVE Accessibility Testing
 
 ##Screenshots of views
