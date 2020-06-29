@@ -1,0 +1,48 @@
+import { inject } from 'inversify'
+import { controller, httpGet, httpPost } from 'inversify-express-utils'
+import BaseController from './base.controller'
+
+import CompanyDetails from 'app/models/companyDetails.model'
+import { SELECT_DIRECTOR_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
+import CompanyService from 'app/services/company/company.service'
+import SessionService from 'app/services/session/session.service'
+import TYPES from 'app/types'
+
+interface ViewModel {
+  company: CompanyDetails
+}
+
+@controller(VIEW_COMPANY_INFORMATION_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
+export class ViewCompanyInformationController extends BaseController {
+
+  public constructor(
+    @inject(SessionService) private session: SessionService,
+    @inject(CompanyService) private companyService: CompanyService) {
+    super()
+  }
+
+  @httpGet('')
+  public async get(): Promise<string> {
+    const company: CompanyDetails = await this.getCompanyInfo()
+
+    const viewModel: ViewModel = {
+      company
+    }
+    return super.render('view-company-information', viewModel)
+  }
+
+  @httpPost('')
+  public post(): void {
+    this.httpContext.response.redirect(SELECT_DIRECTOR_URI)
+  }
+
+  private async getCompanyInfo(): Promise<CompanyDetails> {
+    const companyNumber: string = this.getCompanyNumber()
+    const token: string = this.session.getAccessToken(this.httpContext.request)
+    return this.companyService.getCompanyDetails(token, companyNumber)
+  }
+
+  private getCompanyNumber(): string {
+    return this.session.getDissolutionSession(this.httpContext.request)!.companyNumber!
+  }
+}

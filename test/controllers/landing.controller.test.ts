@@ -20,7 +20,7 @@ describe('LandingController', () => {
   })
 
   describe('POST request', () => {
-    it('should redirect to the who to tell screen upson submission', async () => {
+    it('should redirect to the who to tell screen upon submission', async () => {
       await request(app)
         .post(ROOT_URI)
         .expect(MOVED_TEMPORARILY)
