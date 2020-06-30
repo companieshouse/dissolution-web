@@ -72,3 +72,13 @@ In the terminal in the `dissolution-web` directory:
     ```
     $ docker-compose up --build dissolution-web
     ```
+
+## Controller flow
+
+![Dissolution controller flow](.github/images/DissolutionControllerFlow.png)
+
+* GDS confirmation pages are in green
+* Dissolution API endpoints are in grey
+* At the end of each branch, redirect back to the Redirect Controller
+* Enables save & resume-like functionality
+* Enables consistency between single and multi director journeys
