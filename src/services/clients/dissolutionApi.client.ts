@@ -6,6 +6,7 @@ import { provide } from 'inversify-binding-decorators'
 
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
+import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
 import TYPES from 'app/types'
 
 @provide(DissolutionApiClient)
@@ -20,6 +21,20 @@ export class DissolutionApiClient {
     const response: AxiosResponse<DissolutionCreateResponse> = await this.axios.post(
       `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`,
       body,
+      {
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      }
+    )
+    return response.data
+  }
+
+  public async getDissolution(token: string, companyNumber: string): Promise<DissolutionGetResponse> {
+    const response: AxiosResponse<DissolutionGetResponse> = await this.axios.get(
+      `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`,
       {
         headers: {
           Authorization: 'Bearer ' + token,

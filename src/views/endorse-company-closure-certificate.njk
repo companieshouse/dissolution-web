@@ -1,0 +1,49 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: "Back",
+      href: Paths.ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI
+    })
+  }}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">Application to close a company (DS01)</h1>
+      <h2 class="govuk-heading-m">
+        Company name: {{ dissolutionInfo.company_name }}
+        <br>
+        Company number: {{ dissolutionInfo.company_number }}
+      </h2>
+      <form method="post">
+        {{
+          govukButton({
+            text: 'Confirm and continue',
+            attributes: {
+              id: 'submit'
+            }
+          }) if company.canClose
+        }}
+      </form>
+      <p>
+        <a class="govuk-link" href={{ Paths.SEARCH_COMPANY_URI }}>Choose a different company</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}
