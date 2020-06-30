@@ -13,8 +13,14 @@ describe('Dissolution Request Mapper', () => {
 
   describe('mapToDissolutionRequest', () => {
     it('should map director array to dissolution request', () => {
-      const director1: DirectorToSign = generateDirectorToSign('Ashamed Alligator', '1')
-      const director2: DirectorToSign = generateDirectorToSign('Sympathetic Hippopotamus', '2')
+      const director1: DirectorToSign = generateDirectorToSign()
+      director1.name = 'Ashamed Alligator'
+      director1.id = '1'
+      director1.email = 'ashamed_alligator@test.com'
+      const director2: DirectorToSign = generateDirectorToSign()
+      director2.name = 'Sympathetic Hippopotamus'
+      director2.id = '2'
+      director2.email = 'sympathetic_hippopotamus@test.com'
 
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       dissolutionSession.directorsToSign = [director1, director2]
