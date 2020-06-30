@@ -82,3 +82,4 @@ In the terminal in the `dissolution-web` directory:
 * At the end of each branch, redirect back to the Redirect Controller
 * Enables save & resume-like functionality
 * Enables consistency between single and multi director journeys
+* Draw.io source code can be found [here](.github/images/DissolutionControllerFlow.drawio)
