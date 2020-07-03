@@ -3,24 +3,34 @@ import { controller, httpGet, httpPost } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 
 import BaseController from 'app/controllers/base.controller'
+import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/checkYourAnswersDirector.mapper'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
 import { CHECK_YOUR_ANSWERS_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI } from 'app/paths'
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
-@controller(CHECK_YOUR_ANSWERS_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
+interface ViewModel {
+  directors?: CheckYourAnswersDirector[]
+}
+
+@controller(CHECK_YOUR_ANSWERS_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class CheckYourAnswersController extends BaseController {
   public constructor(
     @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(SessionService) private session: SessionService) {
+    @inject(SessionService) private session: SessionService,
+    @inject(CheckYourAnswersDirectorMapper) private mapper: CheckYourAnswersDirectorMapper) {
     super()
   }
 
   @httpGet('')
   public async get(): Promise<string> {
-    return super.render('check-your-answers')
+    const viewModel: ViewModel = {
+      directors: this.getDirectors()
+    }
+    return super.render('check-your-answers', viewModel)
   }
 
   @httpPost('')
@@ -42,5 +52,10 @@ export class CheckYourAnswersController extends BaseController {
     }
 
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
+  }
+
+  private getDirectors(): CheckYourAnswersDirector[] {
+    const directorsToSign = this.session.getDissolutionSession(this.httpContext.request)!.directorsToSign
+    return directorsToSign!.map(director => this.mapper.mapToCheckYourAnswersDirector(director))
   }
 }
