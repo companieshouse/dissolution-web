@@ -240,7 +240,7 @@ services:
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=500000000
       - DEVELOPER_URL=http://chs-dev
-      - LOG_LEVEL=debug
+      - LOGLEVEL=debug
       - OAUTH2_AUTH_URI=http://account.chs-dev/oauth2/authorise
       - OAUTH2_CLIENT_ID=1234567890.apps.ch.gov.uk
       - OAUTH2_CLIENT_SECRET=M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1
