@@ -38,7 +38,7 @@ services:
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
       - DISSOLUTIONS_API_URL=http://eric:4001
-      - LOG_LEVEL=info
+      - LOGLEVEL=info
       - HUMAN_LOG=1
       - OAUTH2_CLIENT_ID=1234567890.apps.ch.gov.uk
       - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
@@ -65,6 +65,7 @@ services:
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
+      - LOGLEVEL=info
     ports:
       - 3001:3001
     expose:
