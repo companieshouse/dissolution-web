@@ -4,6 +4,7 @@ import { controller, httpGet, httpPost, requestBody } from 'inversify-express-ut
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
+import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
 import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -29,7 +30,8 @@ export class SelectSignatoriesController extends BaseController {
   public constructor(
     @inject(SessionService) private session: SessionService,
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
-    @inject(FormValidator) private validator: FormValidator) {
+    @inject(FormValidator) private validator: FormValidator,
+    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper) {
     super()
   }
 
@@ -119,14 +121,6 @@ export class SelectSignatoriesController extends BaseController {
   private getSelectedSignatories(body: SelectSignatoriesFormModel, signatories: DirectorDetails[]): DirectorToSign[] {
     return signatories
       .filter(signatory => body.signatories!.includes(signatory.id))
-      .map(this.mapToSelectedSignatory)
-  }
-
-  private mapToSelectedSignatory(selectedSingatory: DirectorDetails): DirectorToSign {
-    return {
-      id: selectedSingatory.id,
-      name: selectedSingatory.name,
-      isApplicant: false
-    }
+      .map(selectedSignatory => this.mapper.mapAsSignatory(selectedSignatory))
   }
 }

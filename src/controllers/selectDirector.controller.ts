@@ -4,6 +4,7 @@ import { controller, httpGet, httpPost, requestBody } from 'inversify-express-ut
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
+import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -29,7 +30,8 @@ export class SelectDirectorController extends BaseController {
   public constructor(
     @inject(SessionService) private session: SessionService,
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
-    @inject(FormValidator) private validator: FormValidator) {
+    @inject(FormValidator) private validator: FormValidator,
+    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper) {
     super()
   }
 
@@ -57,7 +59,7 @@ export class SelectDirectorController extends BaseController {
 
     const selectedDirector: Optional<DirectorDetails> = this.getSelectedDirector(directors, body)
 
-    this.updateSession(body, selectedDirector)
+    this.updateSession(body, directors, selectedDirector)
 
     return this.redirect(this.getRedirectURI(directors, selectedDirector))
   }
@@ -90,7 +92,7 @@ export class SelectDirectorController extends BaseController {
     return directors.find(director => director.id === body.director)
   }
 
-  private updateSession(body: SelectDirectorFormModel, selectedDirector?: Optional<DirectorDetails>): void {
+  private updateSession(body: SelectDirectorFormModel, directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): void {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
     if (!this.hasFormChanged(body, session)) {
@@ -100,7 +102,7 @@ export class SelectDirectorController extends BaseController {
     const updatedSession: DissolutionSession = {
       ...session,
       selectDirectorForm: body,
-      directorsToSign: this.getDirectorsToSign(selectedDirector)
+      directorsToSign: this.prepareDirectorsToSign(directors, selectedDirector)
     }
 
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
@@ -110,13 +112,16 @@ export class SelectDirectorController extends BaseController {
     return session.selectDirectorForm?.director !== body.director
   }
 
-  private getDirectorsToSign(selectedDirector?: Optional<DirectorDetails>): DirectorToSign[] {
-    return selectedDirector ? [{
-      id: selectedDirector.id,
-      name: selectedDirector.name,
-      isApplicant: true,
-      email: this.session.getUserEmail(this.httpContext.request)
-    }] : []
+  private prepareDirectorsToSign(directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): DirectorToSign[] {
+    if (selectedDirector) {
+      return [this.mapper.mapAsApplicant(selectedDirector, this.session.getUserEmail(this.httpContext.request))]
+    }
+
+    if (directors.length === 1) {
+      return [this.mapper.mapAsSignatory(directors[0])]
+    }
+
+    return []
   }
 
   private getRedirectURI(directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): string {

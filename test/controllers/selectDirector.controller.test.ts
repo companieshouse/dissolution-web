@@ -1,20 +1,23 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { Request } from 'express'
+import { Application, Request } from 'express'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { generateDirectorDetails, generateSelectDirectorFormModel } from '../fixtures/companyOfficers.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
-import { generateDissolutionSession } from '../fixtures/session.fixtures'
+import { generateDirectorToSign, generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectDirector.controller'
+import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
+import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import selectDirectorSchema from 'app/schemas/selectDirector.schema'
@@ -27,6 +30,7 @@ describe('SelectDirectorController', () => {
   let session: SessionService
   let officerService: CompanyOfficersService
   let validator: FormValidator
+  let mapper: DirectorToSignMapper
 
   const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
@@ -41,6 +45,7 @@ describe('SelectDirectorController', () => {
     session = mock(SessionService)
     officerService = mock(CompanyOfficersService)
     validator = mock(FormValidator)
+    mapper = mock(DirectorToSignMapper)
 
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
 
@@ -99,6 +104,15 @@ describe('SelectDirectorController', () => {
   })
 
   describe('POST - ensure form submission is handled correctly', () => {
+    function initApp(): Application {
+      return createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+        container.rebind(FormValidator).toConstantValue(instance(validator))
+        container.rebind(DirectorToSignMapper).toConstantValue(instance(mapper))
+      })
+    }
+
     beforeEach(() => when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession))
 
     it('should re-render the view with an error if validation fails', async () => {
@@ -111,11 +125,7 @@ describe('SelectDirectorController', () => {
       ])
       when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(error)
 
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
-      })
+      const app = initApp()
 
       const res = await request(app)
         .post(SELECT_DIRECTOR_URI)
@@ -139,11 +149,7 @@ describe('SelectDirectorController', () => {
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
@@ -161,11 +167,7 @@ describe('SelectDirectorController', () => {
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
@@ -185,49 +187,68 @@ describe('SelectDirectorController', () => {
         const directorEmail: string = 'some@mail.com'
 
         const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
+        const director: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_1_ID, name: directorName }
+        const applicant: DirectorToSign = generateDirectorToSign()
 
-        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-          { ...generateDirectorDetails(), id: DIRECTOR_1_ID, name: directorName }
-        ])
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([director])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
         when(session.getUserEmail(anything())).thenReturn(directorEmail)
+        when(mapper.mapAsApplicant(director, directorEmail)).thenReturn(applicant)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
           .expect(MOVED_TEMPORARILY)
 
+        verify(mapper.mapAsApplicant(director, directorEmail)).once()
         verify(session.setDissolutionSession(anything(), anything())).once()
 
         const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
         const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
         assert.equal(updatedSession.directorsToSign!.length, 1)
-        assert.equal(updatedSession.directorsToSign![0].id, DIRECTOR_1_ID)
-        assert.equal(updatedSession.directorsToSign![0].name, directorName)
-        assert.equal(updatedSession.directorsToSign![0].email, directorEmail)
-        assert.isTrue(updatedSession.directorsToSign![0].isApplicant)
+        assert.equal(updatedSession.directorsToSign![0], applicant)
       })
 
-      it('should not store the director details if applicant is not a director', async () => {
+      it('should store the director details if applicant is not a director and is a single director company', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
+
+        const director: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+        const signatory: DirectorToSign = generateDirectorToSign()
+
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([director])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(mapper.mapAsSignatory(director)).thenReturn(signatory)
+
+        const app = initApp()
+
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+
+        verify(mapper.mapAsSignatory(director)).once()
+        verify(session.setDissolutionSession(anything(), anything())).once()
+
+        const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+        const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+        assert.equal(updatedSession.directorsToSign!.length, 1)
+        assert.equal(updatedSession.directorsToSign![0], signatory)
+      })
+
+      it('should not store the director details if applicant is not a director and is a multi director company', async () => {
         const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
 
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-          { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+          { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
@@ -252,11 +273,7 @@ describe('SelectDirectorController', () => {
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
@@ -273,11 +290,7 @@ describe('SelectDirectorController', () => {
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
@@ -295,11 +308,7 @@ describe('SelectDirectorController', () => {
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
@@ -317,11 +326,7 @@ describe('SelectDirectorController', () => {
         ])
         when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
 
-        const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-          container.rebind(FormValidator).toConstantValue(instance(validator))
-        })
+        const app = initApp()
 
         await request(app)
           .post(SELECT_DIRECTOR_URI)
