@@ -3,7 +3,7 @@ import { controller, httpGet, httpPost } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
 import CompanyDetails from 'app/models/companyDetails.model'
-import { SELECT_DIRECTOR_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
+import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
@@ -33,7 +33,7 @@ export class ViewCompanyInformationController extends BaseController {
 
   @httpPost('')
   public post(): void {
-    this.httpContext.response.redirect(SELECT_DIRECTOR_URI)
+    this.httpContext.response.redirect(REDIRECT_GATE_URI)
   }
 
   private async getCompanyInfo(): Promise<CompanyDetails> {

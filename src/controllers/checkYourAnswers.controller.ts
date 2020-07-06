@@ -7,7 +7,7 @@ import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/check
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
-import { CHECK_YOUR_ANSWERS_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI } from 'app/paths'
+import { CHECK_YOUR_ANSWERS_URI, REDIRECT_GATE_URI } from 'app/paths'
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
@@ -42,7 +42,7 @@ export class CheckYourAnswersController extends BaseController {
 
     this.updateSession(applicationReferenceNumber!)
 
-    return this.redirect(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+    return this.redirect(REDIRECT_GATE_URI)
   }
 
   private updateSession(applicationReferenceNumber: string): void {

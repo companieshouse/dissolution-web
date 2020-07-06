@@ -7,6 +7,7 @@ import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
 import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
+import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
@@ -28,7 +29,7 @@ export class DissolutionService {
     return response.application_reference_number
   }
 
-  public async getDissolution(token: string, dissolutionSession: DissolutionSession): Promise<DissolutionGetResponse> {
+  public async getDissolution(token: string, dissolutionSession: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
 
     const companyNumber: string = dissolutionSession.companyNumber!
 

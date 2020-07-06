@@ -38,7 +38,7 @@ services:
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
       - DISSOLUTIONS_API_URL=http://eric:4001
-      - LOG_LEVEL=info
+      - LOGLEVEL=DEBUG
       - HUMAN_LOG=1
       - OAUTH2_CLIENT_ID=1234567890.apps.ch.gov.uk
       - OAUTH2_REQUEST_KEY=pXf+qkU6P6SAoY2lKW0FtKMS4PylaNA3pY2sUQxNFDk=
@@ -65,6 +65,7 @@ services:
       - COOKIE_SECURE_ONLY=0
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=3600
+      - LOGLEVEL=INFO
     ports:
       - 3001:3001
     expose:
@@ -151,7 +152,7 @@ services:
       - API_KEY=MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz
       - CACHE_URL=redis:6379
       - DEVELOPER_HUB_URL=http://localhost?DEVELOPER_HUB_URL
-      - PROXY_TARGET_URLS=http://dissolution-api:3001,http://payments-api
+      - PROXY_TARGET_URLS=http://dissolution-api:3001
     networks:
       - chs-dev
     expose:
@@ -239,7 +240,7 @@ services:
       - COOKIE_SECRET=ChGovUk-XQrbf3sLj2abFxIY2TlapsJ
       - DEFAULT_SESSION_EXPIRATION=500000000
       - DEVELOPER_URL=http://chs-dev
-      - LOG_LEVEL=debug
+      - LOGLEVEL=INFO
       - OAUTH2_AUTH_URI=http://account.chs-dev/oauth2/authorise
       - OAUTH2_CLIENT_ID=1234567890.apps.ch.gov.uk
       - OAUTH2_CLIENT_SECRET=M2UwYzRkNzIwOGQ1OGQ0OWIzMzViYjJjOTEyYTc1

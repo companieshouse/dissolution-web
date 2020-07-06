@@ -13,7 +13,7 @@ import 'app/controllers/checkYourAnswers.controller'
 import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/checkYourAnswersDirector.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
-import { CHECK_YOUR_ANSWERS_URI, ROOT_URI } from 'app/paths'
+import { CHECK_YOUR_ANSWERS_URI, REDIRECT_GATE_URI} from 'app/paths'
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -85,7 +85,7 @@ describe('CheckYourAnswersController', () => {
       await request(app)
         .post(CHECK_YOUR_ANSWERS_URI)
         .expect(MOVED_TEMPORARILY)
-        .expect('Location',`${ROOT_URI}/endorse-company-closure-certificate`)
+        .expect('Location',REDIRECT_GATE_URI)
 
       verify(session.setDissolutionSession(anything(), anything())).once()
       verify(service.createDissolution(TOKEN, dissolutionSession)).once()

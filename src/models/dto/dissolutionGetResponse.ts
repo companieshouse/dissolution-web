@@ -1,3 +1,5 @@
+import { ApplicationStatusEnum } from 'app/models/dto/applicationStatus.enum'
+import { ApplicationTypeEnum } from 'app/models/dto/applicationType.enum'
 import { DissolutionGetDirector } from 'app/models/dto/dissolutionGetDirector'
 import { DissolutionLinks } from 'app/models/dto/dissolutionLinks'
 
