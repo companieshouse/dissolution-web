@@ -67,7 +67,6 @@ export function generateGetDirector(name: string): DissolutionGetDirector {
   }
 }
 
-
 export function generateApprovalData(): DissolutionApprovalModel {
   return {
     companyName: 'Example Company',

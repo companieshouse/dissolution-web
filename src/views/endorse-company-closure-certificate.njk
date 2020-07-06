@@ -15,10 +15,6 @@
 {% endblock %}
 
 {% block content %}
-  {{ govukBackLink({
-    text: "Back",
-    href: Paths.CHECK_YOUR_ANSWERS_URI
-  }) }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
