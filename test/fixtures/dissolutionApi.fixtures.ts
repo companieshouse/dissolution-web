@@ -1,5 +1,5 @@
-import { ApplicationStatusEnum } from 'app/models/dto/applicationStatus.enum'
-import { ApplicationTypeEnum } from 'app/models/dto/applicationType.enum'
+import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
+import ApplicationType from 'app/models/dto/applicationType.enum'
 import { DirectorRequest, DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
 import { DissolutionGetDirector } from 'app/models/dto/dissolutionGetDirector'
@@ -31,9 +31,9 @@ export function generateDissolutionGetResponse(): DissolutionGetResponse {
     ETag: 'ETag',
     kind: 'kind',
     links: generateLinks(),
-    application_status: ApplicationStatusEnum.PENDING_APPROVAL,
+    application_status: ApplicationStatus.PENDING_APPROVAL,
     application_reference: 'asd',
-    application_type: ApplicationTypeEnum.DS01,
+    application_type: ApplicationType.DS01,
     company_number: '12345678',
     company_name: 'example name',
     created_at: new Date().toDateString(),

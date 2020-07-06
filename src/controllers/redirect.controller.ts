@@ -1,9 +1,10 @@
 import { inject } from 'inversify'
 import { controller, httpGet } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
+import moment from 'moment'
 
 import BaseController from 'app/controllers/base.controller'
-import { ApplicationStatusEnum } from 'app/models/dto/applicationStatus.enum'
+import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import { DissolutionGetDirector } from 'app/models/dto/dissolutionGetDirector'
 import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
 import { DissolutionApprovalModel } from 'app/models/form/dissolutionApproval.model'
@@ -14,7 +15,7 @@ import { DissolutionService } from 'app/services/dissolution/dissolution.service
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
-@controller(REDIRECT_GATE_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
+@controller(REDIRECT_GATE_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class RedirectController extends BaseController {
 
   public constructor(@inject(SessionService) private session: SessionService,
@@ -34,8 +35,7 @@ export class RedirectController extends BaseController {
 
     const signingDirector: Optional<DissolutionGetDirector> = this.getUserPendingSignature(dissolution!)
 
-    if (dissolution!.application_status === ApplicationStatusEnum.PENDING_APPROVAL
-      && signingDirector) {
+    if (dissolution!.application_status === ApplicationStatus.PENDING_APPROVAL && signingDirector) {
 
       dissolutionSession.approval = this.prepareApprovalData(dissolution!, signingDirector)
       this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
@@ -49,7 +49,7 @@ export class RedirectController extends BaseController {
   private getUserPendingSignature(dissolution: DissolutionGetResponse): Optional<DissolutionGetDirector> {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
 
-    return dissolution.directors.find(director => director.email === userEmail)
+    return dissolution.directors.find(director => director.email === userEmail && !director.approved_at)
   }
 
   private prepareApprovalData(dissolution: DissolutionGetResponse, signingDirector: DissolutionGetDirector): DissolutionApprovalModel {
@@ -57,12 +57,7 @@ export class RedirectController extends BaseController {
       companyName: dissolution.company_name,
       companyNumber: dissolution.company_number,
       applicant: signingDirector.name,
-      date: this.formatDate(new Date())
+      date: moment().format('DD MMMM YYYY')
     }
-  }
-
-  private formatDate(date: Date): string {
-    const options = { year: 'numeric', month: 'long', day: '2-digit'}
-    return new Intl.DateTimeFormat('en-GB', options).format(date)
   }
 }

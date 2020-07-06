@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { assert } from 'chai'
 import sinon from 'sinon'
 
@@ -6,10 +6,9 @@ import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateRespo
 import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
-import { generateAxiosResponse } from 'test/fixtures/axios.fixtures'
+import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
-  generateDissolutionCreateRequest,
-  generateDissolutionCreateResponse, generateDissolutionGetResponse
+  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetResponse
 } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
@@ -75,7 +74,32 @@ describe('DissolutionApiClient', () => {
       assert.equal(response, GET_RESPONSE.data)
     })
 
-    it('should return null if dissolution is not present in the database', async () => {
+    it('should throw an error if any other error than 404 occurs', async () => {
+      const error: AxiosError = generateAxiosError(generateDissolutionGetResponse())
+      error.response!.status = 400
+
+      getStub = sinon.stub().rejects(error)
+      axiosInstance.get = getStub
+
+      try {
+        await client.getDissolution(TOKEN, COMPANY_NUMBER)
+        assert.fail()
+      } catch (e) {
+        assert.equal(e.response!.status, error.response!.status)
+      }
+
+      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+
+      assert.isTrue(getStub.called)
+
+      const [url, config] = getStub.args[0]
+      assert.equal(url, reqUrl)
+      assert.equal(config.headers.Authorization, 'Bearer ' + TOKEN)
+      assert.equal(config.headers['Content-Type'], 'application/json')
+      assert.equal(config.headers.Accept, 'application/json')
+    })
+
+    it('should return null if dissolution does not exist for the provided company', async () => {
       getStub = sinon.stub().rejects(
         {
           response:
@@ -97,7 +121,7 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers['Content-Type'], 'application/json')
       assert.equal(config.headers.Accept, 'application/json')
 
-      assert.equal(response, null)
+      assert.isNull(response)
     })
   })
 })

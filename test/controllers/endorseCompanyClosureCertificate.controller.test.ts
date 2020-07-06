@@ -38,7 +38,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
   })
 
   describe('GET request', () => {
-    it('should render the view company information page with company info', async () => {
+    it('should render endorse certificate page', async () => {
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
@@ -51,9 +51,9 @@ describe('EndorseCompanyClosureCertificateController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Application to close a company (DS01)'))
-      assert.include(res.text, 'Company 1')
-      assert.include(res.text, '123456789')
-      assert.include(res.text, 'John Smith')
+      assert.isTrue(htmlAssertHelper.hasText('span#companyName', 'Company name: Company 1'))
+      assert.isTrue(htmlAssertHelper.hasText('span#companyNumber', 'Company number: 123456789'))
+      assert.isTrue(htmlAssertHelper.hasText('span#applicantName', 'John Smith'))
     })
   })
 })

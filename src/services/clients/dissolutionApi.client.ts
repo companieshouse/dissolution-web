@@ -47,7 +47,7 @@ export class DissolutionApiClient {
       if (err.response!.status === 404) {
         return null
       } else {
-        throw err
+        return Promise.reject(err)
       }
     })
     return (response ? response.data : null)

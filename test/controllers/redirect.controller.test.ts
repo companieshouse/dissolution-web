@@ -9,7 +9,7 @@ import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/redirect.controller'
-import { ApplicationStatusEnum } from 'app/models/dto/applicationStatus.enum'
+import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, ROOT_URI, SELECT_DIRECTOR_URI } from 'app/paths'
@@ -52,12 +52,12 @@ describe('RedirectController', () => {
         .expect('Location', SELECT_DIRECTOR_URI)
     })
 
-    it('should redirect to sign certificate page if the application is pending approval', async () => {
+    it('should redirect to sign certificate page if the application is pending approval and user is pending signatory', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
 
       dissolution.directors[0].email = USER_EMAIL
-      dissolution.application_status = ApplicationStatusEnum.PENDING_APPROVAL
+      dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
 
       when(session.getUserEmail(anything())).thenReturn(USER_EMAIL)
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
@@ -87,7 +87,7 @@ describe('RedirectController', () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
 
-      dissolution.application_status = ApplicationStatusEnum.PENDING_APPROVAL
+      dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
 
       when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
