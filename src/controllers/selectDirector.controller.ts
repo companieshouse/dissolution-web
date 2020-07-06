@@ -91,8 +91,14 @@ export class SelectDirectorController extends BaseController {
   }
 
   private updateSession(body: SelectDirectorFormModel, selectedDirector?: Optional<DirectorDetails>): void {
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+
+    if (!this.hasFormChanged(body, session)) {
+      return
+    }
+
     const updatedSession: DissolutionSession = {
-      ...this.session.getDissolutionSession(this.httpContext.request),
+      ...session,
       selectDirectorForm: body,
       directorsToSign: this.getDirectorsToSign(selectedDirector)
     }
@@ -100,10 +106,15 @@ export class SelectDirectorController extends BaseController {
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 
+  private hasFormChanged(body: SelectDirectorFormModel, session: DissolutionSession): boolean {
+    return session.selectDirectorForm?.director !== body.director
+  }
+
   private getDirectorsToSign(selectedDirector?: Optional<DirectorDetails>): DirectorToSign[] {
     return selectedDirector ? [{
       id: selectedDirector.id,
       name: selectedDirector.name,
+      isApplicant: true,
       email: this.session.getUserEmail(this.httpContext.request)
     }] : []
   }

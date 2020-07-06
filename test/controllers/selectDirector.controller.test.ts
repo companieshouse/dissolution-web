@@ -129,6 +129,30 @@ describe('SelectDirectorController', () => {
     })
 
     describe('session', () => {
+      it('should not update session if nothing has changed', async () => {
+        const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
+
+        dissolutionSession.selectDirectorForm = form
+
+        when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+          { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
+        ])
+        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+          container.rebind(FormValidator).toConstantValue(instance(validator))
+        })
+
+        await request(app)
+          .post(SELECT_DIRECTOR_URI)
+          .send(form)
+          .expect(MOVED_TEMPORARILY)
+
+        verify(session.setDissolutionSession(anything(), anything())).never()
+      })
+
       it('should store the form in session if validation passes', async () => {
         const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
 
@@ -188,6 +212,7 @@ describe('SelectDirectorController', () => {
         assert.equal(updatedSession.directorsToSign![0].id, DIRECTOR_1_ID)
         assert.equal(updatedSession.directorsToSign![0].name, directorName)
         assert.equal(updatedSession.directorsToSign![0].email, directorEmail)
+        assert.isTrue(updatedSession.directorsToSign![0].isApplicant)
       })
 
       it('should not store the director details if applicant is not a director', async () => {

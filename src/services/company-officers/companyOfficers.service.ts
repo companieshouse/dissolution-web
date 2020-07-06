@@ -16,16 +16,31 @@ export default class CompanyOfficersService {
     @inject(CompanyOfficersClient) private client: CompanyOfficersClient,
     @inject(DirectorDetailsMapper) private directorMapper: DirectorDetailsMapper) {}
 
-  public async getActiveDirectorsForCompany(token: string, companyNumber: string): Promise<DirectorDetails[]> {
+  public async getActiveDirectorsForCompany(token: string, companyNumber: string, directorToExclude?: string): Promise<DirectorDetails[]> {
     const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber)
 
     if (!response.resource) {
       return Promise.reject(`No officers found for company [${companyNumber}]`)
     }
 
-    return response.resource!.items
+    const activeDirectors: DirectorDetails[] = response.resource!.items
       .filter((officer: CompanyOfficer) => officer.officerRole === 'director')
       .filter((director: CompanyOfficer) => !director.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
+
+    return directorToExclude ? this.exclueDirector(activeDirectors, directorToExclude) : activeDirectors
+  }
+
+  private exclueDirector(activeDirectors: DirectorDetails[], directorToExclude: string): DirectorDetails[] {
+    return activeDirectors.filter(activeDirector => activeDirector.id !== directorToExclude)
+  }
+
+  public getMinimumNumberOfSignatores(totalSignatories: number, selectedDirector: string): number {
+    const isApplicantADirector: boolean = selectedDirector !== 'other'
+    const totalActiveDirectors: number = isApplicantADirector ? totalSignatories + 1 : totalSignatories
+
+    const majority: number = Math.floor(((totalActiveDirectors / 2) + 1))
+
+    return isApplicantADirector ? majority - 1 : majority
   }
 }
