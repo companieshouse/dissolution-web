@@ -1,0 +1,49 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% block pageTitle %}
+  How will the directors be signing the application?
+{% endblock %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: "Back",
+      href: Paths.SELECT_DIRECTOR_URI
+    })
+  }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">How will the directors be signing the application?</h1>
+
+      <form method="post">
+        {% for signatory in signatories %}
+          {% include "components/define-signatory-info/signatory-details.njk" %}
+
+          {% if signatories | length !== loop.index %}
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+          {% endif %}
+        {% endfor %}
+
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

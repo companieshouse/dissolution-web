@@ -1,0 +1,105 @@
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/input/macro.njk"  import govukInput %}
+
+{% set willSignSection %}
+  {{
+    govukInput({
+      id: "director-email_" + signatory.id,
+      name: "directorEmail_" + signatory.id,
+      type: "email",
+      classes: "govuk-!-width-full",
+      label: {
+        text: "What is the email address for " + signatory.name + "?"
+      },
+      hint: {
+        text: "We will use this to confirm their identity when they sign the application."
+      },
+      errorMessage: {
+        text: errors["directorEmail_" + signatory.id]
+      } if errors["directorEmail_" + signatory.id],
+      attributes: {
+        spellcheck: "false"
+      },
+      value: data["directorEmail_" + signatory.id] if data
+    })
+  }}
+{% endset -%}
+
+{% set onBehalfSection %}
+  {{
+    govukInput({
+      id: "on-behalf-name_" + signatory.id,
+      name: "onBehalfName_" + signatory.id,
+      classes: "govuk-!-width-full",
+      label: {
+        text: "What is the name of the person signing for " + signatory.name + "?"
+      },
+      errorMessage: {
+        text: errors["onBehalfName_" + signatory.id]
+      } if errors["onBehalfName_" + signatory.id],
+      attributes: {
+        spellcheck: "false"
+      },
+      value: data["onBehalfName_" + signatory.id] if data
+    })
+  }}
+
+  {{
+    govukInput({
+      id: "on-behalf-email_" + signatory.id,
+      name: "onBehalfEmail_" + signatory.id,
+      type: "email",
+      classes: "govuk-!-width-full",
+      label: {
+        text: "What is the email address of the person signing for " + signatory.name + "?"
+      },
+      hint: {
+        text: "We will use this to confirm their identity when they sign the application."
+      },
+      errorMessage: {
+        text: errors["onBehalfEmail_" + signatory.id]
+      } if errors["onBehalfEmail_" + signatory.id],
+      attributes: {
+        spellcheck: "false"
+      },
+      value: data["onBehalfEmail_" + signatory.id] if data
+    })
+  }}
+{% endset -%}
+
+{{
+  govukRadios({
+    idPrefix: "is-signing_" + signatory.id,
+    name: "isSigning_" + signatory.id,
+    fieldset: {
+      attributes: {
+        id: "signatory_" + signatory.id
+      },
+      legend: {
+        text: signatory.name,
+        classes: "govuk-fieldset__legend--m"
+      }
+    },
+    errorMessage: {
+      text: errors["isSigning_" + signatory.id]
+    } if errors["isSigning_" + signatory.id],
+    items: [
+      {
+        value: SignatorySigning.WILL_SIGN,
+        text: "Will sign",
+        conditional: {
+          html: willSignSection
+        },
+        checked: data["isSigning_" + signatory.id] === SignatorySigning.WILL_SIGN if data
+      },
+      {
+        value: SignatorySigning.ON_BEHALF,
+        text: "Someone will sign for them",
+        conditional: {
+          html: onBehalfSection
+        },
+        checked: data["isSigning_" + signatory.id] === SignatorySigning.ON_BEHALF if data
+      }
+    ]
+  })
+}}

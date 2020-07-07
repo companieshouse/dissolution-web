@@ -1,4 +1,5 @@
 import 'app/controllers/checkYourAnswers.controller'
+import 'app/controllers/defineSignatoryInfo.controller'
 import 'app/controllers/healthcheck.controller'
 import 'app/controllers/landing.controller'
 import 'app/controllers/searchCompany.controller'

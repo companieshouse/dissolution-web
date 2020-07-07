@@ -34,13 +34,4 @@ export default class CompanyOfficersService {
   private excludeDirector(activeDirectors: DirectorDetails[], directorToExclude: string): DirectorDetails[] {
     return activeDirectors.filter(activeDirector => activeDirector.id !== directorToExclude)
   }
-
-  public getMinimumNumberOfSignatories(totalSignatories: number, selectedDirector: string): number {
-    const isApplicantADirector: boolean = selectedDirector !== 'other'
-    const totalActiveDirectors: number = isApplicantADirector ? totalSignatories + 1 : totalSignatories
-
-    const majority: number = Math.floor(((totalActiveDirectors / 2) + 1))
-
-    return isApplicantADirector ? majority - 1 : majority
-  }
 }

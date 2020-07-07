@@ -145,46 +145,4 @@ describe('CompanyOfficersService', () => {
       assert.equal(result[0], director2Details)
     })
   })
-
-  describe('getMinimumNumberOfSignatories', () => {
-    it(`should calculate the majority of signatories to select if the applicant is a director and there is an even number of total
-      directors`, () => {
-      const result: number = service.getMinimumNumberOfSignatories(5, '123')
-
-      assert.equal(result, 3)
-    })
-
-    it(`should calculate the majority of signatories to select if the applicant is not a director and there is an even number of total
-      directors`, () => {
-      const result: number = service.getMinimumNumberOfSignatories(6, 'other')
-
-      assert.equal(result, 4)
-    })
-
-    it(`should calculate the majority of signatories to select if the applicant is a director and there is an odd number of total
-      directors`, () => {
-      const result: number = service.getMinimumNumberOfSignatories(4, '123')
-
-      assert.equal(result, 2)
-    })
-
-    it(`should calculate the majority of signatories to select if the applicant is not a director and there is an odd number of total
-      directors`, () => {
-      const result: number = service.getMinimumNumberOfSignatories(5, 'other')
-
-      assert.equal(result, 3)
-    })
-
-    it(`should ensure that all signatories must be selected if company only has 2 directors and applicant is not a director`, () => {
-      const result: number = service.getMinimumNumberOfSignatories(2, 'other')
-
-      assert.equal(result, 2)
-    })
-
-    it(`should ensure that all signatories must be selected if company only has 2 directors and applicant is a director`, () => {
-      const result: number = service.getMinimumNumberOfSignatories(1, 'other')
-
-      assert.equal(result, 1)
-    })
-  })
 })
