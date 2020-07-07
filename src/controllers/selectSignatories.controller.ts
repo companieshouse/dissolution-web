@@ -89,7 +89,7 @@ export class SelectSignatoriesController extends BaseController {
   }
 
   private validate(body: SelectSignatoriesFormModel, totalSignatories: number, session: DissolutionSession): Optional<ValidationErrors> {
-    const minSignatories: number = this.officerService.getMinimumNumberOfSignatores(totalSignatories, session.selectDirectorForm!.director!)
+    const minSignatories: number = this.officerService.getMinimumNumberOfSignatories(totalSignatories, session.selectDirectorForm!.director!)
     return this.validator.validate(body, selectSignatoriesSchema(minSignatories))
   }
 

@@ -113,7 +113,7 @@ describe('SelectSignatoriesController', () => {
 
     beforeEach(() => {
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-      when(officerService.getMinimumNumberOfSignatores(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
+      when(officerService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
     })
 
     it('should re-render the view with an error if validation fails', async () => {

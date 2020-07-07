@@ -28,14 +28,14 @@ export default class CompanyOfficersService {
       .filter((director: CompanyOfficer) => !director.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
 
-    return directorToExclude ? this.exclueDirector(activeDirectors, directorToExclude) : activeDirectors
+    return directorToExclude ? this.excludeDirector(activeDirectors, directorToExclude) : activeDirectors
   }
 
-  private exclueDirector(activeDirectors: DirectorDetails[], directorToExclude: string): DirectorDetails[] {
+  private excludeDirector(activeDirectors: DirectorDetails[], directorToExclude: string): DirectorDetails[] {
     return activeDirectors.filter(activeDirector => activeDirector.id !== directorToExclude)
   }
 
-  public getMinimumNumberOfSignatores(totalSignatories: number, selectedDirector: string): number {
+  public getMinimumNumberOfSignatories(totalSignatories: number, selectedDirector: string): number {
     const isApplicantADirector: boolean = selectedDirector !== 'other'
     const totalActiveDirectors: number = isApplicantADirector ? totalSignatories + 1 : totalSignatories
 
