@@ -10,7 +10,13 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, ROOT_URI, SELECT_DIRECTOR_URI } from 'app/paths'
+import {
+  ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  REDIRECT_GATE_URI,
+  ROOT_URI,
+  SELECT_DIRECTOR_URI,
+  WAIT_FOR_OTHERS_TO_SIGN_URI
+} from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
@@ -28,12 +34,13 @@ export class RedirectController extends BaseController {
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
     const token: string = this.session.getAccessToken(this.httpContext.request)
     const dissolution: Optional<DissolutionGetResponse> = await this.service.getDissolution(token, dissolutionSession)
+    const userEmail: string = this.session.getUserEmail(this.httpContext.request)
 
     if (!dissolution) {
       return this.redirect(SELECT_DIRECTOR_URI)
     }
 
-    const signingDirector: Optional<DissolutionGetDirector> = this.getUserPendingSignature(dissolution!)
+    const signingDirector: Optional<DissolutionGetDirector> = this.getUserPendingSignature(dissolution!, userEmail)
 
     if (dissolution!.application_status === ApplicationStatus.PENDING_APPROVAL && signingDirector) {
 
@@ -43,13 +50,19 @@ export class RedirectController extends BaseController {
       return this.redirect(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
     }
 
+    if (dissolution!.application_status === ApplicationStatus.PENDING_APPROVAL && this.getUserAlreadySigned(dissolution, userEmail)) {
+      return this.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+    }
+
     return this.redirect(ROOT_URI + '/')
   }
 
-  private getUserPendingSignature(dissolution: DissolutionGetResponse): Optional<DissolutionGetDirector> {
-    const userEmail: string = this.session.getUserEmail(this.httpContext.request)
-
+  private getUserPendingSignature(dissolution: DissolutionGetResponse, userEmail: string): Optional<DissolutionGetDirector> {
     return dissolution.directors.find(director => director.email === userEmail && !director.approved_at)
+  }
+
+  private getUserAlreadySigned(dissolution: DissolutionGetResponse, userEmail: string): Optional<DissolutionGetDirector> {
+    return dissolution.directors.find(director => director.email === userEmail && director.approved_at)
   }
 
   private prepareApprovalData(dissolution: DissolutionGetResponse, signingDirector: DissolutionGetDirector): DissolutionApprovalModel {

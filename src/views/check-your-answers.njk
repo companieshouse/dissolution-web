@@ -4,57 +4,98 @@
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 {% from "govuk/components/summary-list/macro.njk"  import govukSummaryList %}
 
-
 {% block pageTitle %}
   Check your answers
 {% endblock %}
 
 {% block content %}
-  {{ govukBackLink({
-    text: 'Back',
-    href: Paths.SELECT_DIRECTOR_URI
-  }) }}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: Paths.DEFINE_SIGNATORY_INFO_URI
+    })
+  }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">Check your answers</h1>
       {% for director in directors %}
         <h2 class="govuk-heading-m">{{ director.name }}</h2>
-        {{ 
-          govukSummaryList({
-            classes: 'govuk-!-margin-bottom-0',
-            attributes: { id: 'director-details' },
-            rows: [
-              {
-                key: {
+        {% if director.isDirectorSigning == 'Yes' %}
+          {{
+            govukSummaryList({
+              classes: 'govuk-!-margin-bottom-0',
+              attributes: { id: 'director-details' },
+              rows: [
+                {
+                  key: {
+                    text: "Will sign"
+                  },
+                  value: {
+                    text: director.isDirectorSigning
+                  },
+                  classes: "director-signing"
+                },
+                {
+                  key: {
+                    text: "Email address"
+                  },
+                  value: {
+                    text: director.email
+                  },
+                  classes: "director-email"
+                }
+              ]
+            })
+          }}
+        {% else %}
+          {{
+            govukSummaryList({
+              classes: 'govuk-!-margin-bottom-0',
+              attributes: { id: 'director-details' },
+              rows: [
+                {
+                  key: {
                   text: "Will sign"
                 },
-                value: {
+                  value: {
                   text: director.isDirectorSigning
                 },
-                classes: "director-signing"
-              },
-              {
-                key: {
-                  text: "Email address"
+                  classes: "director-signing"
                 },
-                value: {
+                {
+                  key: {
+                  text: "Name of a person signing"
+                },
+                  value: {
+                  text: director.onBehalfName
+                },
+                  classes: "on-behalf-name"
+                },
+                {
+                  key: {
+                  text: "Email address of person signing"
+                },
+                  value: {
                   text: director.email
                 },
-                classes: "director-email"
-              }
-            ]
-          })
-        }}
+                  classes: "on-behalf-email"
+                }
+              ]
+            })
+          }}
+        {% endif %}
         <p class="govuk-!-margin-bottom-9"><a class="govuk-link" href="{{ Paths.SELECT_DIRECTOR_URI }}">Change</a></p>
       {% endfor %}
 
       <form method="post">
-        {{ govukButton({
-          text: 'Continue',
-          attributes: {
-            id: 'submit'
-          }
-        }) }}
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
       </form>
     </div>
   </div>

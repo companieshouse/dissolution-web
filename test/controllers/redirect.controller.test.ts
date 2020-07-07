@@ -12,7 +12,13 @@ import 'app/controllers/redirect.controller'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, ROOT_URI, SELECT_DIRECTOR_URI } from 'app/paths'
+import {
+  ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  REDIRECT_GATE_URI,
+  ROOT_URI,
+  SELECT_DIRECTOR_URI,
+  WAIT_FOR_OTHERS_TO_SIGN_URI
+} from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -62,6 +68,7 @@ describe('RedirectController', () => {
       when(session.getUserEmail(anything())).thenReturn(USER_EMAIL)
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
         container.rebind(DissolutionService).toConstantValue(instance(service))
@@ -81,6 +88,30 @@ describe('RedirectController', () => {
       assert.equal(dissolution.company_name, updatedSession.approval!.companyName)
       assert.equal(dissolution.directors[0].name, updatedSession.approval!.applicant)
       assert.isNotNull(updatedSession.approval!.date)
+    })
+
+    it('should redirect to wait for others to sign page if the application is pending approval ' +
+      'and user is not pending signatory', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+
+      dissolution.directors[0].email = USER_EMAIL
+      dissolution.directors[0].approved_at = '2020-07-01'
+      dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
+
+      when(session.getUserEmail(anything())).thenReturn(USER_EMAIL)
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      await request(app)
+        .get(REDIRECT_GATE_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
     })
 
     it('should redirect to landing page as a fallback', async () => {
