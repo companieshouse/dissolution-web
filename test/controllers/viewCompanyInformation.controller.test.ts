@@ -10,7 +10,7 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 import 'app/controllers/viewCompanyInformation.controller'
 import CompanyDetails from 'app/models/companyDetails.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { SELECT_DIRECTOR_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
+import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -144,7 +144,7 @@ describe('ViewCompanyInformationController', () => {
       await request(createApp())
         .post(VIEW_COMPANY_INFORMATION_URI)
         .expect(MOVED_TEMPORARILY)
-        .expect('Location', SELECT_DIRECTOR_URI)
+        .expect('Location', REDIRECT_GATE_URI)
     })
   })
 })

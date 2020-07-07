@@ -1,0 +1,74 @@
+{% extends 'layout.njk' %}
+
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">Sign the application</h1>
+      <h2 class="govuk-heading-m">Apply to strike off and dissolve a company</h2>
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-9">
+        <div id="companyName">Company name: {{ approvalModel.companyName }}</div>
+        <div id="companyNumber">Company number: {{ approvalModel.companyNumber }}</div>
+      </h2>
+      {{
+        govukWarningText({
+          text: "You must read the following statements.",
+          iconFallbackText: "Warning"
+        })
+      }}
+      <h2 class="govuk-heading-m">Important notice for all interested parties</h2>
+
+      <p class="govuk-body">The company has applied to be struck off and dissolved.
+        The registrar will proceed unless there is a reasonable cause not to,
+        and on dissolution any assets remaining in the company will be passed to the Crown.
+        <a class="govuk-link"
+           href=https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#objecting-to-a-companys-dissolution
+           rel="noreferrer noopener" target="_blank">
+          Guidance is available on the grounds for objection (opens in a new tab)</a>.
+        If in doubt, seek professional advice.</p>
+
+      <h2 class="govuk-heading-m">Declaration of directors</h2>
+
+      <p class="govuk-body">I/We as directors / the majority of directors apply for this company to be struck off the Register
+        and declare that none of the circumstances described in section 1004 or 1005 of the Companies Act 2006
+        (being circumstances in which the directors would otherwise be prohibited under those sections).</p>
+
+      <form method="post">
+        {{
+          govukCheckboxes({
+            idPrefix: "confirmation",
+            name: "confirmation",
+            errorMessage: {
+              text: errors.confirmation
+            } if errors.confirmation,
+            items: [
+              {
+                value: "understood",
+                html: "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>"
+              }
+            ]
+          })
+        }}
+        {{
+          govukButton({
+            text: 'Sign the application',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

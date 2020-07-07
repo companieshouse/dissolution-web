@@ -1,3 +1,4 @@
+import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -7,5 +8,6 @@ export default interface DissolutionSession {
   selectDirectorForm?: SelectDirectorFormModel
   selectSignatoriesForm?: SelectSignatoriesFormModel
   directorsToSign?: DirectorToSign[],
-  applicationReferenceNumber?: string
+  applicationReferenceNumber?: string,
+  approval?: DissolutionApprovalModel
 }
