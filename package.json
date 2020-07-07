@@ -36,6 +36,7 @@
     "inversify": "^5.0.1",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.3.2",
+    "momentjs": "^2.0.0",
     "node-jose": "^1.1.4",
     "nunjucks": "^3.2.1",
     "reflect-metadata": "^0.1.13",

@@ -2,6 +2,8 @@ export const ROOT_URI = '/close-a-company'
 
 export const HEALTHCHECK_URI = `${ROOT_URI}/healthcheck`
 
+export const REDIRECT_GATE_URI = `${ROOT_URI}/redirect`
+
 // Pages
 export const WHO_TO_TELL_URI = `${ROOT_URI}/who-to-tell`
 export const SEARCH_COMPANY_URI = `${ROOT_URI}/search-company`
