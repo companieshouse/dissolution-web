@@ -50,7 +50,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h1', 'Application to close a company (DS01)'))
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Sign the application'))
       assert.isTrue(htmlAssertHelper.hasText('span#companyName', 'Company name: Company 1'))
       assert.isTrue(htmlAssertHelper.hasText('span#companyNumber', 'Company number: 123456789'))
       assert.isTrue(htmlAssertHelper.hasText('span#applicantName', 'John Smith'))

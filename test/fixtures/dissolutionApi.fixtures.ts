@@ -63,7 +63,6 @@ export function generateGetDirector(name: string): DissolutionGetDirector {
   return {
     name,
     email: generateEmail(name),
-    approved_at: new Date().toDateString(),
   }
 }
 
