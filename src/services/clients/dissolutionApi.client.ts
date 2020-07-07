@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 
@@ -20,36 +20,40 @@ export class DissolutionApiClient {
   public async createDissolution(token: string, companyNumber: string,
                                  body: DissolutionCreateRequest): Promise<DissolutionCreateResponse> {
     const response: AxiosResponse<DissolutionCreateResponse> = await this.axios.post(
-      `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`,
+      this.generateUrl(companyNumber),
       body,
-      {
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
+      this.generateConfig(token)
     )
     return response.data
   }
 
   public async getDissolution(token: string, companyNumber: string): Promise<Optional<DissolutionGetResponse>> {
-    const response: Optional<AxiosResponse<DissolutionGetResponse>> = await this.axios.get(
-      `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`,
-      {
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      }
-    ).catch((err: AxiosError) => {
+    try {
+      const response: Optional<AxiosResponse<DissolutionGetResponse>> = await this.axios.get(this.generateUrl(companyNumber),
+        this.generateConfig(token)
+      )
+
+      return response!.data
+    } catch (err) {
       if (err.response!.status === 404) {
         return null
-      } else {
-        return Promise.reject(err)
       }
-    })
-    return (response ? response.data : null)
+
+      return Promise.reject(err)
+    }
+  }
+
+  private generateConfig(token: string): AxiosRequestConfig {
+    return {
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    }
+  }
+
+  private generateUrl(companyNumber: string): string {
+    return `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`
   }
 }

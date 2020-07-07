@@ -1,12 +1,9 @@
 {% extends 'layout.njk' %}
 
-{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
-{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 {% from 'govuk/components/button/macro.njk' import govukButton %}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
-{% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% block pageTitle %}
@@ -19,16 +16,17 @@
       {% include 'components/errors/error-summary.njk' %}
 
       <h1 class="govuk-heading-xl">Application to close a company (DS01)</h1>
-      <h2 class="govuk-heading-m" id="companyData">
+      <h2 class="govuk-heading-m">
         <span id="companyName">Company name: {{ approvalModel.companyName }}</span>
         <br>
         <span id="companyNumber">Company number: {{ approvalModel.companyNumber }}</span>
       </h2>
-      <br>
-      {{ govukWarningText({
-        text: "You must read the following statements.",
-        iconFallbackText: "Warning"
-      }) }}
+      {{
+        govukWarningText({
+          text: "You must read the following statements.",
+          iconFallbackText: "Warning"
+        })
+      }}
       <h2 class="govuk-heading-m">Important notice for all interested parties</h2>
 
       <p class="govuk-body">The company has applied to be struck off and dissolved.
@@ -46,25 +44,29 @@
         (being circumstances in which the directors would otherwise be prohibited under those sections).</p>
 
       <form method="post">
-        {{ govukCheckboxes({
-          idPrefix: "confirmation",
-          name: "confirmation",
-          errorMessage: {
-            text: errors.confirmation
-          } if errors.confirmation,
-          items: [
-            {
-              value: "understood",
-              html: "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>"
+        {{
+          govukCheckboxes({
+            idPrefix: "confirmation",
+            name: "confirmation",
+            errorMessage: {
+              text: errors.confirmation
+            } if errors.confirmation,
+            items: [
+              {
+                value: "understood",
+                html: "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>"
+              }
+            ]
+          })
+        }}
+        {{
+          govukButton({
+            text: 'Sign the application',
+            attributes: {
+              id: 'submit'
             }
-          ]
-        }) }}
-        {{ govukButton({
-          text: 'Sign the application',
-          attributes: {
-            id: 'submit'
-          }
-        }) }}
+          })
+        }}
       </form>
     </div>
   </div>
