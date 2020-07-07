@@ -13,7 +13,7 @@ import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, ROOT_URI, SELECT_DIRECTOR_URI } from 'app/paths'
-import { DissolutionService } from 'app/services/dissolution/dissolution.service'
+import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
 import { generateDissolutionGetResponse } from 'test/fixtures/dissolutionApi.fixtures'

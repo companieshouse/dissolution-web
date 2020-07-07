@@ -5,7 +5,7 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import { DissolutionLinks } from 'app/models/dto/dissolutionLinks'
-import { DissolutionApprovalModel } from 'app/models/form/dissolutionApproval.model'
+import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 import { generateEmail } from 'test/fixtures/util.fixtures'
 

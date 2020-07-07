@@ -12,7 +12,7 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 @provide(DissolutionService)
-export class DissolutionService {
+export default class DissolutionService {
 
   public constructor(
     @inject(DissolutionRequestMapper) private dissolutionRequestMapper: DissolutionRequestMapper,

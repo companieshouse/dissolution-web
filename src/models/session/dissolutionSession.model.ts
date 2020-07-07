@@ -1,4 +1,4 @@
-import { DissolutionApprovalModel } from 'app/models/form/dissolutionApproval.model'
+import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 
