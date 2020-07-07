@@ -78,19 +78,19 @@ describe('DefineSignatoryInfoController', () => {
 
       assert.isTrue(htmlAssertHelper.selectorExists(`#signatory_${SIGNATORY_1_ID}`))
       assert.isTrue(htmlAssertHelper.hasText(`#signatory_${SIGNATORY_1_ID} legend`, 'Jimmy McGuiness'))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#isSigning_${SIGNATORY_1_ID}`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#isSigning_${SIGNATORY_1_ID}-2`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#directorEmail_${SIGNATORY_1_ID}`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#onBehalfName_${SIGNATORY_1_ID}`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#onBehalfEmail_${SIGNATORY_1_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_1_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_1_ID}-2`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#director-email_${SIGNATORY_1_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name_${SIGNATORY_1_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email_${SIGNATORY_1_ID}`))
 
       assert.isTrue(htmlAssertHelper.selectorExists(`#signatory_${SIGNATORY_2_ID}`))
       assert.isTrue(htmlAssertHelper.hasText(`#signatory_${SIGNATORY_2_ID} legend`, 'Jane Smith'))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#isSigning_${SIGNATORY_2_ID}`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#isSigning_${SIGNATORY_2_ID}-2`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#directorEmail_${SIGNATORY_2_ID}`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#onBehalfName_${SIGNATORY_2_ID}`))
-      assert.isTrue(htmlAssertHelper.selectorExists(`#onBehalfEmail_${SIGNATORY_2_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_2_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_2_ID}-2`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#director-email_${SIGNATORY_2_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name_${SIGNATORY_2_ID}`))
+      assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email_${SIGNATORY_2_ID}`))
     })
 
     it('should prepopulate the select director page with the selected director from session', async () => {
@@ -120,17 +120,17 @@ describe('DefineSignatoryInfoController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasAttribute(`#isSigning_${SIGNATORY_1_ID}`, 'checked'))
-      assert.isFalse(htmlAssertHelper.hasAttribute(`#isSigning_${SIGNATORY_1_ID}-2`, 'checked'))
-      assert.equal(htmlAssertHelper.getValue(`#directorEmail_${SIGNATORY_1_ID}`), 'director@mail.com')
-      assert.isNull(htmlAssertHelper.getValue(`#onBehalfName_${SIGNATORY_1_ID}`))
-      assert.isNull(htmlAssertHelper.getValue(`#onBehalfEmail_${SIGNATORY_1_ID}`))
+      assert.isTrue(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_1_ID}`, 'checked'))
+      assert.isFalse(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_1_ID}-2`, 'checked'))
+      assert.equal(htmlAssertHelper.getValue(`#director-email_${SIGNATORY_1_ID}`), 'director@mail.com')
+      assert.isNull(htmlAssertHelper.getValue(`#on-behalf-name_${SIGNATORY_1_ID}`))
+      assert.isNull(htmlAssertHelper.getValue(`#on-behalf-email_${SIGNATORY_1_ID}`))
 
-      assert.isFalse(htmlAssertHelper.hasAttribute(`#isSigning_${SIGNATORY_2_ID}`, 'checked'))
-      assert.isTrue(htmlAssertHelper.hasAttribute(`#isSigning_${SIGNATORY_2_ID}-2`, 'checked'))
-      assert.isNull(htmlAssertHelper.getValue(`#directorEmail_${SIGNATORY_2_ID}`))
-      assert.equal(htmlAssertHelper.getValue(`#onBehalfName_${SIGNATORY_2_ID}`), 'Mr Accountant')
-      assert.equal(htmlAssertHelper.getValue(`#onBehalfEmail_${SIGNATORY_2_ID}`), 'accountant@mail.com')
+      assert.isFalse(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_2_ID}`, 'checked'))
+      assert.isTrue(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_2_ID}-2`, 'checked'))
+      assert.isNull(htmlAssertHelper.getValue(`#director-email_${SIGNATORY_2_ID}`))
+      assert.equal(htmlAssertHelper.getValue(`#on-behalf-name_${SIGNATORY_2_ID}`), 'Mr Accountant')
+      assert.equal(htmlAssertHelper.getValue(`#on-behalf-email_${SIGNATORY_2_ID}`), 'accountant@mail.com')
     })
   })
 
@@ -160,7 +160,7 @@ describe('DefineSignatoryInfoController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
-      assert.isTrue(htmlAssertHelper.containsText(`#isSigning_${SIGNATORY_2_ID}-error`, 'some is signing error'))
+      assert.isTrue(htmlAssertHelper.containsText(`#is-signing_${SIGNATORY_2_ID}-error`, 'some is signing error'))
     })
 
     describe('session', () => {
