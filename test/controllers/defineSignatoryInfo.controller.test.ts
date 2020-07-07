@@ -17,7 +17,7 @@ import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from 'app/paths'
+import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
 import SignatoryService from 'app/services/signatories/signatory.service'
 import FormValidator from 'app/utils/formValidator.util'
@@ -131,6 +131,44 @@ describe('DefineSignatoryInfoController', () => {
       assert.isNull(htmlAssertHelper.getValue(`#director-email_${SIGNATORY_2_ID}`))
       assert.equal(htmlAssertHelper.getValue(`#on-behalf-name_${SIGNATORY_2_ID}`), 'Mr Accountant')
       assert.equal(htmlAssertHelper.getValue(`#on-behalf-email_${SIGNATORY_2_ID}`), 'accountant@mail.com')
+    })
+
+    describe('back button', () => {
+      it('should set the button button to the select signatories page if multi director journey', async () => {
+        dissolutionSession.isMultiDirector = true
+
+        when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+        })
+
+        const res = await request(app)
+          .get(DEFINE_SIGNATORY_INFO_URI)
+          .expect(OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), SELECT_SIGNATORIES_URI)
+      })
+
+      it('should set the button button to the select director page if multi director journey', async () => {
+        dissolutionSession.isMultiDirector = false
+
+        when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+        })
+
+        const res = await request(app)
+          .get(DEFINE_SIGNATORY_INFO_URI)
+          .expect(OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), SELECT_DIRECTOR_URI)
+      })
     })
   })
 

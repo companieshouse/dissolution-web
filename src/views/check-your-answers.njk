@@ -12,14 +12,14 @@
 {% block content %}
   {{ govukBackLink({
     text: 'Back',
-    href: Paths.SELECT_DIRECTOR_URI
+    href: backUri
   }) }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">Check your answers</h1>
       {% for director in directors %}
         <h2 class="govuk-heading-m">{{ director.name }}</h2>
-        {{ 
+        {{
           govukSummaryList({
             classes: 'govuk-!-margin-bottom-0',
             attributes: { id: 'director-details' },

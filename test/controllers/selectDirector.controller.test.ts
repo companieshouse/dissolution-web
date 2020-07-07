@@ -208,6 +208,8 @@ describe('SelectDirectorController', () => {
         const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
         const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
+        assert.isTrue(updatedSession.isApplicantADirector)
+        assert.isFalse(updatedSession.isMultiDirector)
         assert.equal(updatedSession.directorsToSign!.length, 1)
         assert.equal(updatedSession.directorsToSign![0], applicant)
       })
@@ -235,6 +237,8 @@ describe('SelectDirectorController', () => {
         const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
         const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
+        assert.isFalse(updatedSession.isApplicantADirector)
+        assert.isFalse(updatedSession.isMultiDirector)
         assert.equal(updatedSession.directorsToSign!.length, 1)
         assert.equal(updatedSession.directorsToSign![0], signatory)
       })
@@ -260,6 +264,8 @@ describe('SelectDirectorController', () => {
         const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
         const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
+        assert.isFalse(updatedSession.isApplicantADirector)
+        assert.isTrue(updatedSession.isMultiDirector)
         assert.isEmpty(updatedSession.directorsToSign)
       })
     })

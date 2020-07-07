@@ -18,6 +18,7 @@ import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
   signatories: DirectorToSign[]
+  isMultiDirector: boolean
   data?: Optional<DefineSignatoryInfoFormModel>
   errors?: Optional<ValidationErrors>
 }
@@ -38,7 +39,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
-    return this.renderView(signatories, session.defineSignatoryInfoForm)
+    return this.renderView(signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
   }
 
   @httpPost('')
@@ -49,7 +50,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
     const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(signatories))
     if (errors) {
-      return this.renderView(signatories, body, errors)
+      return this.renderView(signatories, session.isMultiDirector!, body, errors)
     }
 
     this.updateSession(session, signatories, body)
@@ -63,10 +64,12 @@ export class DefineSignatoryInfoController extends BaseController {
 
   private async renderView(
     signatories: DirectorToSign[],
+    isMultiDirector: boolean,
     data?: Optional<DefineSignatoryInfoFormModel>,
     errors?: Optional<ValidationErrors>): Promise<string> {
     const viewModel: ViewModel = {
       signatories,
+      isMultiDirector,
       data,
       errors
     }

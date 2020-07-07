@@ -9,7 +9,9 @@ export default interface DissolutionSession {
   selectDirectorForm?: SelectDirectorFormModel
   selectSignatoriesForm?: SelectSignatoriesFormModel
   defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
-  directorsToSign?: DirectorToSign[],
-  applicationReferenceNumber?: string,
+  directorsToSign?: DirectorToSign[]
+  applicationReferenceNumber?: string
   approval?: DissolutionApprovalModel
+  isMultiDirector?: boolean
+  isApplicantADirector?: boolean
 }

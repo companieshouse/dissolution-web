@@ -1,12 +1,9 @@
 {% extends 'layout.njk' %}
 
-{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
-{% from "govuk/components/details/macro.njk" import govukDetails %}
-{% from 'govuk/components/button/macro.njk' import govukButton %}
-{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
-{% from "govuk/components/input/macro.njk" import govukInput %}
-{% from "govuk/components/input/macro.njk" import govukInput %}
-{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from 'govuk/components/button/macro.njk'         import govukButton %}
+{% from "govuk/components/error-summary/macro.njk"  import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk"          import govukInput %}
+{% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
 
 {% block pageTitle %}
   How will the directors be signing the application?
@@ -16,7 +13,7 @@
   {{
     govukBackLink({
       text: "Back",
-      href: Paths.SELECT_DIRECTOR_URI
+      href: Paths.SELECT_SIGNATORIES_URI if isMultiDirector else Paths.SELECT_DIRECTOR_URI
     })
   }}
 
@@ -26,7 +23,7 @@
 
       <h1 class="govuk-heading-xl">How will the directors be signing the application?</h1>
 
-      <form method="post">
+      <form method="post" novalidate>
         {% for signatory in signatories %}
           {% include "components/define-signatory-info/signatory-details.njk" %}
 
