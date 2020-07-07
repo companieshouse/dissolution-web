@@ -5,8 +5,8 @@ import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
-import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
-import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
+import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import Optional from 'app/models/optional'
 import TYPES from 'app/types'
 

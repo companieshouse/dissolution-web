@@ -11,7 +11,7 @@ interface ViewModel {
   approvalModel: DissolutionApprovalModel
 }
 
-@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
+@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class EndorseCompanyClosureCertificateController extends BaseController {
 
   public constructor(@inject(SessionService) private session: SessionService) {

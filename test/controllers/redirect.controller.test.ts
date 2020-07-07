@@ -10,7 +10,7 @@ import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/redirect.controller'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
-import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, ROOT_URI, SELECT_DIRECTOR_URI } from 'app/paths'
 import { DissolutionService } from 'app/services/dissolution/dissolution.service'
