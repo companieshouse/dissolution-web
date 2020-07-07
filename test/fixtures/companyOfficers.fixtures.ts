@@ -3,6 +3,7 @@ import Resource from 'ch-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
+import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
@@ -98,5 +99,11 @@ export function generateDirectorDetails(): DirectorDetails {
 export function generateSelectDirectorFormModel(director: string = '123'): SelectDirectorFormModel {
   return {
     director
+  }
+}
+
+export function generateSelectSignatoriesFormModel(...signatories: string[]): SelectSignatoriesFormModel {
+  return {
+    signatories: signatories || ['123']
   }
 }
