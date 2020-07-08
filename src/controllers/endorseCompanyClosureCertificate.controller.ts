@@ -3,7 +3,7 @@ import { controller, httpGet, httpPost } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, } from 'app/paths'
+import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
@@ -30,6 +30,6 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
   @httpPost('')
   public post(): void {
-    this.httpContext.response.redirect(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI) // TODO redirect to correct url
+    this.httpContext.response.redirect(REDIRECT_GATE_URI)
   }
 }

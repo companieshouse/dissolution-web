@@ -45,7 +45,7 @@ describe('CheckYourAnswersController', () => {
   })
 
   describe('GET - ensure that page loads correctly', () => {
-    it('render single director on page', async () => {
+    it('render correct rows for single signing director', async () => {
       const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector()
       director.name = DIRECTOR_1_NAME
       director.email = DIRECTOR_1_EMAIL
@@ -70,6 +70,37 @@ describe('CheckYourAnswersController', () => {
       assert.isTrue(htmlAssertHelper.hasText('h2', DIRECTOR_1_NAME))
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-email dd', 'test@mail.com'))
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-signing dd', 'Yes'))
+      assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#director-details .director-on-behalf-name dd'))
+
+    })
+
+    it('render correct rows for single director that is not signing personally', async () => {
+      const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector()
+      director.name = DIRECTOR_1_NAME
+      director.email = DIRECTOR_1_EMAIL
+      director.isDirectorSigning = 'No'
+      director.onBehalfName = 'Thor, God of Thunder'
+      dissolutionSession.directorsToSign = [generateDirectorToSign()]
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
+      })
+
+      const res = await request(app)
+        .get(CHECK_YOUR_ANSWERS_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Check your answers'))
+      assert.isTrue(htmlAssertHelper.hasText('h2', DIRECTOR_1_NAME))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-on-behalf-name dd', 'Thor, God of Thunder'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-email dd', 'test@mail.com'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-signing dd', 'No'))
     })
 
     describe('back link', () => {
