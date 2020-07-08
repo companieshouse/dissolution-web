@@ -22,12 +22,14 @@ import ValidationErrors from 'app/models/view/validationErrors.model'
 import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
 import SessionService from 'app/services/session/session.service'
+import SignatoryService from 'app/services/signatories/signatory.service'
 import FormValidator from 'app/utils/formValidator.util'
 
 describe('SelectSignatoriesController', () => {
 
   let session: SessionService
   let officerService: CompanyOfficersService
+  let signatoryService: SignatoryService
   let validator: FormValidator
   let mapper: DirectorToSignMapper
 
@@ -43,6 +45,7 @@ describe('SelectSignatoriesController', () => {
   beforeEach(() => {
     session = mock(SessionService)
     officerService = mock(CompanyOfficersService)
+    signatoryService = mock(SignatoryService)
     validator = mock(FormValidator)
     mapper = mock(DirectorToSignMapper)
 
@@ -113,7 +116,7 @@ describe('SelectSignatoriesController', () => {
 
     beforeEach(() => {
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-      when(officerService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
+      when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
     })
 
     it('should re-render the view with an error if validation fails', async () => {

@@ -15,6 +15,7 @@ import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import selectSignatoriesSchema from 'app/schemas/selectSignatories.schema'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
 import SessionService from 'app/services/session/session.service'
+import SignatoryService from 'app/services/signatories/signatory.service'
 import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
@@ -30,6 +31,7 @@ export class SelectSignatoriesController extends BaseController {
   public constructor(
     @inject(SessionService) private session: SessionService,
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
+    @inject(SignatoryService) private signatoryService: SignatoryService,
     @inject(FormValidator) private validator: FormValidator,
     @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper) {
     super()
@@ -89,7 +91,7 @@ export class SelectSignatoriesController extends BaseController {
   }
 
   private validate(body: SelectSignatoriesFormModel, totalSignatories: number, session: DissolutionSession): Optional<ValidationErrors> {
-    const minSignatories: number = this.officerService.getMinimumNumberOfSignatories(
+    const minSignatories: number = this.signatoryService.getMinimumNumberOfSignatories(
       totalSignatories,
       session.selectDirectorForm!.director!
     )

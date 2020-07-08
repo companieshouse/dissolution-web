@@ -13,7 +13,7 @@ import 'app/controllers/checkYourAnswers.controller'
 import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/checkYourAnswersDirector.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
-import { CHECK_YOUR_ANSWERS_URI, REDIRECT_GATE_URI } from 'app/paths'
+import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -101,6 +101,92 @@ describe('CheckYourAnswersController', () => {
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-on-behalf-name dd', 'Thor, God of Thunder'))
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-email dd', 'test@mail.com'))
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-signing dd', 'No'))
+    })
+
+    describe('back link', () => {
+      it('should set back to the select director page when single director journey and applicant is the director', async () => {
+        dissolutionSession.isMultiDirector = false
+        dissolutionSession.isApplicantADirector = true
+
+        when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+        when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
+        })
+
+        const res = await request(app)
+          .get(CHECK_YOUR_ANSWERS_URI)
+          .expect(OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), SELECT_DIRECTOR_URI)
+      })
+
+      it('should set back to the define signatory info page when single director journey and applicant is not the director', async () => {
+        dissolutionSession.isMultiDirector = false
+        dissolutionSession.isApplicantADirector = false
+
+        when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+        when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
+        })
+
+        const res = await request(app)
+          .get(CHECK_YOUR_ANSWERS_URI)
+          .expect(OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), DEFINE_SIGNATORY_INFO_URI)
+      })
+
+      it('should set back to the define signatory info page when multi director journey and applicant is the director', async () => {
+        dissolutionSession.isMultiDirector = true
+        dissolutionSession.isApplicantADirector = true
+
+        when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+        when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
+        })
+
+        const res = await request(app)
+          .get(CHECK_YOUR_ANSWERS_URI)
+          .expect(OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), DEFINE_SIGNATORY_INFO_URI)
+      })
+
+      it('should set back to the define signatory info page when multi director journey and applicant is not the director', async () => {
+        dissolutionSession.isMultiDirector = true
+        dissolutionSession.isApplicantADirector = false
+
+        when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+        when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+
+        const app = createApp(container => {
+          container.rebind(SessionService).toConstantValue(instance(session))
+          container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
+        })
+
+        const res = await request(app)
+          .get(CHECK_YOUR_ANSWERS_URI)
+          .expect(OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), DEFINE_SIGNATORY_INFO_URI)
+      })
     })
   })
 

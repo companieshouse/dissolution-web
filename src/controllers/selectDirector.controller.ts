@@ -102,7 +102,9 @@ export class SelectDirectorController extends BaseController {
     const updatedSession: DissolutionSession = {
       ...session,
       selectDirectorForm: body,
-      directorsToSign: this.prepareDirectorsToSign(directors, selectedDirector)
+      directorsToSign: this.prepareDirectorsToSign(directors, selectedDirector),
+      isMultiDirector: directors.length > 1,
+      isApplicantADirector: !!selectedDirector
     }
 
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)

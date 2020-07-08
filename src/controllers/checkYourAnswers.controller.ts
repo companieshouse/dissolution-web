@@ -7,17 +7,19 @@ import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/check
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
-import { CHECK_YOUR_ANSWERS_URI, REDIRECT_GATE_URI } from 'app/paths'
+import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
 interface ViewModel {
+  backUri: string
   directors?: CheckYourAnswersDirector[]
 }
 
 @controller(CHECK_YOUR_ANSWERS_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class CheckYourAnswersController extends BaseController {
+
   public constructor(
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(SessionService) private session: SessionService,
@@ -28,9 +30,16 @@ export class CheckYourAnswersController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const viewModel: ViewModel = {
+      backUri: this.getBackLink(),
       directors: this.getDirectors()
     }
     return super.render('check-your-answers', viewModel)
+  }
+
+  private getBackLink(): string {
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+
+    return session.isApplicantADirector && !session.isMultiDirector ? SELECT_DIRECTOR_URI : DEFINE_SIGNATORY_INFO_URI
   }
 
   @httpPost('')
