@@ -27,29 +27,29 @@
             rows: [
               {
                 key: {
-                text: "Will sign"
-              },
+                  text: "Will sign"
+                },
                 value: {
-                text: director.isDirectorSigning
-              },
+                  text: director.isDirectorSigning
+                },
                 classes: "director-signing"
               },
               {
                 key: {
-                text: "Name of a person signing"
-              },
+                  text: "Name of a person signing"
+                },
                 value: {
-                text: director.onBehalfName
-              },
+                  text: director.onBehalfName
+                },
                 classes: "director-on-behalf-name"
-              } if director.isDirectorSigning == 'No',
+              } if director.isDirectorSigning === 'No',
               {
                 key: {
-                text: director.isDirectorSigning | asEmailLabel
-              },
+                  text: director.isDirectorSigning | asEmailLabel
+                },
                 value: {
-                text: director.email
-              },
+                  text: director.email
+                },
                 classes: "director-email"
               }
             ]
