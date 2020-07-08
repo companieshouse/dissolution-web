@@ -4,22 +4,23 @@
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 {% from "govuk/components/summary-list/macro.njk"  import govukSummaryList %}
 
-
 {% block pageTitle %}
   Check your answers
 {% endblock %}
 
 {% block content %}
-  {{ govukBackLink({
-    text: 'Back',
-    href: Paths.SELECT_DIRECTOR_URI
-  }) }}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: Paths.DEFINE_SIGNATORY_INFO_URI
+    })
+  }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">Check your answers</h1>
       {% for director in directors %}
         <h2 class="govuk-heading-m">{{ director.name }}</h2>
-        {{ 
+        {{
           govukSummaryList({
             classes: 'govuk-!-margin-bottom-0',
             attributes: { id: 'director-details' },
@@ -35,7 +36,16 @@
               },
               {
                 key: {
-                  text: "Email address"
+                  text: "Name of a person signing"
+                },
+                value: {
+                  text: director.onBehalfName
+                },
+                classes: "director-on-behalf-name"
+              } if director.isDirectorSigning === 'No',
+              {
+                key: {
+                  text: director.isDirectorSigning | asEmailLabel
                 },
                 value: {
                   text: director.email
@@ -49,12 +59,14 @@
       {% endfor %}
 
       <form method="post">
-        {{ govukButton({
-          text: 'Continue',
-          attributes: {
-            id: 'submit'
-          }
-        }) }}
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
       </form>
     </div>
   </div>
