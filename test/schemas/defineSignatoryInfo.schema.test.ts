@@ -12,15 +12,20 @@ describe('Define Signatory Info Schema', () => {
   const SIGNATORY_1_ID = '123'
   const SIGNATORY_2_ID = '456'
 
+  const SIGNATORY_1_NAME = 'Signatory 1'
+  const SIGNATORY_2_NAME = 'Signatory 2'
+
   let signatory1: DirectorToSign
   let signatory2: DirectorToSign
 
   beforeEach(() => {
     signatory1 = generateDirectorToSign()
     signatory1.id = SIGNATORY_1_ID
+    signatory1.name = SIGNATORY_1_NAME
 
     signatory2 = generateDirectorToSign()
     signatory2.id = SIGNATORY_2_ID
+    signatory2.name = SIGNATORY_2_NAME
   })
 
   it('should return no errors when data is valid', () => {
@@ -61,11 +66,11 @@ describe('Define Signatory Info Schema', () => {
 
     assert.equal(errors.error!.details[0].context!.key, `isSigning_${SIGNATORY_1_ID}`)
     assert.equal(errors.error!.details[0].type, `any.only`)
-    assert.equal(errors.error!.details[0].message, 'Select how the director will be signing the application')
+    assert.equal(errors.error!.details[0].message, `Select how ${SIGNATORY_1_NAME} will be signing the application`)
 
     assert.equal(errors.error!.details[1].context!.key, `isSigning_${SIGNATORY_1_ID}`)
     assert.equal(errors.error!.details[1].type, `string.empty`)
-    assert.equal(errors.error!.details[1].message, 'Select how the director will be signing the application')
+    assert.equal(errors.error!.details[1].message, `Select how ${SIGNATORY_1_NAME} will be signing the application`)
   })
 
   it('should return an error if mandatory text fields have not been provided', () => {
@@ -88,15 +93,15 @@ describe('Define Signatory Info Schema', () => {
 
     assert.equal(errors.error!.details[0].context!.key, `directorEmail_${SIGNATORY_1_ID}`)
     assert.equal(errors.error!.details[0].type, `string.empty`)
-    assert.equal(errors.error!.details[0].message, 'Enter contact details for the directors')
+    assert.equal(errors.error!.details[0].message, `Enter the email address for ${SIGNATORY_1_NAME}`)
 
     assert.equal(errors.error!.details[1].context!.key, `onBehalfName_${SIGNATORY_2_ID}`)
     assert.equal(errors.error!.details[1].type, `string.empty`)
-    assert.equal(errors.error!.details[1].message, 'Enter contact details for the directors')
+    assert.equal(errors.error!.details[1].message, `Enter the name for the person signing on behalf of ${SIGNATORY_2_NAME}`)
 
     assert.equal(errors.error!.details[2].context!.key, `onBehalfEmail_${SIGNATORY_2_ID}`)
     assert.equal(errors.error!.details[2].type, `string.empty`)
-    assert.equal(errors.error!.details[2].message, 'Enter contact details for the directors')
+    assert.equal(errors.error!.details[2].message, `Enter the email address for the person signing on behalf of ${SIGNATORY_2_NAME}`)
   })
 
   it('should return an error if email fields do not contain valid email values', () => {
@@ -119,11 +124,11 @@ describe('Define Signatory Info Schema', () => {
 
     assert.equal(errors.error!.details[0].context!.key, `directorEmail_${SIGNATORY_1_ID}`)
     assert.equal(errors.error!.details[0].type, `string.email`)
-    assert.equal(errors.error!.details[0].message, 'Enter contact details for the directors')
+    assert.equal(errors.error!.details[0].message, `Enter a valid email address for ${SIGNATORY_1_NAME}`)
 
     assert.equal(errors.error!.details[1].context!.key, `onBehalfEmail_${SIGNATORY_2_ID}`)
     assert.equal(errors.error!.details[1].type, `string.email`)
-    assert.equal(errors.error!.details[1].message, 'Enter contact details for the directors')
+    assert.equal(errors.error!.details[1].message, `Enter a valid email address for the person signing on behalf of ${SIGNATORY_2_NAME}`)
   })
 
   it('should return an error if a name is provided that is above the maximum length', () => {
@@ -146,7 +151,7 @@ describe('Define Signatory Info Schema', () => {
 
     assert.equal(errors.error!.details[0].context!.key, `onBehalfName_${SIGNATORY_2_ID}`)
     assert.equal(errors.error!.details[0].type, `string.max`)
-    assert.equal(errors.error!.details[0].message, 'Enter contact details for the directors')
+    assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the person signing on behalf of ${SIGNATORY_2_NAME}`)
   })
 
   it('should ignore invalid fields if the associated radio option has not been selected', () => {

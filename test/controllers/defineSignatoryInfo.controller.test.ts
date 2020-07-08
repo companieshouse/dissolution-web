@@ -20,12 +20,10 @@ import ValidationErrors from 'app/models/view/validationErrors.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
 import SignatoryService from 'app/services/signatories/signatory.service'
-import FormValidator from 'app/utils/formValidator.util'
 
 describe('DefineSignatoryInfoController', () => {
 
   let session: SessionService
-  let validator: FormValidator
   let signatoryService: SignatoryService
 
   const APPLICANT_ID = '123'
@@ -36,7 +34,6 @@ describe('DefineSignatoryInfoController', () => {
 
   beforeEach(() => {
     session = mock(SessionService)
-    validator = mock(FormValidator)
     signatoryService = mock(SignatoryService)
 
     const applicant: DirectorToSign = generateDirectorToSign()
@@ -176,7 +173,6 @@ describe('DefineSignatoryInfoController', () => {
     function initApp(): Application {
       return createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(FormValidator).toConstantValue(instance(validator))
         container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
       })
     }
@@ -186,7 +182,7 @@ describe('DefineSignatoryInfoController', () => {
       const error: ValidationErrors = generateValidationError(`isSigning_${SIGNATORY_2_ID}`, 'some is signing error')
 
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-      when(validator.validate(deepEqual(form), anything())).thenReturn(error)
+      when(signatoryService.validateSignatoryInfo(anything(), deepEqual(form))).thenReturn(error)
 
       const app = initApp()
 
@@ -208,7 +204,7 @@ describe('DefineSignatoryInfoController', () => {
         dissolutionSession.defineSignatoryInfoForm = form
 
         when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-        when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+        when(signatoryService.validateSignatoryInfo(anything(), deepEqual(form))).thenReturn(null)
 
         const app = initApp()
 
@@ -226,7 +222,7 @@ describe('DefineSignatoryInfoController', () => {
         dissolutionSession.defineSignatoryInfoForm = undefined
 
         when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-        when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+        when(signatoryService.validateSignatoryInfo(anything(), deepEqual(form))).thenReturn(null)
 
         const app = initApp()
 
@@ -247,7 +243,7 @@ describe('DefineSignatoryInfoController', () => {
         const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
         when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-        when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+        when(signatoryService.validateSignatoryInfo(anything(), deepEqual(form))).thenReturn(null)
 
         const app = initApp()
 
@@ -272,7 +268,7 @@ describe('DefineSignatoryInfoController', () => {
       const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-      when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+      when(signatoryService.validateSignatoryInfo(anything(), deepEqual(form))).thenReturn(null)
 
       const app = initApp()
 
