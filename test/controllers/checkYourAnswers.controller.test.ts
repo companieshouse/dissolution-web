@@ -70,6 +70,8 @@ describe('CheckYourAnswersController', () => {
       assert.isTrue(htmlAssertHelper.hasText('h2', DIRECTOR_1_NAME))
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-email dd', 'test@mail.com'))
       assert.isTrue(htmlAssertHelper.hasText('#director-details .director-signing dd', 'Yes'))
+      assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#director-details .director-on-behalf-name dd'))
+
     })
 
     it('render correct rows for single director that is not signing personally', async () => {

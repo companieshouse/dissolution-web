@@ -20,41 +20,41 @@
       <h1 class="govuk-heading-xl">Check your answers</h1>
       {% for director in directors %}
         <h2 class="govuk-heading-m">{{ director.name }}</h2>
-          {{
-            govukSummaryList({
-              classes: 'govuk-!-margin-bottom-0',
-              attributes: { id: 'director-details' },
-              rows: [
-                {
-                  key: {
-                    text: "Will sign"
-                  },
-                  value: {
-                    text: director.isDirectorSigning
-                  },
-                  classes: "director-signing"
-                },
-                {
-                  key: {
-                  text: "Name of a person signing"
-                },
-                  value: {
-                  text: director.onBehalfName
-                },
-                  classes: "director-on-behalf-name"
-                } if director.isDirectorSigning == 'No',
-                {
-                  key: {
-                    text: director.isDirectorSigning | asEmailLabel
-                  },
-                  value: {
-                    text: director.email
-                  },
-                  classes: "director-email"
-                }
-              ]
-            })
-          }}
+        {{
+          govukSummaryList({
+            classes: 'govuk-!-margin-bottom-0',
+            attributes: { id: 'director-details' },
+            rows: [
+              {
+                key: {
+                text: "Will sign"
+              },
+                value: {
+                text: director.isDirectorSigning
+              },
+                classes: "director-signing"
+              },
+              {
+                key: {
+                text: "Name of a person signing"
+              },
+                value: {
+                text: director.onBehalfName
+              },
+                classes: "director-on-behalf-name"
+              } if director.isDirectorSigning == 'No',
+              {
+                key: {
+                text: director.isDirectorSigning | asEmailLabel
+              },
+                value: {
+                text: director.email
+              },
+                classes: "director-email"
+              }
+            ]
+          })
+        }}
         <p class="govuk-!-margin-bottom-9"><a class="govuk-link" href="{{ Paths.SELECT_DIRECTOR_URI }}">Change</a></p>
       {% endfor %}
 

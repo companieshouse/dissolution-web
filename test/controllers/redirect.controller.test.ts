@@ -13,6 +13,7 @@ import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
+  CERTIFICATE_SIGNED_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
   REDIRECT_GATE_URI,
   ROOT_URI,
@@ -90,11 +91,12 @@ describe('RedirectController', () => {
       assert.isNotNull(updatedSession.approval!.date)
     })
 
-    it('should redirect to wait for others to sign page if the application is pending approval ' +
+    it('should redirect to wait for others to sign page if the user is the applicant and application is pending approval ' +
       'and user is not pending signatory', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
 
+      dissolution.created_by = USER_EMAIL
       dissolution.directors[0].email = USER_EMAIL
       dissolution.directors[0].approved_at = '2020-07-01'
       dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
@@ -114,11 +116,33 @@ describe('RedirectController', () => {
         .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
     })
 
+    it('should redirect to certificate signed page when the user is not the applicant but has already signed ', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+
+      dissolution.directors[0].email = USER_EMAIL
+      dissolution.directors[0].approved_at = '2020-07-01'
+      dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
+
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      await request(app)
+        .get(REDIRECT_GATE_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', CERTIFICATE_SIGNED_URI)
+    })
+
     it('should redirect to landing page as a fallback', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
 
-      dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
+      dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
 
       when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
