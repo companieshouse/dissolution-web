@@ -1,0 +1,58 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/back-link/macro.njk'     import govukBackLink %}
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from "govuk/components/checkboxes/macro.njk"    import govukCheckboxes %}
+{% from 'govuk/components/button/macro.njk'        import govukButton %}
+
+{% block pageTitle %}
+  Which directors will be signing the application?
+{% endblock %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: Paths.SELECT_DIRECTOR_URI
+    })
+  }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% include 'components/errors/error-summary.njk' %}
+
+      <form method="post">
+        {{
+          govukCheckboxes({
+            idPrefix: "signatories",
+            name: "signatories",
+            fieldset: {
+              legend: {
+                text: "Which directors will be signing the application?",
+                isPageHeading: true,
+                classes: "govuk-fieldset__legend--l"
+              }
+            },
+            hint: {
+              text: "More than half of the directors must sign. You should also select directors who will have someone signing for them."
+            },
+            errorMessage: {
+              text: errors.signatories
+            } if errors.signatories,
+            items: signatories | asSelectSignatoriesList(data.signatories)
+          })
+        }}
+
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

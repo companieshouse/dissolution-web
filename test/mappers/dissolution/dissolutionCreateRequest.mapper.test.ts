@@ -2,7 +2,7 @@ import { assert } from 'chai'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
-import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 

@@ -45,6 +45,7 @@ export function generateDirectorToSign(): DirectorToSign {
   return {
     id: '123',
     name: 'Bob Smith',
-    email: 'test@mail.com'
+    email: 'test@mail.com',
+    isApplicant: false
   }
 }

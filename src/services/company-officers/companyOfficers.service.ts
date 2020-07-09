@@ -16,16 +16,22 @@ export default class CompanyOfficersService {
     @inject(CompanyOfficersClient) private client: CompanyOfficersClient,
     @inject(DirectorDetailsMapper) private directorMapper: DirectorDetailsMapper) {}
 
-  public async getActiveDirectorsForCompany(token: string, companyNumber: string): Promise<DirectorDetails[]> {
+  public async getActiveDirectorsForCompany(token: string, companyNumber: string, directorToExclude?: string): Promise<DirectorDetails[]> {
     const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber)
 
     if (!response.resource) {
       return Promise.reject(`No officers found for company [${companyNumber}]`)
     }
 
-    return response.resource!.items
+    const activeDirectors: DirectorDetails[] = response.resource!.items
       .filter((officer: CompanyOfficer) => officer.officerRole === 'director')
       .filter((director: CompanyOfficer) => !director.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
+
+    return directorToExclude ? this.excludeDirector(activeDirectors, directorToExclude) : activeDirectors
+  }
+
+  private excludeDirector(activeDirectors: DirectorDetails[], directorToExclude: string): DirectorDetails[] {
+    return activeDirectors.filter(activeDirector => activeDirector.id !== directorToExclude)
   }
 }

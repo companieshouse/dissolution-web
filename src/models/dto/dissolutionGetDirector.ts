@@ -1,4 +1,4 @@
-export interface DissolutionGetDirector {
+export default interface DissolutionGetDirector {
   name: string,
   email: string,
   approved_at?: string,

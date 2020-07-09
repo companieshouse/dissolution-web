@@ -2,7 +2,9 @@ import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Iden
 import Resource from 'ch-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
+import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
+import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
@@ -98,5 +100,21 @@ export function generateDirectorDetails(): DirectorDetails {
 export function generateSelectDirectorFormModel(director: string = '123'): SelectDirectorFormModel {
   return {
     director
+  }
+}
+
+export function generateSelectSignatoriesFormModel(...signatories: string[]): SelectSignatoriesFormModel {
+  return {
+    signatories: signatories || ['123']
+  }
+}
+
+export function generateDefineSignatoryInfoFormModel(): DefineSignatoryInfoFormModel {
+  return {
+    isSigning_123: SignatorySigning.WILL_SIGN,
+    directorEmail_123: 'director@mail.com',
+    isSigning_456: SignatorySigning.ON_BEHALF,
+    onBehalfName_456: 'Mr Accountant',
+    onBehalfEmail_456: 'accountant@mail.com'
   }
 }

@@ -3,13 +3,13 @@ import { instance, mock, verify, when } from 'ts-mockito'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
-import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
-import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
-import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
-import { DissolutionService } from 'app/services/dissolution/dissolution.service'
+import DissolutionService from 'app/services/dissolution/dissolution.service'
 
 import {
   generateDissolutionCreateRequest,
@@ -41,40 +41,44 @@ describe('DissolutionService', () => {
     service = new DissolutionService(instance(mapper), instance(client))
   })
 
-  it('should call dissolution api client and return reference number', async () => {
-    when(mapper.mapToDissolutionRequest(dissolutionSession))
-      .thenReturn(MAPPED_BODY)
+  describe('createDissolution', () => {
+    it('should call dissolution api client and return reference number', async () => {
+      when(mapper.mapToDissolutionRequest(dissolutionSession))
+        .thenReturn(MAPPED_BODY)
 
-    when(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY))
-      .thenResolve(dissolutionCreateResponse)
+      when(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY))
+        .thenResolve(dissolutionCreateResponse)
 
-    const res: Optional<string> = await service.createDissolution(TOKEN, dissolutionSession)
+      const res: Optional<string> = await service.createDissolution(TOKEN, dissolutionSession)
 
-    verify(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY)).once()
+      verify(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY)).once()
 
-    assert.equal(res, REFERENCE_NUMBER)
+      assert.equal(res, REFERENCE_NUMBER)
+    })
   })
 
-  it('should call dissolution api client and return dissolution info if dissolution is present', async () => {
-    when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!))
-      .thenResolve(dissolutionGetResponse)
+  describe('getDissolution', () => {
+    it('should call dissolution api client and return dissolution info if dissolution is present', async () => {
+      when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!))
+        .thenResolve(dissolutionGetResponse)
 
-    const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
+      const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
 
-    verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
+      verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
-    assert.equal(res, dissolutionGetResponse)
-  })
+      assert.equal(res, dissolutionGetResponse)
+    })
 
-  it('should call dissolution api client and return null if dissolution is not present', async () => {
-    when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!))
-      .thenResolve(null)
+    it('should call dissolution api client and return null if dissolution is not present', async () => {
+      when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!))
+        .thenResolve(null)
 
-    const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
+      const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
 
-    verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
+      verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
-    assert.equal(res, null)
+      assert.equal(res, null)
+    })
   })
 
   it('should call dissolution api client to approve the dissolution for the provided email', async () => {

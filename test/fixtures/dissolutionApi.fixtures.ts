@@ -1,13 +1,13 @@
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import ApplicationType from 'app/models/dto/applicationType.enum'
 import { DirectorRequest, DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
-import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
-import { DissolutionGetDirector } from 'app/models/dto/dissolutionGetDirector'
-import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
-import { DissolutionLinks } from 'app/models/dto/dissolutionLinks'
-import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
-import { DissolutionPatchResponse } from 'app/models/dto/dissolutionPatchResponse'
-import { DissolutionApprovalModel } from 'app/models/form/dissolutionApproval.model'
+import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import DissolutionLinks from 'app/models/dto/dissolutionLinks'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
+import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 import { generateEmail } from 'test/fixtures/util.fixtures'
 
@@ -65,7 +65,6 @@ export function generateGetDirector(name: string): DissolutionGetDirector {
   return {
     name,
     email: generateEmail(name),
-    approved_at: new Date().toDateString(),
   }
 }
 

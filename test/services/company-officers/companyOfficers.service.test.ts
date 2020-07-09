@@ -119,5 +119,30 @@ describe('CompanyOfficersService', () => {
       assert.equal(result[0], director1Details)
       assert.equal(result[1], director2Details)
     })
+
+    it('should should exclude a director if provided', async () => {
+      const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+      response.httpStatusCode = OK
+
+      const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
+      const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
+
+      response.resource = {
+        ...generateCompanyOfficers(),
+        items: [director1, director2]
+      }
+
+      const director1Details: DirectorDetails = { ...generateDirectorDetails(), id: '123' }
+      const director2Details: DirectorDetails = { ...generateDirectorDetails(), id: '456' }
+
+      when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+      when(directorMapper.mapToDirectorDetails(director1)).thenReturn(director1Details)
+      when(directorMapper.mapToDirectorDetails(director2)).thenReturn(director2Details)
+
+      const result: DirectorDetails[] = await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, '123')
+
+      assert.equal(result.length, 1)
+      assert.equal(result[0], director2Details)
+    })
   })
 })

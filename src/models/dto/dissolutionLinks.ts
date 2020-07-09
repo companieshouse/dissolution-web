@@ -1,4 +1,4 @@
-export interface DissolutionLinks {
+export default interface DissolutionLinks {
   self: string,
   payment: string
 }

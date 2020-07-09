@@ -15,11 +15,11 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">Application to close a company (DS01)</h1>
-      <h2 class="govuk-heading-m">
-        <span id="companyName">Company name: {{ approvalModel.companyName }}</span>
-        <br>
-        <span id="companyNumber">Company number: {{ approvalModel.companyNumber }}</span>
+      <h1 class="govuk-heading-xl">Sign the application</h1>
+      <h2 class="govuk-heading-m">Apply to strike off and dissolve a company</h2>
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-9">
+        <div id="companyName">Company name: {{ approvalModel.companyName }}</div>
+        <div id="companyNumber">Company number: {{ approvalModel.companyNumber }}</div>
       </h2>
       {{
         govukWarningText({
@@ -33,7 +33,8 @@
         The registrar will proceed unless there is a reasonable cause not to,
         and on dissolution any assets remaining in the company will be passed to the Crown.
         <a class="govuk-link"
-           href=https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#objecting-to-a-companys-dissolution>
+           href=https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#objecting-to-a-companys-dissolution
+           rel="noreferrer noopener" target="_blank">
           Guidance is available on the grounds for objection (opens in a new tab)</a>.
         If in doubt, seek professional advice.</p>
 

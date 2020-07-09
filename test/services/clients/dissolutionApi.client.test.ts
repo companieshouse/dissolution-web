@@ -2,10 +2,10 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { assert } from 'chai'
 import sinon from 'sinon'
 
-import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
-import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
-import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
-import { DissolutionPatchResponse } from 'app/models/dto/dissolutionPatchResponse'
+import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
@@ -60,7 +60,7 @@ describe('DissolutionApiClient', () => {
   })
 
   describe('getDissolution', () => {
-    it('should return dissolution if dissolution is present in the database', async () => {
+    it('should return dissolution if dissolution is returned from the API', async () => {
       getStub = sinon.stub().resolves(GET_RESPONSE)
       axiosInstance.get = getStub
 

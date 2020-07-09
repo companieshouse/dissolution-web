@@ -1,9 +1,9 @@
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import ApplicationType from 'app/models/dto/applicationType.enum'
-import { DissolutionGetDirector } from 'app/models/dto/dissolutionGetDirector'
-import { DissolutionLinks } from 'app/models/dto/dissolutionLinks'
+import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
+import DissolutionLinks from 'app/models/dto/dissolutionLinks'
 
-export interface DissolutionGetResponse {
+export default interface DissolutionGetResponse {
   ETag: string,
   kind: string,
   links: DissolutionLinks,

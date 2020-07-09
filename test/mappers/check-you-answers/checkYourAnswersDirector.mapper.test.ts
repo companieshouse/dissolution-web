@@ -11,17 +11,20 @@ describe('CheckYourAnswersDirectorMapper', () => {
 
   const NAME = 'Geoff Smith'
   const EMAIL = 'test@mail.com'
+  const ON_BEHALF_NAME = 'Captain America'
 
   describe('mapToCheckYourAnswersDirector', () => {
-    it('should map name and email', () => {
+    it('should map name, on behalf name and email', () => {
       const director: DirectorToSign = generateDirectorToSign()
       director.name = NAME
       director.email = EMAIL
+      director.onBehalfName = ON_BEHALF_NAME
 
       const result: CheckYourAnswersDirector = mapper.mapToCheckYourAnswersDirector(director)
 
       assert.equal(result.name, NAME)
       assert.equal(result.email, EMAIL)
+      assert.equal(result.onBehalfName, ON_BEHALF_NAME)
     })
 
     it('should set isDirectorSigning to "Yes" when onBehalfName is not present', () => {
