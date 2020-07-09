@@ -216,7 +216,8 @@ services:
       - PAYMENTS_API_URL=http://payments-api
       - PAYMENTS_WEB_URL=http://chs-dev
       - SCHEMA_REGISTRY_URL=http://kafka-broker1-rebel1.development.aws.internal:8081
-      - KAFKA_BROKER_ADDR=kafka-broker:9092
+      - KAFKA_BROKER_ADDR=kafka:9092
+      - LOGLEVEL=debug
   payments-web:
     container_name: payments-web
     image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/payments.web.ch.gov.uk:latest
@@ -264,21 +265,19 @@ services:
     networks:
       - chs-dev
     environment:
-      - LOGLEVEL=DEBUG
-      - LOGLEVEL_THIRDPARTY=DEBUG
-      # - KAFKA_BROKER_ADDR=kafka-broker1-rebel1.development.aws.internal:9092
+      - LOGLEVEL=info
+      - LOGLEVEL_THIRDPARTY=info
       - SCHEMA_REGISTRY_URL=http://kafka-broker1-rebel1.development.aws.internal:8081
-      - KAFKA_BROKER_ADDR=kafka-broker:9092
-      # - SCHEMA_REGISTRY_URL=http://kafka-schema:8081
+      - KAFKA_BROKER_ADDR=kafka:9092
       - PAYMENT_PROCESSED_TOPIC=payment-processed
       - PAYMENT_PROCESSED_GROUP_NAME=payment-processed-consumer-group
       - RETRY_THROTTLE_RATE_SECONDS=10
       - KAFKA_ZOOKEEPER_CHROOT=
-      - PAYMENTS_API_URL=payments-api
+      - PAYMENTS_API_URL=http://eric:4001
       - IS_ERROR_QUEUE_CONSUMER=false
       - MAXIMUM_RETRY_ATTEMPTS=6
-      - KAFKA_ZOOKEEPER_ADDR=kafka-zk1-rebel1.development.aws.internal:2181
-      - CHS_API_KEY=g9yZIA81Zo9J46Kzp3JPbfld6kOqxR47EAYqXbRV
+      - KAFKA_ZOOKEEPER_ADDR=zookeeper:2181
+      - CHS_API_KEY=MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz
   # Infrastructure
   redis:
     container_name: redis
@@ -300,8 +299,8 @@ services:
       - 27017
     ports:
       - 27017:27017
-  kafka-broker:
-    container_name: kafka-broker
+  kafka:
+    container_name: kafka
     labels:
       - chs.description=messaging bus used for async integrations e.g. sending emails
       - chs.dependencies=zookeeper
@@ -315,21 +314,6 @@ services:
       - chs-dev
     expose:
       - 9092
-  kafka-schema:
-    container_name: kafka-schema
-    labels:
-      - chs.description=messaging bus used for async integrations e.g. sending emails
-      - chs.dependencies=zookeeper
-    image: bitnami/kafka:2
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:8081
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-    networks:
-      - chs-dev
-    expose:
-      - 8081
   zookeeper:
     container_name: zookeeper
     labels:
