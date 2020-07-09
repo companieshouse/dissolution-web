@@ -32,12 +32,14 @@ export default class SignatoryService {
   }
 
   private updateSignatoryWithContactInfo(signatory: DirectorToSign, contactForm: DefineSignatoryInfoFormModel): void {
-    if (contactForm[`isSigning_${signatory.id}`] === SignatorySigning.WILL_SIGN) {
-      signatory.email = contactForm[`directorEmail_${signatory.id}`]
+    const signatoryId: string = signatory.id.toLowerCase()
+
+    if (contactForm[`isSigning_${signatoryId}`] === SignatorySigning.WILL_SIGN) {
+      signatory.email = contactForm[`directorEmail_${signatoryId}`]
       signatory.onBehalfName = undefined
     } else {
-      signatory.onBehalfName = contactForm[`onBehalfName_${signatory.id}`]
-      signatory.email = contactForm[`onBehalfEmail_${signatory.id}`]
+      signatory.onBehalfName = contactForm[`onBehalfName_${signatoryId}`]
+      signatory.email = contactForm[`onBehalfEmail_${signatoryId}`]
     }
   }
 }

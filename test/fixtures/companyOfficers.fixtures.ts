@@ -111,10 +111,10 @@ export function generateSelectSignatoriesFormModel(...signatories: string[]): Se
 
 export function generateDefineSignatoryInfoFormModel(): DefineSignatoryInfoFormModel {
   return {
-    isSigning_123: SignatorySigning.WILL_SIGN,
-    directorEmail_123: 'director@mail.com',
-    isSigning_456: SignatorySigning.ON_BEHALF,
-    onBehalfName_456: 'Mr Accountant',
-    onBehalfEmail_456: 'accountant@mail.com'
+    isSigning_123abc: SignatorySigning.WILL_SIGN,
+    directorEmail_123abc: 'director@mail.com',
+    isSigning_456def: SignatorySigning.ON_BEHALF,
+    onBehalfName_456def: 'Mr Accountant',
+    onBehalfEmail_456def: 'accountant@mail.com'
   }
 }
