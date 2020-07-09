@@ -5,6 +5,7 @@ import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
 import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
+import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
@@ -12,7 +13,7 @@ import { DissolutionService } from 'app/services/dissolution/dissolution.service
 
 import {
   generateDissolutionCreateRequest,
-  generateDissolutionCreateResponse, generateDissolutionGetResponse
+  generateDissolutionCreateResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
@@ -74,5 +75,16 @@ describe('DissolutionService', () => {
     verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
     assert.equal(res, null)
+  })
+
+  it('should call dissolution api client to approve the dissolution for the provided email', async () => {
+    const email: string = 'test@email.com'
+    const body: DissolutionPatchRequest = generateDissolutionPatchRequest()
+
+    when(mapper.mapToDissolutionPatchRequest(email)).thenReturn(body)
+
+    await service.approveDissolution(TOKEN, dissolutionSession, email)
+
+    verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once()
   })
 })

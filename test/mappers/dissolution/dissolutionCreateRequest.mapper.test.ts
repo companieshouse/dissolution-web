@@ -2,6 +2,7 @@ import { assert } from 'chai'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
+import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
@@ -38,6 +39,18 @@ describe('Dissolution Request Mapper', () => {
       assert.equal(result.directors[1].on_behalf_name, director2.onBehalfName)
       assert.equal(result.directors[1].email, director2.email)
       assert.isFalse('id' in result.directors[1])
+    })
+  })
+
+  describe('mapToDissolutionPatchRequest', () => {
+    it('should map the provided email to patch request', () => {
+      const email: string = 'example@example.com'
+
+      const result: DissolutionPatchRequest = mapper.mapToDissolutionPatchRequest(email)
+
+      assert.equal(result.email, email)
+      assert.isTrue(result.has_approved)
+
     })
   })
 })

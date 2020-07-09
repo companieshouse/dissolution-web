@@ -7,6 +7,8 @@ import { provide } from 'inversify-binding-decorators'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import { DissolutionCreateResponse } from 'app/models/dto/dissolutionCreateResponse'
 import { DissolutionGetResponse } from 'app/models/dto/dissolutionGetResponse'
+import { DissolutionPatchRequest } from 'app/models/dto/dissolutionPatchRequest'
+import { DissolutionPatchResponse } from 'app/models/dto/dissolutionPatchResponse'
 import Optional from 'app/models/optional'
 import TYPES from 'app/types'
 
@@ -55,5 +57,15 @@ export class DissolutionApiClient {
 
   private generateUrl(companyNumber: string): string {
     return `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`
+  }
+
+  public async patchDissolution(token: string, companyNumber: string,
+                                body: DissolutionPatchRequest): Promise<DissolutionPatchResponse> {
+    const response: AxiosResponse<DissolutionPatchResponse> = await this.axios.patch(
+      this.generateUrl(companyNumber),
+      body,
+      this.generateConfig(token)
+    )
+    return response.data
   }
 }
