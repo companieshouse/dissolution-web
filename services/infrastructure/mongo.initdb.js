@@ -1,5 +1,5 @@
 /*
- * account 
+ * account
  */
 db.api_clients.insert({
   "_id" : "1234567890.apps.ch.gov.uk",
@@ -21,7 +21,8 @@ db.api_clients.insert({
   "can_fetch_api_client" : 1,
   "can_fetch_bearer_token" : 1,
   "restricted_ips" : [],
-  "js_domains" : []
+  "js_domains" : [],
+  "internal_app_privileges" : true
 })
 
 db.company_auth_codes.insert({
@@ -41,7 +42,7 @@ db.users.insert({
 })
 
 /*
- * company_profile 
+ * company_profile
  */
 db = db.getSiblingDB('company_profile')
 
@@ -162,7 +163,7 @@ db.company_profile.insert({
 })
 
 /*
- * appointments 
+ * appointments
  */
 db = db.getSiblingDB('appointments')
 
@@ -221,8 +222,8 @@ db.appointments.insert({
       "updated_at": 1432503011000,
       "links": {
          "officer": {
-            "appointments": "/officers/activeOfficer1/appointments",
-            "self": "/officers/activeOfficer1"
+            "appointments": "/officers/W1V267fKJfc6USCGEA6i9YEm6KI/appointments",
+            "self": "/officers/W1V267fKJfc6USCGEA6i9YEm6KI"
          },
          "self": "/company/01777777/appointments/app2"
       },
@@ -246,7 +247,7 @@ db.appointments.insert({
       }
    },
    "appointment_id": "app2",
-   "officer_id": "activeOfficer1",
+   "officer_id": "W1V267fKJfc6USCGEA6i9YEm6KI",
    "updated": {
       "at": 1433406704142
    },
@@ -267,8 +268,8 @@ db.appointments.insert({
       "updated_at": 1432503011000,
       "links": {
          "officer": {
-            "appointments": "/officers/activeOfficer2/appointments",
-            "self": "/officers/activeOfficer2"
+            "appointments": "/officers/W1V267fKJfc6USCGEA6i9YEm6KK/appointments",
+            "self": "/officers/W1V267fKJfc6USCGEA6i9YEm6KK"
          },
          "self": "/company/01777777/appointments/app3"
       },
@@ -293,7 +294,7 @@ db.appointments.insert({
       }
    },
    "appointment_id": "app3",
-   "officer_id": "activeOfficer2",
+   "officer_id": "W1V267fKJfc6USCGEA6i9YEm6KK",
    "updated": {
       "at": 1433406704142
    },
@@ -355,7 +356,7 @@ db.appointments.insert({
 })
 
 /*
- * company_metrics 
+ * company_metrics
  */
 db = db.getSiblingDB('company_metrics')
 
