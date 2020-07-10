@@ -15,3 +15,4 @@ export const CHECK_YOUR_ANSWERS_URI = `${ROOT_URI}/check-your-answers`
 export const ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI = `${ROOT_URI}/endorse-company-closure-certificate`
 export const WAIT_FOR_OTHERS_TO_SIGN_URI = `${ROOT_URI}/wait-for-others-to-sign`
 export const CERTIFICATE_SIGNED_URI = `${ROOT_URI}/certificate-signed`
+export const PAYMENT_URI = `${ROOT_URI}/payment`
