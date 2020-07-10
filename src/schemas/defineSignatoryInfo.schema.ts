@@ -15,29 +15,32 @@ function generateSchemaForSignatories(signatories: DirectorToSign[]): Joi.Schema
 }
 
 function generateSchemaForSignatory(signatory: DirectorToSign): Joi.SchemaMap {
-  const isSigningKey: string = `isSigning_${signatory.id}`
+  const signatoryId: string = formatSignatoryId(signatory)
+  const signatoryName: string = signatory.name
+
+  const isSigningKey: string = `isSigning_${signatoryId}`
 
   return {
-    [isSigningKey]: generateIsSigningRadioSchema(signatory),
-    [`directorEmail_${signatory.id}`]: generateDirectorEmailSchema(isSigningKey, signatory),
-    [`onBehalfName_${signatory.id}`]: generateOnBehalfNameSchema(isSigningKey, signatory),
-    [`onBehalfEmail_${signatory.id}`]: generateOnBehalfEmailSchema(isSigningKey, signatory)
+    [isSigningKey]: generateIsSigningRadioSchema(signatoryName),
+    [`directorEmail_${signatoryId}`]: generateDirectorEmailSchema(isSigningKey, signatoryName),
+    [`onBehalfName_${signatoryId}`]: generateOnBehalfNameSchema(isSigningKey, signatoryName),
+    [`onBehalfEmail_${signatoryId}`]: generateOnBehalfEmailSchema(isSigningKey, signatoryName)
   }
 }
 
-function generateIsSigningRadioSchema(signatory: DirectorToSign): Joi.StringSchema {
+function generateIsSigningRadioSchema(signatoryName: string): Joi.StringSchema {
   return Joi
     .string()
     .required()
     .valid(SignatorySigning.WILL_SIGN, SignatorySigning.ON_BEHALF)
     .messages({
-      'any.only': `Select how ${signatory.name} will be signing the application`,
-      'any.required': `Select how ${signatory.name} will be signing the application`,
-      'string.empty': `Select how ${signatory.name} will be signing the application`
+      'any.only': `Select how ${signatoryName} will be signing the application`,
+      'any.required': `Select how ${signatoryName} will be signing the application`,
+      'string.empty': `Select how ${signatoryName} will be signing the application`
     })
 }
 
-function generateDirectorEmailSchema(isSigningKey: string, signatory: DirectorToSign): Joi.AlternativesSchema {
+function generateDirectorEmailSchema(isSigningKey: string, signatoryName: string): Joi.AlternativesSchema {
   return Joi
     .when(isSigningKey, {
       is: SignatorySigning.WILL_SIGN,
@@ -46,14 +49,14 @@ function generateDirectorEmailSchema(isSigningKey: string, signatory: DirectorTo
         .required()
         .email()
         .messages({
-          'any.required': `Enter the email address for ${signatory.name}`,
-          'string.empty': `Enter the email address for ${signatory.name}`,
-          'string.email': `Enter a valid email address for ${signatory.name}`
+          'any.required': `Enter the email address for ${signatoryName}`,
+          'string.empty': `Enter the email address for ${signatoryName}`,
+          'string.email': `Enter a valid email address for ${signatoryName}`
         })
     })
 }
 
-function generateOnBehalfNameSchema(isSigningKey: string, signatory: DirectorToSign): Joi.AlternativesSchema {
+function generateOnBehalfNameSchema(isSigningKey: string, signatoryName: string): Joi.AlternativesSchema {
   return Joi
     .when(isSigningKey, {
       is: SignatorySigning.ON_BEHALF,
@@ -62,14 +65,14 @@ function generateOnBehalfNameSchema(isSigningKey: string, signatory: DirectorToS
         .required()
         .max(250)
         .messages({
-          'any.required': `Enter the name for the person signing on behalf of ${signatory.name}`,
-          'string.empty': `Enter the name for the person signing on behalf of ${signatory.name}`,
-          'string.max': `Enter a name that is less than 250 characters for the person signing on behalf of ${signatory.name}`
+          'any.required': `Enter the name for the person signing on behalf of ${signatoryName}`,
+          'string.empty': `Enter the name for the person signing on behalf of ${signatoryName}`,
+          'string.max': `Enter a name that is less than 250 characters for the person signing on behalf of ${signatoryName}`
         })
     })
 }
 
-function generateOnBehalfEmailSchema(isSigningKey: string, signatory: DirectorToSign): Joi.AlternativesSchema {
+function generateOnBehalfEmailSchema(isSigningKey: string, signatoryName: string): Joi.AlternativesSchema {
   return Joi
     .when(isSigningKey, {
       is: SignatorySigning.ON_BEHALF,
@@ -78,9 +81,13 @@ function generateOnBehalfEmailSchema(isSigningKey: string, signatory: DirectorTo
         .required()
         .email()
         .messages({
-          'any.required': `Enter the email address for the person signing on behalf of ${signatory.name}`,
-          'string.empty': `Enter the email address for the person signing on behalf of ${signatory.name}`,
-          'string.email': `Enter a valid email address for the person signing on behalf of ${signatory.name}`
+          'any.required': `Enter the email address for the person signing on behalf of ${signatoryName}`,
+          'string.empty': `Enter the email address for the person signing on behalf of ${signatoryName}`,
+          'string.email': `Enter a valid email address for the person signing on behalf of ${signatoryName}`
         })
     })
+}
+
+function formatSignatoryId(signatory: DirectorToSign): string {
+  return signatory.id.toLowerCase()
 }

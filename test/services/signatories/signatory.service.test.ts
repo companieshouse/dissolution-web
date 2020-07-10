@@ -90,6 +90,9 @@ describe('SignatoryService', () => {
     const SIGNATORY_1_ID = '123'
     const SIGNATORY_2_ID = '456'
 
+    const SIGNATORY_1_ID_LOWER = SIGNATORY_1_ID.toLowerCase()
+    const SIGNATORY_2_ID_LOWER = SIGNATORY_2_ID.toLowerCase()
+
     let signatory1: DirectorToSign
     let signatory2: DirectorToSign
 
@@ -104,15 +107,15 @@ describe('SignatoryService', () => {
     it('should update signatories with their contact info if they will sign the application themselves', () => {
       const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
-      contactForm[`isSigning_${SIGNATORY_1_ID}`] = SignatorySigning.WILL_SIGN
-      contactForm[`directorEmail_${SIGNATORY_1_ID}`] = 'director@mail.com'
-      contactForm[`onBehalfName_${SIGNATORY_1_ID}`] = ''
-      contactForm[`onBehalfEmail_${SIGNATORY_1_ID}`] = ''
+      contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
+      contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'director@mail.com'
+      contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ''
+      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ''
 
-      contactForm[`isSigning_${SIGNATORY_2_ID}`] = SignatorySigning.WILL_SIGN
-      contactForm[`directorEmail_${SIGNATORY_2_ID}`] = 'otherDirector@mail.com'
-      contactForm[`onBehalfName_${SIGNATORY_2_ID}`] = ''
-      contactForm[`onBehalfEmail_${SIGNATORY_2_ID}`] = ''
+      contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.WILL_SIGN
+      contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = 'otherDirector@mail.com'
+      contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ''
+      contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ''
 
       service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
 
@@ -126,15 +129,15 @@ describe('SignatoryService', () => {
     it('should update signatories with their contact info if someone will sign the application on behalf of them', () => {
       const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
-      contactForm[`isSigning_${SIGNATORY_1_ID}`] = SignatorySigning.ON_BEHALF
-      contactForm[`directorEmail_${SIGNATORY_1_ID}`] = ''
-      contactForm[`onBehalfName_${SIGNATORY_1_ID}`] = 'Mr Accountant'
-      contactForm[`onBehalfEmail_${SIGNATORY_1_ID}`] = 'accountant@mail.com'
+      contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.ON_BEHALF
+      contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ''
+      contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = 'Mr Accountant'
+      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = 'accountant@mail.com'
 
-      contactForm[`isSigning_${SIGNATORY_2_ID}`] = SignatorySigning.ON_BEHALF
-      contactForm[`directorEmail_${SIGNATORY_2_ID}`] = ''
-      contactForm[`onBehalfName_${SIGNATORY_2_ID}`] = 'Miss Solicitor'
-      contactForm[`onBehalfEmail_${SIGNATORY_2_ID}`] = 'solicitor@mail.com'
+      contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
+      contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ''
+      contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = 'Miss Solicitor'
+      contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = 'solicitor@mail.com'
 
       service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
 
@@ -148,15 +151,15 @@ describe('SignatoryService', () => {
     it('should handle multiple signatories selecting different options for signing preference', () => {
       const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
-      contactForm[`isSigning_${SIGNATORY_1_ID}`] = SignatorySigning.ON_BEHALF
-      contactForm[`directorEmail_${SIGNATORY_1_ID}`] = ''
-      contactForm[`onBehalfName_${SIGNATORY_1_ID}`] = 'Mr Accountant'
-      contactForm[`onBehalfEmail_${SIGNATORY_1_ID}`] = 'accountant@mail.com'
+      contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.ON_BEHALF
+      contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ''
+      contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = 'Mr Accountant'
+      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = 'accountant@mail.com'
 
-      contactForm[`isSigning_${SIGNATORY_2_ID}`] = SignatorySigning.WILL_SIGN
-      contactForm[`directorEmail_${SIGNATORY_2_ID}`] = 'director@mail.com'
-      contactForm[`onBehalfName_${SIGNATORY_2_ID}`] = ''
-      contactForm[`onBehalfEmail_${SIGNATORY_2_ID}`] = ''
+      contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.WILL_SIGN
+      contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = 'director@mail.com'
+      contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ''
+      contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ''
 
       service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
 

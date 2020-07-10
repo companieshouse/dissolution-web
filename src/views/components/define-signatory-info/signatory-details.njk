@@ -1,11 +1,26 @@
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/input/macro.njk"  import govukInput %}
 
+{% set signatoryId = (signatory.id | lower) %}
+{% set fieldsetId = "signatory_" + signatoryId %}
+
+{% set isSigningName = "isSigning_" + signatoryId %}
+{% set isSigningId = "is-signing_" + signatoryId %}
+
+{% set directorEmailName = "directorEmail_" + signatoryId %}
+{% set directorEmailId = "director-email_" + signatoryId %}
+
+{% set onBehalfNameName = "onBehalfName_" + signatoryId %}
+{% set onBehalfNameId = "on-behalf-name_" + signatoryId %}
+
+{% set onBehalfEmailName = "onBehalfEmail_" + signatoryId %}
+{% set onBehalfEmailId = "on-behalf-email_" + signatoryId %}
+
 {% set willSignSection %}
   {{
     govukInput({
-      id: "director-email_" + signatory.id,
-      name: "directorEmail_" + signatory.id,
+      id: directorEmailId,
+      name: directorEmailName,
       type: "email",
       autocomplete: "email",
       classes: "govuk-!-width-full",
@@ -16,12 +31,12 @@
         text: "We will use this to confirm their identity when they sign the application."
       },
       errorMessage: {
-        text: errors["directorEmail_" + signatory.id]
-      } if errors["directorEmail_" + signatory.id],
+        text: errors[directorEmailName]
+      } if errors[directorEmailName],
       attributes: {
         spellcheck: "false"
       },
-      value: data["directorEmail_" + signatory.id] if data
+      value: data[directorEmailName] if data
     })
   }}
 {% endset -%}
@@ -29,26 +44,26 @@
 {% set onBehalfSection %}
   {{
     govukInput({
-      id: "on-behalf-name_" + signatory.id,
-      name: "onBehalfName_" + signatory.id,
+      id: onBehalfNameId,
+      name: onBehalfNameName,
       classes: "govuk-!-width-full",
       label: {
         text: "What is the name of the person signing for " + signatory.name + "?"
       },
       errorMessage: {
-        text: errors["onBehalfName_" + signatory.id]
-      } if errors["onBehalfName_" + signatory.id],
+        text: errors[onBehalfNameName]
+      } if errors[onBehalfNameName],
       attributes: {
         spellcheck: "false"
       },
-      value: data["onBehalfName_" + signatory.id] if data
+      value: data[onBehalfNameName] if data
     })
   }}
 
   {{
     govukInput({
-      id: "on-behalf-email_" + signatory.id,
-      name: "onBehalfEmail_" + signatory.id,
+      id: onBehalfEmailId,
+      name: onBehalfEmailName,
       type: "email",
       autocomplete: "email",
       classes: "govuk-!-width-full",
@@ -59,23 +74,23 @@
         text: "We will use this to confirm their identity when they sign the application."
       },
       errorMessage: {
-        text: errors["onBehalfEmail_" + signatory.id]
-      } if errors["onBehalfEmail_" + signatory.id],
+        text: errors[onBehalfEmailName]
+      } if errors[onBehalfEmailName],
       attributes: {
         spellcheck: "false"
       },
-      value: data["onBehalfEmail_" + signatory.id] if data
+      value: data[onBehalfEmailName] if data
     })
   }}
 {% endset -%}
 
 {{
   govukRadios({
-    idPrefix: "is-signing_" + signatory.id,
-    name: "isSigning_" + signatory.id,
+    idPrefix: isSigningId,
+    name: isSigningName,
     fieldset: {
       attributes: {
-        id: "signatory_" + signatory.id
+        id: fieldsetId
       },
       legend: {
         text: signatory.name,
@@ -83,8 +98,8 @@
       }
     },
     errorMessage: {
-      text: errors["isSigning_" + signatory.id]
-    } if errors["isSigning_" + signatory.id],
+      text: errors[isSigningName]
+    } if errors[isSigningName],
     items: [
       {
         value: SignatorySigning.WILL_SIGN,
@@ -92,7 +107,7 @@
         conditional: {
           html: willSignSection
         },
-        checked: data["isSigning_" + signatory.id] === SignatorySigning.WILL_SIGN if data
+        checked: data[isSigningName] === SignatorySigning.WILL_SIGN if data
       },
       {
         value: SignatorySigning.ON_BEHALF,
@@ -100,7 +115,7 @@
         conditional: {
           html: onBehalfSection
         },
-        checked: data["isSigning_" + signatory.id] === SignatorySigning.ON_BEHALF if data
+        checked: data[isSigningName] === SignatorySigning.ON_BEHALF if data
       }
     ]
   })

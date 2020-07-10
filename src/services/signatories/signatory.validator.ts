@@ -64,8 +64,10 @@ export default class SignatoryValidator {
   }
 
   private getProvidedEmailFieldForSignatory(signatory: DirectorToSign, form: DefineSignatoryInfoFormModel): string {
-    return form[`isSigning_${signatory.id}`] === SignatorySigning.WILL_SIGN ?
-      `directorEmail_${signatory.id}` : `onBehalfEmail_${signatory.id}`
+    const signatoryId: string = signatory.id.toLowerCase()
+
+    return form[`isSigning_${signatoryId}`] === SignatorySigning.WILL_SIGN ?
+      `directorEmail_${signatoryId}` : `onBehalfEmail_${signatoryId}`
   }
 
   private mapToValidationErrors(duplicates: SignatoryDetails[]): ValidationErrors {
