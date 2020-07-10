@@ -1,3 +1,4 @@
+import { BAD_REQUEST, OK } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
@@ -6,14 +7,14 @@ import BaseController from './base.controller'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import EndorseCertificateFormModel from 'app/models/form/endorseCertificateFormModel'
 import Optional from 'app/models/optional'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, PAYMENT_URI, } from 'app/paths'
 import formSchema from 'app/schemas/endorseCertificate.schema'
+import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
-import DissolutionService from 'app/services/dissolution/dissolution.service'
-import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 interface ViewModel {
   approvalModel: DissolutionApprovalModel
@@ -56,6 +57,6 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
       approvalModel,
       errors
     }
-    return super.render('endorse-company-closure-certificate', viewModel)
+    return super.render('endorse-company-closure-certificate', viewModel, errors ? BAD_REQUEST : OK)
   }
 }
