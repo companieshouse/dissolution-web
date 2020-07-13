@@ -45,6 +45,10 @@ export class RedirectController extends BaseController {
       return this.handlePendingApprovalRedirect(dissolution, dissolutionSession)
     }
 
+    if (dissolution!.application_status === ApplicationStatus.PENDING_PAYMENT) {
+      return this.redirect(PAYMENT_URI)
+    }
+
     return this.redirect(ROOT_URI + '/')
   }
 
