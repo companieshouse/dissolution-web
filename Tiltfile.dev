@@ -1,11 +1,11 @@
 local_resource(
   name = 'dev:dissolution-web:init',
-  cmd = 'npm --silent install && npm --silent run build:init'
+  cmd = 'npm install && npm run build'
 )
 
 local_resource(
   name = 'dev:dissolution-web:build-views',
-  cmd = 'npm --silent run build:copy-views',
+  cmd = 'npm run build',
   deps = [
     'src/views'
   ]
@@ -13,7 +13,7 @@ local_resource(
 
 local_resource(
   name = 'dev:dissolution-web:build-code',
-  cmd = 'npm --silent run build:compile',
+  cmd = 'npm run build',
   deps = [
     'src'
   ],
