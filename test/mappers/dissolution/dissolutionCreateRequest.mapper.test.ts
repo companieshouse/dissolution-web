@@ -50,7 +50,6 @@ describe('Dissolution Request Mapper', () => {
 
       assert.equal(result.email, email)
       assert.isTrue(result.has_approved)
-
     })
   })
 })

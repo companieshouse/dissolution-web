@@ -8,10 +8,10 @@ import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateReques
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
-import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 
 @provide(DissolutionService)
 export default class DissolutionService {
@@ -38,12 +38,12 @@ export default class DissolutionService {
     return await this.client.getDissolution(token, companyNumber)
   }
 
-  public async approveDissolution(token: string, dissolutionSession: DissolutionSession, email: string): Promise<DissolutionPatchResponse> {
+  public async approveDissolution(token: string, dissolutionSession: DissolutionSession, email: string): Promise<void> {
 
     const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(email)
     const companyNumber: string = dissolutionSession.companyNumber!
 
-    return await this.client.patchDissolution(token, companyNumber, body)
+   await this.client.patchDissolution(token, companyNumber, body)
   }
 
 }

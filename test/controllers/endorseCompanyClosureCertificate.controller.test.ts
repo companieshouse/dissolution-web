@@ -4,21 +4,21 @@ import { assert } from 'chai'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
+import { generateValidationError } from '../fixtures/error.fixtures'
+import { generateEndorseCertificateFormModel } from '../fixtures/generateEndorseCertificateFormModel'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/endorseCompanyClosureCertificate.controller'
-import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import EndorseCertificateFormModel from 'app/models/form/endorseCertificateFormModel'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import ValidationErrors from 'app/models/view/validationErrors.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, PAYMENT_URI } from 'app/paths'
 import formSchema from 'app/schemas/endorseCertificate.schema'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import FormValidator from 'app/utils/formValidator.util'
 
-import { generateApprovalData } from 'test/fixtures/dissolutionApi.fixtures'
+import { generateApprovalData, generateDissolutionPatchResponse } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('EndorseCompanyClosureCertificateController', () => {
@@ -71,13 +71,8 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
   describe('POST - ensure form submission is handled correctly', () => {
     it('should redirect successfully if validator returns no errors', async () => {
-      const testObject: EndorseCertificateFormModel = {confirmation: 'understood'}
-      const dissolutionPatchResponse: DissolutionPatchResponse = {
-        links: {
-          self: '',
-          payment: ''
-        }
-      }
+      const testObject = generateEndorseCertificateFormModel()
+      const dissolutionPatchResponse = generateDissolutionPatchResponse()
 
       when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve(dissolutionPatchResponse)
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
@@ -97,9 +92,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
   it('should render view with errors displayed if validator returns errors', async () => {
     const testObject: EndorseCertificateFormModel = {confirmation: 'understood'}
-    const mockError: ValidationErrors = {
-      confirmation: `Test confirmation error`
-    }
+    const mockError = generateValidationError('confirmation', 'Test confirmation error')
 
     when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
     when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(mockError)
