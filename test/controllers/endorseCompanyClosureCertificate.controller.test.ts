@@ -4,8 +4,8 @@ import { assert } from 'chai'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
+import { endorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel'
 import { generateValidationError } from '../fixtures/error.fixtures'
-import { generateEndorseCertificateFormModel } from '../fixtures/generateEndorseCertificateFormModel'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -71,7 +71,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
   describe('POST - ensure form submission is handled correctly', () => {
     it('should redirect successfully if validator returns no errors', async () => {
-      const testObject = generateEndorseCertificateFormModel()
+      const testObject = endorseCertificateFormModel()
 
       when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
