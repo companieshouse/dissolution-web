@@ -42,7 +42,7 @@ export default class DissolutionService {
     const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(email)
     const companyNumber: string = dissolutionSession.companyNumber!
 
-   await this.client.patchDissolution(token, companyNumber, body)
+    await this.client.patchDissolution(token, companyNumber, body)
   }
 
 }
