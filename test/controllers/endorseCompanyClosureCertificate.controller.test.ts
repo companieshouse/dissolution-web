@@ -4,7 +4,7 @@ import { assert } from 'chai'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
-import { generateEndorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel'
+import { generateEndorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
@@ -106,4 +106,3 @@ describe('EndorseCompanyClosureCertificateController', () => {
     })
   })
 })
-
