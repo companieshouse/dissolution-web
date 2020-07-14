@@ -12,7 +12,7 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 import 'app/controllers/endorseCompanyClosureCertificate.controller'
 import EndorseCertificateFormModel from 'app/models/form/endorseCertificateFormModel'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, PAYMENT_URI, REDIRECT_GATE_URI } from 'app/paths'
+import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from 'app/paths'
 import formSchema from 'app/schemas/endorseCertificate.schema'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
@@ -103,6 +103,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
     })
 
     const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(BAD_REQUEST)
-    assert.equal(res.text.match(/Test confirmation error/g)!.length, 2)
+    const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+    assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
   })
 })

@@ -44,7 +44,7 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
     this.approveDissolution()
 
-    return this.redirect(REDIRECT_GATE_URI) // TODO - Change to Redirect once logic is there 🐓
+    return this.redirect(REDIRECT_GATE_URI)
   }
 
   private async approveDissolution(): Promise<void>  {
