@@ -18,7 +18,7 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import FormValidator from 'app/utils/formValidator.util'
 
-import { generateApprovalData, generateDissolutionPatchResponse } from 'test/fixtures/dissolutionApi.fixtures'
+import { generateApprovalData } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('EndorseCompanyClosureCertificateController', () => {
@@ -72,9 +72,8 @@ describe('EndorseCompanyClosureCertificateController', () => {
   describe('POST - ensure form submission is handled correctly', () => {
     it('should redirect successfully if validator returns no errors', async () => {
       const testObject = generateEndorseCertificateFormModel()
-      const dissolutionPatchResponse = generateDissolutionPatchResponse()
 
-      when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve(dissolutionPatchResponse)
+      when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
 
       const app = createApp(container => {

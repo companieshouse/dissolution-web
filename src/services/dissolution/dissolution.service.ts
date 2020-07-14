@@ -8,7 +8,6 @@ import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateReques
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
-import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
