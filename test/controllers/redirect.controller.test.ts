@@ -15,6 +15,7 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  PAYMENT_URI,
   REDIRECT_GATE_URI,
   ROOT_URI,
   SELECT_DIRECTOR_URI,
@@ -138,11 +139,31 @@ describe('RedirectController', () => {
         .expect('Location', CERTIFICATE_SIGNED_URI)
     })
 
-    it('should redirect to landing page as a fallback', async () => {
+    it('should redirect to payment when application is pending payment', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
 
       dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
+
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      await request(app)
+        .get(REDIRECT_GATE_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', PAYMENT_URI)
+    })
+
+    it('should redirect to landing page as a fallback', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+
+      dissolution.application_status = ApplicationStatus.PAID
 
       when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)

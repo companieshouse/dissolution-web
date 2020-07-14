@@ -7,6 +7,7 @@ import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
@@ -35,4 +36,13 @@ export default class DissolutionService {
 
     return await this.client.getDissolution(token, companyNumber)
   }
+
+  public async approveDissolution(token: string, dissolutionSession: DissolutionSession, email: string): Promise<void> {
+
+    const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(email)
+    const companyNumber: string = dissolutionSession.companyNumber!
+
+    await this.client.patchDissolution(token, companyNumber, body)
+  }
+
 }

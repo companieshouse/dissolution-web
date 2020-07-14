@@ -13,6 +13,7 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  PAYMENT_URI,
   REDIRECT_GATE_URI,
   ROOT_URI,
   SELECT_DIRECTOR_URI,
@@ -42,6 +43,10 @@ export class RedirectController extends BaseController {
 
     if (dissolution!.application_status === ApplicationStatus.PENDING_APPROVAL) {
       return this.handlePendingApprovalRedirect(dissolution, dissolutionSession)
+    }
+
+    if (dissolution!.application_status === ApplicationStatus.PENDING_PAYMENT) {
+      return this.redirect(PAYMENT_URI)
     }
 
     return this.redirect(ROOT_URI + '/')

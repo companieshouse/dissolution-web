@@ -5,6 +5,8 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionLinks from 'app/models/dto/dissolutionLinks'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 import { generateEmail } from 'test/fixtures/util.fixtures'
@@ -72,5 +74,18 @@ export function generateApprovalData(): DissolutionApprovalModel {
     companyNumber: '12345678',
     applicant: 'John Doe',
     date: new Date().toDateString()
+  }
+}
+
+export function generateDissolutionPatchRequest(): DissolutionPatchRequest {
+  return {
+    email: 'example@gmail.com',
+    has_approved: true
+  }
+}
+
+export function generateDissolutionPatchResponse(): DissolutionPatchResponse {
+  return {
+    links: generateLinks()
   }
 }

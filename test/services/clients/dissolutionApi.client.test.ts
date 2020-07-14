@@ -4,11 +4,14 @@ import sinon from 'sinon'
 
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
-  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetResponse
+  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetResponse,
+  generateDissolutionPatchRequest, generateDissolutionPatchResponse
 } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
@@ -18,12 +21,14 @@ describe('DissolutionApiClient', () => {
   let client: DissolutionApiClient
   let getStub: sinon.SinonStub
   let postStub: sinon.SinonStub
+  let patchStub: sinon.SinonStub
 
   const TOKEN = 'some-token'
   const COMPANY_NUMBER = '12345678'
   const BODY = generateDissolutionCreateRequest()
   const GET_RESPONSE: AxiosResponse<DissolutionGetResponse> = generateAxiosResponse(generateDissolutionGetResponse())
   const CREATE_RESPONSE: AxiosResponse<DissolutionCreateResponse> = generateAxiosResponse(generateDissolutionCreateResponse())
+  const PATCH_RESPONSE: AxiosResponse<DissolutionPatchResponse> = generateAxiosResponse(generateDissolutionPatchResponse())
 
   beforeEach(() => {
     axiosInstance = axios.create()
@@ -122,6 +127,30 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers.Accept, 'application/json')
 
       assert.isNull(response)
+    })
+  })
+
+  describe('patchDissolution', () => {
+    it('should create a dissolution request in the api and return reference number', async () => {
+      const request: DissolutionPatchRequest = generateDissolutionPatchRequest()
+
+      patchStub = sinon.stub().resolves(PATCH_RESPONSE)
+      axiosInstance.patch = patchStub
+
+      const response: DissolutionPatchResponse = await client.patchDissolution(TOKEN, COMPANY_NUMBER, request)
+
+      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+
+      assert.isTrue(patchStub.called)
+
+      const [url, body, config] = patchStub.args[0]
+      assert.equal(url, reqUrl)
+      assert.equal(body, request)
+      assert.equal(config.headers.Authorization, 'Bearer ' + TOKEN)
+      assert.equal(config.headers['Content-Type'], 'application/json')
+      assert.equal(config.headers.Accept, 'application/json')
+
+      assert.equal(response, PATCH_RESPONSE.data)
     })
   })
 })
