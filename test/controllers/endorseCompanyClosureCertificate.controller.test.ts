@@ -4,7 +4,7 @@ import { assert } from 'chai'
 import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
-import { endorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel'
+import { generateEndorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel'
 import { generateValidationError } from '../fixtures/error.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
@@ -71,7 +71,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
   describe('POST - ensure form submission is handled correctly', () => {
     it('should redirect successfully if validator returns no errors', async () => {
-      const testObject = endorseCertificateFormModel()
+      const testObject = generateEndorseCertificateFormModel()
 
       when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
@@ -87,22 +87,23 @@ describe('EndorseCompanyClosureCertificateController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_GATE_URI)
     })
-  })
 
-  it('should render view with errors displayed if validator returns errors', async () => {
-    const testObject: EndorseCertificateFormModel = {confirmation: 'understood'}
-    const mockError = generateValidationError('confirmation', 'Test confirmation error')
+    it('should render view with errors displayed if validator returns errors', async () => {
+      const testObject: EndorseCertificateFormModel = {confirmation: 'understood'}
+      const mockError = generateValidationError('confirmation', 'Test confirmation error')
 
-    when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
-    when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(mockError)
+      when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
+      when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(mockError)
 
-    const app = createApp(container => {
-      container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-      container.rebind(SessionService).toConstantValue(instance(session))
+      const app = createApp(container => {
+        container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
+        container.rebind(SessionService).toConstantValue(instance(session))
+      })
+
+      const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(BAD_REQUEST)
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+      assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
     })
-
-    const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(BAD_REQUEST)
-    const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-    assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
   })
 })
+

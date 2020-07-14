@@ -5,7 +5,7 @@ import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
-import EndorseCertificateFormModel from 'app/models/form/endorseCertificateFormModel'
+import generateEndorseCertificateFormModel from 'app/models/form/endorseCertificateFormModel'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
@@ -36,7 +36,7 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
   }
 
   @httpPost('')
-  public async post(@requestBody() body: EndorseCertificateFormModel): Promise<string | RedirectResult> {
+  public async post(@requestBody() body: generateEndorseCertificateFormModel): Promise<string | RedirectResult> {
     const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
     if (errors) {
       return this.renderView(errors)
