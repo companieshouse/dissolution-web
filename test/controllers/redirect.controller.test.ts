@@ -15,11 +15,11 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  PAYMENT_URI,
   REDIRECT_GATE_URI,
   ROOT_URI,
   SELECT_DIRECTOR_URI,
-  WAIT_FOR_OTHERS_TO_SIGN_URI,
-  PAYMENT_URI
+  WAIT_FOR_OTHERS_TO_SIGN_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
