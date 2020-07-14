@@ -139,7 +139,30 @@ describe('RedirectController', () => {
         .expect('Location', CERTIFICATE_SIGNED_URI)
     })
 
-    it('should redirect to payment when application is pending payment', async () => {
+    it('should redirect to payment when the user is the applicant and application is pending payment', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+
+      dissolution.created_by = USER_EMAIL
+      dissolution.directors[0].email = USER_EMAIL
+      dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
+
+      when(session.getUserEmail(anything())).thenReturn(USER_EMAIL)
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      await request(app)
+        .get(REDIRECT_GATE_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', PAYMENT_URI)
+    })
+
+    it('should redirect to certificate signed when the user is not the applicant and application is pending payment', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
       const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
 
@@ -156,7 +179,7 @@ describe('RedirectController', () => {
       await request(app)
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
-        .expect('Location', PAYMENT_URI)
+        .expect('Location', CERTIFICATE_SIGNED_URI)
     })
 
     it('should redirect to landing page as a fallback', async () => {

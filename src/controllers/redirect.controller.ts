@@ -36,26 +36,28 @@ export class RedirectController extends BaseController {
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
     const token: string = this.session.getAccessToken(this.httpContext.request)
     const dissolution: Optional<DissolutionGetResponse> = await this.service.getDissolution(token, dissolutionSession)
+    const userEmail: string = this.session.getUserEmail(this.httpContext.request)
 
     if (!dissolution) {
       return this.redirect(SELECT_DIRECTOR_URI)
     }
 
+    const isApplicant: boolean = dissolution!.created_by === userEmail
+
     if (dissolution!.application_status === ApplicationStatus.PENDING_APPROVAL) {
-      return this.handlePendingApprovalRedirect(dissolution, dissolutionSession)
+      return this.handlePendingApprovalRedirect(dissolution, dissolutionSession, isApplicant)
     }
 
     if (dissolution!.application_status === ApplicationStatus.PENDING_PAYMENT) {
-      return this.redirect(PAYMENT_URI)
+      return this.handlePendingPaymentRedirect(isApplicant)
     }
 
     return this.redirect(ROOT_URI + '/')
   }
 
   private async handlePendingApprovalRedirect(dissolution: DissolutionGetResponse,
-                                              dissolutionSession: DissolutionSession): Promise<RedirectResult> {
+                                              dissolutionSession: DissolutionSession, isApplicant: boolean): Promise<RedirectResult> {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
-    const isApplicant: boolean = dissolution!.created_by === userEmail
     const signingDirector: Optional<DissolutionGetDirector> = this.getUserPendingSignature(dissolution!, userEmail)
 
     if (signingDirector) {
@@ -65,6 +67,14 @@ export class RedirectController extends BaseController {
       return this.redirect(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
     } else if (isApplicant) {
       return this.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+    } else {
+      return this.redirect(CERTIFICATE_SIGNED_URI)
+    }
+  }
+
+  private async handlePendingPaymentRedirect(isApplicant: boolean): Promise<RedirectResult> {
+    if (isApplicant) {
+      return this.redirect(PAYMENT_URI)
     } else {
       return this.redirect(CERTIFICATE_SIGNED_URI)
     }
