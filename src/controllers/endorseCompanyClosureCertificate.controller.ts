@@ -42,7 +42,7 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
       return this.renderView(errors)
     }
 
-    this.approveDissolution()
+    await this.approveDissolution()
 
     return this.redirect(REDIRECT_GATE_URI)
   }

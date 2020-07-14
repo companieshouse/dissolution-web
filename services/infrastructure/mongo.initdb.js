@@ -41,6 +41,16 @@ db.users.insert({
   "created" : { "$date" : 1420070400000 }
 })
 
+db.users.insert({
+   "_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MU",
+   "surname" : null,
+   "locale" : "GB_en",
+   "password" : "$2a$10$6a..eerV1kSiNW3sBlcYv.VmEXyI7ABWuoo3w7zKzcdh18YKyvPbm",
+   "forename" : null,
+   "email" : "demo2@ch.gov.uk",
+   "created" : { "$date" : 1420070400000 }
+})
+
 /*
  * company_profile
  */
