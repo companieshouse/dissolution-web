@@ -27,8 +27,10 @@ import TYPES from 'app/types'
 @controller(REDIRECT_GATE_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class RedirectController extends BaseController {
 
-  public constructor(@inject(SessionService) private session: SessionService,
-                     @inject(DissolutionService) private service: DissolutionService) {
+  public constructor(
+    @inject(SessionService) private session: SessionService,
+    @inject(DissolutionService) private service: DissolutionService
+  ) {
     super()
   }
 
@@ -66,8 +68,9 @@ export class RedirectController extends BaseController {
     return this.redirect(ERROR_URI)
   }
 
-  private async handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, dissolutionSession: DissolutionSession,
-                                              isApplicant: boolean, userEmail: string): Promise<RedirectResult> {
+  private async handlePendingApprovalRedirect(
+    dissolution: DissolutionGetResponse, dissolutionSession: DissolutionSession, isApplicant: boolean, userEmail: string
+  ): Promise<RedirectResult> {
     const signingDirector: Optional<DissolutionGetDirector> = this.getUserPendingSignature(dissolution!, userEmail)
 
     if (signingDirector) {
