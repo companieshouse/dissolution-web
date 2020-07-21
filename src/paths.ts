@@ -4,7 +4,7 @@ export const HEALTHCHECK_URI = `${ROOT_URI}/healthcheck`
 
 // Redirection
 export const REDIRECT_GATE_URI = `${ROOT_URI}/redirect`
-export const PAYMENT_CALLBACK_URI = `${ROOT_URI}/redirect/payment-callback`
+export const PAYMENT_CALLBACK_URI = `${REDIRECT_GATE_URI}/payment-callback`
 
 // Error
 export const ERROR_URI = `${ROOT_URI}/error`
