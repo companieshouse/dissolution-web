@@ -11,6 +11,7 @@ import { createApp } from './helpers/application.factory'
 import 'app/controllers/redirect.controller'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import PaymentStatus from 'app/models/dto/paymentStatus.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI, CONFIRMATION_URI,
@@ -202,7 +203,7 @@ describe('RedirectController', () => {
     })
   })
 
-  describe('payment fallback GET request', () => {
+  describe('payment callback GET request', () => {
     it('should redirect to confirmation page if GovPay state is valid and status is paid', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
@@ -219,13 +220,13 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: 'paid'
+          status: PaymentStatus.PAID
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', CONFIRMATION_URI)
     })
 
-    it('should redirect to not found if GovPay state is invalid or status is not paid', async () => {
+    it('should redirect to not found if GovPay state is invalid and status is paid', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
       const app = createApp(container => {
@@ -241,7 +242,29 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: 'cancelled'
+          status: PaymentStatus.PAID
+        })
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', ERROR_URI)
+    })
+
+    it('should redirect to not found if GovPay state is valid and status is not paid', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      dissolutionSession.paymentStateUUID = 'ABC123'
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+      await request(app)
+        .get(PAYMENT_CALLBACK_URI)
+        .query({
+          state: 'ABC123',
+          status: PaymentStatus.CANCELLED
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)

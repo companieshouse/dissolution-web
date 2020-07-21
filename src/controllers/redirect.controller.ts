@@ -7,6 +7,7 @@ import BaseController from 'app/controllers/base.controller'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import PaymentStatus from 'app/models/dto/paymentStatus.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -59,7 +60,7 @@ export class RedirectController extends BaseController {
                                   @queryParam('status') status: string): Promise<RedirectResult> {
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
-    if (status === 'paid' && dissolutionSession.paymentStateUUID === state) {
+    if (status === PaymentStatus.PAID && dissolutionSession.paymentStateUUID === state) {
       return this.redirect(CONFIRMATION_URI)
     }
     return this.redirect(ERROR_URI)
