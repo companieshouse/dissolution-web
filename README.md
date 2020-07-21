@@ -1,5 +1,6 @@
 # Dissolution Web
-This repo contains the frontend code for the dissolution web service. It's currenty `WIP`.
+
+This repo contains the frontend code for the dissolution web service.
 
 ## Technologies
 
@@ -15,63 +16,23 @@ We recommend the use of [Visual Studio Code](https://code.visualstudio.com/) for
 
 IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provide syntax highlighting using Twig plugin
 
-## Running locally with Docker  
+## Running locally
 
-1. Required tools:
-    - [Docker for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
-    - [Docker-Compose](https://docs.docker.com/compose/install/)
+1. Clone [Docker CHS Development](https://github.com/companieshouse/docker-chs-development) and follow the steps in the README.
 
-2. Once installed, open Docker for Mac and navigate to Preferences -> Resources and change the settings to Memory => 4 GB, CPUs 4, SWAP = 1 GB.
+2. Enable the `dissolution` module
 
-3. Add the following to your `/etc/hosts` file:
-
-    ```
-    127.0.0.1 chs-dev cdn.chs-dev account.chs-dev api.chs-dev chs-company-profile-api
-    ```
-
-4. Login to the Companies House AWS account and run the following command in a fresh terminal session:
-
-    ```
-    $ docker login -u AWS -p "$(aws ecr get-login-password)" https://169942020521.dkr.ecr.eu-west-1.amazonaws.com
-    ```
-
-5. Link your GitHub SSH key to to `dissolution-web` directory to access private NPM dependencies in Docker:
-
-    ```
-    $ mkdir .ssh
-    $ ln ~/.ssh/id_rsa .ssh/id_rsa
-    ```
-    
-6. Clone [Dissolution API](https://github.com/companieshouse/dissolution-api) and ensure you have the following folder structure locally:
-    ```
-    companies-house
-    |- dissolution-web
-    |- dissolution-api
-    ```
-
-7. Run the following in the `dissolution-web` directory to bring the environment up:
-
-    ```
-    $ docker-compose up
-    ```
-
-8. Navigate to `http://chs-dev/close-a-company/` to see the landing page
+3. Navigate to `http://chs.local/close-a-company/` to see the landing page
 
 ## To make local changes
 
-In the terminal in the `dissolution-web` directory:
+Development mode is available for this service in [Docker CHS Development](https://github.com/companieshouse/docker-chs-development).
 
-1. Stop to service you wish to make changes to
+    ./bin/chs-dev development enable dissolution-web
 
-    ```
-    $ docker-compose stop dissolution-web
-    ```
+## To build the Docker container
 
-2. Bring it back up and force the container to rebuild
-
-    ```
-    $ docker-compose up --build dissolution-web
-    ```
+    DOCKER_BUILDKIT=1 docker build --ssh default -t 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/dissolution-web:latest .
 
 ## Controller flow
 
