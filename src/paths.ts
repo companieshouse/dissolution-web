@@ -2,7 +2,12 @@ export const ROOT_URI = '/close-a-company'
 
 export const HEALTHCHECK_URI = `${ROOT_URI}/healthcheck`
 
+// Redirection
 export const REDIRECT_GATE_URI = `${ROOT_URI}/redirect`
+export const PAYMENT_CALLBACK_URI = `${ROOT_URI}/redirect/payment-callback`
+
+// Error
+export const ERROR_URI = `${ROOT_URI}/error`
 
 // Pages
 export const WHO_TO_TELL_URI = `${ROOT_URI}/who-to-tell`
@@ -16,3 +21,4 @@ export const ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI = `${ROOT_URI}/endorse-comp
 export const WAIT_FOR_OTHERS_TO_SIGN_URI = `${ROOT_URI}/wait-for-others-to-sign`
 export const CERTIFICATE_SIGNED_URI = `${ROOT_URI}/certificate-signed`
 export const PAYMENT_URI = `${ROOT_URI}/payment`
+export const CONFIRMATION_URI = `${ROOT_URI}/confirmation`

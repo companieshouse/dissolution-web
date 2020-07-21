@@ -13,5 +13,6 @@ export default interface DissolutionSession {
   applicationReferenceNumber?: string
   approval?: DissolutionApprovalModel
   isMultiDirector?: boolean
-  isApplicantADirector?: boolean
+  isApplicantADirector?: boolean,
+  paymentStateUUID?: string
 }
