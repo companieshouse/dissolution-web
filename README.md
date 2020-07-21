@@ -28,15 +28,11 @@ IntelliJ does not have a Nunjuck plugin but you can configure IntelliJ to provid
 
 Development mode is available for this service in [Docker CHS Development](https://github.com/companieshouse/docker-chs-development).
 
-    ```
     ./bin/chs-dev development enable dissolution-web
-    ```
 
 ## To build the Docker container
 
-    ```
     DOCKER_BUILDKIT=1 docker build --ssh default -t 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/dissolution-web:latest .
-    ```
 
 ## Controller flow
 
