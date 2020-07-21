@@ -12,15 +12,15 @@ import { WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
 describe('WaitForOthersToSignController', () => {
   describe('GET request', () => {
     it('should render the WaitForOthers page', async () => {
-        const app = createApp()
+     const app = createApp()
 
-        const res = await request(app)
-          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-          .expect(OK)
+     const res = await request(app)
+      .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+      .expect(OK)
 
-        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-        assert.isTrue(htmlAssertHelper.hasText('h1', 'You must ask the other directors or members to sign the application'))
+     assert.isTrue(htmlAssertHelper.hasText('h1', 'You must ask the other directors or members to sign the application'))
       })
     })
 })
