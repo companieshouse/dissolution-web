@@ -8,4 +8,6 @@ import 'app/controllers/searchCompany.controller'
 import 'app/controllers/selectDirector.controller'
 import 'app/controllers/selectSignatories.controller'
 import 'app/controllers/viewCompanyInformation.controller'
+import 'app/controllers/viewFinalConfirmation.controller'
 import 'app/controllers/whoToTell.controller'
+

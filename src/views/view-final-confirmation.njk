@@ -1,0 +1,43 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block content %}
+  <main class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        {{ govukPanel({
+         titleText: "Application received",
+         html: "Your reference number <br><strong>" + applicationReferenceNumber + "</strong>"
+        }) }}
+
+        <p class="govuk-body">We will email you within 2 working days to let you know if the application has been accepted or rejected.</p>
+
+        <h3 class="govuk-heading-m">What to do next</h3>
+        <a href="#" class="govuk-link">Download the signed copy of the application (PDF 238Kb) (opens in a new tab).)</a>
+        <p class="govuk-body">You must inform all directors or members that the application has been submitted, including those who signed it. 
+                              They must send a copy of the application to all interested parties within 7 days.</p>
+        <p class="govuk-body">Read the <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#how-to-apply-for-strike-off-and-who-to-tell"
+                                        class="govuk-link">full list of parties you must tell about the company closing (opens in a new tab).</a></p>
+
+        {{ govukWarningText({
+          text: "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
+          iconFallbackText: "Warning"
+        }) }}
+
+        <h3 class="govuk-heading-m">If you no longer want to close the company</h3>
+        <p class="govuk-body">You should <a href="#" class="govuk-link">cancel this application to close the company (opens in a new tab)</a> as soon as possible.</p>
+        <p class="govuk-body">You cannot cancel your application if we have already processed and accepted it.</p>
+
+      </div>
+    </main>
+  </div>
+{% endblock %}
