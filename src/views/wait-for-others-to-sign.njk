@@ -1,3 +1,5 @@
+{% extends 'layout.njk' %}
+
 {% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
 
@@ -7,16 +9,19 @@
 
 {% block content %}
   <main class="govuk-main-wrapper">
+
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
-
-        <div class="govuk-panel" style="background:#1d70b8">
-          <h1 class="govuk-panel__title govuk-heading-l" style="color:#ffffff">
-             You must ask the other directors or members to sign the application
-          </h1>
+        <div class="interruption-card">
+          <h1 class="govuk-heading-xl govuk-!-margin-bottom-1">You must ask the other directors or members to sign the application</h1>
         </div>
+      </div>
+    </div>
 
-        <p class="govuk-body govuk-!-font-weight-bold">Before you can submit the application, you must:</p>
+    <div class="govuk-grid-row govuk-!-margin-top-4">
+      <div class="govuk-grid-column-two-thirds">
+
+        <p class="govuk-body govuk-!-font-weight-bold">You must now:</p>
         <ul class="govuk-list govuk-list--bullet">
           <li>email the other directors or members or those signing for them to ask them to sign the application</li>
           <li>give them the link to the Apply to strike off or dissolve a company service: <a href="#" class="govuk-link">http://guidedfiling.companieshouse.gov.uk/start?t=DS01</a>
