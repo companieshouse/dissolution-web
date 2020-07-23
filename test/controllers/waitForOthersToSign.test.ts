@@ -21,6 +21,6 @@ describe('WaitForOthersToSignController', () => {
      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
      assert.isTrue(htmlAssertHelper.hasText('h1', 'You must ask the other directors or members to sign the application'))
-      })
     })
+  })
 })
