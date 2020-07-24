@@ -11,10 +11,9 @@ describe('APIClientFactory', () => {
 
   const TOKEN = 'some-token'
   const COMPANY_PROFILE_API_URL = 'http://some-company-profile-url'
-  const PAYMENTS_API_URL = 'http://some-payments-api-url'
 
   beforeEach(() => {
-    factory = new APIClientFactory(COMPANY_PROFILE_API_URL, PAYMENTS_API_URL)
+    factory = new APIClientFactory(COMPANY_PROFILE_API_URL)
   })
 
   describe('getCompanyProfileService', () => {

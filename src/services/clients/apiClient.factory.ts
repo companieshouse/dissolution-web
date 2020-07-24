@@ -13,8 +13,7 @@ import TYPES from 'app/types'
 export default class APIClientFactory {
 
   public constructor(
-    @inject(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL) private COMPANY_PROFILE_API_URL: string,
-    @inject(TYPES.PAYMENTS_API_URL) private PAYMENTS_API_URL: string
+    @inject(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL) private COMPANY_PROFILE_API_URL: string
   ) {}
 
   public getCompanyProfileService(token: string): CompanyProfileService {
@@ -26,6 +25,6 @@ export default class APIClientFactory {
   }
 
   public getPaymentService(token: string): PaymentService {
-    return createApiClient(undefined, token, this.PAYMENTS_API_URL).payment
+    return createApiClient(undefined, token).payment
   }
 }
