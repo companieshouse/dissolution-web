@@ -10,7 +10,7 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/viewFinalConfirmation.controller'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { VIEW_FINAL_CONFIRMATION } from 'app/paths'
+import { VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
 
 describe('ViewFinalConfirmationController', () => {
@@ -35,7 +35,7 @@ describe('ViewFinalConfirmationController', () => {
       })
 
       const res = await request(app)
-        .get(VIEW_FINAL_CONFIRMATION)
+        .get(VIEW_FINAL_CONFIRMATION_URI)
         .expect(OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)

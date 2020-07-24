@@ -2,7 +2,7 @@ import { inject } from 'inversify'
 import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
-import { VIEW_FINAL_CONFIRMATION } from 'app/paths'
+import { VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
@@ -10,7 +10,7 @@ interface ViewModel {
   applicationReferenceNumber: string
 }
 
-@controller(VIEW_FINAL_CONFIRMATION, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class ViewFinalConfirmationController extends BaseController {
 
   public constructor(
