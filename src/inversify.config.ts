@@ -32,6 +32,7 @@ export function initContainer(): Container {
   container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
   container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
   container.bind<string>(TYPES.CHS_URL).toConstantValue(getEnvOrThrow('CHS_URL'))
+  container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow('PAYMENTS_API_URL'))
 
   // Utils
   const logger = createLogger(APP_NAME)
