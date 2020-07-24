@@ -1,6 +1,5 @@
 import 'reflect-metadata'
 
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { CreatePaymentRequest, Payment } from 'ch-sdk-node/dist/services/payment'
 import { ApiResponse } from 'ch-sdk-node/dist/services/resource'
 import { inject } from 'inversify'
@@ -19,8 +18,7 @@ export default class PaymentService {
     @inject(PaymentMapper) private mapper: PaymentMapper,
     @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
-    @inject(PaymentApiClient) private client: PaymentApiClient,
-    @inject(ApplicationLogger) private logger: ApplicationLogger
+    @inject(PaymentApiClient) private client: PaymentApiClient
   ) {}
 
   public async generatePaymentURL(
@@ -37,18 +35,12 @@ export default class PaymentService {
       paymentRedirectURI, applicationReferenceNumber, paymentResource, paymentStateUUID
     )
 
-    return this.createPayment(token, createPaymentRequest)
-  }
+    const response: ApiResponse<Payment> = await this.client.createPayment(token, createPaymentRequest)
 
-  private async createPayment(token: string, createPaymentRequest: CreatePaymentRequest): Promise<string> {
-    try {
-      const response: ApiResponse<Payment> = await this.client.createPayment(token, createPaymentRequest)
-
-      return `${response.resource?.links.journey}?summary=false`
-    } catch (err) {
-      this.logger.error(err)
-
-      return Promise.reject(err)
+    if (!response.resource) {
+      return Promise.reject(new Error('Payment session failed to create'))
     }
+
+    return `${response.resource.links.journey}?summary=false`
   }
 }

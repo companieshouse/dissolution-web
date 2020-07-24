@@ -1,14 +1,11 @@
 import axios, { AxiosInstance } from 'axios'
 import * as bodyParser from 'body-parser'
-import { createLogger } from 'ch-logging'
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { Application, NextFunction, Request, Response } from 'express'
 import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import { InversifyExpressServer } from 'inversify-express-utils'
 import * as nunjucks from 'nunjucks'
 
-import { APP_NAME } from 'app/constants/app.const'
 import TYPES from 'app/types'
 import { addFilters, addGlobals } from 'app/utils/nunjucks.util'
 
@@ -51,8 +48,7 @@ const mockEnvVars = (container: Container): void => {
   container.bind(TYPES.CHS_URL).toConstantValue('CHS_URL')
   container.bind(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue('CHS_COMPANY_PROFILE_API_LOCAL_URL')
   container.bind(TYPES.DISSOLUTIONS_API_URL).toConstantValue('DISSOLUTIONS_API_URL')
-  const logger = createLogger(APP_NAME)
-  container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
+  container.bind(TYPES.PAYMENTS_API_URL).toConstantValue('PAYMENTS_API_URL')
   container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
 }
 
