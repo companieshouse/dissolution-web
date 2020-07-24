@@ -19,8 +19,7 @@ export class DissolutionApiClient {
     @inject(TYPES.AxiosInstance) private axios: AxiosInstance
   ) {}
 
-  public async createDissolution(token: string, companyNumber: string,
-                                 body: DissolutionCreateRequest): Promise<DissolutionCreateResponse> {
+  public async createDissolution(token: string, companyNumber: string, body: DissolutionCreateRequest): Promise<DissolutionCreateResponse> {
     const response: AxiosResponse<DissolutionCreateResponse> = await this.axios.post(
       this.generateUrl(companyNumber),
       body,
@@ -31,7 +30,8 @@ export class DissolutionApiClient {
 
   public async getDissolution(token: string, companyNumber: string): Promise<Optional<DissolutionGetResponse>> {
     try {
-      const response: Optional<AxiosResponse<DissolutionGetResponse>> = await this.axios.get(this.generateUrl(companyNumber),
+      const response: Optional<AxiosResponse<DissolutionGetResponse>> = await this.axios.get(
+        this.generateUrl(companyNumber),
         this.generateConfig(token)
       )
 
@@ -43,6 +43,15 @@ export class DissolutionApiClient {
 
       return Promise.reject(err)
     }
+  }
+
+  public async patchDissolution(token: string, companyNumber: string, body: DissolutionPatchRequest): Promise<DissolutionPatchResponse> {
+    const response: AxiosResponse<DissolutionPatchResponse> = await this.axios.patch(
+      this.generateUrl(companyNumber),
+      body,
+      this.generateConfig(token)
+    )
+    return response.data
   }
 
   private generateConfig(token: string): AxiosRequestConfig {
@@ -57,15 +66,5 @@ export class DissolutionApiClient {
 
   private generateUrl(companyNumber: string): string {
     return `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`
-  }
-
-  public async patchDissolution(token: string, companyNumber: string,
-                                body: DissolutionPatchRequest): Promise<DissolutionPatchResponse> {
-    const response: AxiosResponse<DissolutionPatchResponse> = await this.axios.patch(
-      this.generateUrl(companyNumber),
-      body,
-      this.generateConfig(token)
-    )
-    return response.data
   }
 }
