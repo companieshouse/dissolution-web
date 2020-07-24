@@ -1,0 +1,43 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block content %}
+  <main class="govuk-main-wrapper">
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <div class="interruption-card">
+          <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-1">You must ask the other directors or members to sign the application</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="govuk-grid-row govuk-!-margin-top-4">
+      <div class="govuk-grid-column-two-thirds">
+
+        <p class="govuk-body govuk-!-font-weight-bold">Before submitting, you must now:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>email the other directors or members or those signing for them to ask them to sign the application</li>
+          <li>give them the link to the Apply to strike off or dissolve a company service: <a href="#" class="govuk-link">http://guidedfiling.companieshouse.gov.uk/start?t=DS01</a></li>
+        </ul>
+
+        <p class="govuk-body govuk-!-font-weight-bold">Those signing must:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>select the link and start to go through the service</li>
+          <li>sign in to or register for a Companies House account using the email address that you have given us in this service</li>
+          <li>have the company's authentication code in order to sign</li>
+        </ul>
+
+        <p class="govuk-body">When all directors or members have signed you will be able to pay for and submit the application.</p>
+        <p class="govuk-body">You can now exit this page</p>
+
+      </div>
+    </main>
+  </div>
+{% endblock %}

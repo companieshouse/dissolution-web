@@ -9,5 +9,6 @@ import 'app/controllers/selectDirector.controller'
 import 'app/controllers/selectSignatories.controller'
 import 'app/controllers/viewCompanyInformation.controller'
 import 'app/controllers/viewFinalConfirmation.controller'
+import 'app/controllers/waitForOthersToSign.controller'
 import 'app/controllers/whoToTell.controller'
 
