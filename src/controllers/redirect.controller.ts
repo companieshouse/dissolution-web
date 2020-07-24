@@ -13,11 +13,10 @@ import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI,
-  CONFIRMATION_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, ERROR_URI,
   PAYMENT_URI,
   REDIRECT_GATE_URI,
-  SELECT_DIRECTOR_URI,
+  SELECT_DIRECTOR_URI, VIEW_FINAL_CONFIRMATION_URI,
   WAIT_FOR_OTHERS_TO_SIGN_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
@@ -45,27 +44,31 @@ export class RedirectController extends BaseController {
       return this.redirect(SELECT_DIRECTOR_URI)
     }
 
+    dissolutionSession.applicationReferenceNumber = dissolution.application_reference
     const isApplicant: boolean = dissolution!.created_by === userEmail
 
     switch (dissolution!.application_status) {
       case ApplicationStatus.PENDING_APPROVAL:
         return this.handlePendingApprovalRedirect(dissolution, dissolutionSession, isApplicant, userEmail)
       case ApplicationStatus.PENDING_PAYMENT:
-        return this.handlePendingPaymentRedirect(isApplicant)
+        return this.handlePendingPaymentRedirect(isApplicant, dissolutionSession)
       case ApplicationStatus.PAID:
-        return this.redirect(CONFIRMATION_URI)
+
+        return this.saveSessionAndRedirect(dissolutionSession, VIEW_FINAL_CONFIRMATION_URI)
     }
   }
 
   @httpGet('/payment-callback')
   public async getPaymentCallback(@queryParam('state') state: string,
-                                  @queryParam('status') status: string): Promise<RedirectResult> {
+                                  @queryParam('status') status: string,
+                                  @queryParam('ref') reference: string): Promise<RedirectResult> {
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    dissolutionSession.applicationReferenceNumber = reference
 
     if (status === PaymentStatus.PAID && dissolutionSession.paymentStateUUID === state) {
-      return this.redirect(CONFIRMATION_URI)
+      return this.saveSessionAndRedirect(dissolutionSession, VIEW_FINAL_CONFIRMATION_URI)
     }
-    return this.redirect(ERROR_URI)
+    return this.saveSessionAndRedirect(dissolutionSession, ERROR_URI)
   }
 
   private async handlePendingApprovalRedirect(
@@ -75,21 +78,20 @@ export class RedirectController extends BaseController {
 
     if (signingDirector) {
       dissolutionSession.approval = this.prepareApprovalData(dissolution!, signingDirector)
-      this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
-      return this.redirect(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+      return this.saveSessionAndRedirect(dissolutionSession, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
     } else if (isApplicant) {
-      return this.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+      return this.saveSessionAndRedirect(dissolutionSession, WAIT_FOR_OTHERS_TO_SIGN_URI)
     } else {
-      return this.redirect(CERTIFICATE_SIGNED_URI)
+      return this.saveSessionAndRedirect(dissolutionSession, CERTIFICATE_SIGNED_URI)
     }
   }
 
-  private async handlePendingPaymentRedirect(isApplicant: boolean): Promise<RedirectResult> {
+  private async handlePendingPaymentRedirect(isApplicant: boolean, dissolutionSession: DissolutionSession): Promise<RedirectResult> {
     if (isApplicant) {
-      return this.redirect(PAYMENT_URI)
+      return this.saveSessionAndRedirect(dissolutionSession, PAYMENT_URI)
     } else {
-      return this.redirect(CERTIFICATE_SIGNED_URI)
+      return this.saveSessionAndRedirect(dissolutionSession, CERTIFICATE_SIGNED_URI)
     }
   }
 
@@ -104,5 +106,10 @@ export class RedirectController extends BaseController {
       applicant: signingDirector.name,
       date: moment().format('DD MMMM YYYY')
     }
+  }
+
+  private saveSessionAndRedirect(session: DissolutionSession, redirectUri: string): RedirectResult {
+    this.session.setDissolutionSession(this.httpContext.request, session)
+    return this.redirect(redirectUri)
   }
 }

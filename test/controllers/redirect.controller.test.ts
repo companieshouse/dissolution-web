@@ -14,11 +14,11 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import PaymentStatus from 'app/models/dto/paymentStatus.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
-  CERTIFICATE_SIGNED_URI, CONFIRMATION_URI,
-  ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, ERROR_URI, PAYMENT_CALLBACK_URI,
-  PAYMENT_URI,
+  CERTIFICATE_SIGNED_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  ERROR_URI, PAYMENT_CALLBACK_URI, PAYMENT_URI,
   REDIRECT_GATE_URI,
   SELECT_DIRECTOR_URI,
+  VIEW_FINAL_CONFIRMATION_URI,
   WAIT_FOR_OTHERS_TO_SIGN_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
@@ -43,6 +43,31 @@ describe('RedirectController', () => {
   })
 
   describe('redirect GET request', () => {
+    it('should update dissolution session with reference number', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+      const referenceNumber = '123456'
+      dissolution.application_reference = referenceNumber
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      await request(app)
+        .get(REDIRECT_GATE_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.equal(updatedSession.applicationReferenceNumber, referenceNumber)
+    })
+
     it('should redirect to select director page if dissolution has not yet been created', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
@@ -199,11 +224,42 @@ describe('RedirectController', () => {
       await request(app)
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
-        .expect('Location', CONFIRMATION_URI)
+        .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
     })
   })
 
   describe('payment callback GET request', () => {
+    it('should update dissolution session with reference number', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const referenceNumber: string = '123456'
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      dissolutionSession.paymentStateUUID = 'ABC123'
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+      await request(app)
+        .get(PAYMENT_CALLBACK_URI)
+        .query({
+          state: 'ABC123',
+          status: PaymentStatus.PAID,
+          ref: referenceNumber
+        })
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.equal(updatedSession.applicationReferenceNumber, referenceNumber)
+    })
+
     it('should redirect to confirmation page if GovPay state is valid and status is paid', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
@@ -220,10 +276,11 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: PaymentStatus.PAID
+          status: PaymentStatus.PAID,
+          ref: '123456'
         })
         .expect(MOVED_TEMPORARILY)
-        .expect('Location', CONFIRMATION_URI)
+        .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
     })
 
     it('should redirect to not found if GovPay state is invalid and status is paid', async () => {
@@ -242,7 +299,8 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: PaymentStatus.PAID
+          status: PaymentStatus.PAID,
+          ref: '123456'
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)
@@ -264,7 +322,8 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: PaymentStatus.CANCELLED
+          status: PaymentStatus.CANCELLED,
+          ref: '123456'
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)

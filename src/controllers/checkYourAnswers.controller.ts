@@ -4,7 +4,6 @@ import { RedirectResult } from 'inversify-express-utils/dts/results'
 
 import BaseController from 'app/controllers/base.controller'
 import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/checkYourAnswersDirector.mapper'
-import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI } from 'app/paths'
@@ -47,20 +46,9 @@ export class CheckYourAnswersController extends BaseController {
     const token: string = this.session.getAccessToken(this.httpContext.request)
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
-    const applicationReferenceNumber: Optional<string> = await this.dissolutionService.createDissolution(token, dissolutionSession)
-
-    this.updateSession(applicationReferenceNumber!)
+    await this.dissolutionService.createDissolution(token, dissolutionSession)
 
     return this.redirect(REDIRECT_GATE_URI)
-  }
-
-  private updateSession(applicationReferenceNumber: string): void {
-    const updatedSession: DissolutionSession = {
-      ...this.session.getDissolutionSession(this.httpContext.request),
-      applicationReferenceNumber
-    }
-
-    this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 
   private getDirectors(): CheckYourAnswersDirector[] {
