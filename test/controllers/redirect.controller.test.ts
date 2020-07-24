@@ -106,7 +106,7 @@ describe('RedirectController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 
-      verify(session.setDissolutionSession(anything(), anything())).twice()
+      verify(session.setDissolutionSession(anything(), anything())).once()
 
       const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
       const updatedSession: DissolutionSession = sessionCaptor.last()[1]
