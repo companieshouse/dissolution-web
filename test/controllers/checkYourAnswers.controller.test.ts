@@ -1,11 +1,9 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { Request } from 'express'
 import { MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
-import { anything, capture, instance, mock, verify, when } from 'ts-mockito'
-import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
+import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCheckYourAnswersDirector } from '../fixtures/checkYourAnswersDirector.fixtures'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -27,7 +25,6 @@ describe('CheckYourAnswersController', () => {
 
   const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
-  const REFERENCE_NUMBER = '1234567'
   const DIRECTOR_1_NAME = 'Geoff Smith'
   const DIRECTOR_1_EMAIL = 'test@mail.com'
 
@@ -191,7 +188,7 @@ describe('CheckYourAnswersController', () => {
   })
 
   describe('POST - create dissolution request', () => {
-    it('should add company reference number to dissolution session', async () => {
+    it('should create dissolution', async () => {
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
       const app = createApp(container => {
@@ -204,13 +201,7 @@ describe('CheckYourAnswersController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_GATE_URI)
 
-      verify(session.setDissolutionSession(anything(), anything())).once()
       verify(service.createDissolution(TOKEN, dissolutionSession)).once()
-
-      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
-
-      assert.equal(updatedSession.applicationReferenceNumber, REFERENCE_NUMBER)
     })
   })
 })

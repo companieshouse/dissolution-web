@@ -14,11 +14,11 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import PaymentStatus from 'app/models/dto/paymentStatus.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
-  CERTIFICATE_SIGNED_URI, CONFIRMATION_URI,
-  ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, ERROR_URI, PAYMENT_CALLBACK_URI,
-  PAYMENT_URI,
+  CERTIFICATE_SIGNED_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  ERROR_URI, PAYMENT_CALLBACK_URI, PAYMENT_URI,
   REDIRECT_GATE_URI,
   SELECT_DIRECTOR_URI,
+  VIEW_FINAL_CONFIRMATION_URI,
   WAIT_FOR_OTHERS_TO_SIGN_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
@@ -81,7 +81,7 @@ describe('RedirectController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 
-      verify(session.setDissolutionSession(anything(), anything())).once()
+      verify(session.setDissolutionSession(anything(), anything())).twice()
 
       const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
       const updatedSession: DissolutionSession = sessionCaptor.last()[1]
@@ -115,6 +115,8 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to certificate signed page when the user is not the applicant but has already signed ', async () => {
@@ -137,6 +139,8 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', CERTIFICATE_SIGNED_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to payment when the user is the applicant and application is pending payment', async () => {
@@ -160,6 +164,8 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', PAYMENT_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to certificate signed when the user is not the applicant and application is pending payment', async () => {
@@ -180,6 +186,8 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', CERTIFICATE_SIGNED_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to confirmation page if application status is paid', async () => {
@@ -199,7 +207,10 @@ describe('RedirectController', () => {
       await request(app)
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
-        .expect('Location', CONFIRMATION_URI)
+        .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
     })
   })
 
@@ -220,10 +231,13 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: PaymentStatus.PAID
+          status: PaymentStatus.PAID,
+          ref: '123456'
         })
         .expect(MOVED_TEMPORARILY)
-        .expect('Location', CONFIRMATION_URI)
+        .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to not found if GovPay state is invalid and status is paid', async () => {
@@ -242,10 +256,13 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: PaymentStatus.PAID
+          status: PaymentStatus.PAID,
+          ref: '123456'
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to not found if GovPay state is valid and status is not paid', async () => {
@@ -264,10 +281,13 @@ describe('RedirectController', () => {
         .get(PAYMENT_CALLBACK_URI)
         .query({
           state: 'ABC123',
-          status: PaymentStatus.CANCELLED
+          status: PaymentStatus.CANCELLED,
+          ref: '123456'
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
     })
   })
 })

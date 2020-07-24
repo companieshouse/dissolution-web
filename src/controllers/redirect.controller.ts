@@ -13,11 +13,10 @@ import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI,
-  CONFIRMATION_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, ERROR_URI,
   PAYMENT_URI,
   REDIRECT_GATE_URI,
-  SELECT_DIRECTOR_URI,
+  SELECT_DIRECTOR_URI, VIEW_FINAL_CONFIRMATION_URI,
   WAIT_FOR_OTHERS_TO_SIGN_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
@@ -44,6 +43,7 @@ export class RedirectController extends BaseController {
     if (!dissolution) {
       return this.redirect(SELECT_DIRECTOR_URI)
     }
+    this.updateSessionWithReferenceNumber(dissolution.application_reference)
 
     const isApplicant: boolean = dissolution!.created_by === userEmail
 
@@ -53,19 +53,27 @@ export class RedirectController extends BaseController {
       case ApplicationStatus.PENDING_PAYMENT:
         return this.handlePendingPaymentRedirect(isApplicant)
       case ApplicationStatus.PAID:
-        return this.redirect(CONFIRMATION_URI)
+
+        return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
     }
   }
 
   @httpGet('/payment-callback')
   public async getPaymentCallback(@queryParam('state') state: string,
-                                  @queryParam('status') status: string): Promise<RedirectResult> {
-    const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-
+                                  @queryParam('status') status: string,
+                                  @queryParam('ref') reference: string): Promise<RedirectResult> {
+    const dissolutionSession: DissolutionSession = this.updateSessionWithReferenceNumber(reference)
     if (status === PaymentStatus.PAID && dissolutionSession.paymentStateUUID === state) {
-      return this.redirect(CONFIRMATION_URI)
+      return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
     }
     return this.redirect(ERROR_URI)
+  }
+
+  private updateSessionWithReferenceNumber(reference: string): DissolutionSession {
+    const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    dissolutionSession.applicationReferenceNumber = reference
+    this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+    return dissolutionSession
   }
 
   private async handlePendingApprovalRedirect(

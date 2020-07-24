@@ -21,5 +21,4 @@ export const ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI = `${ROOT_URI}/endorse-comp
 export const WAIT_FOR_OTHERS_TO_SIGN_URI = `${ROOT_URI}/wait-for-others-to-sign`
 export const CERTIFICATE_SIGNED_URI = `${ROOT_URI}/certificate-signed`
 export const PAYMENT_URI = `${ROOT_URI}/payment`
-export const CONFIRMATION_URI = `${ROOT_URI}/confirmation`
 export const VIEW_FINAL_CONFIRMATION_URI = `${ROOT_URI}/view-final-confirmation`
