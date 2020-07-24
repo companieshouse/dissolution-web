@@ -43,6 +43,31 @@ describe('RedirectController', () => {
   })
 
   describe('redirect GET request', () => {
+    it('should update dissolution session with reference number', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+      const referenceNumber = '123456'
+      dissolution.application_reference = referenceNumber
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      await request(app)
+        .get(REDIRECT_GATE_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.equal(updatedSession.applicationReferenceNumber, referenceNumber)
+    })
+
     it('should redirect to select director page if dissolution has not yet been created', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
@@ -115,8 +140,6 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to certificate signed page when the user is not the applicant but has already signed ', async () => {
@@ -139,8 +162,6 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', CERTIFICATE_SIGNED_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to payment when the user is the applicant and application is pending payment', async () => {
@@ -164,8 +185,6 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', PAYMENT_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to certificate signed when the user is not the applicant and application is pending payment', async () => {
@@ -186,8 +205,6 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', CERTIFICATE_SIGNED_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to confirmation page if application status is paid', async () => {
@@ -208,13 +225,41 @@ describe('RedirectController', () => {
         .get(REDIRECT_GATE_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
-
     })
   })
 
   describe('payment callback GET request', () => {
+    it('should update dissolution session with reference number', async () => {
+      const dissolutionSession: DissolutionSession = generateDissolutionSession()
+      const referenceNumber: string = '123456'
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(DissolutionService).toConstantValue(instance(service))
+      })
+
+      dissolutionSession.paymentStateUUID = 'ABC123'
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+      await request(app)
+        .get(PAYMENT_CALLBACK_URI)
+        .query({
+          state: 'ABC123',
+          status: PaymentStatus.PAID,
+          ref: referenceNumber
+        })
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
+
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.equal(updatedSession.applicationReferenceNumber, referenceNumber)
+    })
+
     it('should redirect to confirmation page if GovPay state is valid and status is paid', async () => {
       const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
@@ -236,8 +281,6 @@ describe('RedirectController', () => {
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to not found if GovPay state is invalid and status is paid', async () => {
@@ -261,8 +304,6 @@ describe('RedirectController', () => {
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
 
     it('should redirect to not found if GovPay state is valid and status is not paid', async () => {
@@ -286,8 +327,6 @@ describe('RedirectController', () => {
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', ERROR_URI)
-
-      verify(session.setDissolutionSession(anything(), anything())).once()
     })
   })
 })
