@@ -1,7 +1,9 @@
 import 'reflect-metadata'
 
+import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { CreatePaymentRequest, Payment } from 'ch-sdk-node/dist/services/payment'
 import { ApiResponse } from 'ch-sdk-node/dist/services/resource'
+import { CREATED } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import PaymentApiClient from '../clients/paymentApi.client'
@@ -18,7 +20,8 @@ export default class PaymentService {
     @inject(PaymentMapper) private mapper: PaymentMapper,
     @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
-    @inject(PaymentApiClient) private client: PaymentApiClient
+    @inject(PaymentApiClient) private client: PaymentApiClient,
+    @inject(ApplicationLogger) private logger: ApplicationLogger
   ) {}
 
   public async generatePaymentURL(
@@ -37,10 +40,12 @@ export default class PaymentService {
 
     const response: ApiResponse<Payment> = await this.client.createPayment(token, createPaymentRequest)
 
-    if (!response.resource) {
+    if (response.httpStatusCode !== CREATED) {
+      this.logger.error(JSON.stringify(response))
+
       return Promise.reject(new Error('Payment session failed to create'))
     }
 
-    return `${response.resource.links.journey}?summary=false`
+    return `${response.resource!.links.journey}?summary=false`
   }
 }

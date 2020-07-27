@@ -1,6 +1,8 @@
+import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import { CreatePaymentRequest, Payment } from 'ch-sdk-node/dist/services/payment'
 import { ApiResponse, ApiResult } from 'ch-sdk-node/dist/services/resource'
 import { assert } from 'chai'
+import { INTERNAL_SERVER_ERROR } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCreatePaymentRequest, generatePaymentResult } from '../../fixtures/payment.fixtures'
 
@@ -13,12 +15,12 @@ import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('PaymentService', () => {
   let mapper: PaymentMapper
-  let client: PaymentApiClient
-
-  let service: PaymentService
-
   const CHS_URL = 'http://some-ui-url'
   const DISSOLUTIONS_API_URL = 'http://some-dissolutions-api-url'
+  let client: PaymentApiClient
+  let logger: ApplicationLogger
+
+  let service: PaymentService
 
   let dissolutionSession: DissolutionSession
 
@@ -31,11 +33,12 @@ describe('PaymentService', () => {
   beforeEach(() => {
     mapper = mock(PaymentMapper)
     client = mock(PaymentApiClient)
+    logger = mock(ApplicationLogger)
 
     dissolutionSession = generateDissolutionSession()
 
     service = new PaymentService(
-      instance(mapper), CHS_URL, DISSOLUTIONS_API_URL, instance(client)
+      instance(mapper), CHS_URL, DISSOLUTIONS_API_URL, instance(client), instance(logger)
     )
 
     paymentResponse = paymentResult.value as ApiResponse<Payment>
@@ -58,7 +61,7 @@ describe('PaymentService', () => {
     })
 
     it('should reject with an error if payment session failed to create', async () => {
-      paymentResponse.resource = undefined
+      paymentResponse.httpStatusCode = INTERNAL_SERVER_ERROR
 
       when(
         mapper.mapToCreatePaymentRequest(
