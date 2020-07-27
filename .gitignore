@@ -4,3 +4,5 @@ node_modules
 .scannerwork/*
 .ssh
 .vscode/*
+coverage-report
+.nyc_output/
