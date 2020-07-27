@@ -40,7 +40,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h3', 'What to do next'))
+      assert.isTrue(htmlAssertHelper.hasText('h2', 'What to do next'))
       assert.isTrue(htmlAssertHelper.containsText('div.govuk-panel__body', APPLICATION_REFERENCE_NUMBER))
     })
   })
