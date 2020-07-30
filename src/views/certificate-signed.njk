@@ -1,0 +1,36 @@
+{% extends 'layout.njk' %}
+
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% block pageTitle %}
+  {{ serviceName }}
+{% endblock %}
+
+{% block content %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <div class="interruption-card">
+          <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-8">Application signed</h1>
+          <p class="govuk-body govuk-!-font-size-36 govuk-!-margin-bottom-1">Check the application's progress with the person who is submitting it</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="govuk-grid-row govuk-!-margin-top-4">
+      <div class="govuk-grid-column-two-thirds">
+
+        <p class="govuk-body">We need to recieve signatures from all signing directors or members before the person making the application can pay for and submit it. It may take some time for others to sign.</p>
+
+        <h2 class="govuk-heading-s">What to do next</h2>
+
+        <p class="govuk-body">The person making the application can download a signed PDF copy of it after it has been submitted.</p>
+        <p class="govuk-body">The directors or members must then send this to all interested parties within 7 days of submission.</p>
+
+        {{ govukWarningText({
+          text: "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
+          iconFallbackText: "Warning"
+        }) }}
+
+      </div>
+  </div>
+{% endblock %}
