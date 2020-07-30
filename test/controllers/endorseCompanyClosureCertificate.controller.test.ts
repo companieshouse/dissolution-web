@@ -18,7 +18,7 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import FormValidator from 'app/utils/formValidator.util'
 
-import { generateApprovalData } from 'test/fixtures/dissolutionApi.fixtures'
+import { generateApprovalModel } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('EndorseCompanyClosureCertificateController', () => {
@@ -39,7 +39,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
     mockedFormValidator = mock(FormValidator)
 
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
-    dissolutionSession.approval = generateApprovalData()
+    dissolutionSession.approval = generateApprovalModel()
     dissolutionSession.approval.companyName = 'Company 1'
     dissolutionSession.approval.companyNumber = '123456789'
     dissolutionSession.approval.applicant = 'John Smith'

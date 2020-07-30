@@ -61,14 +61,14 @@ export function generateLinks(): DissolutionLinks {
   }
 }
 
-export function generateGetDirector(name: string): DissolutionGetDirector {
+export function generateGetDirector(name: string = 'Jane Smith'): DissolutionGetDirector {
   return {
     name,
     email: generateEmail(name),
   }
 }
 
-export function generateApprovalData(): DissolutionApprovalModel {
+export function generateApprovalModel(): DissolutionApprovalModel {
   return {
     companyName: 'Example Company',
     companyNumber: '12345678',
