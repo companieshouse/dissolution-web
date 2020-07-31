@@ -1,4 +1,3 @@
-
 import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
@@ -10,7 +9,6 @@ export class CertificateSignedController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {
-
     return super.render('certificate-signed')
   }
 }
