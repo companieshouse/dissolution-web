@@ -15,7 +15,7 @@ describe('LandingController', () => {
   describe('GET request', () => {
     it('should render the landing page', async () => {
       const res = await request(app).get(ROOT_URI).expect(OK)
-      assert.include(res.text,'Use this service to apply to close a company, also known as striking a company off the register or dissolution.')
+      assert.include(res.text,'Use this service to apply to close a public limited company, a private limited company, or a limited liability partnership (LLP).')
     })
   })
 
