@@ -1,3 +1,4 @@
+import 'app/controllers/certificateSigned.controller'
 import 'app/controllers/checkYourAnswers.controller'
 import 'app/controllers/defineSignatoryInfo.controller'
 import 'app/controllers/endorseCompanyClosureCertificate.controller'
@@ -12,3 +13,4 @@ import 'app/controllers/viewCompanyInformation.controller'
 import 'app/controllers/viewFinalConfirmation.controller'
 import 'app/controllers/waitForOthersToSign.controller'
 import 'app/controllers/whoToTell.controller'
+
