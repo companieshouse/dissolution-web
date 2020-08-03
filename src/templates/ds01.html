@@ -16,7 +16,7 @@
     <style type="text/css">
         body {
             font-size: 14px;
-            font-family: 'SourceSansPro-Regular', sans-serif;
+            font-family: 'TransportNewLight-Regular', sans-serif;
         }
 
         img {
@@ -103,13 +103,12 @@
 
         .director-data-left {
             padding-left: 10px;
-            width: 250px;
+            width: 210px;
         }
 
         .director-data-right {
             width: 320px;
             padding-top: 30px;
-            padding-right: 20px;
         }
 
         .hr-thin {
@@ -197,7 +196,7 @@
         <tr class="director-data-row">
             <td class="director-data-left">{{$director.name}}</td>
             <td class="director-data-right">
-                {{if $director.onBehalfName}}<label>{{$director.onBehalfName}}</label>
+                {{if $director.onBehalfName}}<label>{{$director.onBehalfName}} pp {{$director.name}}</label>
                 {{else}}<label>{{$director.name}}</label>{{end}}
                 <div class="hr-div">
                     <hr class="hr-thin"/>
