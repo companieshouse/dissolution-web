@@ -30,12 +30,15 @@ export default class CompanyDetailsMapper {
       company.registeredOfficeAddress.postalCode,
       company.registeredOfficeAddress.premises,
       company.registeredOfficeAddress.region]
-    .filter(el => el != null && el.trim() !== '')
-    .join(', ')
+      .filter(el => el != null && el.trim() !== '')
+      .join(', ')
   }
 
   private canClose(company: CompanyProfile): boolean {
-    const closableCompanyTypes = ['ltd', 'plc']
-    return company.companyStatus === 'active' && closableCompanyTypes.includes(company.type)
+    const closableCompanyTypes = ['ltd', 'plc', 'llp']
+    const invalidPrefixes = ['FC', 'NF', 'SF']
+    return company.companyStatus === 'active'
+      && closableCompanyTypes.includes(company.type)
+      && !invalidPrefixes.includes(company.companyNumber.slice(0, 2))
   }
 }
