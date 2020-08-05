@@ -11,7 +11,7 @@
 {% set documentationUrl = 'https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#how-to-apply-for-strike-off-and-who-to-tell' %}
 
 {% block pageTitle %}
-  {{ serviceName }}
+  Who to tell
 {% endblock %}
 
 {% block content %}
@@ -26,12 +26,12 @@
       {% include 'components/errors/error-summary.njk' %}
 
       <h1 class="govuk-heading-xl">Who to tell about the company closing</h1>
-      <p class="govuk-body">Directors must give a copy of this application to all interested parties within 7 days of it being submitted.</p>
-      <p class="govuk-body">Read the <a class="govuk-link" target="_blank" href="{{ documentationUrl }}">full list of parties you must tell about the company closing (opens in a new tab)</a>.</p>
+      <p class="govuk-body">Directors or members must give a copy of this application to all interested parties within 7 days of it being submitted. You can download a PDF copy of the application after you submit it.</p>
+      <p class="govuk-body">Read the <a class="govuk-link" target="_blank" href="{{ documentationUrl }}">full list of interested parties you must tell about the company closing (opens in a new tab)</a>.</p>
 
       {{
         govukWarningText({
-          text: "Directors can be fined or imprisoned if they do not inform all interested parties.",
+          text: "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
           iconFallbackText: "Warning"
         })
       }}
@@ -47,7 +47,7 @@
             items: [
               {
                 value: "understood",
-                text: "The directors understand that they are responsible for notifying all interested parties."
+                text: "The directors or members understand that they are responsible for notifying all interested parties."
               }
             ]
           })
