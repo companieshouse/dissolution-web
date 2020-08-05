@@ -53,7 +53,7 @@ export class ViewCompanyInformationController extends BaseController {
   private updateSession(session: DissolutionSession, company: CompanyDetails): void {
     const updatedSession: DissolutionSession = {
       ...session,
-      companyType: company.companyType
+      officerType: company.companyType === 'llp' ? 'member' : 'director'
     }
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
