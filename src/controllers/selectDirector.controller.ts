@@ -19,6 +19,7 @@ import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
+  memberType: string
   directors: DirectorDetails[]
   data?: Optional<SelectDirectorFormModel>
   errors?: Optional<ValidationErrors>
@@ -38,10 +39,11 @@ export class SelectDirectorController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const form: Optional<SelectDirectorFormModel> = this.getFormFromSession()
-
+    const companyType = this.session.getDissolutionSession(this.httpContext.request)!.companyType
+    const memberType = companyType === 'llp'?'member':'director'
     const directors: DirectorDetails[] = await this.getDirectors()
 
-    return this.renderView(directors, form)
+    return this.renderView(memberType, directors, form)
   }
 
   private getFormFromSession(): Optional<SelectDirectorFormModel> {
@@ -50,11 +52,13 @@ export class SelectDirectorController extends BaseController {
 
   @httpPost('')
   public async post(@requestBody() body: SelectDirectorFormModel): Promise<string | RedirectResult> {
+    const companyType = this.session.getDissolutionSession(this.httpContext.request)!.companyType
+    const memberType = companyType === 'llp'?'member':'director'
     const directors: DirectorDetails[] = await this.getDirectors()
 
     const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema)
     if (errors) {
-      return this.renderView(directors, body, errors)
+      return this.renderView(memberType, directors, body, errors)
     }
 
     const selectedDirector: Optional<DirectorDetails> = this.getSelectedDirector(directors, body)
@@ -76,10 +80,12 @@ export class SelectDirectorController extends BaseController {
   }
 
   private async renderView(
+    memberType: string,
     directors: DirectorDetails[],
     data?: Optional<SelectDirectorFormModel>,
     errors?: Optional<ValidationErrors>): Promise<string> {
     const viewModel: ViewModel = {
+      memberType,
       directors,
       data,
       errors

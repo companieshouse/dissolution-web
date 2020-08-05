@@ -3,6 +3,7 @@ import { controller, httpGet, httpPost } from 'inversify-express-utils'
 import BaseController from './base.controller'
 
 import CompanyDetails from 'app/models/companyDetails.model'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
@@ -23,7 +24,10 @@ export class ViewCompanyInformationController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
     const company: CompanyDetails = await this.getCompanyInfo()
+
+    this.updateSession(session, company)
 
     const viewModel: ViewModel = {
       company
@@ -44,5 +48,13 @@ export class ViewCompanyInformationController extends BaseController {
 
   private getCompanyNumber(): string {
     return this.session.getDissolutionSession(this.httpContext.request)!.companyNumber!
+  }
+
+  private updateSession(session: DissolutionSession, company: CompanyDetails): void {
+    const updatedSession: DissolutionSession = {
+      ...session,
+      companyType: company.companyType
+    }
+    this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 }

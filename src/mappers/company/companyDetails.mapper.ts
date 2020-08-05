@@ -35,7 +35,7 @@ export default class CompanyDetailsMapper {
   }
 
   private canClose(company: CompanyProfile): boolean {
-    const closableCompanyTypes = ['ltd', 'plc']
+    const closableCompanyTypes = ['ltd', 'plc', 'llp']
     return company.companyStatus === 'active' && closableCompanyTypes.includes(company.type)
   }
 }
