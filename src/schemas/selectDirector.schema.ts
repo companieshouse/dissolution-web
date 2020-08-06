@@ -1,12 +1,15 @@
 import * as Joi from '@hapi/joi'
 
-const selectDirectorSchema: Joi.ObjectSchema = Joi.object({
-  director: Joi.string()
-    .required()
-    .messages({
-      'any.required': `Select which of the directors you are or if you're not a director`,
-      'string.empty': `Select which of the directors you are or if you're not a director`
-    })
-})
+import OfficerType from 'app/models/dto/officerType.enum'
 
-export default selectDirectorSchema
+export default function selectDirectorSchema(officerType: OfficerType): Joi.ObjectSchema {
+
+  return Joi.object({
+    director: Joi.string()
+      .required()
+      .messages({
+        'any.required': `Select which of the ${officerType}s you are or if you're not a ${officerType}`,
+        'string.empty': `Select which of the ${officerType}s you are or if you're not a ${officerType}`
+      })
+  })
+}

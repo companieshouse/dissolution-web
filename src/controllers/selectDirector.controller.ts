@@ -54,7 +54,7 @@ export class SelectDirectorController extends BaseController {
     const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
     const directors: DirectorDetails[] = await this.getDirectors()
 
-    const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema)
+    const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema(officerType!))
     if (errors) {
       return this.renderView(officerType!, directors, body, errors)
     }

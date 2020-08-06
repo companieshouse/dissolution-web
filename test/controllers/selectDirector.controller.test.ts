@@ -56,6 +56,7 @@ describe('SelectDirectorController', () => {
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
 
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+    dissolutionSession.officerType = OfficerType.DIRECTOR
   })
 
   describe('GET - ensure that page loads correctly', () => {
@@ -174,7 +175,7 @@ describe('SelectDirectorController', () => {
         { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
         { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
       ])
-      when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(error)
+      when(validator.validate(deepEqual(form), anything())).thenReturn(error)
 
       const app = initApp()
 
@@ -198,7 +199,7 @@ describe('SelectDirectorController', () => {
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
@@ -216,7 +217,7 @@ describe('SelectDirectorController', () => {
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
@@ -242,7 +243,7 @@ describe('SelectDirectorController', () => {
         const applicant: DirectorToSign = generateDirectorToSign()
 
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([director])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
         when(session.getUserEmail(anything())).thenReturn(directorEmail)
         when(mapper.mapAsApplicant(director, directorEmail)).thenReturn(applicant)
 
@@ -272,7 +273,7 @@ describe('SelectDirectorController', () => {
         const signatory: DirectorToSign = generateDirectorToSign()
 
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([director])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
         when(mapper.mapAsSignatory(director)).thenReturn(signatory)
 
         const app = initApp()
@@ -301,7 +302,7 @@ describe('SelectDirectorController', () => {
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
           { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
@@ -328,7 +329,7 @@ describe('SelectDirectorController', () => {
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
@@ -345,7 +346,7 @@ describe('SelectDirectorController', () => {
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
@@ -363,7 +364,7 @@ describe('SelectDirectorController', () => {
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
           { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
@@ -381,7 +382,7 @@ describe('SelectDirectorController', () => {
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
           { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema)).thenReturn(null)
+        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
 
         const app = initApp()
 
