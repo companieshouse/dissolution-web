@@ -15,6 +15,7 @@ export default class DissolutionApprovalMapper {
       companyName: dissolution.company_name,
       companyNumber: dissolution.company_number,
       applicant: signatory.name,
+      onBehalfName: signatory.on_behalf_name,
       date: moment().format('DD MMMM YYYY')
     }
   }
