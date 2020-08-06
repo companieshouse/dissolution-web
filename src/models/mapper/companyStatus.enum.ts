@@ -1,5 +1,6 @@
 enum CompanyStatus {
-  ACTIVE = 'active'
+  ACTIVE = 'active',
+  DISSOLVED = 'dissolved'
 }
 
 export default CompanyStatus
