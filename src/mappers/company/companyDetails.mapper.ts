@@ -4,6 +4,9 @@ import { CompanyProfile } from 'ch-sdk-node/dist/services/company-profile/types'
 import { provide } from 'inversify-binding-decorators'
 
 import CompanyDetails from 'app/models/companyDetails.model'
+import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
+import CompanyStatus from 'app/models/mapper/companyStatus.enum'
+import OverseasCompanyPrefix from 'app/models/mapper/overseasCompanyPrefix.enum'
 
 @provide(CompanyDetailsMapper)
 export default class CompanyDetailsMapper {
@@ -35,10 +38,8 @@ export default class CompanyDetailsMapper {
   }
 
   private canClose(company: CompanyProfile): boolean {
-    const closableCompanyTypes = ['ltd', 'plc', 'llp']
-    const invalidPrefixes = ['FC', 'NF', 'SF']
-    return company.companyStatus === 'active'
-      && closableCompanyTypes.includes(company.type)
-      && !invalidPrefixes.includes(company.companyNumber.slice(0, 2))
+    return company.companyStatus === CompanyStatus.ACTIVE
+      && Object.values(ClosableCompanyType).some(val => val === company.type)
+      && !Object.values(OverseasCompanyPrefix).some(invalidPrefix => company.companyNumber.startsWith(invalidPrefix))
   }
 }
