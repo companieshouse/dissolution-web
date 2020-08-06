@@ -24,7 +24,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
       assert.equal(result.companyType, 'ltd')
-      assert.equal(result.canClose, true)
+      assert.isTrue(result.canClose)
     })
 
     it('should extract the proper profile details of a non-closable ltd company', () => {
@@ -41,7 +41,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'inactive')
       assert.equal(result.companyType, 'ltd')
-      assert.equal(result.canClose, false)
+      assert.isFalse(result.canClose)
     })
 
     it('should extract the proper profile details of a closable plc company', () => {
@@ -58,7 +58,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
       assert.equal(result.companyType, 'plc')
-      assert.equal(result.canClose, true)
+      assert.isTrue(result.canClose)
     })
 
     it('should extract the proper profile details of a closable llp company', () => {
@@ -75,7 +75,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
       assert.equal(result.companyType, 'llp')
-      assert.equal(result.canClose, true)
+      assert.isTrue(result.canClose)
     })
 
     it('should extract the proper profile details of a non-closable plc company', () => {
@@ -92,7 +92,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'inactive')
       assert.equal(result.companyType, 'plc')
-      assert.equal(result.canClose, false)
+      assert.isFalse(result.canClose)
     })
 
     it('should extract the proper profile details of a active but non-closable company', () => {
@@ -109,7 +109,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
       assert.equal(result.companyType, 'limited')
-      assert.equal(result.canClose, false)
+      assert.isFalse(result.canClose)
     })
 
     it('should extract the proper profile details of a active but non-closable overseas company', () => {
@@ -126,7 +126,7 @@ describe('CompanyDetailsMapper', () => {
       assert.equal(result.companyNumber, 'SF777777')
       assert.equal(result.companyStatus, 'active')
       assert.equal(result.companyType, 'llp')
-      assert.equal(result.canClose, false)
+      assert.isFalse(result.canClose)
     })
   })
 })
