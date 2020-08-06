@@ -1,3 +1,4 @@
+import OfficerType from 'app/models/dto/officerType.enum'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export type GovUKRadio = {
@@ -11,7 +12,7 @@ export type GovUKRadioDivider = {
 }
 
 export function asSelectDirectorList(directors: DirectorDetails[],
-                                     officerType: string, choice?: string): (GovUKRadio | GovUKRadioDivider)[] {
+                                     officerType: OfficerType, choice?: string): (GovUKRadio | GovUKRadioDivider)[] {
   const directorRadios: GovUKRadio[] = getDirectorRadios(directors, choice)
   const divider: GovUKRadioDivider = { divider: 'or' }
   const notADirectorRadio: GovUKRadio = getNotADirectorRadio(officerType!, choice)
@@ -23,7 +24,7 @@ function getDirectorRadios(directors: DirectorDetails[], choice?: string): GovUK
   return directors.map(director => asGovUKRadio(director.name, director.id, choice))
 }
 
-function getNotADirectorRadio(officerType: string, choice?: string): GovUKRadio {
+function getNotADirectorRadio(officerType: OfficerType, choice?: string): GovUKRadio {
   return asGovUKRadio(`I am not a ${officerType} of this company`, 'other', choice)
 }
 

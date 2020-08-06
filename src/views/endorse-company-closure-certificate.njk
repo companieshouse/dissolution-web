@@ -39,11 +39,11 @@
           Guidance is available on the grounds for objection (opens in a new tab)</a>.
         If in doubt, seek professional advice.</p>
 
-      <h2 class="govuk-heading-m">Declaration of directors</h2>
+      <h2 id="declaration-heading" class="govuk-heading-m">Declaration of {{ approvalModel.officerType }}s</h2>
 
-      <p class="govuk-body">I/We as directors / the majority of directors apply for this company to be struck off the Register
+      <p id="declaration" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of {{ approvalModel.officerType }}s apply for this company to be struck off the Register
         and declare that none of the circumstances described in section 1004 or 1005 of the Companies Act 2006
-        (being circumstances in which the directors would otherwise be prohibited under those sections).</p>
+        (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections).</p>
 
       <form method="post">
         {{

@@ -14,12 +14,18 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectDirector.controller'
 import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
+import OfficerType from 'app/models/dto/officerType.enum'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from 'app/paths'
+import {
+  CHECK_YOUR_ANSWERS_URI,
+  DEFINE_SIGNATORY_INFO_URI,
+  SELECT_DIRECTOR_URI,
+  SELECT_SIGNATORIES_URI
+} from 'app/paths'
 import selectDirectorSchema from 'app/schemas/selectDirector.schema'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
 import SessionService from 'app/services/session/session.service'
@@ -71,10 +77,55 @@ describe('SelectDirectorController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which director are you?'))
       assert.equal(htmlAssertHelper.getValue('#select-director'), DIRECTOR_1_ID)
       assert.equal(htmlAssertHelper.getValue('#select-director-2'), DIRECTOR_2_ID)
       assert.equal(htmlAssertHelper.getValue('#select-director-4'), NOT_A_DIRECTOR_ID)
+    })
+
+    it('should render the select director page with directors for DS01', async () => {
+      dissolutionSession.officerType = OfficerType.DIRECTOR
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_DIRECTOR_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which director are you?'))
+    })
+
+    it('should render the select director page with members for LLDS01', async () => {
+      dissolutionSession.officerType = OfficerType.MEMBER
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_DIRECTOR_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which member are you?'))
     })
 
     it('should prepopulate the select director page with the selected director from session', async () => {

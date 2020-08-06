@@ -10,6 +10,7 @@ import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/endorseCompanyClosureCertificate.controller'
+import OfficerType from 'app/models/dto/officerType.enum'
 import EndorseCertificateFormModel from 'app/models/form/endorseCertificateFormModel'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from 'app/paths'
@@ -66,6 +67,44 @@ describe('EndorseCompanyClosureCertificateController', () => {
       assert.isTrue(htmlAssertHelper.hasText('div#companyName', 'Company name: Company 1'))
       assert.isTrue(htmlAssertHelper.hasText('div#companyNumber', 'Company number: 123456789'))
       assert.isTrue(htmlAssertHelper.hasText('span#applicantName', 'John Smith'))
+    })
+
+    it('should render endorse certificate page with directors for DS01', async () => {
+      dissolutionSession.approval!.officerType = OfficerType.DIRECTOR
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+      })
+
+      const res = await request(app)
+        .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of directors'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration', 'directors'))
+      assert.isFalse(htmlAssertHelper.containsText('#declaration', 'members'))
+
+    })
+
+    it('should render endorse certificate page with members for LLDS01', async () => {
+      dissolutionSession.approval!.officerType = OfficerType.MEMBER
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+      })
+
+      const res = await request(app)
+        .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of members'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration', 'members'))
+      assert.isFalse(htmlAssertHelper.containsText('#declaration', 'directors'))
+
     })
   })
 
