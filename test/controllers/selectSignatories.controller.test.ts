@@ -6,7 +6,11 @@ import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
-import { generateDirectorDetails, generateSelectDirectorFormModel, generateSelectSignatoriesFormModel } from '../fixtures/companyOfficers.fixtures'
+import {
+  generateDirectorDetails,
+  generateSelectDirectorFormModel,
+  generateSelectSignatoriesFormModel
+} from '../fixtures/companyOfficers.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
 import { generateDirectorToSign, generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
@@ -53,7 +57,6 @@ describe('SelectSignatoriesController', () => {
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
 
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
-    dissolutionSession.officerType = OfficerType.DIRECTOR
     dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
   })
 
@@ -61,8 +64,32 @@ describe('SelectSignatoriesController', () => {
     it('should render the select signatories page with the relevant options', async () => {
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_SIGNATORIES_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.equal(htmlAssertHelper.getValue('#signatories'), DIRECTOR_1_ID)
+      assert.equal(htmlAssertHelper.getValue('#signatories-2'), DIRECTOR_2_ID)
+    })
+
+    it('should render the select signatories page with directors for DS01', async () => {
+      dissolutionSession.officerType = OfficerType.DIRECTOR
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
+        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
       ])
 
       const app = createApp(container => {
@@ -77,8 +104,29 @@ describe('SelectSignatoriesController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Which directors will be signing the application?'))
-      assert.equal(htmlAssertHelper.getValue('#signatories'), DIRECTOR_1_ID)
-      assert.equal(htmlAssertHelper.getValue('#signatories-2'), DIRECTOR_2_ID)
+    })
+
+    it('should render the select signatories page with members for LLDS01', async () => {
+      dissolutionSession.officerType = OfficerType.MEMBER
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
+        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_SIGNATORIES_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which members will be signing the application?'))
     })
 
     it('should prepopulate the select signatories page with the selected signatories from session', async () => {
@@ -86,8 +134,8 @@ describe('SelectSignatoriesController', () => {
 
       when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
       ])
 
       const app = createApp(container => {
@@ -126,8 +174,8 @@ describe('SelectSignatoriesController', () => {
       const error: ValidationErrors = generateValidationError('signatories', 'some signatories error')
 
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
       ])
       when(validator.validate(deepEqual(form), anything())).thenReturn(error)
 
@@ -151,8 +199,8 @@ describe('SelectSignatoriesController', () => {
         dissolutionSession.selectSignatoriesForm = form
 
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-          { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-          { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+          {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+          {...generateDirectorDetails(), id: DIRECTOR_2_ID}
         ])
         when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 
@@ -170,8 +218,8 @@ describe('SelectSignatoriesController', () => {
         const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
         when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-          { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-          { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+          {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+          {...generateDirectorDetails(), id: DIRECTOR_2_ID}
         ])
         when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 
@@ -193,8 +241,8 @@ describe('SelectSignatoriesController', () => {
       it('should clear the existing signatories and save the new selection', async () => {
         const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
-        const director1: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_1_ID, name: 'Signatory 1' }
-        const director2: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_2_ID, name: 'Signatory 2' }
+        const director1: DirectorDetails = {...generateDirectorDetails(), id: DIRECTOR_1_ID, name: 'Signatory 1'}
+        const director2: DirectorDetails = {...generateDirectorDetails(), id: DIRECTOR_2_ID, name: 'Signatory 2'}
 
         const signatory: DirectorToSign = generateDirectorToSign()
 
@@ -224,8 +272,8 @@ describe('SelectSignatoriesController', () => {
       const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
       when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
       ])
       when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 
@@ -237,51 +285,5 @@ describe('SelectSignatoriesController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', DEFINE_SIGNATORY_INFO_URI)
     })
-
-    it('should render the select signitory page with directors for DS01', async () => {
-      dissolutionSession.officerType = OfficerType.DIRECTOR
-
-      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-      ])
-
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-      })
-
-      const res = await request(app)
-        .get(SELECT_SIGNATORIES_URI)
-        .expect(OK)
-
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which directors will be signing the application?'))
-    })
-
-    it('should render the select director page with members for LLDS01', async () => {
-      dissolutionSession.officerType = OfficerType.MEMBER
-
-      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-      ])
-
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-      })
-
-      const res = await request(app)
-        .get(SELECT_SIGNATORIES_URI)
-        .expect(OK)
-
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which members will be signing the application?'))
-    })
-    })
   })
+})

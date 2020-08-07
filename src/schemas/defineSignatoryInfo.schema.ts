@@ -34,7 +34,7 @@ function generateIsSigningRadioSchema(signatoryName: string): Joi.StringSchema {
     .required()
     .valid(SignatorySigning.WILL_SIGN, SignatorySigning.ON_BEHALF)
     .messages({
-      'any.only': `Select how  will be signing the application`,
+      'any.only': `Select how ${signatoryName} will be signing the application`,
       'any.required': `Select how ${signatoryName} will be signing the application`,
       'string.empty': `Select how ${signatoryName} will be signing the application`
     })
