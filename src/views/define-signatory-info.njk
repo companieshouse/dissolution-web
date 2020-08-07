@@ -6,7 +6,7 @@
 {% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
 
 {% block pageTitle %}
-  How will the directors be signing the application?
+  How will the {{officerType}}s be signing the application?
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">How will the directors be signing the application?</h1>
+      <h1 class="govuk-heading-xl">How will the {{officerType}}s be signing the application?</h1>
 
       <form method="post" novalidate>
         {% for signatory in signatories %}

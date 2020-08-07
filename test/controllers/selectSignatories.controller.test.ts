@@ -14,6 +14,7 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/selectSignatories.controller'
 import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
+import OfficerType from 'app/models/dto/officerType.enum'
 import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -52,6 +53,7 @@ describe('SelectSignatoriesController', () => {
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
 
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+    dissolutionSession.officerType = OfficerType.DIRECTOR
     dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
   })
 
@@ -235,5 +237,51 @@ describe('SelectSignatoriesController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', DEFINE_SIGNATORY_INFO_URI)
     })
+
+    it('should render the select signitory page with directors for DS01', async () => {
+      dissolutionSession.officerType = OfficerType.DIRECTOR
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_SIGNATORIES_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which directors will be signing the application?'))
+    })
+
+    it('should render the select director page with members for LLDS01', async () => {
+      dissolutionSession.officerType = OfficerType.MEMBER
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+        { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_SIGNATORIES_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which members will be signing the application?'))
+    })
+    })
   })
-})

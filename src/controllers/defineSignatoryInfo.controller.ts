@@ -3,6 +3,7 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
+import OfficerType from 'app/models/dto/officerType.enum'
 
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import Optional from 'app/models/optional'
@@ -15,6 +16,7 @@ import SignatoryService from 'app/services/signatories/signatory.service'
 import TYPES from 'app/types'
 
 interface ViewModel {
+  officerType: OfficerType
   signatories: DirectorToSign[]
   isMultiDirector: boolean
   data?: Optional<DefineSignatoryInfoFormModel>
@@ -33,21 +35,23 @@ export class DefineSignatoryInfoController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
-    return this.renderView(signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
+    return this.renderView(officerType!, signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
   }
 
   @httpPost('')
   public async post(@requestBody() body: DefineSignatoryInfoFormModel): Promise<string | RedirectResult> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
     const errors: Optional<ValidationErrors> = this.signatoryService.validateSignatoryInfo(signatories, body)
     if (errors) {
-      return this.renderView(signatories, session.isMultiDirector!, body, errors)
+      return this.renderView(officerType!, signatories, session.isMultiDirector!, body, errors)
     }
 
     this.updateSession(session, signatories, body)
@@ -60,11 +64,13 @@ export class DefineSignatoryInfoController extends BaseController {
   }
 
   private async renderView(
+    officerType: OfficerType,
     signatories: DirectorToSign[],
     isMultiDirector: boolean,
     data?: Optional<DefineSignatoryInfoFormModel>,
     errors?: Optional<ValidationErrors>): Promise<string> {
     const viewModel: ViewModel = {
+      officerType,
       signatories,
       isMultiDirector,
       data,

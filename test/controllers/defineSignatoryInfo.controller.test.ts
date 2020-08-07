@@ -11,6 +11,7 @@ import { generateValidationError } from '../fixtures/error.fixtures'
 import { generateDirectorToSign, generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
+import OfficerType from 'app/models/dto/officerType.enum'
 
 import 'app/controllers/defineSignatoryInfo.controller'
 import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
@@ -55,6 +56,7 @@ describe('DefineSignatoryInfoController', () => {
     signatory2.id = SIGNATORY_2_ID
 
     dissolutionSession = generateDissolutionSession()
+    dissolutionSession.officerType = OfficerType.DIRECTOR
     dissolutionSession.directorsToSign = [applicant, signatory1, signatory2]
   })
 
@@ -72,7 +74,7 @@ describe('DefineSignatoryInfoController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h1', 'How will the directors be signing the application?'))
+      assert.isTrue(htmlAssertHelper.hasText('h1', `How will the directors be signing the application?`))
 
       assert.isTrue(htmlAssertHelper.selectorDoesNotExist(`#signatory_${APPLICANT_ID}`))
 
@@ -281,5 +283,52 @@ describe('DefineSignatoryInfoController', () => {
         .expect(MOVED_TEMPORARILY)
         .expect('Location', CHECK_YOUR_ANSWERS_URI)
     })
+
+    it('should render the define signatory info page with directors for DS01', async () => {
+      dissolutionSession.officerType = OfficerType.DIRECTOR
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateSignatoryInfo(), id: DIRECTOR_1_ID },
+        { ...generateSignatoryInfo(), id: DIRECTOR_2_ID }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(DEFINE_SIGNATORY_INFO_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'How will the directors be signing the application?'))
+    })
+
+    it('should render the define signatory info page with members for LLDS01', async () => {
+      dissolutionSession.officerType = OfficerType.MEMBER
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+        { ...generateSignatoryInfo(), id: DIRECTOR_1_ID },
+        { ...generateSignatoryInfo(), id: DIRECTOR_2_ID }
+      ])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+      })
+
+      const res = await request(app)
+        .get(SELECT_DIRECTOR_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Which member are you?'))
+    })
+    })
   })
-})
+  
