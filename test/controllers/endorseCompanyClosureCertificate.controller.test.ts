@@ -51,7 +51,34 @@ describe('EndorseCompanyClosureCertificateController', () => {
   })
 
   describe('GET request', () => {
-    it('should render endorse certificate page', async () => {
+    it('should render endorse certificate page without an on behalf statement if director is signing', async () => {
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+      })
+
+      const res = await request(app)
+        .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+        .expect(OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+      const dateString = new Date().toDateString()
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Sign the application'))
+      assert.isTrue(htmlAssertHelper.hasText('div#companyName', 'Company name: Company 1'))
+      assert.isTrue(htmlAssertHelper.hasText('div#companyNumber', 'Company number: 123456789'))
+      assert.isTrue(htmlAssertHelper.hasText('span#applicantName', 'John Smith'))
+      assert.isTrue(htmlAssertHelper.hasText('span#confirmationLabel', 'I confirm I have read and understood the statements - signed John Smith on ' + dateString))
+    })
+
+    it('should render endorse certificate page with an on behalf statement if director has a signatory', async () => {
+      dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+      dissolutionSession.approval = generateApprovalModel()
+      dissolutionSession.approval.companyName = 'Company 1'
+      dissolutionSession.approval.companyNumber = '123456789'
+      dissolutionSession.approval.applicant = 'John Smith'
+      dissolutionSession.approval.onBehalfName = 'Jesse Smith'
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
@@ -62,11 +89,13 @@ describe('EndorseCompanyClosureCertificateController', () => {
         .expect(OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+      const dateString = new Date().toDateString()
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Sign the application'))
       assert.isTrue(htmlAssertHelper.hasText('div#companyName', 'Company name: Company 1'))
       assert.isTrue(htmlAssertHelper.hasText('div#companyNumber', 'Company number: 123456789'))
-      assert.isTrue(htmlAssertHelper.hasText('span#applicantName', 'John Smith'))
+      assert.isTrue(htmlAssertHelper.hasText('span#applicantName', 'Jesse Smith'))
+      assert.isTrue(htmlAssertHelper.hasText('span#confirmationLabel', 'I confirm I have read and understood the statements - signed Jesse Smith on ' + dateString +' on behalf of John Smith'))
     })
 
     it('should render endorse certificate page with directors for DS01', async () => {

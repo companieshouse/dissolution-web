@@ -45,6 +45,12 @@
         and declare that none of the circumstances described in section 1004 or 1005 of the Companies Act 2006
         (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections).</p>
 
+      {% if not approvalModel.onBehalfName %}
+        {% set confirmationLabel = "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>" %}
+      {% else %}
+        {% set confirmationLabel = "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.onBehalfName + "</span></strong> on <strong>" + approvalModel.date + "</strong> on behalf of <strong>" + approvalModel.applicant + "</strong>" %}
+      {% endif %}
+
       <form method="post">
         {{
           govukCheckboxes({
@@ -56,7 +62,7 @@
             items: [
               {
                 value: "understood",
-                html: "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>"
+                html: "<span id=confirmationLabel>" + confirmationLabel + "</span>"
               }
             ]
           })

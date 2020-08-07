@@ -4,6 +4,7 @@ export default interface DissolutionApprovalModel {
   companyName: string,
   companyNumber: string,
   applicant: string,
-  date: string,
   officerType: OfficerType
+  onBehalfName?: string,
+  date: string
 }
