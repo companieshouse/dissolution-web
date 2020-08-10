@@ -5,6 +5,7 @@ import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
 import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
+import OfficerType from 'app/models/dto/officerType.enum'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -19,7 +20,7 @@ import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
-  officerType: string
+  officerType: OfficerType
   directors: DirectorDetails[]
   data?: Optional<SelectDirectorFormModel>
   errors?: Optional<ValidationErrors>
@@ -78,7 +79,7 @@ export class SelectDirectorController extends BaseController {
   }
 
   private async renderView(
-    officerType: string,
+    officerType: OfficerType,
     directors: DirectorDetails[],
     data?: Optional<SelectDirectorFormModel>,
     errors?: Optional<ValidationErrors>): Promise<string> {

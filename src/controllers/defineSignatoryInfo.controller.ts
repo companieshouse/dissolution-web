@@ -35,7 +35,7 @@ export class DefineSignatoryInfoController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
+    const officerType = session.officerType
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
@@ -45,7 +45,7 @@ export class DefineSignatoryInfoController extends BaseController {
   @httpPost('')
   public async post(@requestBody() body: DefineSignatoryInfoFormModel): Promise<string | RedirectResult> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
+    const officerType = session.officerType
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 

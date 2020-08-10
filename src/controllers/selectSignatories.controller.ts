@@ -42,7 +42,7 @@ export class SelectSignatoriesController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
+    const officerType = session.officerType
 
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 
@@ -56,7 +56,7 @@ export class SelectSignatoriesController extends BaseController {
     }
 
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const officerType = this.session.getDissolutionSession(this.httpContext.request)!.officerType
+    const officerType = session.officerType
 
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 

@@ -59,6 +59,17 @@ describe('asSelectDirectorList', () => {
     assert.equal(defaultRadio.value, 'other')
   })
 
+  it ('should display OfficerType Member on radio button where user selects they are not a member', () => {
+    const directors: DirectorDetails[] = [
+      generateDirectorDetails(),
+      generateDirectorDetails()
+    ]
+    const result: (GovUKRadio | GovUKRadioDivider)[] = asSelectDirectorList(directors, OfficerType.MEMBER, 'other')
+
+    const defaultRadio: GovUKRadio = result[3] as GovUKRadio
+    assert.equal(defaultRadio.text, 'I am not a member of this company')
+  })
+
   describe('checked', () => {
     it('should not select any radio if nothing is previously selected', () => {
       const directors: DirectorDetails[] = [

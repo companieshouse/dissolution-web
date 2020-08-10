@@ -364,7 +364,7 @@ describe('SelectDirectorController', () => {
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
           { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
+        when(validator.validate(deepEqual(form), deepEqual(selectDirectorSchema(dissolutionSession.officerType!)))).thenReturn(null)
 
         const app = initApp()
 
@@ -382,7 +382,7 @@ describe('SelectDirectorController', () => {
           { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
           { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
         ])
-        when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
+        when(validator.validate(deepEqual(form), deepEqual(selectDirectorSchema(dissolutionSession.officerType!)))).thenReturn(null)
 
         const app = initApp()
 

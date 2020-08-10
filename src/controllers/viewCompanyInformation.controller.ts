@@ -4,6 +4,7 @@ import BaseController from './base.controller'
 
 import CompanyDetails from 'app/models/companyDetails.model'
 import OfficerType from 'app/models/dto/officerType.enum'
+import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyService from 'app/services/company/company.service'
@@ -54,7 +55,7 @@ export class ViewCompanyInformationController extends BaseController {
   private updateSession(session: DissolutionSession, company: CompanyDetails): void {
     const updatedSession: DissolutionSession = {
       ...session,
-      officerType: company.companyType === 'llp' ? OfficerType.MEMBER : OfficerType.DIRECTOR
+      officerType: company.companyType === ClosableCompanyType.LLP ? OfficerType.MEMBER : OfficerType.DIRECTOR
     }
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }

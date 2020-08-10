@@ -6,6 +6,7 @@ import DissolutionApprovalMapper from 'app/mappers/approval/dissolutionApproval.
 import ApplicationType from 'app/models/dto/applicationType.enum'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 describe('DissolutionApprovalMapper', () => {
@@ -30,7 +31,7 @@ describe('DissolutionApprovalMapper', () => {
 
       assert.equal(result.companyName, 'some company name')
       assert.equal(result.companyNumber, '12345')
-      assert.equal(result.officerType, 'director')
+      assert.equal(result.officerType, OfficerType.DIRECTOR)
     })
 
     it('should map the company information to the approval model for LLDS01', () => {
@@ -42,7 +43,7 @@ describe('DissolutionApprovalMapper', () => {
 
       assert.equal(result.companyName, 'some company name')
       assert.equal(result.companyNumber, '12345')
-      assert.equal(result.officerType, 'member')
+      assert.equal(result.officerType, OfficerType.MEMBER)
     })
 
     it('should map the signatory information to the approval model', () => {

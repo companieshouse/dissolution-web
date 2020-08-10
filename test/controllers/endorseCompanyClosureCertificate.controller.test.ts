@@ -133,7 +133,6 @@ describe('EndorseCompanyClosureCertificateController', () => {
       assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of members'))
       assert.isTrue(htmlAssertHelper.containsText('#declaration', 'members'))
       assert.isFalse(htmlAssertHelper.containsText('#declaration', 'directors'))
-
     })
   })
 
