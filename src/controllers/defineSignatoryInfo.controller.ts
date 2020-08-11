@@ -3,8 +3,8 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
-
 import OfficerType from 'app/models/dto/officerType.enum'
+
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
