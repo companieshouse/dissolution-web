@@ -6,7 +6,7 @@
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 
 {% block pageTitle %}
-  Which directors will be signing the application?
+  Which {{officerType}} will be signing the application?
 {% endblock %}
 
 {% block content %}
@@ -29,13 +29,13 @@
             name: "signatories",
             fieldset: {
               legend: {
-                text: "Which directors will be signing the application?",
+                text: "Which " + officerType + "s will be signing the application?",
                 isPageHeading: true,
                 classes: "govuk-fieldset__legend--l"
               }
             },
             hint: {
-              text: "More than half of the directors must sign. You should also select directors who will have someone signing for them."
+              text: "More than half of the " + officerType + "s must sign. You should also select " + officerType + "s who will have someone signing for them."
             },
             errorMessage: {
               text: errors.signatories

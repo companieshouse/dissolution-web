@@ -7,6 +7,7 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionLinks from 'app/models/dto/dissolutionLinks'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
+import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 import { generateEmail } from 'test/fixtures/util.fixtures'
@@ -73,7 +74,8 @@ export function generateApprovalModel(): DissolutionApprovalModel {
     companyName: 'Example Company',
     companyNumber: '12345678',
     applicant: 'John Doe',
-    date: new Date().toDateString()
+    date: new Date().toDateString(),
+    officerType: OfficerType.DIRECTOR
   }
 }
 

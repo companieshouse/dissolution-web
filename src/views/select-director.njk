@@ -6,7 +6,7 @@
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 
 {% block pageTitle %}
-  Which director are you?
+  Which {{officerType}} are you?
 {% endblock %}
 
 {% block content %}
@@ -29,7 +29,7 @@
             name: "director",
             fieldset: {
               legend: {
-                text: "Which director are you?",
+                text: "Which " + officerType + " are you?",
                 isPageHeading: true,
                 classes: "govuk-fieldset__legend--l"
               }
@@ -37,7 +37,7 @@
             errorMessage: {
               text: errors.director
             } if errors.director,
-            items: directors | asSelectDirectorList(data.director)
+            items: directors | asSelectDirectorList(officerType, data.director)
           })
         }}
 

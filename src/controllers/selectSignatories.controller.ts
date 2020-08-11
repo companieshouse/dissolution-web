@@ -5,6 +5,7 @@ import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
 import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
+import OfficerType from 'app/models/dto/officerType.enum'
 import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -20,6 +21,7 @@ import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
+  officerType: OfficerType
   signatories: DirectorDetails[]
   data?: Optional<SelectSignatoriesFormModel>
   errors?: Optional<ValidationErrors>
@@ -40,10 +42,11 @@ export class SelectSignatoriesController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const officerType: OfficerType = session.officerType!
 
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 
-    return this.renderView(signatories, session.selectSignatoriesForm)
+    return this.renderView(officerType!, signatories, session.selectSignatoriesForm)
   }
 
   @httpPost('')
@@ -53,12 +56,13 @@ export class SelectSignatoriesController extends BaseController {
     }
 
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const officerType: OfficerType = session.officerType!
 
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 
-    const errors: Optional<ValidationErrors> = this.validate(body, signatories.length, session)
+    const errors: Optional<ValidationErrors> = this.validate(body, officerType!, signatories.length, session)
     if (errors) {
-      return this.renderView(signatories, body, errors)
+      return this.renderView(officerType!, signatories, body, errors)
     }
 
     this.updateSession(session, body, signatories)
@@ -78,10 +82,12 @@ export class SelectSignatoriesController extends BaseController {
   }
 
   private async renderView(
+    officerType: OfficerType,
     signatories: DirectorDetails[],
     data?: Optional<SelectSignatoriesFormModel>,
     errors?: Optional<ValidationErrors>): Promise<string> {
     const viewModel: ViewModel = {
+      officerType,
       signatories,
       data,
       errors
@@ -90,13 +96,14 @@ export class SelectSignatoriesController extends BaseController {
     return super.render('select-signatories', viewModel, errors ? BAD_REQUEST : OK)
   }
 
-  private validate(body: SelectSignatoriesFormModel, totalSignatories: number, session: DissolutionSession): Optional<ValidationErrors> {
+  private validate(body: SelectSignatoriesFormModel, officerType: OfficerType,
+                   totalSignatories: number, session: DissolutionSession): Optional<ValidationErrors> {
     const minSignatories: number = this.signatoryService.getMinimumNumberOfSignatories(
       totalSignatories,
       session.selectDirectorForm!.director!
     )
 
-    return this.validator.validate(body, selectSignatoriesSchema(minSignatories))
+    return this.validator.validate(body, selectSignatoriesSchema(officerType, minSignatories))
   }
 
   private updateSession(session: DissolutionSession, body: SelectSignatoriesFormModel, signatories: DirectorDetails[]): void {

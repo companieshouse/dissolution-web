@@ -3,6 +3,7 @@ import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
 import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
 import sinon from 'sinon'
 
+import OfficerType from 'app/models/dto/officerType.enum'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
@@ -37,7 +38,8 @@ export function generateDissolutionSession(companyNumber: string = '12345678'): 
       generateDirectorToSign(),
       generateDirectorToSign(),
       generateDirectorToSign()
-    ]
+    ],
+    officerType: OfficerType.DIRECTOR
   }
 }
 

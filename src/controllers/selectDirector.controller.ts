@@ -5,6 +5,7 @@ import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
 
 import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.mapper'
+import OfficerType from 'app/models/dto/officerType.enum'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -19,6 +20,7 @@ import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
+  officerType: OfficerType
   directors: DirectorDetails[]
   data?: Optional<SelectDirectorFormModel>
   errors?: Optional<ValidationErrors>
@@ -37,29 +39,27 @@ export class SelectDirectorController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {
-    const form: Optional<SelectDirectorFormModel> = this.getFormFromSession()
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
     const directors: DirectorDetails[] = await this.getDirectors()
 
-    return this.renderView(directors, form)
-  }
-
-  private getFormFromSession(): Optional<SelectDirectorFormModel> {
-    return this.session.getDissolutionSession(this.httpContext.request)!.selectDirectorForm
+    return this.renderView(session.officerType!, directors, session.selectDirectorForm)
   }
 
   @httpPost('')
   public async post(@requestBody() body: SelectDirectorFormModel): Promise<string | RedirectResult> {
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const officerType: OfficerType = session.officerType!
     const directors: DirectorDetails[] = await this.getDirectors()
 
-    const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema)
+    const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema(officerType!))
     if (errors) {
-      return this.renderView(directors, body, errors)
+      return this.renderView(officerType!, directors, body, errors)
     }
 
     const selectedDirector: Optional<DirectorDetails> = this.getSelectedDirector(directors, body)
 
-    this.updateSession(body, directors, selectedDirector)
+    this.updateSession(session, body, directors, selectedDirector)
 
     return this.redirect(this.getRedirectURI(directors, selectedDirector))
   }
@@ -76,10 +76,12 @@ export class SelectDirectorController extends BaseController {
   }
 
   private async renderView(
+    officerType: OfficerType,
     directors: DirectorDetails[],
     data?: Optional<SelectDirectorFormModel>,
     errors?: Optional<ValidationErrors>): Promise<string> {
     const viewModel: ViewModel = {
+      officerType,
       directors,
       data,
       errors
@@ -92,8 +94,8 @@ export class SelectDirectorController extends BaseController {
     return directors.find(director => director.id === body.director)
   }
 
-  private updateSession(body: SelectDirectorFormModel, directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): void {
-    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+  private updateSession(session: DissolutionSession, body: SelectDirectorFormModel,
+    directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): void {
 
     if (!this.hasFormChanged(body, session)) {
       return
