@@ -27,7 +27,8 @@ export class ViewCompanyInformationController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const company: CompanyDetails = await this.getCompanyInfo()
+
+    const company: CompanyDetails = await this.getCompanyInfo(session)
 
     this.updateSession(session, company)
 
@@ -42,14 +43,10 @@ export class ViewCompanyInformationController extends BaseController {
     this.httpContext.response.redirect(REDIRECT_GATE_URI)
   }
 
-  private async getCompanyInfo(): Promise<CompanyDetails> {
-    const companyNumber: string = this.getCompanyNumber()
+  private async getCompanyInfo(session: DissolutionSession): Promise<CompanyDetails> {
+    const companyNumber: string = session.companyNumber!
     const token: string = this.session.getAccessToken(this.httpContext.request)
     return this.companyService.getCompanyDetails(token, companyNumber)
-  }
-
-  private getCompanyNumber(): string {
-    return this.session.getDissolutionSession(this.httpContext.request)!.companyNumber!
   }
 
   private updateSession(session: DissolutionSession, company: CompanyDetails): void {

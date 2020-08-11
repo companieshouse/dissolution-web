@@ -3,8 +3,8 @@ import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import BaseController from './base.controller'
-import OfficerType from 'app/models/dto/officerType.enum'
 
+import OfficerType from 'app/models/dto/officerType.enum'
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
@@ -35,7 +35,7 @@ export class DefineSignatoryInfoController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const officerType = session.officerType
+    const officerType: OfficerType = session.officerType!
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
@@ -45,7 +45,7 @@ export class DefineSignatoryInfoController extends BaseController {
   @httpPost('')
   public async post(@requestBody() body: DefineSignatoryInfoFormModel): Promise<string | RedirectResult> {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const officerType = session.officerType
+    const officerType: OfficerType = session.officerType!
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
