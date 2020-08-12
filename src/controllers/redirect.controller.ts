@@ -17,7 +17,8 @@ import {
   REDIRECT_GATE_URI,
   SEARCH_COMPANY_URI, SELECT_DIRECTOR_URI,
   VIEW_FINAL_CONFIRMATION_URI,
-  WAIT_FOR_OTHERS_TO_SIGN_URI
+  WAIT_FOR_OTHERS_TO_SIGN_URI,
+  EMAIL_ERROR_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
@@ -80,8 +81,15 @@ export class RedirectController extends BaseController {
   private async handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
 
-    const redirectUri: string = this.isApplicant(dissolution, userEmail) ? PAYMENT_URI : CERTIFICATE_SIGNED_URI
+    let redirectUri: string
 
+    if (this.isApplicant(dissolution, userEmail)) {
+      redirectUri = PAYMENT_URI
+    } else if (this.getSignatory(dissolution, userEmail)) {
+      redirectUri = CERTIFICATE_SIGNED_URI
+    } else {
+      redirectUri = EMAIL_ERROR_URI
+    }
     return this.saveSessionAndRedirect(session, redirectUri)
   }
 
