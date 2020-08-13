@@ -41,9 +41,12 @@
 
       <h2 id="declaration-heading" class="govuk-heading-m">Declaration of {{ approvalModel.officerType }}s</h2>
 
-      <p id="declaration" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of {{ approvalModel.officerType }}s apply for this company to be struck off the Register
-        and declare that none of the circumstances described in section 1004 or 1005 of the Companies Act 2006
-        (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections).</p>
+      <p id="declaration" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of {{ approvalModel.officerType }}s apply for this {% if officerType == member %} LLP {% else %} company {% endif %} to be struck off the Register
+        and declare that:
+
+      <p id="declaration" class="govuk-body">i) none of the circumstances described in section 1004 or 1005 of the Companies Act 2006 (being circumstances in which the directors would otherwise be prohibited under those sections from making an application) exists in relation to the company and,</p>
+
+      <p id="declaration" class="govuk-body">ii) we have compiled with the requirements of sections 1006 and 1007 of the Act and have given/will give copies of the application to the people listed in those sections as required.</p>
 
       {% if not approvalModel.onBehalfName %}
         {% set confirmationLabel = "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>" %}
