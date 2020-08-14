@@ -6,5 +6,7 @@ export default interface DissolutionApprovalModel {
   applicant: string,
   officerType: OfficerType
   onBehalfName?: string,
-  date: string
+  date: string,
+  certificateBucket: string,
+  certificateKey: string
 }

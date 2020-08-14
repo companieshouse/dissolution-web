@@ -14,5 +14,7 @@ export default interface DissolutionGetResponse {
   company_number: string,
   created_at: string,
   created_by: string,
-  directors: DissolutionGetDirector[]
+  directors: DissolutionGetDirector[],
+  certificate_bucket: string,
+  certificate_key: string
 }

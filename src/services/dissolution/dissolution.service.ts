@@ -1,5 +1,6 @@
 import 'reflect-metadata'
 
+import S3 from 'aws-sdk/clients/s3';
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 
@@ -45,4 +46,25 @@ export default class DissolutionService {
     await this.client.patchDissolution(token, companyNumber, body)
   }
 
+  public async generateCertificateUrl(certificateBucket: string, certificateKey: string): Promise<Optional<string>> {
+    const s3 = new S3({
+      region: 'eu-west-1'
+    })
+
+    const params = {
+      Bucket: certificateBucket,
+      Key: certificateKey,
+      Expires: 60 * 2
+    }
+
+    console.log(params)
+
+    try {
+      const signedUrl = await s3.getSignedUrlPromise('getObject', params)
+      return signedUrl
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
 }

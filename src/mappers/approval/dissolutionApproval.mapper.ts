@@ -19,7 +19,9 @@ export default class DissolutionApprovalMapper {
       applicant: signatory.name,
       officerType: dissolution.application_type === ApplicationType.LLDS01 ? OfficerType.MEMBER : OfficerType.DIRECTOR,
       onBehalfName: signatory.on_behalf_name,
-      date: moment().format('DD MMMM YYYY')
+      date: moment().format('DD MMMM YYYY'),
+      certificateBucket: dissolution.certificate_bucket,
+      certificateKey: dissolution.certificate_key
     }
   }
 }
