@@ -111,9 +111,13 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
+      assert.isTrue(htmlAssertHelper.containsText('#paragraph-statement', 'company'))
       assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of directors'))
-      assert.isTrue(htmlAssertHelper.containsText('#declaration', 'directors'))
-      assert.isFalse(htmlAssertHelper.containsText('#declaration', 'members'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'directors'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'company'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration-bullet-one', 'directors'))
+      assert.isFalse(htmlAssertHelper.containsText('#declaration-paragraph', 'LLP'))
+      assert.isFalse(htmlAssertHelper.containsText('#declaration-paragraph', 'members'))
 
     })
 
@@ -130,9 +134,13 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
+      assert.isTrue(htmlAssertHelper.containsText('#paragraph-statement', 'LLP'))
       assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of members'))
-      assert.isTrue(htmlAssertHelper.containsText('#declaration', 'members'))
-      assert.isFalse(htmlAssertHelper.containsText('#declaration', 'directors'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'members'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'LLP'))
+      assert.isTrue(htmlAssertHelper.containsText('#declaration-bullet-one', 'members'))
+      assert.isFalse(htmlAssertHelper.containsText('#declaration-paragraph', 'company'))
+      assert.isFalse(htmlAssertHelper.containsText('#declaration-paragraph', 'directors'))
     })
   })
 
