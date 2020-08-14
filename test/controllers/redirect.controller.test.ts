@@ -175,6 +175,8 @@ describe('RedirectController', () => {
       })
 
       it('should redirect to certificate signed when the user is not the applicant', async () => {
+        const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: "true" }
+        dissolution.directors = [signatory]
         dissolution.created_by = OTHER_USER_EMAIL
 
         when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)

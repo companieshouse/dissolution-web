@@ -90,6 +90,7 @@ export class RedirectController extends BaseController {
     } else {
       redirectUri = EMAIL_ERROR_URI
     }
+
     return this.saveSessionAndRedirect(session, redirectUri)
   }
 
@@ -107,7 +108,11 @@ export class RedirectController extends BaseController {
       return this.saveSessionAndRedirect(session, WAIT_FOR_OTHERS_TO_SIGN_URI)
     }
 
-    return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
+    if (signatory && signatory.approved_at) {
+      return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
+    }
+
+    return this.saveSessionAndRedirect(session, EMAIL_ERROR_URI)
   }
 
   private getSignatory(dissolution: DissolutionGetResponse, userEmail: string): Optional<DissolutionGetDirector> {
