@@ -1,6 +1,7 @@
 import 'app/controllers/certificateSigned.controller'
 import 'app/controllers/checkYourAnswers.controller'
 import 'app/controllers/defineSignatoryInfo.controller'
+import 'app/controllers/notSelectedSignatory.controller'
 import 'app/controllers/endorseCompanyClosureCertificate.controller'
 import 'app/controllers/healthcheck.controller'
 import 'app/controllers/landing.controller'

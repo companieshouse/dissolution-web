@@ -8,7 +8,7 @@ export const PAYMENT_CALLBACK_URI = `${REDIRECT_GATE_URI}/payment-callback`
 
 // Error
 export const ERROR_URI = `${ROOT_URI}/error`
-export const EMAIL_ERROR_URI = `${ROOT_URI}/email-error`
+export const NOT_SELECTED_SIGNATORY = `${ROOT_URI}/not-selected-signatory`
 
 // Pages
 export const WHO_TO_TELL_URI = `${ROOT_URI}/who-to-tell`

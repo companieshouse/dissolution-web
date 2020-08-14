@@ -18,7 +18,7 @@ import {
   SEARCH_COMPANY_URI, SELECT_DIRECTOR_URI,
   VIEW_FINAL_CONFIRMATION_URI,
   WAIT_FOR_OTHERS_TO_SIGN_URI,
-  EMAIL_ERROR_URI
+  NOT_SELECTED_SIGNATORY
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
@@ -88,7 +88,7 @@ export class RedirectController extends BaseController {
     } else if (this.getSignatory(dissolution, userEmail)) {
       redirectUri = CERTIFICATE_SIGNED_URI
     } else {
-      redirectUri = EMAIL_ERROR_URI
+      redirectUri = NOT_SELECTED_SIGNATORY
     }
 
     return this.saveSessionAndRedirect(session, redirectUri)
@@ -112,7 +112,7 @@ export class RedirectController extends BaseController {
       return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
     }
 
-    return this.saveSessionAndRedirect(session, EMAIL_ERROR_URI)
+    return this.saveSessionAndRedirect(session, NOT_SELECTED_SIGNATORY)
   }
 
   private getSignatory(dissolution: DissolutionGetResponse, userEmail: string): Optional<DissolutionGetDirector> {
