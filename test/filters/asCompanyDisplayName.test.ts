@@ -16,7 +16,7 @@ describe('asCompanyDisplayNameFilter', () => {
     assert.equal('LLP', asCompanyDisplayName(OfficerType.MEMBER))
   })
 
-  it(`should return "LLP" if officer type is "member and capitalize is true"`, () => {
+  it(`should return "LLP" if officer type is "member" and capitalize is true`, () => {
     assert.equal('LLP', asCompanyDisplayName(OfficerType.MEMBER))
   })
 })
