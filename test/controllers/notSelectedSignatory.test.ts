@@ -20,7 +20,7 @@ describe('NotSelectedSignatoryController', () => {
 
      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-     assert.isTrue(htmlAssertHelper.hasText('h1', 'Email address not authorised to sign'))
-    })
+    assert.isTrue(htmlAssertHelper.hasText('h1', 'Email address not authorised to sign'))
+     })
   })
 })

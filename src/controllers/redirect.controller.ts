@@ -80,16 +80,16 @@ export class RedirectController extends BaseController {
 
   private async handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
+    const redirectUri: string = this.getPendingPaymentRedirectUri(dissolution, userEmail)
 
-    let redirectUri: string
-
-    if (this.isApplicant(dissolution, userEmail)) {
-      redirectUri = PAYMENT_URI
-    } else if (this.getSignatory(dissolution, userEmail)) {
-      redirectUri = CERTIFICATE_SIGNED_URI
-    } else {
-      redirectUri = NOT_SELECTED_SIGNATORY
-    }
+    private getPendingPaymentRedirectUri(dissolution: DissolutionGetResponse, userEmail: string): string {
+      if (this.isApplicant(dissolution, userEmail)) {
+        return PAYMENT_URI
+      } else if (this.getSignatory(dissolution, userEmail)) {
+        return CERTIFICATE_SIGNED_URI
+      } else {
+        return NOT_SELECTED_SIGNATORY
+      }
 
     return this.saveSessionAndRedirect(session, redirectUri)
   }
@@ -99,18 +99,18 @@ export class RedirectController extends BaseController {
 
     const signatory: Optional<DissolutionGetDirector> = this.getSignatory(dissolution, userEmail)
 
-    if (signatory && !signatory.approved_at) {
+    if (signatory) {
+      if (signatory.approved_at) {
+          return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
+      }
+
       session.approval = this.mapper.mapToApprovalModel(dissolution!, signatory)
       return this.saveSessionAndRedirect(session, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-    }
+      }
 
     if (this.isApplicant(dissolution, userEmail)) {
       return this.saveSessionAndRedirect(session, WAIT_FOR_OTHERS_TO_SIGN_URI)
-    }
-
-    if (signatory && signatory.approved_at) {
-      return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
-    }
+      }
 
     return this.saveSessionAndRedirect(session, NOT_SELECTED_SIGNATORY)
   }

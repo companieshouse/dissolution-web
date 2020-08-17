@@ -23,7 +23,8 @@ import {
   SEARCH_COMPANY_URI,
   SELECT_DIRECTOR_URI,
   VIEW_FINAL_CONFIRMATION_URI,
-  WAIT_FOR_OTHERS_TO_SIGN_URI
+  WAIT_FOR_OTHERS_TO_SIGN_URI,
+  NOT_SELECTED_SIGNATORY
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
@@ -284,6 +285,29 @@ describe('RedirectController', () => {
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', SEARCH_COMPANY_URI)
+    })
+  })
+
+  describe('Unauthroised User', () => {
+    let dissolution: DissolutionGetResponse
+    const dissolutionSession: DissolutionSession = generateDissolutionSession()
+
+    beforeEach(() => {
+      dissolution = generateDissolutionGetResponse()
+      dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
+    })
+
+    it('should redirect to not authorised page if application is pending approval and email address is unauthorised', async () => {
+      const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: "true" }
+      dissolution.directors = [signatory]
+      dissolution.created_by = OTHER_USER_EMAIL
+
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
+      await request(initApp())
+        .get(REDIRECT_GATE_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', NOT_SELECTED_SIGNATORY)
     })
   })
 })
