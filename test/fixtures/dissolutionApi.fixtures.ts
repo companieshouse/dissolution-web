@@ -44,7 +44,9 @@ export function generateDissolutionGetResponse(): DissolutionGetResponse {
     directors: [
       generateGetDirector('Prime Tyrannosaurus'),
       generateGetDirector('Rising Whale')
-    ]
+    ],
+    certificate_key: 'some-key',
+    certificate_bucket: 'some-bucket'
   }
 }
 

@@ -5,6 +5,7 @@ import sinon from 'sinon'
 
 import OfficerType from 'app/models/dto/officerType.enum'
 import DirectorToSign from 'app/models/session/directorToSign.model'
+import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 export function generateSession(): Session {
@@ -49,5 +50,12 @@ export function generateDirectorToSign(): DirectorToSign {
     name: 'Bob Smith',
     email: 'test@mail.com',
     isApplicant: false
+  }
+}
+
+export function generateDissolutionConfirmation(): DissolutionConfirmation {
+  return {
+    certificateBucket: 'some-bucket',
+    certificateKey: 'some-key'
   }
 }

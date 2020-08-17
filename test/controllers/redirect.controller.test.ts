@@ -9,12 +9,13 @@ import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/redirect.controller'
-import DissolutionApprovalMapper from 'app/mappers/approval/dissolutionApproval.mapper'
+import DissolutionSessionMapper from 'app/mappers/session/dissolutionSession.mapper'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import PaymentStatus from 'app/models/dto/paymentStatus.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
+import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
@@ -29,13 +30,13 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
 import { generateApprovalModel, generateDissolutionGetResponse, generateGetDirector } from 'test/fixtures/dissolutionApi.fixtures'
-import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
+import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('RedirectController', () => {
 
   let session: SessionService
   let service: DissolutionService
-  let mapper: DissolutionApprovalMapper
+  let mapper: DissolutionSessionMapper
 
   const USER_EMAIL = 'myemail@mail.com'
   const OTHER_USER_EMAIL = 'another@mail.com'
@@ -44,7 +45,7 @@ describe('RedirectController', () => {
   beforeEach(() => {
     session = mock(SessionService)
     service = mock(DissolutionService)
-    mapper = mock(DissolutionApprovalMapper)
+    mapper = mock(DissolutionSessionMapper)
 
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
   })
@@ -53,7 +54,7 @@ describe('RedirectController', () => {
     return createApp(container => {
       container.rebind(SessionService).toConstantValue(instance(session))
       container.rebind(DissolutionService).toConstantValue(instance(service))
-      container.rebind(DissolutionApprovalMapper).toConstantValue(instance(mapper))
+      container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper))
     })
   }
 
@@ -194,13 +195,24 @@ describe('RedirectController', () => {
         dissolution.application_status = ApplicationStatus.PAID
       })
 
-      it('should redirect to confirmation page', async () => {
+      it('should prepare a confirmation session and redirect to confirmation page', async () => {
+        const confirmation: DissolutionConfirmation = generateDissolutionConfirmation()
+
         when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+        when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation)
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
           .expect(MOVED_TEMPORARILY)
           .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
+
+        verify(mapper.mapToDissolutionConfirmation(dissolution)).once()
+        verify(session.setDissolutionSession(anything(), anything())).once()
+
+        const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+        const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+        assert.equal(updatedSession.confirmation, confirmation)
       })
     })
   })
@@ -248,7 +260,13 @@ describe('RedirectController', () => {
       assert.equal(updatedSession.applicationReferenceNumber, REF)
     })
 
-    it('should redirect to confirmation page if status is paid', async () => {
+    it('should prepare a confirmation session and redirect to confirmation page if status is paid', async () => {
+      const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+      const confirmation: DissolutionConfirmation = generateDissolutionConfirmation()
+
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+      when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation)
+
       await request(initApp())
         .get(PAYMENT_CALLBACK_URI)
         .query({
@@ -258,6 +276,14 @@ describe('RedirectController', () => {
         })
         .expect(MOVED_TEMPORARILY)
         .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
+
+      verify(mapper.mapToDissolutionConfirmation(dissolution)).once()
+      verify(session.setDissolutionSession(anything(), anything())).once()
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.equal(updatedSession.confirmation, confirmation)
     })
 
     it('should redirect to payment if status is failed', async () => {

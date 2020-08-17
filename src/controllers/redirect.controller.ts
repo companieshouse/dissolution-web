@@ -3,7 +3,7 @@ import { controller, httpGet, queryParam } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 
 import BaseController from 'app/controllers/base.controller'
-import DissolutionApprovalMapper from 'app/mappers/approval/dissolutionApproval.mapper'
+import DissolutionSessionMapper from 'app/mappers/session/dissolutionSession.mapper'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
@@ -29,7 +29,7 @@ export class RedirectController extends BaseController {
   public constructor(
     @inject(SessionService) private session: SessionService,
     @inject(DissolutionService) private service: DissolutionService,
-    @inject(DissolutionApprovalMapper) private mapper: DissolutionApprovalMapper) {
+    @inject(DissolutionSessionMapper) private mapper: DissolutionSessionMapper) {
     super()
   }
 
@@ -46,6 +46,7 @@ export class RedirectController extends BaseController {
 
     switch (dissolution.application_status) {
       case ApplicationStatus.PAID:
+        session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
         return this.saveSessionAndRedirect(session, VIEW_FINAL_CONFIRMATION_URI)
       case ApplicationStatus.PENDING_PAYMENT:
         return this.handlePendingPaymentRedirect(dissolution, session)
@@ -69,7 +70,14 @@ export class RedirectController extends BaseController {
 
     session.applicationReferenceNumber = reference
 
-    return this.saveSessionAndRedirect(session, this.getPaymentCallbackRedirectUri(status))
+    const redirectUri: string = this.getPaymentCallbackRedirectUri(status)
+
+    if (redirectUri === VIEW_FINAL_CONFIRMATION_URI) {
+      const dissolution: DissolutionGetResponse = (await this.getDissolution(session))!
+      session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
+    }
+
+    return this.saveSessionAndRedirect(session, redirectUri)
   }
 
   private async getDissolution(session: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
