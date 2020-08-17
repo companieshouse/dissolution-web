@@ -18,13 +18,13 @@ import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
-  PAYMENT_CALLBACK_URI, PAYMENT_URI,
+  NOT_SELECTED_SIGNATORY, PAYMENT_CALLBACK_URI,
+  PAYMENT_URI,
   REDIRECT_GATE_URI,
   SEARCH_COMPANY_URI,
   SELECT_DIRECTOR_URI,
   VIEW_FINAL_CONFIRMATION_URI,
-  WAIT_FOR_OTHERS_TO_SIGN_URI,
-  NOT_SELECTED_SIGNATORY
+  WAIT_FOR_OTHERS_TO_SIGN_URI
 } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
@@ -288,21 +288,34 @@ describe('RedirectController', () => {
     })
   })
 
-  describe('Unauthroised User', () => {
+  describe('Unauthorised user', () => {
     let dissolution: DissolutionGetResponse
     const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
     beforeEach(() => {
       dissolution = generateDissolutionGetResponse()
-      dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
+
+      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
     })
 
     it('should redirect to not authorised page if application is pending approval and email address is unauthorised', async () => {
-      const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: "true" }
+      const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: 'true' }
       dissolution.directors = [signatory]
       dissolution.created_by = OTHER_USER_EMAIL
+      dissolution.application_status = ApplicationStatus.PENDING_APPROVAL
 
-      when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+      await request(initApp())
+        .get(REDIRECT_GATE_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', NOT_SELECTED_SIGNATORY)
+    })
+
+    it('should redirect to not authorised page if application is pending payment and email address is unauthorised', async () => {
+      const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: 'true' }
+      dissolution.directors = [signatory]
+      dissolution.created_by = OTHER_USER_EMAIL
+      dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
 
       await request(initApp())
         .get(REDIRECT_GATE_URI)
