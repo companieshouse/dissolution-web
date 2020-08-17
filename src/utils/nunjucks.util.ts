@@ -1,5 +1,6 @@
 import { Environment } from 'nunjucks'
 
+import { asCompanyDisplayName } from 'app/filters/asCompanyDisplayName'
 import { asCompanyStatusText } from 'app/filters/asCompanyStatusText.filter'
 import { asCompanyTypeText } from 'app/filters/asCompanyTypeText.filter'
 import { asEmailLabel } from 'app/filters/asEmailLabel.filter'
@@ -18,6 +19,7 @@ export const addFilters = (env: Environment): void => {
   env.addFilter('asCompanyStatusText', asCompanyStatusText)
   env.addFilter('asFormattedDate', asFormattedDate)
   env.addFilter('asEmailLabel', asEmailLabel)
+  env.addFilter('asCompanyDisplayName', asCompanyDisplayName)
 }
 
 export const addGlobals = (env: Environment): void => {

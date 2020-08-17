@@ -19,8 +19,8 @@
       <h1 class="govuk-heading-xl">Sign the application</h1>
       <h2 class="govuk-heading-m">Apply to strike off and dissolve a company</h2>
       <h2 class="govuk-heading-m govuk-!-margin-bottom-9">
-        <div id="companyName">Company name: {{ approvalModel.companyName }}</div>
-        <div id="companyNumber">Company number: {{ approvalModel.companyNumber }}</div>
+        <div id="companyName">{{ approvalModel.officerType | asCompanyDisplayName(true)}} name: {{ approvalModel.companyName }}</div>
+        <div id="companyNumber">{{ approvalModel.officerType | asCompanyDisplayName(true)}} number: {{ approvalModel.companyNumber }}</div>
       </h2>
       {{
         govukWarningText({
@@ -30,20 +30,27 @@
       }}
       <h2 class="govuk-heading-m">Important notice for all interested parties</h2>
 
-      <p class="govuk-body">The company has applied to be struck off and dissolved.
-        The registrar will proceed unless there is a reasonable cause not to,
-        and on dissolution any assets remaining in the company will be passed to the Crown.
+      <p id="paragraph-statement"class="govuk-body">The {{ approvalModel.officerType | asCompanyDisplayName }} has
+        applied to be struck off and dissolved. The registrar will proceed unless there is a reasonable cause not to,
+        and on dissolution any assets remaining in the {{ approvalModel.officerType | asCompanyDisplayName }} will be
+        passed to the Crown.
         <a class="govuk-link"
            href=https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#objecting-to-a-companys-dissolution
            rel="noreferrer noopener" target="_blank">
-          Guidance is available on the grounds for objection (opens in a new tab)</a>.
-        If in doubt, seek professional advice.</p>
+          Guidance is available on the grounds for objection (opens in a new tab)</a>. If in doubt, seek professional advice.</p>
 
       <h2 id="declaration-heading" class="govuk-heading-m">Declaration of {{ approvalModel.officerType }}s</h2>
 
-      <p id="declaration" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of {{ approvalModel.officerType }}s apply for this company to be struck off the Register
-        and declare that none of the circumstances described in section 1004 or 1005 of the Companies Act 2006
-        (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections).</p>
+      <p id="declaration-paragraph" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of
+        {{ approvalModel.officerType }}s apply for this {{ approvalModel.officerType | asCompanyDisplayName }} to be
+        struck off the Register and declare that:
+
+      <p id="declaration-bullet-one" class="govuk-body">i) none of the circumstances described in section 1004 or 1005
+        of the Companies Act 2006 (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be
+        prohibited under those sections from making an application) exists in relation to the company and,</p>
+
+      <p class="govuk-body">ii) we have complied with the requirements of sections 1006 and 1007 of the Act and have
+        given/will give copies of the application to the people listed in those sections as required.</p>
 
       {% if not approvalModel.onBehalfName %}
         {% set confirmationLabel = "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>" %}
