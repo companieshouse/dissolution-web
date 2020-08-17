@@ -2,13 +2,12 @@ import { inject } from 'inversify'
 import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
-import { CERTIFICATE_DOWNLOAD_URI, VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
+import { VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
 interface ViewModel {
-  applicationReferenceNumber: string,
-  certificateUrl: string
+  applicationReferenceNumber: string
 }
 
 @controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
@@ -22,9 +21,9 @@ export class ViewFinalConfirmationController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     const viewModel: ViewModel = {
-      applicationReferenceNumber: this.getApplicationReferenceNumber(),
-      certificateUrl: CERTIFICATE_DOWNLOAD_URI
+      applicationReferenceNumber: this.getApplicationReferenceNumber()
     }
+
     return super.render('view-final-confirmation', viewModel)
   }
 
