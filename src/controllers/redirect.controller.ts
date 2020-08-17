@@ -78,14 +78,14 @@ export class RedirectController extends BaseController {
     return this.service.getDissolution(token, session)
   }
 
-  private async handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
+  private handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
     const redirectUri: string = this.getPendingPaymentRedirectUri(dissolution, userEmail)
 
     return this.saveSessionAndRedirect(session, redirectUri)
   }
 
-  private async handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
+  private handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
     const signatory: Optional<DissolutionGetDirector> = this.getSignatory(dissolution, userEmail)
 
