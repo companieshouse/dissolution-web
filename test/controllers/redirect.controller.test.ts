@@ -18,7 +18,8 @@ import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
-  PAYMENT_CALLBACK_URI, PAYMENT_URI,
+  NOT_SELECTED_SIGNATORY, PAYMENT_CALLBACK_URI,
+  PAYMENT_URI,
   REDIRECT_GATE_URI,
   SEARCH_COMPANY_URI,
   SELECT_DIRECTOR_URI,
@@ -153,6 +154,19 @@ describe('RedirectController', () => {
           .expect(MOVED_TEMPORARILY)
           .expect('Location', CERTIFICATE_SIGNED_URI)
       })
+
+      it('should redirect to not authorised page if the user is not the applicant and not signatory', async () => {
+        const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: 'random email', approved_at: '2020-07-01' }
+        dissolution.directors = [signatory]
+        dissolution.created_by = OTHER_USER_EMAIL
+
+        when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
+        await request(initApp())
+          .get(REDIRECT_GATE_URI)
+          .expect(MOVED_TEMPORARILY)
+          .expect('Location', NOT_SELECTED_SIGNATORY)
+      })
     })
 
     describe('Pending Payment', () => {
@@ -175,6 +189,8 @@ describe('RedirectController', () => {
       })
 
       it('should redirect to certificate signed when the user is not the applicant', async () => {
+        const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: '2020-07-01' }
+        dissolution.directors = [signatory]
         dissolution.created_by = OTHER_USER_EMAIL
 
         when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
@@ -183,6 +199,20 @@ describe('RedirectController', () => {
           .get(REDIRECT_GATE_URI)
           .expect(MOVED_TEMPORARILY)
           .expect('Location', CERTIFICATE_SIGNED_URI)
+      })
+
+      it('should redirect to not authorised page when the user is not the applicant and not signatory', async () => {
+        const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: 'random email', approved_at: '2020-07-01' }
+        dissolution.directors = [signatory]
+        dissolution.created_by = OTHER_USER_EMAIL
+        dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
+
+        when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+
+        await request(initApp())
+          .get(REDIRECT_GATE_URI)
+          .expect(MOVED_TEMPORARILY)
+          .expect('Location', NOT_SELECTED_SIGNATORY)
       })
     })
 

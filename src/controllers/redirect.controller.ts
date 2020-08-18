@@ -13,6 +13,7 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  NOT_SELECTED_SIGNATORY,
   PAYMENT_URI,
   REDIRECT_GATE_URI,
   SEARCH_COMPANY_URI, SELECT_DIRECTOR_URI,
@@ -77,17 +78,15 @@ export class RedirectController extends BaseController {
     return this.service.getDissolution(token, session)
   }
 
-  private async handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
+  private handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
-
-    const redirectUri: string = this.isApplicant(dissolution, userEmail) ? PAYMENT_URI : CERTIFICATE_SIGNED_URI
+    const redirectUri: string = this.getPendingPaymentRedirectUri(dissolution, userEmail)
 
     return this.saveSessionAndRedirect(session, redirectUri)
   }
 
-  private async handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
+  private handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
-
     const signatory: Optional<DissolutionGetDirector> = this.getSignatory(dissolution, userEmail)
 
     if (signatory && !signatory.approved_at) {
@@ -99,7 +98,11 @@ export class RedirectController extends BaseController {
       return this.saveSessionAndRedirect(session, WAIT_FOR_OTHERS_TO_SIGN_URI)
     }
 
-    return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
+    if (signatory && signatory.approved_at) {
+      return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
+    }
+
+    return this.saveSessionAndRedirect(session, NOT_SELECTED_SIGNATORY)
   }
 
   private getSignatory(dissolution: DissolutionGetResponse, userEmail: string): Optional<DissolutionGetDirector> {
@@ -113,6 +116,16 @@ export class RedirectController extends BaseController {
   private saveSessionAndRedirect(session: DissolutionSession, redirectUri: string): RedirectResult {
     this.session.setDissolutionSession(this.httpContext.request, session)
     return this.redirect(redirectUri)
+  }
+
+  private getPendingPaymentRedirectUri(dissolution: DissolutionGetResponse, userEmail: string): string {
+    if (this.isApplicant(dissolution, userEmail)) {
+      return PAYMENT_URI
+    } else if (this.getSignatory(dissolution, userEmail)) {
+      return CERTIFICATE_SIGNED_URI
+    } else {
+      return NOT_SELECTED_SIGNATORY
+    }
   }
 
   private getPaymentCallbackRedirectUri(status: PaymentStatus): string {
