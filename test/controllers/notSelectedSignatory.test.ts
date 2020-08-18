@@ -12,15 +12,15 @@ import { NOT_SELECTED_SIGNATORY } from 'app/paths'
 describe('NotSelectedSignatoryController', () => {
   describe('GET request', () => {
     it('should render the NotSelectedSignatory page', async () => {
-     const app = createApp()
+      const app = createApp()
 
-     const res = await request(app)
-      .get(NOT_SELECTED_SIGNATORY)
-      .expect(OK)
+      const res = await request(app)
+        .get(NOT_SELECTED_SIGNATORY)
+        .expect(OK)
 
-     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-    assert.isTrue(htmlAssertHelper.hasText('h1', 'Email address not authorised to sign'))
-     })
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Email address not authorised to sign'))
+    })
   })
 })
