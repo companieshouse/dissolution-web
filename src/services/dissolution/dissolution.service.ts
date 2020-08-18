@@ -2,6 +2,7 @@ import 'reflect-metadata'
 
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
+import DissolutionCertificateService from './dissolutionCertificate.service'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
@@ -9,6 +10,7 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import Optional from 'app/models/optional'
+import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
@@ -17,7 +19,8 @@ export default class DissolutionService {
 
   public constructor(
     @inject(DissolutionRequestMapper) private dissolutionRequestMapper: DissolutionRequestMapper,
-    @inject(DissolutionApiClient) private client: DissolutionApiClient
+    @inject(DissolutionApiClient) private client: DissolutionApiClient,
+    @inject(DissolutionCertificateService) private certificateService: DissolutionCertificateService
   ) {}
 
   public async createDissolution(token: string, dissolutionSession: DissolutionSession): Promise<string> {
@@ -45,4 +48,7 @@ export default class DissolutionService {
     await this.client.patchDissolution(token, companyNumber, body)
   }
 
+  public async generateDissolutionCertificateUrl(confirmation: DissolutionConfirmation): Promise<string> {
+    return this.certificateService.generateDissolutionCertificateUrl(confirmation)
+  }
 }

@@ -11,7 +11,8 @@ const TYPES = {
   SessionMiddleware: 'SessionMiddleware',
   AuthMiddleware: 'AuthMiddleware',
   CompanyAuthMiddleware: 'CompanyAuthMiddleware',
-  AxiosInstance: 'AxiosInstance'
+  AxiosInstance: 'AxiosInstance',
+  S3: 'S3'
 }
 
 export default TYPES

@@ -1,3 +1,5 @@
+import DissolutionConfirmation from './dissolutionConfirmation.model'
+
 import OfficerType from 'app/models/dto/officerType.enum'
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
@@ -14,6 +16,7 @@ export default interface DissolutionSession {
   directorsToSign?: DirectorToSign[]
   applicationReferenceNumber?: string
   approval?: DissolutionApprovalModel
+  confirmation?: DissolutionConfirmation
   isMultiDirector?: boolean
   isApplicantADirector?: boolean
   paymentStateUUID?: string

@@ -2,16 +2,17 @@ import { assert } from 'chai'
 import 'mocha'
 import { generateDissolutionGetResponse, generateGetDirector } from '../../fixtures/dissolutionApi.fixtures'
 
-import DissolutionApprovalMapper from 'app/mappers/approval/dissolutionApproval.mapper'
+import DissolutionSessionMapper from 'app/mappers/session/dissolutionSession.mapper'
 import ApplicationType from 'app/models/dto/applicationType.enum'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
+import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 
-describe('DissolutionApprovalMapper', () => {
+describe('DissolutionSessionMapper', () => {
 
-  const mapper: DissolutionApprovalMapper = new DissolutionApprovalMapper()
+  const mapper: DissolutionSessionMapper = new DissolutionSessionMapper()
 
   describe('mapToApprovalModel', () => {
     let dissolution: DissolutionGetResponse
@@ -52,6 +53,25 @@ describe('DissolutionApprovalMapper', () => {
       const result: DissolutionApprovalModel = mapper.mapToApprovalModel(dissolution, signatory)
 
       assert.equal(result.applicant, 'some signatory name')
+    })
+  })
+
+  describe('mapToDissolutionConfirmation', () => {
+    let dissolution: DissolutionGetResponse
+
+    const BUCKET: string = 'some-bucket'
+    const KEY: string = 'some-key'
+
+    beforeEach(() => dissolution = generateDissolutionGetResponse())
+
+    it('should map the certificate fields to a confirmation session', () => {
+      dissolution.certificate_bucket = BUCKET
+      dissolution.certificate_key = KEY
+
+      const result: DissolutionConfirmation = mapper.mapToDissolutionConfirmation(dissolution)
+
+      assert.equal(result.certificateKey, KEY)
+      assert.equal(result.certificateBucket, BUCKET)
     })
   })
 })

@@ -1,5 +1,6 @@
 import 'reflect-metadata'
 
+import S3 from 'aws-sdk/clients/s3'
 import axios, { AxiosInstance } from 'axios'
 import { createLogger } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
@@ -33,6 +34,9 @@ export function initContainer(): Container {
   container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
   container.bind<string>(TYPES.CHS_URL).toConstantValue(getEnvOrThrow('CHS_URL'))
   container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow('PAYMENTS_API_URL'))
+
+  // AWS
+  container.bind<S3>(TYPES.S3).toConstantValue(new S3({ region: getEnvOrThrow('ENV_REGION_AWS') }))
 
   // Utils
   const logger = createLogger(APP_NAME)

@@ -7,20 +7,24 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import Optional from 'app/models/optional'
+import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
+import DissolutionCertificateService from 'app/services/dissolution/dissolutionCertificate.service'
 
 import {
   generateDissolutionCreateRequest,
   generateDissolutionCreateResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
-import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
+import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('DissolutionService', () => {
+  let service: DissolutionService
+
   let mapper: DissolutionRequestMapper
   let client: DissolutionApiClient
-  let service: DissolutionService
+  let certificateService: DissolutionCertificateService
 
   let dissolutionCreateResponse: DissolutionCreateResponse
   let dissolutionGetResponse: DissolutionGetResponse
@@ -33,12 +37,17 @@ describe('DissolutionService', () => {
   beforeEach(() => {
     mapper = mock(DissolutionRequestMapper)
     client = mock(DissolutionApiClient)
+    certificateService = mock(DissolutionCertificateService)
 
     dissolutionCreateResponse = generateDissolutionCreateResponse()
     dissolutionGetResponse = generateDissolutionGetResponse()
     dissolutionSession = generateDissolutionSession()
 
-    service = new DissolutionService(instance(mapper), instance(client))
+    service = new DissolutionService(
+      instance(mapper),
+      instance(client),
+      instance(certificateService)
+    )
   })
 
   describe('createDissolution', () => {
@@ -81,14 +90,31 @@ describe('DissolutionService', () => {
     })
   })
 
-  it('should call dissolution api client to approve the dissolution for the provided email', async () => {
-    const email: string = 'test@email.com'
-    const body: DissolutionPatchRequest = generateDissolutionPatchRequest()
+  describe('approveDissolution', () => {
+    it('should call dissolution api client to approve the dissolution for the provided email', async () => {
+      const email: string = 'test@email.com'
+      const body: DissolutionPatchRequest = generateDissolutionPatchRequest()
 
-    when(mapper.mapToDissolutionPatchRequest(email)).thenReturn(body)
+      when(mapper.mapToDissolutionPatchRequest(email)).thenReturn(body)
 
-    await service.approveDissolution(TOKEN, dissolutionSession, email)
+      await service.approveDissolution(TOKEN, dissolutionSession, email)
 
-    verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once()
+      verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once()
+    })
+  })
+
+  describe('generateDissolutionCertificateUrl', () => {
+    it('should generate a URL to download the certificate and return it', async () => {
+      const certificateUrl: string = 'http://some-certificate-url'
+      const confirmation: DissolutionConfirmation = generateDissolutionConfirmation()
+
+      when(certificateService.generateDissolutionCertificateUrl(confirmation)).thenResolve(certificateUrl)
+
+      const result: string = await service.generateDissolutionCertificateUrl(confirmation)
+
+      assert.equal(result, certificateUrl)
+
+      verify(certificateService.generateDissolutionCertificateUrl(confirmation)).once()
+    })
   })
 })

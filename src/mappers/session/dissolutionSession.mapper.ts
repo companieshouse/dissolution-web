@@ -8,9 +8,10 @@ import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
+import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 
-@provide(DissolutionApprovalMapper)
-export default class DissolutionApprovalMapper {
+@provide(DissolutionSessionMapper)
+export default class DissolutionSessionMapper {
 
   public mapToApprovalModel(dissolution: DissolutionGetResponse, signatory: DissolutionGetDirector): DissolutionApprovalModel {
     return {
@@ -20,6 +21,13 @@ export default class DissolutionApprovalMapper {
       officerType: dissolution.application_type === ApplicationType.LLDS01 ? OfficerType.MEMBER : OfficerType.DIRECTOR,
       onBehalfName: signatory.on_behalf_name,
       date: moment().format('DD MMMM YYYY')
+    }
+  }
+
+  public mapToDissolutionConfirmation(dissolution: DissolutionGetResponse): DissolutionConfirmation {
+    return {
+      certificateBucket: dissolution.certificate_bucket,
+      certificateKey: dissolution.certificate_key
     }
   }
 }

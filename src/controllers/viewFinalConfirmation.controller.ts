@@ -23,6 +23,7 @@ export class ViewFinalConfirmationController extends BaseController {
     const viewModel: ViewModel = {
       applicationReferenceNumber: this.getApplicationReferenceNumber()
     }
+
     return super.render('view-final-confirmation', viewModel)
   }
 

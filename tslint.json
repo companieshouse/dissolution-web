@@ -58,6 +58,7 @@
             "member-variable-declaration"
         ],
         "promise-function-async": true,
-        "no-async-without-await": true
+        "no-async-without-await": true,
+        "eofline": true
     }
 }
