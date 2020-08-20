@@ -24,7 +24,7 @@ export default class CompanyOfficersService {
     }
 
     const activeDirectors: DirectorDetails[] = response.resource!.items
-      .filter((officer: CompanyOfficer) => officer.officerRole === 'director')
+      .filter((officer: CompanyOfficer) => officer.officerRole === 'director' || officer.officerRole === 'llp-member')
       .filter((director: CompanyOfficer) => !director.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
 
