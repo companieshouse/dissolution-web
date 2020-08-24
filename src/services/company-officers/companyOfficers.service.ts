@@ -7,6 +7,8 @@ import { provide } from 'inversify-binding-decorators'
 import CompanyOfficersClient from '../clients/companyOfficers.client'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
+import OfficerRole from 'app/models/dto/officerRole.enum'
+import OfficerType from 'app/models/dto/officerType.enum'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 
 @provide(CompanyOfficersService)
@@ -24,7 +26,7 @@ export default class CompanyOfficersService {
     }
 
     const activeDirectors: DirectorDetails[] = response.resource!.items
-      .filter((officer: CompanyOfficer) => officer.officerRole === 'director' || officer.officerRole === 'llp-member')
+      .filter((officer: CompanyOfficer) => officer.officerRole === OfficerRole.DIRECTOR || officer.officerRole === OfficerRole.MEMBER)
       .filter((director: CompanyOfficer) => !director.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
 
