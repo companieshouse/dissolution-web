@@ -7,6 +7,7 @@ import { generateCompanyOfficer, generateCompanyOfficers, generateCompanyOfficer
   generateDirectorDetails } from '../../fixtures/companyOfficers.fixtures'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
+import OfficerRole from 'app/models/dto/officerRole.enum'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 import CompanyOfficersClient from 'app/services/clients/companyOfficers.client'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
@@ -47,42 +48,18 @@ describe('CompanyOfficersService', () => {
       }
     })
 
-    it('should filter out officers who are not directors', async () => {
+    it('should filter out officers who are not directors or members', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
       response.httpStatusCode = OK
 
       const secretary: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'secretary' }
-      const director: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
+      const director: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
       const manager: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'cicmanager' }
+      const llpMember: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
 
       response.resource = {
         ...generateCompanyOfficers(),
-        items: [secretary, director, manager]
-      }
-
-      when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
-
-      await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)
-
-      verify(directorMapper.mapToDirectorDetails(anything())).once()
-      verify(directorMapper.mapToDirectorDetails(director)).once()
-    })
-
-    it('should filter directors who have resigned', async () => {
-      const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
-
-      const active1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
-      const resigned: CompanyOfficer = {
-        ...generateCompanyOfficer(),
-        officerRole: 'director',
-        resignedOn: new Date().toISOString()
-      }
-      const active2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
-
-      response.resource = {
-        ...generateCompanyOfficers(),
-        items: [active1, resigned, active2]
+        items: [secretary, director, manager, llpMember]
       }
 
       when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
@@ -90,16 +67,70 @@ describe('CompanyOfficersService', () => {
       await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)
 
       verify(directorMapper.mapToDirectorDetails(anything())).twice()
-      verify(directorMapper.mapToDirectorDetails(active1)).once()
-      verify(directorMapper.mapToDirectorDetails(active2)).once()
+      verify(directorMapper.mapToDirectorDetails(director)).once()
+      verify(directorMapper.mapToDirectorDetails(llpMember)).once()
+    })
+
+    it('should filter directors who have resigned', async () => {
+      const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+      response.httpStatusCode = OK
+
+      const activeDirector1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+      const resignedDirector: CompanyOfficer = {
+        ...generateCompanyOfficer(),
+        officerRole: OfficerRole.DIRECTOR,
+        resignedOn: new Date().toISOString()
+      }
+      const activeDirector2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+
+      response.resource = {
+        ...generateCompanyOfficers(),
+        items: [activeDirector1, resignedDirector, activeDirector2]
+      }
+
+      when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+
+      await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)
+
+      verify(directorMapper.mapToDirectorDetails(anything())).twice()
+      verify(directorMapper.mapToDirectorDetails(activeDirector1)).once()
+      verify(directorMapper.mapToDirectorDetails(resignedDirector)).never()
+      verify(directorMapper.mapToDirectorDetails(activeDirector2)).once()
+    })
+
+    it('should filter members who have resigned', async () => {
+      const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+      response.httpStatusCode = OK
+
+      const activeMember1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+      const resignedMember: CompanyOfficer = {
+        ...generateCompanyOfficer(),
+        officerRole: OfficerRole.LLP_MEMBER,
+        resignedOn: new Date().toISOString()
+      }
+      const activeMember2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+
+      response.resource = {
+        ...generateCompanyOfficers(),
+        items: [activeMember1, resignedMember, activeMember2]
+      }
+
+      when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+
+      await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)
+
+      verify(directorMapper.mapToDirectorDetails(anything())).twice()
+      verify(directorMapper.mapToDirectorDetails(activeMember1)).once()
+      verify(directorMapper.mapToDirectorDetails(resignedMember)).never()
+      verify(directorMapper.mapToDirectorDetails(activeMember2)).once()
     })
 
     it('should map the director details of each active director and return them', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
       response.httpStatusCode = OK
 
-      const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
-      const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
+      const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+      const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
 
       response.resource = {
         ...generateCompanyOfficers(),
@@ -120,12 +151,38 @@ describe('CompanyOfficersService', () => {
       assert.equal(result[1], director2Details)
     })
 
-    it('should should exclude a director if provided', async () => {
+    it('should map the members details of each active member and return them', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
       response.httpStatusCode = OK
 
-      const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
-      const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'director' }
+      const member1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+      const member2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+
+      response.resource = {
+        ...generateCompanyOfficers(),
+        items: [member1, member2]
+      }
+
+      const member1Details: DirectorDetails = generateDirectorDetails()
+      const member2Details: DirectorDetails = generateDirectorDetails()
+
+      when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+      when(directorMapper.mapToDirectorDetails(member1)).thenReturn(member1Details)
+      when(directorMapper.mapToDirectorDetails(member2)).thenReturn(member2Details)
+
+      const result: DirectorDetails[] = await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)
+
+      assert.equal(result.length, 2)
+      assert.equal(result[0], member1Details)
+      assert.equal(result[1], member2Details)
+    })
+
+    it('should exclude a director if provided', async () => {
+      const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+      response.httpStatusCode = OK
+
+      const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+      const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
 
       response.resource = {
         ...generateCompanyOfficers(),

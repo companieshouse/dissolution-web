@@ -8,11 +8,15 @@ import CompanyOfficersClient from '../clients/companyOfficers.client'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
 import OfficerRole from 'app/models/dto/officerRole.enum'
-import OfficerType from 'app/models/dto/officerType.enum'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 
 @provide(CompanyOfficersService)
 export default class CompanyOfficersService {
+
+  private readonly VALID_OFFICER_ROLES: string[] = [
+    OfficerRole.DIRECTOR,
+    OfficerRole.LLP_MEMBER
+  ]
 
   public constructor(
     @inject(CompanyOfficersClient) private client: CompanyOfficersClient,
@@ -26,8 +30,7 @@ export default class CompanyOfficersService {
     }
 
     const activeDirectors: DirectorDetails[] = response.resource!.items
-      .filter((officer: CompanyOfficer) => officer.officerRole === OfficerRole.DIRECTOR || officer.officerRole === OfficerRole.LLP_MEMBER)
-      .filter((director: CompanyOfficer) => !director.resignedOn)
+      .filter((officer: CompanyOfficer) => this.VALID_OFFICER_ROLES.includes(officer.officerRole) && !officer.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
 
     return directorToExclude ? this.excludeDirector(activeDirectors, directorToExclude) : activeDirectors

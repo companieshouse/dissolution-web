@@ -1,5 +1,5 @@
 enum OfficerRole {
-  LLP_MEMBER = 'member',
+  LLP_MEMBER = 'llp-member',
   DIRECTOR = 'director'
 }
 
