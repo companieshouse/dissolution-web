@@ -18,15 +18,15 @@ export default class DissolutionRequestMapper {
 
   private mapToDirectorRequest(director: DirectorToSign): DirectorRequest {
     return {
-      name: director.name,
+      officer_id: director.id,
       email: director.email!,
       on_behalf_name: director.onBehalfName
     }
   }
 
-  public mapToDissolutionPatchRequest(email: string): DissolutionPatchRequest {
+  public mapToDissolutionPatchRequest(officerId: string): DissolutionPatchRequest {
     return {
-      email,
+      officer_id: officerId,
       has_approved: true
     }
   }

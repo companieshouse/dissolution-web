@@ -30,12 +30,12 @@ describe('Dissolution Request Mapper', () => {
 
       assert.equal(result.directors.length, 2)
 
-      assert.equal(result.directors[0].name, director1.name)
+      assert.equal(result.directors[0].officer_id, director1.id)
       assert.equal(result.directors[0].on_behalf_name, director1.onBehalfName)
       assert.equal(result.directors[0].email, director1.email)
       assert.isFalse('id' in result.directors[0])
 
-      assert.equal(result.directors[1].name, director2.name)
+      assert.equal(result.directors[1].officer_id, director2.id)
       assert.equal(result.directors[1].on_behalf_name, director2.onBehalfName)
       assert.equal(result.directors[1].email, director2.email)
       assert.isFalse('id' in result.directors[1])
@@ -43,12 +43,12 @@ describe('Dissolution Request Mapper', () => {
   })
 
   describe('mapToDissolutionPatchRequest', () => {
-    it('should map the provided email to patch request', () => {
-      const email: string = 'example@example.com'
+    it('should map the provided officer ID to patch request', () => {
+      const officerId: string = 'abc123'
 
-      const result: DissolutionPatchRequest = mapper.mapToDissolutionPatchRequest(email)
+      const result: DissolutionPatchRequest = mapper.mapToDissolutionPatchRequest(officerId)
 
-      assert.equal(result.email, email)
+      assert.equal(result.officer_id, officerId)
       assert.isTrue(result.has_approved)
     })
   })
