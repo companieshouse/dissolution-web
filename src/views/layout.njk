@@ -23,9 +23,9 @@
 {% block header %}
   {{
     govukHeader({
-      homepageUrl: paths.ROOT_URI,
+      homepageUrl: Paths.ROOT_URI + '/',
       serviceName: serviceName,
-      serviceUrl: paths.ROOT_URI,
+      serviceUrl: Paths.ROOT_URI + '/',
       containerClasses: 'govuk-width-container'
     })
   }}
