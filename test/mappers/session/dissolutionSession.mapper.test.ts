@@ -48,10 +48,12 @@ describe('DissolutionSessionMapper', () => {
     })
 
     it('should map the signatory information to the approval model', () => {
+      signatory.officer_id = 'abc123'
       signatory.name = 'some signatory name'
 
       const result: DissolutionApprovalModel = mapper.mapToApprovalModel(dissolution, signatory)
 
+      assert.equal(result.officerId, 'abc123')
       assert.equal(result.applicant, 'some signatory name')
     })
   })

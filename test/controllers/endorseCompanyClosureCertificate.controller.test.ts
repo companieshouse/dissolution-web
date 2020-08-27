@@ -148,7 +148,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
     it('should redirect successfully if validator returns no errors', async () => {
       const testObject = generateEndorseCertificateFormModel()
 
-      when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve()
+      when(mockedDissolutionService.approveDissolution(anything(), anything())).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
 
       const app = createApp(container => {
@@ -167,7 +167,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
       const testObject: EndorseCertificateFormModel = {confirmation: 'understood'}
       const mockError = generateValidationError('confirmation', 'Test confirmation error')
 
-      when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
+      when(mockedDissolutionService.approveDissolution(TOKEN, anything())).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(mockError)
 
       const app = createApp(container => {

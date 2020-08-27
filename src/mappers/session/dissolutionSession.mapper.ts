@@ -15,6 +15,7 @@ export default class DissolutionSessionMapper {
 
   public mapToApprovalModel(dissolution: DissolutionGetResponse, signatory: DissolutionGetDirector): DissolutionApprovalModel {
     return {
+      officerId: signatory.officer_id,
       companyName: dissolution.company_name,
       companyNumber: dissolution.company_number,
       applicant: signatory.name,

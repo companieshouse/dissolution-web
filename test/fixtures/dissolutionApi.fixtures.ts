@@ -52,7 +52,7 @@ export function generateDissolutionGetResponse(): DissolutionGetResponse {
 
 export function generateDirectorRequest(name: string): DirectorRequest {
   return {
-    name,
+    officer_id: 'abc123',
     email: generateEmail(name)
   }
 }
@@ -66,6 +66,7 @@ export function generateLinks(): DissolutionLinks {
 
 export function generateGetDirector(name: string = 'Jane Smith'): DissolutionGetDirector {
   return {
+    officer_id: 'abc123',
     name,
     email: generateEmail(name),
   }
@@ -73,6 +74,7 @@ export function generateGetDirector(name: string = 'Jane Smith'): DissolutionGet
 
 export function generateApprovalModel(): DissolutionApprovalModel {
   return {
+    officerId: 'abc123',
     companyName: 'Example Company',
     companyNumber: '12345678',
     applicant: 'John Doe',
@@ -83,7 +85,7 @@ export function generateApprovalModel(): DissolutionApprovalModel {
 
 export function generateDissolutionPatchRequest(): DissolutionPatchRequest {
   return {
-    email: 'example@gmail.com',
+    officer_id: 'abc123',
     has_approved: true
   }
 }
