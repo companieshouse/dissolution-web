@@ -237,7 +237,7 @@ describe('DefineSignatoryInfoController', () => {
         .send(form)
         .expect(BAD_REQUEST)
 
-      verify(validator.validate(deepEqual(form), anything())).called()
+      verify(validator.validate(deepEqual(form), anything())).once()
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
