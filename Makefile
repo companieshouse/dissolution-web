@@ -12,6 +12,7 @@ clean:
 	rm -f ./build.log
 
 package-install:
+	npm audit
 	npm install
 
 .PHONY: build

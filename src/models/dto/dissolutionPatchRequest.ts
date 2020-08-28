@@ -1,4 +1,4 @@
 export default interface DissolutionPatchRequest {
-  email: string
+  officer_id: string
   has_approved: boolean
 }

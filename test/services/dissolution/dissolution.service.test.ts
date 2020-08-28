@@ -14,7 +14,7 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import DissolutionCertificateService from 'app/services/dissolution/dissolutionCertificate.service'
 
 import {
-  generateDissolutionCreateRequest,
+  generateApprovalModel, generateDissolutionCreateRequest,
   generateDissolutionCreateResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
@@ -92,12 +92,14 @@ describe('DissolutionService', () => {
 
   describe('approveDissolution', () => {
     it('should call dissolution api client to approve the dissolution for the provided email', async () => {
-      const email: string = 'test@email.com'
+      const officerId: string = 'abc123'
+      dissolutionSession.approval = { ...generateApprovalModel(), officerId }
+
       const body: DissolutionPatchRequest = generateDissolutionPatchRequest()
 
-      when(mapper.mapToDissolutionPatchRequest(email)).thenReturn(body)
+      when(mapper.mapToDissolutionPatchRequest(officerId)).thenReturn(body)
 
-      await service.approveDissolution(TOKEN, dissolutionSession, email)
+      await service.approveDissolution(TOKEN, dissolutionSession)
 
       verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once()
     })
