@@ -65,9 +65,9 @@ describe('CheckYourAnswersController', () => {
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Check your answers'))
       assert.isTrue(htmlAssertHelper.hasText('h2', DIRECTOR_1_NAME))
-      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-email dd', 'test@mail.com'))
-      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-signing dd', 'Yes'))
-      assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#director-details .director-on-behalf-name dd'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details-0 .director-email dd', 'test@mail.com'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details-0 .director-signing dd', 'Yes'))
+      assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#director-details-0 .director-on-behalf-name dd'))
 
     })
 
@@ -95,9 +95,9 @@ describe('CheckYourAnswersController', () => {
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Check your answers'))
       assert.isTrue(htmlAssertHelper.hasText('h2', DIRECTOR_1_NAME))
-      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-on-behalf-name dd', 'Thor, God of Thunder'))
-      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-email dd', 'test@mail.com'))
-      assert.isTrue(htmlAssertHelper.hasText('#director-details .director-signing dd', 'No'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details-0 .director-on-behalf-name dd', 'Thor, God of Thunder'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details-0 .director-email dd', 'test@mail.com'))
+      assert.isTrue(htmlAssertHelper.hasText('#director-details-0 .director-signing dd', 'No'))
     })
 
     describe('back link', () => {
