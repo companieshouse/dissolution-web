@@ -5,7 +5,7 @@ import { createLoggerMiddleware } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import cookieParser from 'cookie-parser'
 import * as express from 'express'
-import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status-codes'
+import { INTERNAL_SERVER_ERROR } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import NunjucksLoader from './nunjucksLoader.middleware'
@@ -29,23 +29,10 @@ export default class ServerMiddlewareLoader {
   }
 
   public configureErrorHandling(app: express.Application): void {
-    app.use(
-      (req: express.Request, res: express.Response) => this.notFoundHandler(req, res),
-      (err: any, req: express.Request, res: express.Response) => this.defaultHandler(err, req, res)
-    )
-  }
+    app.use((err: any, _: express.Request, res: express.Response, _2: express.NextFunction) => {
+      this.logger.error(`${err.constructor.name} - ${err.message}`)
 
-  private notFoundHandler(_: express.Request, res: express.Response): void {
-    return res.status(NOT_FOUND).render('error')
-  }
-
-  private defaultHandler(err: any, _: express.Request, res: express.Response): void {
-    this.logger.error(`${err.constructor.name} - ${err.message}`)
-
-    if (!err.statusCode) {
-        err.statusCode = INTERNAL_SERVER_ERROR
-    }
-
-    return res.status(err.statusCode).render('error')
+      return res.status(err.statusCode || INTERNAL_SERVER_ERROR).render('error')
+    })
   }
 }
