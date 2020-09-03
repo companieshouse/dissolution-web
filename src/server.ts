@@ -22,9 +22,8 @@ export default class Server {
   public start(container: Container): void {
     const server: Application = new InversifyExpressServer(container)
       .setConfig((app: Application) => this.middlewareLoader.loadServerMiddleware(app, __dirname))
+      .setErrorConfig((app: Application) => this.middlewareLoader.configureErrorHandling(app))
       .build()
-
-    this.middlewareLoader.configureErrorHandling(server)
 
     server.listen(this.PORT, () => this.logStartMessage())
   }
