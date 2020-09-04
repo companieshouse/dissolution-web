@@ -1,6 +1,10 @@
-# Description
+## Description
 
 Please explain briefly the changes you made here.
+
+## Coding Standards
+
+Code Style Guide: https://github.com/companieshouse/dissolution-web/wiki/Code-Style-Guide
 
 ## Checklist
 
