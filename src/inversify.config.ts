@@ -9,6 +9,7 @@ import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
 import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
+import PiwikConfig from './models/piwikConfig'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
@@ -29,11 +30,15 @@ export function initContainer(): Container {
   container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv('NODE_ENV'))
   container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow('CDN_HOST'))
   container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow('CHS_COMPANY_PROFILE_API_LOCAL_URL'))
-  container.bind<Optional<string>>(TYPES.PIWIK_SITE_ID).toConstantValue(getEnv('PIWIK_SITE_ID'))
-  container.bind<Optional<string>>(TYPES.PIWIK_URL).toConstantValue(getEnv('PIWIK_URL'))
   container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
   container.bind<string>(TYPES.CHS_URL).toConstantValue(getEnvOrThrow('CHS_URL'))
   container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow('PAYMENTS_API_URL'))
+  const piwikConfig: PiwikConfig = {
+    url: getEnvOrThrow('PIWIK_URL'),
+    siteId: getEnvOrThrow('PIWIK_SITE_ID'),
+    landingPageStartGoalId: getEnvOrThrow('PIWIK_LANDING_PAGE_START_GOAL_ID')
+  }
+  container.bind<PiwikConfig>(TYPES.PIWIK_CONFIG).toConstantValue(piwikConfig)
 
   // AWS
   container.bind<S3>(TYPES.S3).toConstantValue(new S3({ region: getEnvOrThrow('ENV_REGION_AWS') }))
