@@ -28,8 +28,10 @@
               text: 'Start now',
               isStartButton: true,
               attributes: {
-               id: 'start-now'
-              }
+               id: 'start-now',
+               'data-event-id': 'start-now-button' if piwik,
+               onclick: '_paq.push(["trackGoal", ' + piwik.landingPageStartGoalId + ']);' if piwik
+             }
             })
          }}
         </form>
