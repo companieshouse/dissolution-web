@@ -9,6 +9,7 @@ import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
 import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
+import SignOutUserBannerMiddleware from './middleware/signOutUserBanner.middleware'
 import PiwikConfig from './models/piwikConfig'
 
 import { APP_NAME } from 'app/constants/app.const'
@@ -60,11 +61,12 @@ export function initContainer(): Container {
   container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(cookieConfig, sessionStore))
 
   // Auth
-  container.bind(TYPES.AuthMiddleware).toConstantValue(AuthMiddleware(
-    getEnvOrThrow('CHS_URL'),
-    new UriFactory(),
-    commonAuthMiddleware
-  ))
+  const sessionService: SessionService = new SessionService()
+
+  container.bind(TYPES.AuthMiddleware).toConstantValue(
+    AuthMiddleware(getEnvOrThrow('CHS_URL'), new UriFactory(), commonAuthMiddleware)
+  )
+
   const authConfig: AuthConfig = {
     accountUrl: getEnvOrThrow('ACCOUNT_URL'),
     accountRequestKey: getEnvOrThrow('OAUTH2_REQUEST_KEY'),
@@ -72,7 +74,12 @@ export function initContainer(): Container {
     chsUrl: getEnvOrThrow('CHS_URL'),
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-    CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), new SessionService(), logger))
+    CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), sessionService, logger)
+  )
+
+  container.bind(TYPES.SignOutUserBannerMiddleware).toConstantValue(
+    SignOutUserBannerMiddleware(sessionService)
+  )
 
   container.load(buildProviderModule())
 

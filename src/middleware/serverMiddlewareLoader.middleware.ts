@@ -17,7 +17,8 @@ export default class ServerMiddlewareLoader {
 
   public constructor(
     @inject(NunjucksLoader) private nunjucks: NunjucksLoader,
-    @inject(ApplicationLogger) private logger: ApplicationLogger) {}
+    @inject(ApplicationLogger) private logger: ApplicationLogger
+  ) {}
 
   public loadServerMiddleware(app: express.Application, directory: string): void {
     app.use(bodyParser.json())

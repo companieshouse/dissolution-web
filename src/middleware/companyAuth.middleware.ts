@@ -11,10 +11,10 @@ import SessionService from 'app/services/session/session.service'
 
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
-export default function CompanyAuthMiddleware(authConfig: AuthConfig,
-                                              encryptionService: JwtEncryptionService,
-                                              sessionService: SessionService,
-                                              logger: ApplicationLogger): RequestHandler {
+export default function CompanyAuthMiddleware(
+  authConfig: AuthConfig, encryptionService: JwtEncryptionService,
+  sessionService: SessionService, logger: ApplicationLogger
+): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const dissolutionSession: Optional<DissolutionSession> = sessionService.getDissolutionSession(req)
 

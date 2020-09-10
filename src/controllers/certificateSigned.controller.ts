@@ -12,7 +12,10 @@ interface ViewModel {
   officerType: OfficerType
 }
 
-@controller(CERTIFICATE_SIGNED_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(
+  CERTIFICATE_SIGNED_URI,
+  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
+)
 export class CertificateSignedController extends BaseController {
 
   public constructor(

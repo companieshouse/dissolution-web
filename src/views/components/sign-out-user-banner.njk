@@ -1,0 +1,12 @@
+{% if userEmail %}
+  <div class="govuk-section-break--visible">
+    <div class="sign-out-user-banner">
+      <span id="signed_in_user_email" class="sign-out-user-banner__email">
+        {{ userEmail }}
+      </span>
+      <span>
+        <a id="sign_out" href="/signout">Sign out</a>
+      </span>
+    </div>
+  </div>
+{% endif %}

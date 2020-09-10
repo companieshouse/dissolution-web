@@ -12,7 +12,10 @@ interface ViewModel {
   officerType: OfficerType
 }
 
-@controller(WAIT_FOR_OTHERS_TO_SIGN_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(
+  WAIT_FOR_OTHERS_TO_SIGN_URI,
+  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
+)
 export class WaitForOthersToSignController extends BaseController {
 
   public constructor(

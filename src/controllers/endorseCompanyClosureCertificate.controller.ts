@@ -21,7 +21,10 @@ interface ViewModel {
   errors?: ValidationErrors
 }
 
-@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(
+  ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
+  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
+)
 export class EndorseCompanyClosureCertificateController extends BaseController {
 
   public constructor(@inject(SessionService) private session: SessionService,

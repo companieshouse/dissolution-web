@@ -26,7 +26,10 @@ interface ViewModel {
   errors?: Optional<ValidationErrors>
 }
 
-@controller(SELECT_DIRECTOR_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(
+  SELECT_DIRECTOR_URI,
+  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
+)
 export class SelectDirectorController extends BaseController {
 
   public constructor(
