@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
+import { Application } from 'express'
 import { OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
@@ -17,28 +18,27 @@ import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 let session: SessionService
 
-const TOKEN = 'some-token'
 const COMPANY_NUMBER = '01777777'
 
+let app: Application
 let dissolutionSession: DissolutionSession
 
 beforeEach(() => {
   session = mock(SessionService)
-
-  when(session.getAccessToken(anything())).thenReturn(TOKEN)
-
   dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+
+  when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+  app = createApp(container => {
+    container.rebind(SessionService).toConstantValue(instance(session))
+  })
+
 })
 
 describe('WaitForOthersToSignController', () => {
   describe('GET request', () => {
     it('should render the WaitForOthers page with director text when company is plc', async () => {
       dissolutionSession.officerType = OfficerType.DIRECTOR
-      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-      })
 
       const res = await request(app)
         .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
@@ -53,11 +53,6 @@ describe('WaitForOthersToSignController', () => {
 
     it('should render the WaitForOthers page with member text when company is llp', async () => {
       dissolutionSession.officerType = OfficerType.MEMBER
-      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-      })
 
       const res = await request(app)
         .get(WAIT_FOR_OTHERS_TO_SIGN_URI)

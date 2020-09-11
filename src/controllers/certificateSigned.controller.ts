@@ -1,11 +1,11 @@
-import OfficerType from 'app/models/dto/officerType.enum'
-import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import SessionService from 'app/services/session/session.service'
 import { inject } from 'inversify'
 import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
+import OfficerType from 'app/models/dto/officerType.enum'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { CERTIFICATE_SIGNED_URI } from 'app/paths'
+import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
 interface ViewModel {

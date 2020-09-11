@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
+import { Application } from 'express'
 import { OK } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
@@ -17,29 +18,27 @@ import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 let session: SessionService
 
-const TOKEN = 'some-token'
 const COMPANY_NUMBER = '01777777'
 
+let app: Application
 let dissolutionSession: DissolutionSession
 
 beforeEach(() => {
   session = mock(SessionService)
 
-  when(session.getAccessToken(anything())).thenReturn(TOKEN)
-
   dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+
+  app = createApp(container => {
+    container.rebind(SessionService).toConstantValue(instance(session))
+  })
+
+  when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 })
 
 describe('CertificateSignedController', () => {
   describe('GET request', () => {
     it('should render the CertificateSigned page with director text when the company is plc', async () => {
       dissolutionSession.officerType = OfficerType.DIRECTOR
-
-      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-      })
 
       const res = await request(app)
         .get(CERTIFICATE_SIGNED_URI)
@@ -54,11 +53,6 @@ describe('CertificateSignedController', () => {
 
     it('should render the CertificateSigned page with member text if the company is LLP', async () => {
       dissolutionSession.officerType = OfficerType.MEMBER
-      when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-      const app = createApp(container => {
-        container.rebind(SessionService).toConstantValue(instance(session))
-      })
 
       const res = await request(app)
         .get(CERTIFICATE_SIGNED_URI)
