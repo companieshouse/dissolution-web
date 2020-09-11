@@ -20,4 +20,5 @@ export default interface DissolutionSession {
   isMultiDirector?: boolean
   isApplicantADirector?: boolean
   paymentStateUUID?: string
+  isApplicationAlreadyPaid?: boolean
 }

@@ -9,7 +9,7 @@ import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/payment.controller'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { PAYMENT_URI } from 'app/paths'
+import { PAYMENT_URI, SEARCH_COMPANY_URI } from 'app/paths'
 import PaymentService from 'app/services/payment/payment.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -39,10 +39,11 @@ describe('PaymentController', () => {
       })
     }
 
-    it('should redirect to the payment page', async () => {
+    it('should redirect to the payment page if the application has not been paid for', async () => {
       when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
       when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
+      dissolutionSession.isApplicationAlreadyPaid = false
 
       const app = initApp()
 
@@ -50,6 +51,20 @@ describe('PaymentController', () => {
         .get(PAYMENT_URI)
         .expect(MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_URL)
+    })
+
+    it('should redirect to the search company page if the application has been paid for', async () => {
+      when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
+      when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
+      dissolutionSession.isApplicationAlreadyPaid = true
+
+      const app = initApp()
+
+      await request(app)
+        .get(PAYMENT_URI)
+        .expect(MOVED_TEMPORARILY)
+        .expect('Location', SEARCH_COMPANY_URI)
     })
   })
 })
