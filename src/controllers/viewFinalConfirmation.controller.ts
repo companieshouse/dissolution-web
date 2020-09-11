@@ -23,12 +23,14 @@ export class ViewFinalConfirmationController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {
-    const session: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
+    const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
     const viewModel: ViewModel = {
       applicationReferenceNumber: this.getApplicationReferenceNumber(),
-      officerType: session.officerType!
+      officerType: dissolutionSession.officerType!
     }
+
+    this.markApplicationAsPaid(dissolutionSession)
 
     return super.render('view-final-confirmation', viewModel)
   }
@@ -36,5 +38,11 @@ export class ViewFinalConfirmationController extends BaseController {
   private getApplicationReferenceNumber(): string {
     return this.sessionService
       .getDissolutionSession(this.httpContext.request)!.applicationReferenceNumber!
+  }
+
+  private markApplicationAsPaid(dissolutionSession: DissolutionSession): void {
+    dissolutionSession.applicationPaid = true
+
+    this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
   }
 }

@@ -1,10 +1,12 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
+import { Request } from 'express'
 import { Application } from 'express'
 import { OK } from 'http-status-codes'
 import request from 'supertest'
-import { anything, instance, mock, when } from 'ts-mockito'
+import { anything, capture, instance, mock, when } from 'ts-mockito'
+import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
@@ -42,6 +44,11 @@ describe('ViewFinalConfirmationController', () => {
       const res = await request(app)
         .get(VIEW_FINAL_CONFIRMATION_URI)
         .expect(OK)
+
+      const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+      const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+      assert.isTrue(updatedSession.applicationPaid)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
