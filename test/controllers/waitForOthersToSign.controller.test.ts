@@ -22,8 +22,6 @@ const COMPANY_NUMBER = '01777777'
 
 let dissolutionSession: DissolutionSession
 
-
-
 beforeEach(() => {
   session = mock(SessionService)
 
@@ -31,6 +29,7 @@ beforeEach(() => {
 
   dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
 })
+
 describe('WaitForOthersToSignController', () => {
   describe('GET request', () => {
     it('should render the WaitForOthers page with director text when company is plc', async () => {
@@ -41,13 +40,15 @@ describe('WaitForOthersToSignController', () => {
         container.rebind(SessionService).toConstantValue(instance(session))
       })
 
-     const res = await request(app)
-      .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-      .expect(OK)
+      const res = await request(app)
+        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+        .expect(OK)
 
-     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-     assert.isTrue(htmlAssertHelper.hasText('h1', 'The directors must sign the application before you can submit it'))
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'The directors must sign the application before you can submit it'))
+      assert.isTrue(htmlAssertHelper.hasText('#email', 'We will email the directors and ask them to sign the application.'))
+      assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all directors have signed, we will email you with instructions to pay for and submit the application.'))
     })
 
     it('should render the WaitForOthers page with member text when company is llp', async () => {
@@ -65,6 +66,8 @@ describe('WaitForOthersToSignController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'The members must sign the application before you can submit it'))
+      assert.isTrue(htmlAssertHelper.hasText('#email', 'We will email the members and ask them to sign the application.'))
+      assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all members have signed, we will email you with instructions to pay for and submit the application.'))
     })
   })
 })

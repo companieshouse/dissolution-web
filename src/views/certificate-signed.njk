@@ -19,12 +19,12 @@
     <div class="govuk-grid-row govuk-!-margin-top-4">
       <div class="govuk-grid-column-two-thirds">
 
-        <p class="govuk-body">We need to recieve signatures from all signing directors or members before the person making the application can pay for and submit it. It may take some time for others to sign.</p>
+        <p id="signatures" class="govuk-body">We need to receive signatures from all signing {{ officerType }}s before the person making the application can pay for and submit it. It may take some time for others to sign.</p>
 
         <h2 class="govuk-heading-s">What to do next</h2>
 
         <p class="govuk-body">The person making the application can download a signed PDF copy of it after it has been submitted.</p>
-        <p class="govuk-body">The directors or members must then send this to all interested parties within 7 days of submission.</p>
+        <p id="parties" class="govuk-body">The {{ officerType }}s must then send this to all interested parties within 7 days of submission.</p>
 
         {{ govukWarningText({
           text: "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
