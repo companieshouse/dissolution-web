@@ -48,7 +48,7 @@ describe('ViewFinalConfirmationController', () => {
       const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
       const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
-      assert.isTrue(updatedSession.applicationPaid)
+      assert.isTrue(updatedSession.isApplicationAlreadyPaid)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 

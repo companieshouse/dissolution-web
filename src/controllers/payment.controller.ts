@@ -25,7 +25,7 @@ export class PaymentController extends BaseController {
     const token: string = this.session.getAccessToken(this.httpContext.request)
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
-    if (dissolutionSession.applicationPaid === true) {
+    if (dissolutionSession.isApplicationAlreadyPaid) {
       return this.redirect(SEARCH_COMPANY_URI)
     }
 

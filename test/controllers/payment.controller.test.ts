@@ -43,7 +43,7 @@ describe('PaymentController', () => {
       when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
       when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
-      dissolutionSession.applicationPaid = false
+      dissolutionSession.isApplicationAlreadyPaid = false
 
       const app = initApp()
 
@@ -57,7 +57,7 @@ describe('PaymentController', () => {
       when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
       when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
-      dissolutionSession.applicationPaid = true
+      dissolutionSession.isApplicationAlreadyPaid = true
 
       const app = initApp()
 

@@ -41,7 +41,7 @@ export class ViewFinalConfirmationController extends BaseController {
   }
 
   private markApplicationAsPaid(dissolutionSession: DissolutionSession): void {
-    dissolutionSession.applicationPaid = true
+    dissolutionSession.isApplicationAlreadyPaid = true
 
     this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
   }
