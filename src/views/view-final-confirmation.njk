@@ -20,7 +20,7 @@
 
       <h2 class="govuk-heading-m">What to do next</h2>
 
-      <p class="govuk-body"><a href="{{ Paths.CERTIFICATE_DOWNLOAD_URI }}" target="_blank" class="govuk-link">Download the signed copy of the application (opens in a new tab)</a>.</p>
+      <p class="govuk-body"><a href="{{ Paths.CERTIFICATE_DOWNLOAD_URI }}" target="_blank" onclick="_paq.push(['trackGoal', {{ piwik.confirmationPagePDFGoalId }}]);" class="govuk-link">Download the signed copy of the application (opens in a new tab)</a>.</p>
       <p id="inform" class="govuk-body">
         You must inform all {{ officerType }}s that the application has been submitted, including those who signed it.
         They must send a copy of the application to all interested parties within 7 days.</p>

@@ -1,5 +1,6 @@
 export default interface PiwikConfig {
   url: string
   siteId: string
-  landingPageStartGoalId: string
+  landingPageStartGoalId: number
+  confirmationPagePDFGoalId: number
 }
