@@ -15,10 +15,7 @@ interface ViewModel {
   company: CompanyDetails
 }
 
-@controller(
-  VIEW_COMPANY_INFORMATION_URI,
-  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.SignOutUserBannerMiddleware
-)
+@controller(VIEW_COMPANY_INFORMATION_URI, TYPES.AuthMiddleware)
 export class ViewCompanyInformationController extends BaseController {
 
   public constructor(

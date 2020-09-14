@@ -13,10 +13,7 @@ interface ViewModel {
   officerType: OfficerType
 }
 
-@controller(
-  VIEW_FINAL_CONFIRMATION_URI,
-  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
-)
+@controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class ViewFinalConfirmationController extends BaseController {
 
   public constructor(

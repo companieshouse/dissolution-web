@@ -16,10 +16,7 @@ interface ViewModel {
   directors?: CheckYourAnswersDirector[]
 }
 
-@controller(
-  CHECK_YOUR_ANSWERS_URI,
-  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
-)
+@controller(CHECK_YOUR_ANSWERS_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class CheckYourAnswersController extends BaseController {
 
   public constructor(

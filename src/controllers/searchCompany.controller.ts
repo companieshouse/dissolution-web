@@ -21,10 +21,7 @@ interface ViewModel {
   errors?: ValidationErrors
 }
 
-@controller(
-  SEARCH_COMPANY_URI,
-  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.SignOutUserBannerMiddleware
-)
+@controller(SEARCH_COMPANY_URI, TYPES.AuthMiddleware)
 export class SearchCompanyController extends BaseController {
 
   public constructor(

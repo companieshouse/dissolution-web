@@ -5,8 +5,7 @@ import { SEARCH_COMPANY_URI } from 'app/paths'
 import UriFactory from 'app/utils/uri.factory'
 
 export default function AuthMiddleware(
-  accountWebUrl: string, uriFactory: UriFactory,
-  commonAuthMiddleware: (opts: AuthOptions) => RequestHandler
+  accountWebUrl: string, uriFactory: UriFactory, commonAuthMiddleware: (opts: AuthOptions) => RequestHandler
 ): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     const authOptions: AuthOptions = {

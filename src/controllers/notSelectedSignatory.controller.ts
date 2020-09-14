@@ -4,10 +4,7 @@ import BaseController from 'app/controllers/base.controller'
 import { NOT_SELECTED_SIGNATORY } from 'app/paths'
 import TYPES from 'app/types'
 
-@controller(
-  NOT_SELECTED_SIGNATORY,
-  TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware, TYPES.SignOutUserBannerMiddleware
-)
+@controller(NOT_SELECTED_SIGNATORY, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class NotSelectedSignatoryController extends BaseController {
 
   @httpGet('')

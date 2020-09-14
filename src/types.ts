@@ -10,7 +10,7 @@ const TYPES = {
   SessionMiddleware: 'SessionMiddleware',
   AuthMiddleware: 'AuthMiddleware',
   CompanyAuthMiddleware: 'CompanyAuthMiddleware',
-  SignOutUserBannerMiddleware: 'SignOutUserBannerMiddleware',
+  SaveUserEmailToLocals: 'SaveUserEmailToLocals',
   AxiosInstance: 'AxiosInstance',
   S3: 'S3'
 }

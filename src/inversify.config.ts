@@ -9,7 +9,7 @@ import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
 import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
-import SignOutUserBannerMiddleware from './middleware/signOutUserBanner.middleware'
+import SaveUserEmailToLocals from './middleware/saveUserEmailToLocals.middleware'
 import PiwikConfig from './models/piwikConfig'
 
 import { APP_NAME } from 'app/constants/app.const'
@@ -77,8 +77,8 @@ export function initContainer(): Container {
     CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), sessionService, logger)
   )
 
-  container.bind(TYPES.SignOutUserBannerMiddleware).toConstantValue(
-    SignOutUserBannerMiddleware(sessionService)
+  container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(
+    SaveUserEmailToLocals(sessionService)
   )
 
   container.load(buildProviderModule())
@@ -87,4 +87,3 @@ export function initContainer(): Container {
 }
 
 export default initContainer
-
