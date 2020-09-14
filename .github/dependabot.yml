@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "ch-sdk-node"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
