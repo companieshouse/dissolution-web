@@ -9,7 +9,7 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
-@controller(CERTIFICATE_DOWNLOAD_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(CERTIFICATE_DOWNLOAD_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class CertificateDownloadController extends BaseController {
 
   public constructor(

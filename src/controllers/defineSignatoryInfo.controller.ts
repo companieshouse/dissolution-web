@@ -25,7 +25,7 @@ interface ViewModel {
   errors?: Optional<ValidationErrors>
 }
 
-@controller(DEFINE_SIGNATORY_INFO_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(DEFINE_SIGNATORY_INFO_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class DefineSignatoryInfoController extends BaseController {
 
   public constructor(

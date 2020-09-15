@@ -21,13 +21,14 @@ interface ViewModel {
   errors?: ValidationErrors
 }
 
-@controller(SEARCH_COMPANY_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware)
+@controller(SEARCH_COMPANY_URI, TYPES.AuthMiddleware)
 export class SearchCompanyController extends BaseController {
 
   public constructor(
     @inject(FormValidator) private validator: FormValidator,
     @inject(CompanyService) private companyService: CompanyService,
-    @inject(SessionService) private session: SessionService) {
+    @inject(SessionService) private sessionService: SessionService
+  ) {
     super()
   }
 
@@ -63,15 +64,15 @@ export class SearchCompanyController extends BaseController {
   }
 
   private async doesCompanyExist(companyNumber: string): Promise<boolean> {
-    const token: string = this.session.getAccessToken(this.httpContext.request)
+    const token: string = this.sessionService.getAccessToken(this.httpContext.request)
     return this.companyService.doesCompanyExist(token, companyNumber)
   }
 
   private updateSession(body: SearchCompanyFormModel): void {
     const updatedSession: DissolutionSession = {
-      ...this.session.getDissolutionSession(this.httpContext.request),
+      ...this.sessionService.getDissolutionSession(this.httpContext.request),
       companyNumber: body.companyNumber!
     }
-    this.session.setDissolutionSession(this.httpContext.request, updatedSession)
+    this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 }
