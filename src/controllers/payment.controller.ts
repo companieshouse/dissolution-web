@@ -1,3 +1,9 @@
+import { inject } from 'inversify'
+import { controller, httpGet } from 'inversify-express-utils'
+import { RedirectResult } from 'inversify-express-utils/dts/results'
+import { v4 as uuidv4 } from 'uuid'
+import BaseController from './base.controller'
+
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import Optional from 'app/models/optional'
@@ -7,11 +13,6 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import PaymentService from 'app/services/payment/payment.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
-import { inject } from 'inversify'
-import { controller, httpGet } from 'inversify-express-utils'
-import { RedirectResult } from 'inversify-express-utils/dts/results'
-import { v4 as uuidv4 } from 'uuid'
-import BaseController from './base.controller'
 
 @controller(PAYMENT_URI, TYPES.SessionMiddleware, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
 export class PaymentController extends BaseController {
