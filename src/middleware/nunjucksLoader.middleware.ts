@@ -6,6 +6,7 @@ import { provide } from 'inversify-binding-decorators'
 import nunjucks from 'nunjucks'
 import * as path from 'path'
 
+import { SERVICE_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
 import { ROOT_URI } from 'app/paths'
 import TYPES from 'app/types'
@@ -50,5 +51,7 @@ export default class NunjucksLoader {
     }
 
     app.locals.piwik = this.PIWIK_CONFIG
+
+    app.locals.serviceName = SERVICE_NAME
   }
 }
