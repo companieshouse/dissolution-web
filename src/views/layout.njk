@@ -4,8 +4,6 @@
 {% from 'govuk/components/header/macro.njk'       import govukHeader %}
 {% from 'govuk/components/phase-banner/macro.njk' import govukPhaseBanner %}
 
-{% set serviceName = 'Apply to strike off and dissolve a company' %}
-
 {% block head %}
   <!--[if !IE 8]><!-->
   <link href="//{{ cdn.host }}/stylesheets/govuk-frontend/v3.6.0/govuk-frontend-3.6.0.min.css" rel="stylesheet"/>
@@ -18,6 +16,10 @@
           crossorigin="anonymous"></script>
 
   {% block download %}{% endblock %}
+{% endblock %}
+
+{% block pageTitle %}
+  {{ title }}
 {% endblock %}
 
 {% block header %}
@@ -38,6 +40,8 @@
 {% set mainClasses = mainClasses | default('govuk-main-wrapper--auto-spacing') %}
 
 {% block beforeContent %}
+  <div id="templateName" data-id="{{ title }}" hidden></div>
+
   {{
     govukPhaseBanner({
       tag: {

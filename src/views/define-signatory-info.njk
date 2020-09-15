@@ -6,9 +6,7 @@
 {% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
-{% block pageTitle %}
-  How will the {{officerType}}s be signing the application?
-{% endblock %}
+{% set title = "How will the directors be signing the application?" %}
 
 {% block content %}
   {{
@@ -22,7 +20,7 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">How will the {{officerType}}s be signing the application?</h1>
+      <h1 class="govuk-heading-xl">How will the {{ officerType }}s be signing the application?</h1>
 
       {{ govukWarningText({
         text: "Anyone who signs for a " + officerType + " must have power of attorney for them.",

@@ -50,5 +50,7 @@ export default class NunjucksLoader {
     }
 
     app.locals.piwik = this.PIWIK_CONFIG
+
+    app.locals.serviceName = 'Apply to strike off and dissolve a company'
   }
 }
