@@ -18,7 +18,7 @@ export default class FormValidator {
     if (!result.error) {
       return null
     }
-    return this.mapJoiErrorsToValidationErrors(result.error!.details)
+    return this.mapJoiErrorsToValidationErrors(result.error.details)
   }
 
   private mapJoiErrorsToValidationErrors(errors: ValidationErrorItem[]): ValidationErrors {

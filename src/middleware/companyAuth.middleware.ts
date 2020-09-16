@@ -21,7 +21,7 @@ export default function CompanyAuthMiddleware(
       return next(new Error('No Company Number in session'))
     }
 
-    const companyNumber = dissolutionSession!.companyNumber
+    const companyNumber = dissolutionSession.companyNumber
     const signInInfo: ISignInInfo = sessionService.getSignInInfo(req)
 
     if (isAuthorisedForCompany(signInInfo, companyNumber)) {

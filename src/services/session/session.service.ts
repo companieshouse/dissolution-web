@@ -16,11 +16,11 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 export default class SessionService {
 
   public getAccessToken(req: Request): string {
-    return this.getSignInInfo(req)!.access_token!.access_token!
+    return this.getSignInInfo(req).access_token!.access_token!
   }
 
   public getUserEmail(req: Request): string {
-    return this.getSignInInfo(req)!.user_profile!.email!
+    return this.getSignInInfo(req).user_profile!.email!
   }
 
   public getDissolutionSession(req: Request): Optional<DissolutionSession> {

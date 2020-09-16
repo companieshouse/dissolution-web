@@ -52,9 +52,9 @@ export class SelectDirectorController extends BaseController {
     const officerType: OfficerType = session.officerType!
     const directors: DirectorDetails[] = await this.getDirectors()
 
-    const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema(officerType!))
+    const errors: Optional<ValidationErrors> = this.validator.validate(body, selectDirectorSchema(officerType))
     if (errors) {
-      return this.renderView(officerType!, directors, body, errors)
+      return this.renderView(officerType, directors, body, errors)
     }
 
     const selectedDirector: Optional<DirectorDetails> = this.getSelectedDirector(directors, body)

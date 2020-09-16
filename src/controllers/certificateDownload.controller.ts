@@ -22,6 +22,6 @@ export class CertificateDownloadController extends BaseController {
   public async get(): Promise<RedirectResult> {
     const confirmation: DissolutionConfirmation = this.session.getDissolutionSession(this.httpContext.request)!.confirmation!
 
-    return super.redirect(await this.dissolutionService.generateDissolutionCertificateUrl(confirmation!))
+    return super.redirect(await this.dissolutionService.generateDissolutionCertificateUrl(confirmation))
   }
 }

@@ -29,7 +29,7 @@ export default class CompanyOfficersService {
       return Promise.reject(`No officers found for company [${companyNumber}]`)
     }
 
-    const activeDirectors: DirectorDetails[] = response.resource!.items
+    const activeDirectors: DirectorDetails[] = response.resource.items
       .filter((officer: CompanyOfficer) => this.VALID_OFFICER_ROLES.includes(officer.officerRole) && !officer.resignedOn)
       .map((activeDirector: CompanyOfficer) => this.directorMapper.mapToDirectorDetails(activeDirector))
 
