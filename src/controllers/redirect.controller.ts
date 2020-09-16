@@ -99,7 +99,7 @@ export class RedirectController extends BaseController {
     const signatoryPendingApproval: Optional<DissolutionGetDirector> = signatoriesForUser.find(signatory => !signatory.approved_at)
 
     if (signatoryPendingApproval) {
-      session.approval = this.mapper.mapToApprovalModel(dissolution!, signatoryPendingApproval)
+      session.approval = this.mapper.mapToApprovalModel(dissolution, signatoryPendingApproval)
       return this.saveSessionAndRedirect(session, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
     }
 
@@ -119,7 +119,7 @@ export class RedirectController extends BaseController {
   }
 
   private isApplicant(dissolution: DissolutionGetResponse, userEmail: string): boolean {
-    return dissolution!.created_by === userEmail
+    return dissolution.created_by === userEmail
   }
 
   private saveSessionAndRedirect(session: DissolutionSession, redirectUri: string): RedirectResult {

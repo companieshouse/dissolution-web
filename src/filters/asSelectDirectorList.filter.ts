@@ -15,7 +15,7 @@ export function asSelectDirectorList(directors: DirectorDetails[],
                                      officerType: OfficerType, choice?: string): (GovUKRadio | GovUKRadioDivider)[] {
   const directorRadios: GovUKRadio[] = getDirectorRadios(directors, choice)
   const divider: GovUKRadioDivider = { divider: 'or' }
-  const notADirectorRadio: GovUKRadio = getNotADirectorRadio(officerType!, choice)
+  const notADirectorRadio: GovUKRadio = getNotADirectorRadio(officerType, choice)
 
   return [...directorRadios, divider, notADirectorRadio]
 }

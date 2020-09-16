@@ -46,7 +46,7 @@ export class SelectSignatoriesController extends BaseController {
 
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 
-    return this.renderView(officerType!, signatories, session.selectSignatoriesForm)
+    return this.renderView(officerType, signatories, session.selectSignatoriesForm)
   }
 
   @httpPost('')
@@ -60,9 +60,9 @@ export class SelectSignatoriesController extends BaseController {
 
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 
-    const errors: Optional<ValidationErrors> = this.validate(body, officerType!, signatories.length, session)
+    const errors: Optional<ValidationErrors> = this.validate(body, officerType, signatories.length, session)
     if (errors) {
-      return this.renderView(officerType!, signatories, body, errors)
+      return this.renderView(officerType, signatories, body, errors)
     }
 
     this.updateSession(session, body, signatories)

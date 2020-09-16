@@ -42,7 +42,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
-    return this.renderView(officerType!, signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
+    return this.renderView(officerType, signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
   }
 
   @httpPost('')
@@ -54,7 +54,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
     const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(signatories))
     if (errors) {
-      return this.renderView(officerType!, signatories, session.isMultiDirector!, body, errors)
+      return this.renderView(officerType, signatories, session.isMultiDirector!, body, errors)
     }
 
     this.updateSession(session, signatories, body)
