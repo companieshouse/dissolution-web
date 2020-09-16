@@ -37,7 +37,8 @@ export function initContainer(): Container {
   const piwikConfig: PiwikConfig = {
     url: getEnvOrThrow('PIWIK_URL'),
     siteId: getEnvOrThrow('PIWIK_SITE_ID'),
-    landingPageStartGoalId: getEnvOrThrow('PIWIK_LANDING_PAGE_START_GOAL_ID')
+    landingPageStartGoalId: Number(getEnvOrThrow('PIWIK_LANDING_PAGE_START_GOAL_ID')),
+    confirmationPagePDFGoalId: Number(getEnvOrThrow('PIWIK_CONFIRMATION_PAGE_PDF_GOAL_ID'))
   }
   container.bind<PiwikConfig>(TYPES.PIWIK_CONFIG).toConstantValue(piwikConfig)
 
