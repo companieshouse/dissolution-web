@@ -30,19 +30,11 @@ export class ViewFinalConfirmationController extends BaseController {
       officerType: dissolutionSession.officerType!
     }
 
-    this.markApplicationAsPaid(dissolutionSession)
-
     return super.render('view-final-confirmation', viewModel)
   }
 
   private getApplicationReferenceNumber(): string {
     return this.sessionService
       .getDissolutionSession(this.httpContext.request)!.applicationReferenceNumber!
-  }
-
-  private markApplicationAsPaid(dissolutionSession: DissolutionSession): void {
-    dissolutionSession.isApplicationAlreadyPaid = true
-
-    this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
   }
 }
