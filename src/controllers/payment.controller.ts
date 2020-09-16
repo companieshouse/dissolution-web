@@ -29,9 +29,8 @@ export class PaymentController extends BaseController {
   public async get(): Promise<RedirectResult> {
     const token: string = this.session.getAccessToken(this.httpContext.request)
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token)
 
-    if (dissolution!.application_status === ApplicationStatus.PAID) {
+    if (await this.isAlreadyPaid(dissolutionSession, token)) {
       return this.redirect(SEARCH_COMPANY_URI)
     }
 
@@ -55,5 +54,11 @@ export class PaymentController extends BaseController {
 
   private async getDissolution(session: DissolutionSession, token: string): Promise<Optional<DissolutionGetResponse>> {
     return this.service.getDissolution(token, session)
+  }
+
+  private async isAlreadyPaid(dissolutionSession: DissolutionSession, token: string): Promise<boolean> {
+    const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token)
+
+    return dissolution!.application_status === ApplicationStatus.PAID
   }
 }
