@@ -34,9 +34,9 @@ function generateIsSigningRadioSchema(officerType: OfficerType): Joi.StringSchem
     .required()
     .valid(SignatorySigning.WILL_SIGN, SignatorySigning.ON_BEHALF)
     .messages({
-      'any.only': `Select how this ${officerType} will be signing the application`,
-      'any.required': `Select how this ${officerType} will be signing the application`,
-      'string.empty': `Select how this ${officerType} will be signing the application`
+      'any.only': `Select how the ${officerType} will be signing the application`,
+      'any.required': `Select how the ${officerType} will be signing the application`,
+      'string.empty': `Select how the ${officerType} will be signing the application`
     })
 }
 
@@ -49,9 +49,9 @@ function generateDirectorEmailSchema(isSigningKey: string, officerType: OfficerT
         .required()
         .email()
         .messages({
-          'any.required': `Enter the email address for this ${officerType}`,
-          'string.empty': `Enter the email address for this ${officerType}`,
-          'string.email': `Enter a valid email address for this ${officerType}`
+          'any.required': `Enter the email address for the ${officerType}`,
+          'string.empty': `Enter the email address for the ${officerType}`,
+          'string.email': `Enter a valid email address for the ${officerType}`
         })
     })
 }
@@ -65,9 +65,9 @@ function generateOnBehalfNameSchema(isSigningKey: string, officerType: OfficerTy
         .required()
         .max(250)
         .messages({
-          'any.required': `Enter the name for the person signing on behalf of this ${officerType}`,
-          'string.empty': `Enter the name for the person signing on behalf of this ${officerType}`,
-          'string.max': `Enter a name that is less than 250 characters for the person signing on behalf of this ${officerType}`
+          'any.required': `Enter the name for the person signing on behalf of the ${officerType}`,
+          'string.empty': `Enter the name for the person signing on behalf of the ${officerType}`,
+          'string.max': `Enter a name that is less than 250 characters for the person signing on behalf of the ${officerType}`
         })
     })
 }
@@ -81,9 +81,9 @@ function generateOnBehalfEmailSchema(isSigningKey: string, officerType: OfficerT
         .required()
         .email()
         .messages({
-          'any.required': `Enter the email address for the person signing on behalf of this ${officerType}`,
-          'string.empty': `Enter the email address for the person signing on behalf of this ${officerType}`,
-          'string.email': `Enter a valid email address for the person signing on behalf of this ${officerType}`
+          'any.required': `Enter the email address for the person signing on behalf of the ${officerType}`,
+          'string.empty': `Enter the email address for the person signing on behalf of the ${officerType}`,
+          'string.email': `Enter a valid email address for the person signing on behalf of the ${officerType}`
         })
     })
 }
