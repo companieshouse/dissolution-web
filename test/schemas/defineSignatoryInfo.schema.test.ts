@@ -3,6 +3,7 @@ import { assert } from 'chai'
 import { generateDefineSignatoryInfoFormModel } from '../fixtures/companyOfficers.fixtures'
 import { generateDirectorToSign } from '../fixtures/session.fixtures'
 
+import OfficerType from 'app/models/dto/officerType.enum'
 import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import defineSignatoryInfoSchema from 'app/schemas/defineSignatoryInfo.schema'
@@ -33,6 +34,7 @@ describe('Define Signatory Info Schema', () => {
 
   it('should return no errors when data is valid', () => {
     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+    const officerType: OfficerType = OfficerType.DIRECTOR
 
     form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
     form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'director@mail.com'
@@ -44,13 +46,14 @@ describe('Define Signatory Info Schema', () => {
     form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = 'Mr Accountant'
     form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = 'accountant@mail.com'
 
-    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
+    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 
     assert.isUndefined(errors.error)
   })
 
   it('should return an error when it has not been provided how a signatory will be signing', () => {
     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+    const officerType: OfficerType = OfficerType.DIRECTOR
 
     form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = ''
     form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'director@mail.com'
@@ -62,22 +65,23 @@ describe('Define Signatory Info Schema', () => {
     form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = 'Mr Accountant'
     form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = 'accountant@mail.com'
 
-    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
+    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 
     assert.isDefined(errors.error)
     assert.equal(errors.error!.details.length, 2)
 
     assert.equal(errors.error!.details[0].context!.key, `isSigning_${SIGNATORY_1_ID_LOWER}`)
     assert.equal(errors.error!.details[0].type, `any.only`)
-    assert.equal(errors.error!.details[0].message, `Select how ${SIGNATORY_1_NAME} will be signing the application`)
+    assert.equal(errors.error!.details[0].message, `Select how the ${officerType} will be signing the application`)
 
     assert.equal(errors.error!.details[1].context!.key, `isSigning_${SIGNATORY_1_ID_LOWER}`)
     assert.equal(errors.error!.details[1].type, `string.empty`)
-    assert.equal(errors.error!.details[1].message, `Select how ${SIGNATORY_1_NAME} will be signing the application`)
+    assert.equal(errors.error!.details[1].message, `Select how the ${officerType} will be signing the application`)
   })
 
   it('should return an error if mandatory text fields have not been provided', () => {
     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+    const officerType: OfficerType = OfficerType.DIRECTOR
 
     form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
     form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ''
@@ -89,26 +93,27 @@ describe('Define Signatory Info Schema', () => {
     form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ''
     form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ''
 
-    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
+    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 
     assert.isDefined(errors.error)
     assert.equal(errors.error!.details.length, 3)
 
     assert.equal(errors.error!.details[0].context!.key, `directorEmail_${SIGNATORY_1_ID_LOWER}`)
     assert.equal(errors.error!.details[0].type, `string.empty`)
-    assert.equal(errors.error!.details[0].message, `Enter the email address for ${SIGNATORY_1_NAME}`)
+    assert.equal(errors.error!.details[0].message, `Enter the email address for the ${officerType}`)
 
     assert.equal(errors.error!.details[1].context!.key, `onBehalfName_${SIGNATORY_2_ID_LOWER}`)
     assert.equal(errors.error!.details[1].type, `string.empty`)
-    assert.equal(errors.error!.details[1].message, `Enter the name for the person signing on behalf of ${SIGNATORY_2_NAME}`)
+    assert.equal(errors.error!.details[1].message, `Enter the name for the person signing on behalf of the ${officerType}`)
 
     assert.equal(errors.error!.details[2].context!.key, `onBehalfEmail_${SIGNATORY_2_ID_LOWER}`)
     assert.equal(errors.error!.details[2].type, `string.empty`)
-    assert.equal(errors.error!.details[2].message, `Enter the email address for the person signing on behalf of ${SIGNATORY_2_NAME}`)
+    assert.equal(errors.error!.details[2].message, `Enter the email address for the person signing on behalf of the ${officerType}`)
   })
 
   it('should return an error if email fields do not contain valid email values', () => {
     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+    const officerType: OfficerType = OfficerType.DIRECTOR
 
     form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
     form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'not an email'
@@ -120,22 +125,23 @@ describe('Define Signatory Info Schema', () => {
     form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = 'Mr Accountant'
     form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = 'also not an email'
 
-    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
+    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 
     assert.isDefined(errors.error)
     assert.equal(errors.error!.details.length, 2)
 
     assert.equal(errors.error!.details[0].context!.key, `directorEmail_${SIGNATORY_1_ID_LOWER}`)
     assert.equal(errors.error!.details[0].type, `string.email`)
-    assert.equal(errors.error!.details[0].message, `Enter a valid email address for ${SIGNATORY_1_NAME}`)
+    assert.equal(errors.error!.details[0].message, `Enter a valid email address for the ${officerType}`)
 
     assert.equal(errors.error!.details[1].context!.key, `onBehalfEmail_${SIGNATORY_2_ID_LOWER}`)
     assert.equal(errors.error!.details[1].type, `string.email`)
-    assert.equal(errors.error!.details[1].message, `Enter a valid email address for the person signing on behalf of ${SIGNATORY_2_NAME}`)
+    assert.equal(errors.error!.details[1].message, `Enter a valid email address for the person signing on behalf of the ${officerType}`)
   })
 
   it('should return an error if a name is provided that is above the maximum length', () => {
     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+    const officerType: OfficerType = OfficerType.DIRECTOR
 
     form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
     form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'director@mail.com'
@@ -147,18 +153,19 @@ describe('Define Signatory Info Schema', () => {
     form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = 'X'.repeat(251)
     form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = 'accountant@mail.com'
 
-    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
+    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 
     assert.isDefined(errors.error)
     assert.equal(errors.error!.details.length, 1)
 
     assert.equal(errors.error!.details[0].context!.key, `onBehalfName_${SIGNATORY_2_ID_LOWER}`)
     assert.equal(errors.error!.details[0].type, `string.max`)
-    assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the person signing on behalf of ${SIGNATORY_2_NAME}`)
+    assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the person signing on behalf of the ${officerType}`)
   })
 
   it('should ignore invalid fields if the associated radio option has not been selected', () => {
     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+    const officerType: OfficerType = OfficerType.DIRECTOR
 
     form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
     form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'director@mail.com'
@@ -170,7 +177,7 @@ describe('Define Signatory Info Schema', () => {
     form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = 'Mr Accountant'
     form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = 'accountant@mail.com'
 
-    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
+    const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 
     assert.isUndefined(errors.error)
   })
