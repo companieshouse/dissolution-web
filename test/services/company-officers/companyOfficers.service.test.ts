@@ -54,21 +54,47 @@ describe('CompanyOfficersService', () => {
 
       const secretary: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'secretary' }
       const director: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+      const corporateDirector: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.CORPORATE_DIRECTOR }
+      const corporateNomineeDirector: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.CORPORATE_NOMINEE_DIRECTOR }
+      const judicialFactor: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.JUDICIAL_FACTOR }
       const manager: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'cicmanager' }
       const llpMember: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+      const llpDesignatedMember: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_DESIGNATED_MEMBER }
+      const corporateLlpMember: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.CORPORATE_LLP_MEMBER }
+      const corporateLlpDesignatedMember: CompanyOfficer = {
+        ...generateCompanyOfficer(),
+        officerRole: OfficerRole.CORPORATE_LLP_DESIGNATED_MEMBER
+      }
 
       response.resource = {
         ...generateCompanyOfficers(),
-        items: [secretary, director, manager, llpMember]
+        items: [
+          secretary,
+          director,
+          corporateDirector,
+          corporateNomineeDirector,
+          judicialFactor,
+          manager,
+          llpMember,
+          llpDesignatedMember,
+          corporateLlpMember,
+          corporateLlpDesignatedMember
+        ]
       }
 
       when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
 
       await service.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)
 
-      verify(directorMapper.mapToDirectorDetails(anything())).twice()
+      verify(directorMapper.mapToDirectorDetails(anything())).times(8)
       verify(directorMapper.mapToDirectorDetails(director)).once()
+      verify(directorMapper.mapToDirectorDetails(corporateDirector)).once()
+      verify(directorMapper.mapToDirectorDetails(corporateNomineeDirector)).once()
+      verify(directorMapper.mapToDirectorDetails(judicialFactor)).once()
       verify(directorMapper.mapToDirectorDetails(llpMember)).once()
+      verify(directorMapper.mapToDirectorDetails(llpDesignatedMember)).once()
+      verify(directorMapper.mapToDirectorDetails(corporateLlpMember)).once()
+      verify(directorMapper.mapToDirectorDetails(corporateLlpDesignatedMember)).once()
     })
 
     it('should filter directors who have resigned', async () => {
