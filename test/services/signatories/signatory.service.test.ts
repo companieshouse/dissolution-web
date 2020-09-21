@@ -74,12 +74,12 @@ describe('SignatoryService', () => {
       const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
       contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-      contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'director@mail.com'
+      contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = 'DIRECTOR@mail.com'
       contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ''
       contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ''
 
       contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-      contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = 'otherDirector@mail.com'
+      contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = 'otherdirector@mail.com'
       contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ''
       contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ''
 
@@ -88,7 +88,7 @@ describe('SignatoryService', () => {
       assert.equal(signatory1.email, 'director@mail.com')
       assert.isUndefined(signatory1.onBehalfName)
 
-      assert.equal(signatory2.email, 'otherDirector@mail.com')
+      assert.equal(signatory2.email, 'otherdirector@mail.com')
       assert.isUndefined(signatory2.onBehalfName)
     })
 
@@ -98,7 +98,7 @@ describe('SignatoryService', () => {
       contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.ON_BEHALF
       contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ''
       contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = 'Mr Accountant'
-      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = 'accountant@mail.com'
+      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = 'ACCOUNTANT@mail.com'
 
       contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
       contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ''
@@ -120,7 +120,7 @@ describe('SignatoryService', () => {
       contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.ON_BEHALF
       contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ''
       contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = 'Mr Accountant'
-      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = 'accountant@mail.com'
+      contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = 'ACCOUNTANT@mail.com'
 
       contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.WILL_SIGN
       contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = 'director@mail.com'
