@@ -15,7 +15,13 @@ export default class CompanyOfficersService {
 
   private readonly VALID_OFFICER_ROLES: string[] = [
     OfficerRole.DIRECTOR,
-    OfficerRole.LLP_MEMBER
+    OfficerRole.CORPORATE_DIRECTOR,
+    OfficerRole.CORPORATE_NOMINEE_DIRECTOR,
+    OfficerRole.JUDICIAL_FACTOR,
+    OfficerRole.LLP_MEMBER,
+    OfficerRole.LLP_DESIGNATED_MEMBER,
+    OfficerRole.CORPORATE_LLP_MEMBER,
+    OfficerRole.CORPORATE_LLP_DESIGNATED_MEMBER
   ]
 
   public constructor(
