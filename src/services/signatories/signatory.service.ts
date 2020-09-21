@@ -25,11 +25,11 @@ export default class SignatoryService {
     const signatoryId: string = signatory.id.toLowerCase()
 
     if (contactForm[`isSigning_${signatoryId}`] === SignatorySigning.WILL_SIGN) {
-      signatory.email = contactForm[`directorEmail_${signatoryId}`]
+      signatory.email = contactForm[`directorEmail_${signatoryId}`].toLowerCase()
       signatory.onBehalfName = undefined
     } else {
       signatory.onBehalfName = contactForm[`onBehalfName_${signatoryId}`]
-      signatory.email = contactForm[`onBehalfEmail_${signatoryId}`]
+      signatory.email = contactForm[`onBehalfEmail_${signatoryId}`].toLowerCase()
     }
   }
 }
