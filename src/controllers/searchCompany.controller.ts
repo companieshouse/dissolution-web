@@ -13,6 +13,7 @@ import formSchema from 'app/schemas/searchCompany.schema'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
+import CompanyNumberSanitizer from 'app/utils/companyNumberSanitizer'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
@@ -27,7 +28,8 @@ export class SearchCompanyController extends BaseController {
   public constructor(
     @inject(FormValidator) private validator: FormValidator,
     @inject(CompanyService) private companyService: CompanyService,
-    @inject(SessionService) private sessionService: SessionService
+    @inject(SessionService) private sessionService: SessionService,
+    @inject(CompanyNumberSanitizer) private companyNumberSanitizer: CompanyNumberSanitizer
   ) {
     super()
   }
@@ -39,12 +41,13 @@ export class SearchCompanyController extends BaseController {
 
   @httpPost('')
   public async post(@requestBody() body: SearchCompanyFormModel): Promise<string | RedirectResult> {
+    body.companyNumber = this.companyNumberSanitizer.sanitizeCompany(body.companyNumber!)
     const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
     if (errors) {
       return this.renderView(body, errors)
     }
 
-    if (!await this.doesCompanyExist(body.companyNumber!)) {
+    if (!await this.doesCompanyExist(body.companyNumber)) {
       return this.renderView(body, { companyNumber : 'Company number does not exist or is incorrect' })
     }
 
@@ -71,7 +74,7 @@ export class SearchCompanyController extends BaseController {
   private updateSession(body: SearchCompanyFormModel): void {
     const updatedSession: DissolutionSession = {
       ...this.sessionService.getDissolutionSession(this.httpContext.request),
-      companyNumber: body.companyNumber!
+      companyNumber: body.companyNumber
     }
     this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
   }
