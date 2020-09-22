@@ -5,6 +5,9 @@ export default class CompanyNumberSanitizer {
   private readonly COMPANY_NUMBER_SIZE: number = 8
 
   public sanitizeCompany(companyNumber: string): string {
+    if (!companyNumber || companyNumber.trim().length === 0) {
+      return ''
+    }
     const uppercaseCompanyNumber: string = companyNumber.toUpperCase()
     const strippedCompanyNumber: string = this.stripWhitespaces(uppercaseCompanyNumber)
 

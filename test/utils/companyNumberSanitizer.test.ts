@@ -7,6 +7,13 @@ import CompanyNumberSanitizer from 'app/utils/companyNumberSanitizer'
 describe('CompanyNumberSanitizer', () => {
   const sanitizer: CompanyNumberSanitizer = new CompanyNumberSanitizer()
 
+  it('should return empty string if company number is empty', () => {
+    [' ', '', '\t'].forEach(number => {
+      const result: string = sanitizer.sanitizeCompany(number)
+      expect(result).to.be.equal('')
+    })
+  })
+
   it('should trim whitespaces', () => {
     [' NI000123', 'NI000123 ', ' NI000123 ', 'NI 00 01 23'].forEach(valueWithWhitespaces => {
       const result: string = sanitizer.sanitizeCompany(valueWithWhitespaces)
