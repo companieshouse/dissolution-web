@@ -19,12 +19,14 @@ import { SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import searchCompanySchema from 'app/schemas/searchCompany.schema'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
+import CompanyNumberSanitizer from 'app/utils/companyNumberSanitizer'
 import FormValidator from 'app/utils/formValidator.util'
 
 describe('SearchCompanyController', () => {
 
   let validator: FormValidator
   let companyService: CompanyService
+  let sanitizer: CompanyNumberSanitizer
   let session: SessionService
 
   const TOKEN = 'some-token'
@@ -33,6 +35,7 @@ describe('SearchCompanyController', () => {
     validator = mock(FormValidator)
     companyService = mock(CompanyService)
     session = mock(SessionService)
+    sanitizer = mock(CompanyNumberSanitizer)
 
     when(session.getAccessToken(anything())).thenReturn(TOKEN)
   })
@@ -59,9 +62,11 @@ describe('SearchCompanyController', () => {
       const error: ValidationErrors = generateValidationError('companyNumber', 'Some company number error')
 
       when(validator.validate(deepEqual(form), searchCompanySchema)).thenReturn(error)
+      when(sanitizer.sanitizeCompany(companyNumber)).thenReturn(companyNumber)
 
       const app = createApp(container => {
         container.rebind(FormValidator).toConstantValue(instance(validator))
+        container.rebind(CompanyNumberSanitizer).toConstantValue(instance(sanitizer))
       })
 
       const res = await request(app)
@@ -79,11 +84,13 @@ describe('SearchCompanyController', () => {
     it('should re-render the view with an error if validation passes but company does not exist', async () => {
       when(validator.validate(deepEqual(form), searchCompanySchema)).thenReturn(null)
       when(companyService.doesCompanyExist(TOKEN, companyNumber)).thenResolve(false)
+      when(sanitizer.sanitizeCompany(companyNumber)).thenReturn(companyNumber)
 
       const app = createApp(container => {
         container.rebind(FormValidator).toConstantValue(instance(validator))
         container.rebind(CompanyService).toConstantValue(instance(companyService))
         container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyNumberSanitizer).toConstantValue(instance(sanitizer))
       })
 
       const res = await request(app)
@@ -101,11 +108,13 @@ describe('SearchCompanyController', () => {
     it('should save the company number in session if company exists', async () => {
       when(validator.validate(deepEqual(form), searchCompanySchema)).thenReturn(null)
       when(companyService.doesCompanyExist(TOKEN, companyNumber)).thenResolve(true)
+      when(sanitizer.sanitizeCompany(companyNumber)).thenReturn(companyNumber)
 
       const app = createApp(container => {
         container.rebind(FormValidator).toConstantValue(instance(validator))
         container.rebind(CompanyService).toConstantValue(instance(companyService))
         container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyNumberSanitizer).toConstantValue(instance(sanitizer))
       })
 
       await request(app)
@@ -125,11 +134,13 @@ describe('SearchCompanyController', () => {
     it('should redirect if validator returns no errors and company exists', async () => {
       when(validator.validate(deepEqual(form), searchCompanySchema)).thenReturn(null)
       when(companyService.doesCompanyExist(TOKEN, companyNumber)).thenResolve(true)
+      when(sanitizer.sanitizeCompany(companyNumber)).thenReturn(companyNumber)
 
       const app = createApp(container => {
         container.rebind(FormValidator).toConstantValue(instance(validator))
         container.rebind(CompanyService).toConstantValue(instance(companyService))
         container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyNumberSanitizer).toConstantValue(instance(sanitizer))
       })
 
       await request(app)
