@@ -100,9 +100,8 @@
           govukButton({
             text: 'Confirm and continue',
             attributes: {
-              id: 'submit'
-               onclick: '_paq.push(["trackGoal", ' + company.companyType | asCompanyTypeGoalsId + ']);' if piwik
-             }
+              id: 'submit',
+              onclick: '_paq.push(["trackGoal", ' + company.companyType | asCompanyTypeGoalId(piwik) + ']);' if piwik
             }
           }) if company.canClose
         }}
