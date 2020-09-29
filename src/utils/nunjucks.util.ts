@@ -21,7 +21,7 @@ export const addFilters = (env: Environment): void => {
   env.addFilter('asFormattedDate', asFormattedDate)
   env.addFilter('asEmailLabel', asEmailLabel)
   env.addFilter('asCompanyDisplayName', asCompanyDisplayName)
-  env.addFilter('asCompanyTypeGoalId.ts', asCompanyTypeGoalsId)
+  env.addFilter('asCompanyTypeGoalId', asCompanyTypeGoalsId)
 }
 
 export const addGlobals = (env: Environment): void => {
