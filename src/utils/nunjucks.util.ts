@@ -2,7 +2,7 @@ import { Environment } from 'nunjucks'
 
 import { asCompanyDisplayName } from 'app/filters/asCompanyDisplayName'
 import { asCompanyStatusText } from 'app/filters/asCompanyStatusText.filter'
-import { asCompanyTypeGoalId } from 'app/filters/asCompanyTypeGoalId'
+import { asCompanyTypeGoalId } from 'app/filters/asCompanyTypeGoalId.filter'
 import { asCompanyTypeText } from 'app/filters/asCompanyTypeText.filter'
 import { asEmailLabel } from 'app/filters/asEmailLabel.filter'
 import { asFormattedDate } from 'app/filters/asFormattedDate.filter'
