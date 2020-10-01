@@ -8,9 +8,9 @@ const piwikConfig: PiwikConfig = {
   url: '',
   siteId: '',
   landingPageStartGoalId: 999,
-  confirmationPagePDFGoalId: 999,
-  limitedCompanyGoalId: '',
-  partnershipGoalId: ''
+  confirmationPagePDFGoalId: 998,
+  limitedCompanyGoalId: 997,
+  partnershipGoalId: 996
   }
 
 describe('asCompanyTypeGoalId', () => {
@@ -19,6 +19,6 @@ describe('asCompanyTypeGoalId', () => {
   })
 
   it(`should return 'limitedCompanyGoalId' when company is of type limited company`, () => {
-    assert.equal(piwikConfig.partnershipGoalId, asCompanyTypeGoalId(ClosableCompanyType.LTD, piwikConfig))
+    assert.equal(piwikConfig.limitedCompanyGoalId, asCompanyTypeGoalId(ClosableCompanyType.LTD, piwikConfig))
   })
 })
