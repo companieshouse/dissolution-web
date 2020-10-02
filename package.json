@@ -43,7 +43,7 @@
     "nunjucks": "^3.2.1",
     "reflect-metadata": "^0.1.13",
     "tsconfig-paths": "^3.9.0",
-    "tslib": "^2.0.0",
+    "tslib": "^2.0.1",
     "uuid": "^8.2.0",
     "web-security-node": "git@github.com:companieshouse/web-security-node.git#0729df976b7273701ccef449e5a9a7818459dbaf"
   },
