@@ -39,7 +39,7 @@
     "inversify-express-utils": "^6.3.2",
     "lodash": "^4.17.20",
     "momentjs": "^2.0.0",
-    "node-jose": "^1.1.4",
+    "node-jose": "^2.0.0",
     "nunjucks": "^3.2.1",
     "reflect-metadata": "^0.1.13",
     "tsconfig-paths": "^3.9.0",
