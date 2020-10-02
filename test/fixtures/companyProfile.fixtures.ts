@@ -27,7 +27,8 @@ export function generateCompanyProfile(): CompanyProfile {
     hasInsolvencyHistory: false,
     registeredOfficeAddress: generateRegisteredOfficeAddress(),
     accounts: generateAccounts(),
-    confirmationStatement: generateConfirmationStatement()
+    confirmationStatement: generateConfirmationStatement(),
+    links: {}
   }
 }
 
