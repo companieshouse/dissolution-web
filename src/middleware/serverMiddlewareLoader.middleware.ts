@@ -4,14 +4,14 @@ import bodyParser from 'body-parser'
 import { createLoggerMiddleware } from 'ch-logging'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import cookieParser from 'cookie-parser'
-import { Application, NextFunction, Request, RequestHandler, Response } from 'express'
+import { Application, NextFunction, Request, Response } from 'express'
 import { INTERNAL_SERVER_ERROR } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
+import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middleware'
 import NunjucksLoader from './nunjucksLoader.middleware'
 
 import { APP_NAME } from 'app/constants/app.const'
-import TYPES from 'app/types'
 
 @provide(ServerMiddlewareLoader)
 export default class ServerMiddlewareLoader {
@@ -19,8 +19,7 @@ export default class ServerMiddlewareLoader {
   public constructor(
     @inject(NunjucksLoader) private nunjucks: NunjucksLoader,
     @inject(ApplicationLogger) private logger: ApplicationLogger,
-    @inject(TYPES.SessionMiddleware) private sessionMiddleware: RequestHandler,
-    @inject(TYPES.SaveUserEmailToLocals) private saveUserEmailToLocals: RequestHandler
+    @inject(CustomServerMiddlewareLoader) private customServerMiddlewareLoader: CustomServerMiddlewareLoader
   ) {}
 
   public loadServerMiddleware(app: Application, directory: string): void {
@@ -29,8 +28,7 @@ export default class ServerMiddlewareLoader {
     app.use(cookieParser())
     app.use(createLoggerMiddleware(APP_NAME))
 
-    app.use(this.sessionMiddleware)
-    app.use(this.saveUserEmailToLocals)
+    this.customServerMiddlewareLoader.loadCustomServerMiddleware(app)
 
     this.nunjucks.configureNunjucks(app, directory)
   }

@@ -6,13 +6,12 @@ import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 
 interface ViewModel {
   officerType: OfficerType
 }
 
-@controller(WAIT_FOR_OTHERS_TO_SIGN_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(WAIT_FOR_OTHERS_TO_SIGN_URI)
 export class WaitForOthersToSignController extends BaseController {
 
   public constructor(

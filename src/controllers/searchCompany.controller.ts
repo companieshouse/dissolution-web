@@ -12,7 +12,6 @@ import { SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } fro
 import formSchema from 'app/schemas/searchCompany.schema'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 import CompanyNumberSanitizer from 'app/utils/companyNumberSanitizer'
 import FormValidator from 'app/utils/formValidator.util'
 
@@ -22,7 +21,7 @@ interface ViewModel {
   errors?: ValidationErrors
 }
 
-@controller(SEARCH_COMPANY_URI, TYPES.AuthMiddleware)
+@controller(SEARCH_COMPANY_URI)
 export class SearchCompanyController extends BaseController {
 
   public constructor(

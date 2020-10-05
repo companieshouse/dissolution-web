@@ -2,9 +2,8 @@ import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
 import { NOT_SELECTED_SIGNATORY } from 'app/paths'
-import TYPES from 'app/types'
 
-@controller(NOT_SELECTED_SIGNATORY, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(NOT_SELECTED_SIGNATORY)
 export class NotSelectedSignatoryController extends BaseController {
 
   @httpGet('')

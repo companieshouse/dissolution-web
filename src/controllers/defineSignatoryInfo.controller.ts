@@ -14,7 +14,6 @@ import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from 'app/paths'
 import defineSignatoryInfoSchema from 'app/schemas/defineSignatoryInfo.schema'
 import SessionService from 'app/services/session/session.service'
 import SignatoryService from 'app/services/signatories/signatory.service'
-import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
@@ -25,7 +24,7 @@ interface ViewModel {
   errors?: Optional<ValidationErrors>
 }
 
-@controller(DEFINE_SIGNATORY_INFO_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(DEFINE_SIGNATORY_INFO_URI)
 export class DefineSignatoryInfoController extends BaseController {
 
   public constructor(

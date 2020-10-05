@@ -16,7 +16,6 @@ import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI,
 import selectDirectorSchema from 'app/schemas/selectDirector.schema'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
@@ -26,7 +25,7 @@ interface ViewModel {
   errors?: Optional<ValidationErrors>
 }
 
-@controller(SELECT_DIRECTOR_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(SELECT_DIRECTOR_URI)
 export class SelectDirectorController extends BaseController {
 
   public constructor(

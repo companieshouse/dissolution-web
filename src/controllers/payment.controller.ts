@@ -12,9 +12,8 @@ import { PAYMENT_URI, SEARCH_COMPANY_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import PaymentService from 'app/services/payment/payment.service'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 
-@controller(PAYMENT_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(PAYMENT_URI)
 export class PaymentController extends BaseController {
 
   public constructor(
