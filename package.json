@@ -1,8 +1,8 @@
 {
   "name": "dissolution-web",
   "version": "0.0.1",
-  "description": "This is a skeleton NodeJS frontend applications for Companies House",
-  "main": "dist/App.js",
+  "description": "This is a Node.js frontend application for the Companies House dissolution service.",
+  "main": "dist/app.js",
   "repository": {
     "url": "https://github.com/companieshouse/dissolution-web"
   },
@@ -21,12 +21,12 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "api-sdk-node": "git+ssh://git@github.com/companieshouse/api-sdk-node.git#0.2.3",
     "aws-sdk": "^2.732.0",
     "axios": "^0.20.0",
     "body-parser": "^1.18.2",
     "ch-logging": "git+ssh://git@github.com/companieshouse/ch-structured-logging-node.git#a3e0dcc57f91f63803e02ceef2cc5e4038de9a19",
     "ch-node-session-handler": "git+ssh://git@github.com/companieshouse/node-session-handler.git#3.0.2",
-    "ch-sdk-node": "git+ssh://git@github.com/companieshouse/api-sdk-node.git#0.2.1",
     "cookie-parser": "^1.4.5",
     "crypto": "^1.0.1",
     "dashify": "^2.0.0",

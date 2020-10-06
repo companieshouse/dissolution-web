@@ -1,5 +1,5 @@
-import { CreatePaymentRequest, Payment, PaymentService } from 'ch-sdk-node/dist/services/payment'
-import { ApiResponse, ApiResult } from 'ch-sdk-node/dist/services/resource'
+import { CreatePaymentRequest, Payment, PaymentService } from 'api-sdk-node/dist/services/payment'
+import { ApiResponse, ApiResult } from 'api-sdk-node/dist/services/resource'
 import { assert } from 'chai'
 import { instance, mock, when } from 'ts-mockito'
 import { generateCreatePaymentRequest, generatePaymentResult } from '../../fixtures/payment.fixtures'

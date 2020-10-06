@@ -1,4 +1,4 @@
-import { CompanyProfile } from 'ch-sdk-node/dist/services/company-profile/types'
+import { CompanyProfile } from 'api-sdk-node/dist/services/company-profile/types'
 import { assert } from 'chai'
 import { generateCompanyProfile} from '../../fixtures/companyProfile.fixtures'
 

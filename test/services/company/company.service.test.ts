@@ -1,5 +1,5 @@
-import { CompanyProfile } from 'ch-sdk-node/dist/services/company-profile/types'
-import Resource from 'ch-sdk-node/dist/services/resource'
+import { CompanyProfile } from 'api-sdk-node/dist/services/company-profile/types'
+import Resource from 'api-sdk-node/dist/services/resource'
 import { assert } from 'chai'
 import { NOT_FOUND, OK } from 'http-status-codes'
 import { instance, mock, when } from 'ts-mockito'
