@@ -1,5 +1,5 @@
-import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Identification } from 'ch-sdk-node/dist/services/company-officers/types'
-import Resource from 'ch-sdk-node/dist/services/resource'
+import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Identification } from 'api-sdk-node/dist/services/company-officers/types'
+import Resource from 'api-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
 import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'

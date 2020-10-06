@@ -1,9 +1,9 @@
 import 'reflect-metadata'
 
-import { createApiClient } from 'ch-sdk-node'
-import CompanyOfficersService from 'ch-sdk-node/dist/services/company-officers/service'
-import CompanyProfileService from 'ch-sdk-node/dist/services/company-profile/service'
-import PaymentService from 'ch-sdk-node/dist/services/payment/service'
+import { createApiClient } from 'api-sdk-node'
+import CompanyOfficersService from 'api-sdk-node/dist/services/company-officers/service'
+import CompanyProfileService from 'api-sdk-node/dist/services/company-profile/service'
+import PaymentService from 'api-sdk-node/dist/services/payment/service'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 

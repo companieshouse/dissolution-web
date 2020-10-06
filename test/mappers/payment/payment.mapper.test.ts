@@ -1,4 +1,4 @@
-import { CreatePaymentRequest } from 'ch-sdk-node/dist/services/payment'
+import { CreatePaymentRequest } from 'api-sdk-node/dist/services/payment'
 import { assert } from 'chai'
 import { generateCreatePaymentRequest } from '../../fixtures/payment.fixtures'
 

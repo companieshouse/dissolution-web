@@ -1,8 +1,8 @@
 import 'reflect-metadata'
 
+import { CreatePaymentRequest, Payment } from 'api-sdk-node/dist/services/payment'
+import { ApiResponse } from 'api-sdk-node/dist/services/resource'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { CreatePaymentRequest, Payment } from 'ch-sdk-node/dist/services/payment'
-import { ApiResponse } from 'ch-sdk-node/dist/services/resource'
 import { CREATED } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'

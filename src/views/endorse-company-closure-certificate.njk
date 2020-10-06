@@ -50,11 +50,13 @@
       <p class="govuk-body">ii) we have complied with the requirements of sections 1006 and 1007 of the Act and have
         given/will give copies of the application to the people listed in those sections as required.</p>
 
-      {% if not approvalModel.onBehalfName %}
-        {% set confirmationLabel = "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.applicant + "</span></strong> on <strong>" + approvalModel.date + "</strong>" %}
-      {% else %}
-        {% set confirmationLabel = "I confirm I have read and understood the statements - signed <strong><span id=applicantName>" + approvalModel.onBehalfName + "</span></strong> on <strong>" + approvalModel.date + "</strong> on behalf of <strong>" + approvalModel.applicant + "</strong>" %}
-      {% endif %}
+      {% set confirmationLabel %}
+        {% if not approvalModel.onBehalfName %}
+          I confirm I have read and understood the statements - signed <strong><span id="applicantName">{{ approvalModel.applicant }}</span></strong> on <strong>{{ approvalModel.date }}</strong>
+        {% else %}
+          I confirm I have read and understood the statements - signed <strong><span id="applicantName">{{ approvalModel.onBehalfName }}</span></strong> on <strong>{{ approvalModel.date }}</strong> on behalf of <strong>{{ approvalModel.applicant }}</strong>
+        {% endif %}
+      {% endset %}
 
       <form method="post">
         {{
