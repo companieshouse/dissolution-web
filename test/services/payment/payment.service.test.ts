@@ -1,6 +1,6 @@
+import { CreatePaymentRequest, Payment } from 'api-sdk-node/dist/services/payment'
+import { ApiResponse, ApiResult } from 'api-sdk-node/dist/services/resource'
 import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { CreatePaymentRequest, Payment } from 'ch-sdk-node/dist/services/payment'
-import { ApiResponse, ApiResult } from 'ch-sdk-node/dist/services/resource'
 import { assert } from 'chai'
 import { INTERNAL_SERVER_ERROR } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'

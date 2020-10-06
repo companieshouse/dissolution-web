@@ -1,5 +1,5 @@
-import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from 'ch-sdk-node/dist/services/company-profile/types'
-import Resource from 'ch-sdk-node/dist/services/resource'
+import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from 'api-sdk-node/dist/services/company-profile/types'
+import Resource from 'api-sdk-node/dist/services/resource'
 import { OK } from 'http-status-codes'
 
 import CompanyDetails from 'app/models/companyDetails.model'

@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import { CompanyProfile } from 'ch-sdk-node/dist/services/company-profile/types'
+import { CompanyProfile } from 'api-sdk-node/dist/services/company-profile/types'
 import { provide } from 'inversify-binding-decorators'
 
 import CompanyDetails from 'app/models/companyDetails.model'

@@ -1,5 +1,5 @@
-import { CreatePaymentRequest, Payment } from 'ch-sdk-node/dist/services/payment'
-import { ApiResponse, ApiResult } from 'ch-sdk-node/dist/services/resource'
+import { CreatePaymentRequest, Payment } from 'api-sdk-node/dist/services/payment'
+import { ApiResponse, ApiResult } from 'api-sdk-node/dist/services/resource'
 import { CREATED } from 'http-status-codes'
 
 export function generateCreatePaymentRequest(): CreatePaymentRequest {

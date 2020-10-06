@@ -1,5 +1,5 @@
-import { CompanyOfficer, CompanyOfficers } from 'ch-sdk-node/dist/services/company-officers/types'
-import Resource from 'ch-sdk-node/dist/services/resource'
+import { CompanyOfficer, CompanyOfficers } from 'api-sdk-node/dist/services/company-officers/types'
+import Resource from 'api-sdk-node/dist/services/resource'
 import { assert } from 'chai'
 import { NOT_FOUND, OK } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
