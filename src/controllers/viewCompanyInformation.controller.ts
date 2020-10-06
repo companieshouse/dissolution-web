@@ -9,13 +9,12 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 
 interface ViewModel {
   company: CompanyDetails
 }
 
-@controller(VIEW_COMPANY_INFORMATION_URI, TYPES.AuthMiddleware)
+@controller(VIEW_COMPANY_INFORMATION_URI)
 export class ViewCompanyInformationController extends BaseController {
 
   public constructor(

@@ -13,7 +13,6 @@ import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from 'app/
 import formSchema from 'app/schemas/endorseCertificate.schema'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
@@ -21,7 +20,7 @@ interface ViewModel {
   errors?: ValidationErrors
 }
 
-@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 export class EndorseCompanyClosureCertificateController extends BaseController {
 
   public constructor(@inject(SessionService) private session: SessionService,

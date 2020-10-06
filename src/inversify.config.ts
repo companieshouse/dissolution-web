@@ -9,12 +9,12 @@ import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
 import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
-import SaveUserEmailToLocals from './middleware/saveUserEmailToLocals.middleware'
 import PiwikConfig from './models/piwikConfig'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
 import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
+import SaveUserEmailToLocals from 'app/middleware/saveUserEmailToLocals.middleware'
 import AuthConfig from 'app/models/authConfig'
 import Optional from 'app/models/optional'
 import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
@@ -63,13 +63,14 @@ export function initContainer(): Container {
   container.bind(SessionStore).toConstantValue(sessionStore)
   container.bind(TYPES.SessionMiddleware).toConstantValue(SessionMiddleware(cookieConfig, sessionStore))
 
-  // Auth
-  const sessionService: SessionService = new SessionService()
-
+  // User authentication
   container.bind(TYPES.AuthMiddleware).toConstantValue(
     AuthMiddleware(getEnvOrThrow('CHS_URL'), new UriFactory(), commonAuthMiddleware)
   )
 
+  const sessionService: SessionService = new SessionService()
+
+  // Company authentication
   const authConfig: AuthConfig = {
     accountUrl: getEnvOrThrow('ACCOUNT_URL'),
     accountRequestKey: getEnvOrThrow('OAUTH2_REQUEST_KEY'),

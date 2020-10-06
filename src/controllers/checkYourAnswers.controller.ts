@@ -9,14 +9,13 @@ import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.m
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 
 interface ViewModel {
   backUri: string
   directors?: CheckYourAnswersDirector[]
 }
 
-@controller(CHECK_YOUR_ANSWERS_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(CHECK_YOUR_ANSWERS_URI)
 export class CheckYourAnswersController extends BaseController {
 
   public constructor(

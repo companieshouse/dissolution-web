@@ -6,13 +6,12 @@ import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { CERTIFICATE_SIGNED_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 
 interface ViewModel {
   officerType: OfficerType
 }
 
-@controller(CERTIFICATE_SIGNED_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(CERTIFICATE_SIGNED_URI)
 export class CertificateSignedController extends BaseController {
 
   public constructor(

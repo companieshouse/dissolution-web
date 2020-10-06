@@ -6,14 +6,13 @@ import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
 import SessionService from 'app/services/session/session.service'
-import TYPES from 'app/types'
 
 interface ViewModel {
   applicationReferenceNumber: string,
   officerType: OfficerType
 }
 
-@controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.AuthMiddleware, TYPES.CompanyAuthMiddleware)
+@controller(VIEW_FINAL_CONFIRMATION_URI)
 export class ViewFinalConfirmationController extends BaseController {
 
   public constructor(
