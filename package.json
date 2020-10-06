@@ -55,7 +55,7 @@
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.6",
     "@types/hapi__joi": "^17.1.6",
-    "@types/ioredis": "^4.16.1",
+    "@types/ioredis": "^4.17.4",
     "@types/jsdom": "^16.2.3",
     "@types/lodash": "^4.14.157",
     "@types/mocha": "^8.0.3",
