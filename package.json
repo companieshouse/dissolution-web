@@ -22,7 +22,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "api-sdk-node": "git+ssh://git@github.com/companieshouse/api-sdk-node.git#0.2.3",
-    "aws-sdk": "^2.732.0",
+    "aws-sdk": "^2.769.0",
     "axios": "^0.20.0",
     "body-parser": "^1.18.2",
     "ch-logging": "git+ssh://git@github.com/companieshouse/ch-structured-logging-node.git#a3e0dcc57f91f63803e02ceef2cc5e4038de9a19",
