@@ -21,7 +21,6 @@ Code Style Guide: https://github.com/companieshouse/dissolution-web/wiki/Code-St
 - [ ] WAVE accessibility testing tool ran on new or updated pages
 - [ ] All UI Tests Passing
 - [ ] Pulled latest master into feature branch
-- [ ] Code reviewed
 - [ ] Sonar Analysis
 - [ ] New Docker environment variables are consistent with those on the Rebel1 environment
 - [ ] If your pull request depends on any other, please link them in the description
