@@ -1,12 +1,19 @@
 import 'reflect-metadata'
 
+import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
+import SignatoryValidator from './signatory.validator'
 
 import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
+import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
+import ValidationErrors from 'app/models/view/validationErrors.model'
+import OfficerType from 'app/models/dto/officerType.enum'
 
 @provide(SignatoryService)
 export default class SignatoryService {
+
+  public constructor(@inject(SignatoryValidator) private validator: SignatoryValidator) {}
 
   public getMinimumNumberOfSignatories(totalSignatories: number, selectedDirector: string): number {
     const isApplicantADirector: boolean = selectedDirector !== 'other'
@@ -15,6 +22,10 @@ export default class SignatoryService {
     const majority: number = Math.floor(((totalActiveDirectors / 2) + 1))
 
     return isApplicantADirector ? majority - 1 : majority
+  }
+
+  public validateSignatoryInfo(signatories: DirectorToSign[], contactForm: DefineSignatoryInfoFormModel, officerType: OfficerType): Optional<ValidationErrors> {
+    return this.validator.validateSignatoryInfo(signatories, contactForm, officerType)
   }
 
   public updateSignatoriesWithContactInfo(signatories: DirectorToSign[], contactForm: DefineSignatoryInfoFormModel): void {

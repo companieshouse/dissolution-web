@@ -94,11 +94,10 @@ export class RedirectController extends BaseController {
 
   private handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
     const userEmail: string = this.session.getUserEmail(this.httpContext.request)
-    const signatoriesForUser: DissolutionGetDirector[] = this.getSignatoriesForUser(dissolution, userEmail)
-    const signatoryPendingApproval: Optional<DissolutionGetDirector> = signatoriesForUser.find(signatory => !signatory.approved_at)
+    const signatory: Optional<DissolutionGetDirector> = this.getSignatory(dissolution, userEmail)
 
-    if (signatoryPendingApproval) {
-      session.approval = this.mapper.mapToApprovalModel(dissolution, signatoryPendingApproval)
+    if (signatory && !signatory.approved_at) {
+      session.approval = this.mapper.mapToApprovalModel(dissolution!, signatory)
       return this.saveSessionAndRedirect(session, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
     }
 
@@ -106,15 +105,15 @@ export class RedirectController extends BaseController {
       return this.saveSessionAndRedirect(session, WAIT_FOR_OTHERS_TO_SIGN_URI)
     }
 
-    if (signatoriesForUser.length > 0) {
+    if (signatory && signatory.approved_at) {
       return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI)
     }
 
     return this.saveSessionAndRedirect(session, NOT_SELECTED_SIGNATORY)
   }
 
-  private getSignatoriesForUser(dissolution: DissolutionGetResponse, userEmail: string): DissolutionGetDirector[] {
-    return dissolution.directors.filter(director => director.email === userEmail)
+  private getSignatory(dissolution: DissolutionGetResponse, userEmail: string): Optional<DissolutionGetDirector> {
+    return dissolution.directors.find(director => director.email === userEmail)
   }
 
   private isApplicant(dissolution: DissolutionGetResponse, userEmail: string): boolean {
@@ -129,7 +128,7 @@ export class RedirectController extends BaseController {
   private getPendingPaymentRedirectUri(dissolution: DissolutionGetResponse, userEmail: string): string {
     if (this.isApplicant(dissolution, userEmail)) {
       return PAYMENT_URI
-    } else if (this.getSignatoriesForUser(dissolution, userEmail).length > 0) {
+    } else if (this.getSignatory(dissolution, userEmail)) {
       return CERTIFICATE_SIGNED_URI
     } else {
       return NOT_SELECTED_SIGNATORY

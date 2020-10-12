@@ -1,14 +1,27 @@
 import { assert } from 'chai'
+import { instance, mock, verify, when } from 'ts-mockito'
 import { generateDefineSignatoryInfoFormModel } from '../../fixtures/companyOfficers.fixtures'
+import { generateValidationError } from '../../fixtures/error.fixtures'
 import { generateDirectorToSign } from '../../fixtures/session.fixtures'
 
 import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
+import Optional from 'app/models/optional'
 import DirectorToSign from 'app/models/session/directorToSign.model'
+import ValidationErrors from 'app/models/view/validationErrors.model'
 import SignatoryService from 'app/services/signatories/signatory.service'
+import SignatoryValidator from 'app/services/signatories/signatory.validator'
 
 describe('SignatoryService', () => {
 
-  const service: SignatoryService = new SignatoryService()
+  let service: SignatoryService
+
+  let validator: SignatoryValidator
+
+  beforeEach(() => {
+    validator = mock(SignatoryValidator)
+
+    service = new SignatoryService(instance(validator))
+  })
 
   describe('getMinimumNumberOfSignatories', () => {
     it(`should calculate the majority of signatories to select if the applicant is a director and there is an even number of total
@@ -49,6 +62,27 @@ describe('SignatoryService', () => {
       const result: number = service.getMinimumNumberOfSignatories(1, 'other')
 
       assert.equal(result, 1)
+    })
+  })
+
+  describe('validateSignatoryInfo', () => {
+    it('should validate the signatory info and return the result', () => {
+      const signatories: DirectorToSign[] = [
+        generateDirectorToSign(),
+        generateDirectorToSign()
+      ]
+
+      const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+
+      const error: ValidationErrors = generateValidationError('signatory', 'some signatory info error')
+
+      when(validator.validateSignatoryInfo(signatories, form)).thenReturn(error)
+
+      const result: Optional<ValidationErrors> = service.validateSignatoryInfo(signatories, form)
+
+      assert.equal(result, error)
+
+      verify(validator.validateSignatoryInfo(signatories, form)).once()
     })
   })
 

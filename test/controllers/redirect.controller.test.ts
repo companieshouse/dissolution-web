@@ -106,23 +106,20 @@ describe('RedirectController', () => {
       })
 
       it('should redirect to sign certificate page if the application if user is pending signatory', async () => {
-        const approved: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: new Date().toISOString() }
-        const pending: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: undefined }
-
-        dissolution.directors = [approved, pending]
+        const signatory: DissolutionGetDirector = { ...generateGetDirector(), email: USER_EMAIL, approved_at: undefined }
+        dissolution.directors = [signatory]
 
         const approval: DissolutionApprovalModel = generateApprovalModel()
 
         when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
-        when(mapper.mapToApprovalModel(dissolution, pending)).thenReturn(approval)
+        when(mapper.mapToApprovalModel(dissolution, signatory)).thenReturn(approval)
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
           .expect(MOVED_TEMPORARILY)
           .expect('Location', ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 
-        verify(mapper.mapToApprovalModel(dissolution, pending)).once()
-        verify(mapper.mapToApprovalModel(dissolution, approved)).never()
+        verify(mapper.mapToApprovalModel(dissolution, signatory)).once()
         verify(session.setDissolutionSession(anything(), anything())).once()
 
         const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
@@ -134,7 +131,6 @@ describe('RedirectController', () => {
       it('should redirect to wait for others to sign page if the user is the applicant and user is not pending signatory', async () => {
         dissolution.created_by = USER_EMAIL
         dissolution.directors = [
-          { ...generateGetDirector(), email: USER_EMAIL, approved_at: '2020-07-02' },
           { ...generateGetDirector(), email: USER_EMAIL, approved_at: '2020-07-01' }
         ]
 

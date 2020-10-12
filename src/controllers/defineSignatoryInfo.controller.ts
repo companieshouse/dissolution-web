@@ -11,10 +11,8 @@ import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from 'app/paths'
-import defineSignatoryInfoSchema from 'app/schemas/defineSignatoryInfo.schema'
 import SessionService from 'app/services/session/session.service'
 import SignatoryService from 'app/services/signatories/signatory.service'
-import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
   officerType: OfficerType
@@ -29,8 +27,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
   public constructor(
     @inject(SessionService) private session: SessionService,
-    @inject(SignatoryService) private signatoryService: SignatoryService,
-    @inject(FormValidator) private validator: FormValidator) {
+    @inject(SignatoryService) private signatoryService: SignatoryService) {
     super()
   }
 
@@ -51,7 +48,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
     const signatories: DirectorToSign[] = this.getSignatories(session)
 
-    const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(signatories, officerType))
+    const errors: Optional<ValidationErrors> = this.signatoryService.validateSignatoryInfo(signatories, body, officerType)
     if (errors) {
       return this.renderView(officerType, signatories, session.isMultiDirector!, body, errors)
     }

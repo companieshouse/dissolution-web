@@ -48,9 +48,10 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
   private async approveDissolution(): Promise<void>  {
     const token: string = this.session.getAccessToken(this.httpContext.request)
+    const userEmail: string = this.session.getUserEmail(this.httpContext.request)
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
-    await this.dissolutionService.approveDissolution(token, dissolutionSession)
+    await this.dissolutionService.approveDissolution(token, dissolutionSession, userEmail)
   }
 
   private async renderView(errors?: ValidationErrors): Promise<string> {
