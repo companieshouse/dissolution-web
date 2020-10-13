@@ -5,7 +5,7 @@
 {% from "govuk/components/radios/macro.njk"        import govukRadios %}
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 
-{% set title = "Which director are you?" %}
+{% set title = "Which director are you?" + pageTitleSuffix %}
 
 {% block content %}
   {{
