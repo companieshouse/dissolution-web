@@ -9,6 +9,7 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/viewCompanyInformation.controller'
 import CompanyDetails from 'app/models/companyDetails.model'
+import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyService from 'app/services/company/company.service'
@@ -60,7 +61,7 @@ describe('ViewCompanyInformationController', () => {
       company.companyNumber = COMPANY_NUMBER
       company.companyName = 'Some company name'
       company.companyStatus = 'active'
-      company.companyType = 'ltd'
+      company.companyType = ClosableCompanyType.LTD
       company.companyRegOffice = 'some address'
       company.companyIncDate = '2020-06-24T13:51:57.623Z'
 

@@ -10,7 +10,7 @@
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
-{% set title = "View company information" + pageTitleSuffix %}
+{% set title = "View company information - " + pageTitleSuffix %}
 
 {% block content %}
   {{
@@ -25,15 +25,15 @@
 
       <h1 class="govuk-heading-xl">View company information</h1>
       {% if not company.canClose %}
-      <div id="cannot-close-error" class="govuk-inset-text">
-        <h2 class="govuk-heading-l">You cannot use this service</h2>
-        <p class="govuk-body">This could be because the company:</p>
-        <ul class="govuk-list govuk-list--bullet">
-          <li>is not active</li>
-          <li>is not a public limited company, a private limited company, or a limited liability partnership (LLP)</li>
-          <li>is an overseas company</li>
-        </ul>
-      </div>
+        <div id="cannot-close-error" class="govuk-inset-text">
+          <h2 class="govuk-heading-l">You cannot use this service</h2>
+          <p class="govuk-body">This could be because the company:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>is not active</li>
+            <li>cannot be closed</li>
+            <li>is an overseas company</li>
+          </ul>
+        </div>
       {% endif %}
 
       <h2 id="company-name" class="govuk-heading-l">{{ company.companyName | upper }}</h2>

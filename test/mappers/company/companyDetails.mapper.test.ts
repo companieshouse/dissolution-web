@@ -4,6 +4,7 @@ import { generateCompanyProfile} from '../../fixtures/companyProfile.fixtures'
 
 import CompanyDetailsMapper from 'app/mappers/company/companyDetails.mapper'
 import CompanyDetails from 'app/models/companyDetails.model'
+import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
 
 describe('CompanyDetailsMapper', () => {
 
@@ -16,14 +17,14 @@ describe('CompanyDetailsMapper', () => {
       profile.companyName = 'this company'
       profile.companyNumber = '01777777'
       profile.companyStatus = 'active'
-      profile.type = 'ltd'
+      profile.type = ClosableCompanyType.LTD
 
       const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
 
       assert.equal(result.companyName, 'this company')
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
-      assert.equal(result.companyType, 'ltd')
+      assert.equal(result.companyType, ClosableCompanyType.LTD)
       assert.isTrue(result.canClose)
     })
 
@@ -33,14 +34,14 @@ describe('CompanyDetailsMapper', () => {
       profile.companyName = 'this company'
       profile.companyNumber = '01777777'
       profile.companyStatus = 'inactive'
-      profile.type = 'ltd'
+      profile.type = ClosableCompanyType.LTD
 
       const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
 
       assert.equal(result.companyName, 'this company')
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'inactive')
-      assert.equal(result.companyType, 'ltd')
+      assert.equal(result.companyType, ClosableCompanyType.LTD)
       assert.isFalse(result.canClose)
     })
 
@@ -50,31 +51,14 @@ describe('CompanyDetailsMapper', () => {
       profile.companyName = 'this company'
       profile.companyNumber = '01777777'
       profile.companyStatus = 'active'
-      profile.type = 'plc'
+      profile.type = ClosableCompanyType.PLC
 
       const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
 
       assert.equal(result.companyName, 'this company')
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
-      assert.equal(result.companyType, 'plc')
-      assert.isTrue(result.canClose)
-    })
-
-    it('should extract the proper profile details of a closable llp company', () => {
-      const profile: CompanyProfile = generateCompanyProfile()
-
-      profile.companyName = 'this company'
-      profile.companyNumber = '01777777'
-      profile.companyStatus = 'active'
-      profile.type = 'llp'
-
-      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
-
-      assert.equal(result.companyName, 'this company')
-      assert.equal(result.companyNumber, '01777777')
-      assert.equal(result.companyStatus, 'active')
-      assert.equal(result.companyType, 'llp')
+      assert.equal(result.companyType, ClosableCompanyType.PLC)
       assert.isTrue(result.canClose)
     })
 
@@ -84,31 +68,201 @@ describe('CompanyDetailsMapper', () => {
       profile.companyName = 'this company'
       profile.companyNumber = '01777777'
       profile.companyStatus = 'inactive'
-      profile.type = 'plc'
+      profile.type = ClosableCompanyType.PLC
 
       const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
 
       assert.equal(result.companyName, 'this company')
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'inactive')
-      assert.equal(result.companyType, 'plc')
+      assert.equal(result.companyType, ClosableCompanyType.PLC)
       assert.isFalse(result.canClose)
     })
 
-    it('should extract the proper profile details of a active but non-closable company', () => {
+    it('should extract the proper profile details of a closable llp company', () => {
       const profile: CompanyProfile = generateCompanyProfile()
 
       profile.companyName = 'this company'
       profile.companyNumber = '01777777'
       profile.companyStatus = 'active'
-      profile.type = 'limited'
+      profile.type = ClosableCompanyType.LLP
 
       const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
 
       assert.equal(result.companyName, 'this company')
       assert.equal(result.companyNumber, '01777777')
       assert.equal(result.companyStatus, 'active')
-      assert.equal(result.companyType, 'limited')
+      assert.equal(result.companyType, ClosableCompanyType.LLP)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a non-closable llp company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'inactive'
+      profile.type = ClosableCompanyType.LLP
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'inactive')
+      assert.equal(result.companyType, ClosableCompanyType.LLP)
+      assert.isFalse(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "private-unlimited" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.PRIVATE_UNLIMITED
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.PRIVATE_UNLIMITED)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "old-public-company" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.OLD_PUBLIC_COMPANY
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.OLD_PUBLIC_COMPANY)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "private-limited-guarant-nsc-limited-exemption" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "private-limited-guarant-nsc" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.PRIVATE_LIMITED_GUARANT_NSC
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.PRIVATE_LIMITED_GUARANT_NSC)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "private-unlimited-nsc" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.PRIVATE_UNLIMITED_NSC
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.PRIVATE_UNLIMITED_NSC)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "private-limited-shares-section-30-exemption" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "northern-ireland" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.NORTHERN_IRELAND
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.NORTHERN_IRELAND)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a closable "northern-ireland-other" company', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = ClosableCompanyType.NORTHERN_IRELAND_OTHER
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, ClosableCompanyType.NORTHERN_IRELAND_OTHER)
+      assert.isTrue(result.canClose)
+    })
+
+    it('should extract the proper profile details of a active but non-closable company type', () => {
+      const profile: CompanyProfile = generateCompanyProfile()
+
+      profile.companyName = 'this company'
+      profile.companyNumber = '01777777'
+      profile.companyStatus = 'active'
+      profile.type = 'non-closable-company-type'
+
+      const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
+
+      assert.equal(result.companyName, 'this company')
+      assert.equal(result.companyNumber, '01777777')
+      assert.equal(result.companyStatus, 'active')
+      assert.equal(result.companyType, 'non-closable-company-type')
       assert.isFalse(result.canClose)
     })
 
@@ -118,14 +272,14 @@ describe('CompanyDetailsMapper', () => {
       profile.companyName = 'this company'
       profile.companyNumber = 'SF777777'
       profile.companyStatus = 'active'
-      profile.type = 'llp'
+      profile.type = ClosableCompanyType.LLP
 
       const result: CompanyDetails = mapper.mapToCompanyDetails(profile)
 
       assert.equal(result.companyName, 'this company')
       assert.equal(result.companyNumber, 'SF777777')
       assert.equal(result.companyStatus, 'active')
-      assert.equal(result.companyType, 'llp')
+      assert.equal(result.companyType, ClosableCompanyType.LLP)
       assert.isFalse(result.canClose)
     })
   })
