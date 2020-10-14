@@ -22,14 +22,17 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">What is the company number?</h1>
-
+       <label class="govuk-label" for="company-number">
+        <h1 class="govuk-heading-xl">What is the company number?</h1>
+       </label>
+       <div id="company-number-hint" class="govuk-hint">
+        This is the 8 character reference issued by Companies House when the company
+        was set up.
+       </div>
       <form method="post">
         {{
           govukInput({
-            label: {
-              text: "This is the 8 character reference issued by Companies House when the company was set up."
-            },
+            describedBy: "company-number-hint",
             errorMessage: {
               text: errors.companyNumber
             } if errors.companyNumber,
