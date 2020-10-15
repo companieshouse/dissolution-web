@@ -115,8 +115,6 @@ describe('EndorseCompanyClosureCertificateController', () => {
       assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of directors'))
       assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'directors'))
       assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'company'))
-      assert.isFalse(htmlAssertHelper.containsText('#declaration-paragraph', 'members'))
-
     })
 
     it('should render endorse certificate page with members for LLDS01', async () => {
@@ -136,7 +134,6 @@ describe('EndorseCompanyClosureCertificateController', () => {
       assert.isTrue(htmlAssertHelper.hasText('#declaration-heading', 'Declaration of members'))
       assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'members'))
       assert.isTrue(htmlAssertHelper.containsText('#declaration-paragraph', 'LLP'))
-      assert.isFalse(htmlAssertHelper.containsText('#declaration-paragraph', 'directors'))
     })
   })
 
