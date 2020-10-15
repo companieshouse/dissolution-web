@@ -41,14 +41,10 @@
 
       <p id="declaration-paragraph" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of
         {{ approvalModel.officerType }}s apply for this {{ approvalModel.officerType | asCompanyDisplayName }} to be
-        struck off the Register and declare that:
-
-      <p id="declaration-bullet-one" class="govuk-body">i) none of the circumstances described in section 1004 or 1005
-        of the Companies Act 2006 (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be
-        prohibited under those sections from making an application) exists in relation to the company and,</p>
-
-      <p class="govuk-body">ii) we have complied with the requirements of sections 1006 and 1007 of the Act and have
-        given/will give copies of the application to the people listed in those sections as required.</p>
+        struck off the Register and declare that none of the circumstances described in  
+          <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1004" target="_blank" class="govuk-link">section 1004 of the Companies Act 2006(opens in a new tab)</a>
+          or  <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1005" target="_blank" class="govuk-link">section 1005 of the Companies Act 2006(opens in a new tab)</a>
+          (being circumstances in which the directors would otherwise be prohibited under those sections.)</p>
 
       {% set confirmationLabel %}
         {% if not approvalModel.onBehalfName %}
@@ -57,6 +53,8 @@
           I confirm I have read and understood the statements - signed <strong><span id="applicantName">{{ approvalModel.onBehalfName }}</span></strong> on <strong>{{ approvalModel.date }}</strong> on behalf of <strong>{{ approvalModel.applicant }}</strong>
         {% endif %}
       {% endset %}
+
+      <h2 class="govuk-heading-m">By ticking this box you are signing the application</h2>
 
       <form method="post">
         {{
