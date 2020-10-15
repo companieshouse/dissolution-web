@@ -4,6 +4,7 @@ import { OK } from 'http-status-codes'
 
 import CompanyDetails from 'app/models/companyDetails.model'
 import SearchCompanyFormModel from 'app/models/form/searchCompany.model'
+import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
 
 export function generateCompanyProfileResource(): Resource<CompanyProfile> {
   return {
@@ -22,7 +23,7 @@ export function generateCompanyProfile(): CompanyProfile {
     jurisdiction: 'some jurisdiction',
     sicCodes:[],
     hasBeenLiquidated: false,
-    type: 'plc',
+    type: ClosableCompanyType.PLC,
     hasCharges: false,
     hasInsolvencyHistory: false,
     registeredOfficeAddress: generateRegisteredOfficeAddress(),
@@ -75,7 +76,7 @@ export function generateCompanyDetails(): CompanyDetails {
     companyName: 'My Company',
     companyNumber: '1234',
     companyStatus: 'active',
-    companyType: 'ltd',
+    companyType: ClosableCompanyType.LTD,
     companyIncDate: new Date().toISOString(),
     companyRegOffice: 'Some address',
     canClose: true
