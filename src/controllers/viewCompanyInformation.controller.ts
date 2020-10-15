@@ -45,6 +45,7 @@ export class ViewCompanyInformationController extends BaseController {
   private async getCompanyInfo(session: DissolutionSession): Promise<CompanyDetails> {
     const companyNumber: string = session.companyNumber!
     const token: string = this.session.getAccessToken(this.httpContext.request)
+
     return this.companyService.getCompanyDetails(token, companyNumber)
   }
 
