@@ -13,6 +13,7 @@ import SessionService from 'app/services/session/session.service'
 const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
 
 const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
+  ROOT_URI,
   `${ROOT_URI}/`,
   WHO_TO_TELL_URI,
   HEALTHCHECK_URI,

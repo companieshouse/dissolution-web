@@ -5,6 +5,7 @@ import { HEALTHCHECK_URI, ROOT_URI, SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from '
 import UriFactory from 'app/utils/uri.factory'
 
 const USER_AUTH_WHITELISTED_URLS: string[] = [
+  ROOT_URI,
   `${ROOT_URI}/`,
   WHO_TO_TELL_URI,
   HEALTHCHECK_URI
