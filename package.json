@@ -81,7 +81,7 @@
     "node-sass": "^4.14.1",
     "nyc": "^15.1.0",
     "sass-lint": "^1.13.1",
-    "sinon": "^9.1.0",
+    "sinon": "^9.2.0",
     "sonarqube-scanner": "^2.7.0",
     "supertest": "^5.0.0",
     "ts-mockito": "^2.6.1",
