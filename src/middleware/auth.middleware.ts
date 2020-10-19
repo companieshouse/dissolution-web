@@ -8,7 +8,9 @@ const USER_AUTH_WHITELISTED_URLS: string[] = [
   ROOT_URI,
   `${ROOT_URI}/`,
   WHO_TO_TELL_URI,
-  HEALTHCHECK_URI
+  `${WHO_TO_TELL_URI}/`,
+  HEALTHCHECK_URI,
+  `${HEALTHCHECK_URI}/`,
 ]
 
 export default function AuthMiddleware(
