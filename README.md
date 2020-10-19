@@ -41,7 +41,7 @@ Development mode is available for this service in [Docker CHS Development](https
 
 * GDS confirmation pages are in green
 * Dissolution API endpoints are in grey
-* At the end of each branch, redirect back to the Redirect Controller
+* At the end of each branch, redirect back to the Redirect Controller (except for payment callback)
 * Enables save & resume-like functionality
 * Enables consistency between single and multi director journeys
 * Draw.io source code can be found [here](.github/images/DissolutionControllerFlow.drawio)
