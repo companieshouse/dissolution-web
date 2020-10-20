@@ -73,7 +73,7 @@
     "gulp-sass": "^4.1.0",
     "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-watch-sass": "^1.4.1",
-    "husky": "^4.2.5",
+    "husky": "^4.3.0",
     "jsdom": "^16.2.2",
     "minimist": "^1.2.5",
     "mocha": "^8.2.0",
