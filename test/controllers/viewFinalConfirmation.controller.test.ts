@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Application } from 'express'
-import { OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
 import { generateDissolutionSession } from '../fixtures/session.fixtures'
@@ -41,7 +41,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const res = await request(app)
         .get(VIEW_FINAL_CONFIRMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -54,7 +54,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const res = await request(app)
         .get(VIEW_FINAL_CONFIRMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -67,7 +67,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const res = await request(app)
         .get(VIEW_FINAL_CONFIRMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 

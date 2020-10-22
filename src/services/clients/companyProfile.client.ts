@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
-import { CompanyProfile } from 'api-sdk-node/dist/services/company-profile/types'
-import Resource from 'api-sdk-node/dist/services/resource'
+import { CompanyProfile } from '@companieshouse/api-sdk-node/dist/services/company-profile/types'
+import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import APIClientFactory from './apiClient.factory'

@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCheckYourAnswersDirector } from '../fixtures/checkYourAnswersDirector.fixtures'
@@ -59,7 +59,7 @@ describe('CheckYourAnswersController', () => {
 
       const res = await request(app)
         .get(CHECK_YOUR_ANSWERS_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -89,7 +89,7 @@ describe('CheckYourAnswersController', () => {
 
       const res = await request(app)
         .get(CHECK_YOUR_ANSWERS_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -115,7 +115,7 @@ describe('CheckYourAnswersController', () => {
 
         const res = await request(app)
           .get(CHECK_YOUR_ANSWERS_URI)
-          .expect(OK)
+          .expect(StatusCodes.OK)
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -136,7 +136,7 @@ describe('CheckYourAnswersController', () => {
 
         const res = await request(app)
           .get(CHECK_YOUR_ANSWERS_URI)
-          .expect(OK)
+          .expect(StatusCodes.OK)
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -157,7 +157,7 @@ describe('CheckYourAnswersController', () => {
 
         const res = await request(app)
           .get(CHECK_YOUR_ANSWERS_URI)
-          .expect(OK)
+          .expect(StatusCodes.OK)
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -178,7 +178,7 @@ describe('CheckYourAnswersController', () => {
 
         const res = await request(app)
           .get(CHECK_YOUR_ANSWERS_URI)
-          .expect(OK)
+          .expect(StatusCodes.OK)
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -198,7 +198,7 @@ describe('CheckYourAnswersController', () => {
 
       await request(app)
         .post(CHECK_YOUR_ANSWERS_URI)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_GATE_URI)
 
       verify(service.createDissolution(TOKEN, dissolutionSession)).once()

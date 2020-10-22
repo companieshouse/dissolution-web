@@ -1,6 +1,6 @@
-import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from 'api-sdk-node/dist/services/company-profile/types'
-import Resource from 'api-sdk-node/dist/services/resource'
-import { OK } from 'http-status-codes'
+import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from '@companieshouse/api-sdk-node/dist/services/company-profile/types'
+import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
+import { StatusCodes } from 'http-status-codes'
 
 import CompanyDetails from 'app/models/companyDetails.model'
 import SearchCompanyFormModel from 'app/models/form/searchCompany.model'
@@ -8,7 +8,7 @@ import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
 
 export function generateCompanyProfileResource(): Resource<CompanyProfile> {
   return {
-    httpStatusCode: OK,
+    httpStatusCode: StatusCodes.OK,
     resource: generateCompanyProfile()
   }
 }

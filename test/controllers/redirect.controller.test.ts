@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Application, Request } from 'express'
-import { INTERNAL_SERVER_ERROR, MOVED_TEMPORARILY } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
@@ -93,7 +93,7 @@ describe('RedirectController', () => {
 
       await request(initApp())
         .get(REDIRECT_GATE_URI)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', SELECT_DIRECTOR_URI)
     })
 
@@ -118,7 +118,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 
         verify(mapper.mapToApprovalModel(dissolution, pending)).once()
@@ -142,7 +142,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
       })
 
@@ -156,7 +156,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', CERTIFICATE_SIGNED_URI)
       })
 
@@ -169,7 +169,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', NOT_SELECTED_SIGNATORY)
       })
     })
@@ -189,7 +189,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', PAYMENT_URI)
       })
 
@@ -202,7 +202,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', CERTIFICATE_SIGNED_URI)
       })
 
@@ -216,7 +216,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', NOT_SELECTED_SIGNATORY)
       })
     })
@@ -237,7 +237,7 @@ describe('RedirectController', () => {
 
         await request(initApp())
           .get(REDIRECT_GATE_URI)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
 
         verify(mapper.mapToDissolutionConfirmation(dissolution)).once()
@@ -272,7 +272,7 @@ describe('RedirectController', () => {
           status: PaymentStatus.PAID,
           ref: '123456'
         })
-        .expect(INTERNAL_SERVER_ERROR)
+        .expect(StatusCodes.INTERNAL_SERVER_ERROR)
     })
 
     it('should update dissolution session with reference number', async () => {
@@ -283,7 +283,7 @@ describe('RedirectController', () => {
           status: PaymentStatus.PAID,
           ref: REF
         })
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
 
       verify(session.setDissolutionSession(anything(), anything())).once()
@@ -308,7 +308,7 @@ describe('RedirectController', () => {
           status: PaymentStatus.PAID,
           ref: REF
         })
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', VIEW_FINAL_CONFIRMATION_URI)
 
       verify(mapper.mapToDissolutionConfirmation(dissolution)).once()
@@ -328,7 +328,7 @@ describe('RedirectController', () => {
           status: PaymentStatus.FAILED,
           ref: REF
         })
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', PAYMENT_URI)
     })
 
@@ -340,7 +340,7 @@ describe('RedirectController', () => {
           status: PaymentStatus.CANCELLED,
           ref: REF
         })
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', SEARCH_COMPANY_URI)
     })
   })

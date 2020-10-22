@@ -1,10 +1,10 @@
 import 'reflect-metadata'
 
+import { AuthOptions } from '@companieshouse/web-security-node'
 import { assert } from 'chai'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import * as sinon from 'sinon'
 import { instance, mock, when } from 'ts-mockito'
-import { AuthOptions } from 'web-security-node'
 
 import AuthMiddleware from 'app/middleware/auth.middleware'
 import { SEARCH_COMPANY_URI } from 'app/paths'

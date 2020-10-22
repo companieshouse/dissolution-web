@@ -1,4 +1,4 @@
-import { CompanyOfficer } from 'api-sdk-node/dist/services/company-officers/types'
+import { CompanyOfficer } from '@companieshouse/api-sdk-node/dist/services/company-officers/types'
 import { assert } from 'chai'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'

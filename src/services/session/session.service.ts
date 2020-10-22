@@ -1,9 +1,9 @@
 import 'reflect-metadata'
 
-import 'ch-node-session-handler'
-import { Session } from 'ch-node-session-handler'
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
-import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
+import '@companieshouse/node-session-handler'
+import { Session } from '@companieshouse/node-session-handler'
+import { SessionKey } from '@companieshouse/node-session-handler/lib/session/keys/SessionKey'
+import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/model/SessionInterfaces'
 import { Request } from 'express'
 import { provide } from 'inversify-binding-decorators'
 

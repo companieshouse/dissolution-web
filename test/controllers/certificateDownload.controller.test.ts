@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
 import { Application } from 'express'
-import { MOVED_TEMPORARILY } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateDissolutionConfirmation, generateDissolutionSession } from '../fixtures/session.fixtures'
@@ -40,7 +40,7 @@ describe('CertificateDownloadController', () => {
 
       await request(app)
         .get(CERTIFICATE_DOWNLOAD_URI)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_URL)
 
       verify(dissolutionService.generateDissolutionCertificateUrl(dissolutionSession.confirmation)).once()

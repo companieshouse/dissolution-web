@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
-import { CompanyOfficer, CompanyOfficers } from 'api-sdk-node/dist/services/company-officers/types'
-import Resource from 'api-sdk-node/dist/services/resource'
+import { CompanyOfficer, CompanyOfficers } from '@companieshouse/api-sdk-node/dist/services/company-officers/types'
+import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import CompanyOfficersClient from '../clients/companyOfficers.client'

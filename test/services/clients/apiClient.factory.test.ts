@@ -1,6 +1,6 @@
-import CompanyOfficersService from 'api-sdk-node/dist/services/company-officers/service'
-import CompanyProfileService from 'api-sdk-node/dist/services/company-profile/service'
-import { PaymentService } from 'api-sdk-node/dist/services/payment'
+import CompanyOfficersService from '@companieshouse/api-sdk-node/dist/services/company-officers/service'
+import CompanyProfileService from '@companieshouse/api-sdk-node/dist/services/company-profile/service'
+import { PaymentService } from '@companieshouse/api-sdk-node/dist/services/payment'
 import { assert } from 'chai'
 
 import APIClientFactory from 'app/services/clients/apiClient.factory'

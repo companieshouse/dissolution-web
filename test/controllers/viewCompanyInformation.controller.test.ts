@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
 import { createApp } from './helpers/application.factory'
@@ -49,7 +49,7 @@ describe('ViewCompanyInformationController', () => {
 
       const res = await request(app)
         .get(VIEW_COMPANY_INFORMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -74,7 +74,7 @@ describe('ViewCompanyInformationController', () => {
 
       const res = await request(app)
         .get(VIEW_COMPANY_INFORMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -110,7 +110,7 @@ describe('ViewCompanyInformationController', () => {
 
       const res = await request(app)
         .get(VIEW_COMPANY_INFORMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -131,7 +131,7 @@ describe('ViewCompanyInformationController', () => {
 
       const res = await request(app)
         .get(VIEW_COMPANY_INFORMATION_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -144,7 +144,7 @@ describe('ViewCompanyInformationController', () => {
     it('should redirect to the select director screen upon submission', async () => {
       await request(createApp())
         .post(VIEW_COMPANY_INFORMATION_URI)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_GATE_URI)
     })
   })

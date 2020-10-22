@@ -1,5 +1,5 @@
-import { SessionStore } from 'ch-node-session-handler'
-import { INTERNAL_SERVER_ERROR, OK } from 'http-status-codes'
+import { SessionStore } from '@companieshouse/node-session-handler'
+import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, BaseHttpController } from 'inversify-express-utils'
 
@@ -14,7 +14,7 @@ export class HealthcheckController extends BaseHttpController {
 
   @httpGet('')
   public async healthcheck(): Promise<void> {
-    const status: number = await this.isRedisHealthy() ? OK : INTERNAL_SERVER_ERROR
+    const status: number = await this.isRedisHealthy() ? StatusCodes.OK : StatusCodes.INTERNAL_SERVER_ERROR
 
     this.httpContext.response.status(status).send(`Redis status: ${status}`)
   }

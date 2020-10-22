@@ -1,6 +1,6 @@
-import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Identification } from 'api-sdk-node/dist/services/company-officers/types'
-import Resource from 'api-sdk-node/dist/services/resource'
-import { OK } from 'http-status-codes'
+import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Identification } from '@companieshouse/api-sdk-node/dist/services/company-officers/types'
+import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
+import { StatusCodes } from 'http-status-codes'
 
 import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
@@ -9,7 +9,7 @@ import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
   return {
-    httpStatusCode: OK,
+    httpStatusCode: StatusCodes.OK,
     resource: generateCompanyOfficers()
   }
 }

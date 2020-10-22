@@ -1,7 +1,7 @@
-import { CompanyOfficer, CompanyOfficers } from 'api-sdk-node/dist/services/company-officers/types'
-import Resource from 'api-sdk-node/dist/services/resource'
+import { CompanyOfficer, CompanyOfficers } from '@companieshouse/api-sdk-node/dist/services/company-officers/types'
+import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
 import { assert } from 'chai'
-import { NOT_FOUND, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCompanyOfficer, generateCompanyOfficers, generateCompanyOfficersResource,
   generateDirectorDetails } from '../../fixtures/companyOfficers.fixtures'
@@ -35,7 +35,7 @@ describe('CompanyOfficersService', () => {
   describe('getActiveDirectorsForCompany', () => {
     it('should reject with an error if it fails to fetch the officers for the provided company', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = NOT_FOUND
+      response.httpStatusCode = StatusCodes.NOT_FOUND
       response.resource = undefined
 
       when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
@@ -50,7 +50,7 @@ describe('CompanyOfficersService', () => {
 
     it('should filter out officers who are not directors or members', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
 
       const secretary: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: 'secretary' }
       const director: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
@@ -99,7 +99,7 @@ describe('CompanyOfficersService', () => {
 
     it('should filter directors who have resigned', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
 
       const activeDirector1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
       const resignedDirector: CompanyOfficer = {
@@ -126,7 +126,7 @@ describe('CompanyOfficersService', () => {
 
     it('should filter members who have resigned', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
 
       const activeMember1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
       const resignedMember: CompanyOfficer = {
@@ -153,7 +153,7 @@ describe('CompanyOfficersService', () => {
 
     it('should map the director details of each active director and return them', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
 
       const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
       const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
@@ -179,7 +179,7 @@ describe('CompanyOfficersService', () => {
 
     it('should map the members details of each active member and return them', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
 
       const member1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
       const member2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
@@ -205,7 +205,7 @@ describe('CompanyOfficersService', () => {
 
     it('should exclude a director if provided', async () => {
       const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
 
       const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
       const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
