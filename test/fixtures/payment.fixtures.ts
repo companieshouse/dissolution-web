@@ -1,6 +1,6 @@
 import { CreatePaymentRequest, Payment } from '@companieshouse/api-sdk-node/dist/services/payment'
 import { ApiResponse, ApiResult } from '@companieshouse/api-sdk-node/dist/services/resource'
-import { CREATED } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 
 export function generateCreatePaymentRequest(): CreatePaymentRequest {
   return {
@@ -14,7 +14,7 @@ export function generateCreatePaymentRequest(): CreatePaymentRequest {
 export function generatePaymentResult(): ApiResult<ApiResponse<Payment>> {
   return {
     value: {
-      httpStatusCode: CREATED,
+      httpStatusCode: StatusCodes.CREATED,
       headers: {},
       resource: generatePayment()
     },
