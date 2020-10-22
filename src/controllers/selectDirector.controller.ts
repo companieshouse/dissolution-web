@@ -117,7 +117,7 @@ export class SelectDirectorController extends BaseController {
 
   private prepareDirectorsToSign(directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): DirectorToSign[] {
     if (selectedDirector) {
-      return [this.mapper.mapAsApplicant(selectedDirector, this.session.getUserEmail(this.httpContext.request))]
+      return [this.mapper.mapAsApplicant(selectedDirector, this.session.getUserEmail(this.httpContext.request)!)]
     }
 
     if (directors.length === 1) {

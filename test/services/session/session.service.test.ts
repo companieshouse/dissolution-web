@@ -48,9 +48,18 @@ describe('SessionService', () => {
       const req: Request = generateRequest()
       req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(signInInfo)
 
-      const result: string = service.getUserEmail(req)
+      const result: Optional<string> = service.getUserEmail(req)
 
       assert.equal(result, EMAIL)
+    })
+
+    it(`should return undefined if there is no sign in info present in the session`, () => {
+      const req: Request = generateRequest()
+      req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(undefined)
+
+      const result: Optional<string> = service.getUserEmail(req)
+
+      assert.isUndefined(result)
     })
   })
 

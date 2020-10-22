@@ -19,8 +19,8 @@ export default class SessionService {
     return this.getSignInInfo(req).access_token!.access_token!
   }
 
-  public getUserEmail(req: Request): string {
-    return this.getSignInInfo(req).user_profile!.email!
+  public getUserEmail(req: Request): Optional<string> {
+    return this.getSignInInfo(req)?.user_profile?.email!
   }
 
   public getDissolutionSession(req: Request): Optional<DissolutionSession> {
