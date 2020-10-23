@@ -71,7 +71,7 @@
     "gulp-sass": "^4.1.0",
     "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-watch-sass": "^1.4.1",
-    "jsdom": "^16.2.2",
+    "jsdom": "^16.4.0",
     "mocha": "^8.2.0",
     "node-sass": "^4.14.1",
     "nyc": "^15.1.0",
