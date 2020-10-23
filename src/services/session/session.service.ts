@@ -1,9 +1,9 @@
 import 'reflect-metadata'
 
-import 'ch-node-session-handler'
-import { Session } from 'ch-node-session-handler'
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
-import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
+import '@companieshouse/node-session-handler'
+import { Session } from '@companieshouse/node-session-handler'
+import { SessionKey } from '@companieshouse/node-session-handler/lib/session/keys/SessionKey'
+import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/model/SessionInterfaces'
 import { Request } from 'express'
 import { provide } from 'inversify-binding-decorators'
 
@@ -19,8 +19,8 @@ export default class SessionService {
     return this.getSignInInfo(req).access_token!.access_token!
   }
 
-  public getUserEmail(req: Request): string {
-    return this.getSignInInfo(req).user_profile!.email!
+  public getUserEmail(req: Request): Optional<string> {
+    return this.getSignInInfo(req)?.user_profile?.email!
   }
 
   public getDissolutionSession(req: Request): Optional<DissolutionSession> {

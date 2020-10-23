@@ -1,6 +1,6 @@
-import { Session } from 'ch-node-session-handler/lib'
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
-import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
+import { Session } from '@companieshouse/node-session-handler/lib'
+import { SessionKey } from '@companieshouse/node-session-handler/lib/session/keys/SessionKey'
+import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/model/SessionInterfaces'
 import sinon from 'sinon'
 
 import OfficerType from 'app/models/dto/officerType.enum'
@@ -9,16 +9,18 @@ import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 export function generateSession(): Session {
-  return {
-    get: sinon.stub(),
-    data: {
-      [SessionKey.OAuth2Nonce]: ''
-    },
-    getExtraData: sinon.stub(),
-    setExtraData: sinon.stub(),
-    deleteExtraData: sinon.stub(),
-    verify: sinon.stub()
+  const session: Session = new Session()
+
+  session.get = sinon.stub()
+  session.data = {
+    [SessionKey.OAuth2Nonce]: ''
   }
+  session.getExtraData = sinon.stub()
+  session.setExtraData = sinon.stub()
+  session.deleteExtraData = sinon.stub()
+  session.verify = sinon.stub()
+
+  return session
 }
 
 export function generateISignInInfo(): ISignInInfo {

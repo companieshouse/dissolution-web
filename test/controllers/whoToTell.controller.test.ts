@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { deepEqual, instance, mock, when } from 'ts-mockito'
 import { createApp } from './helpers/application.factory'
@@ -18,7 +18,7 @@ describe('WhoToTellController', () => {
     it('should render the who to tell page', async () => {
       const app = createApp()
 
-      const res = await request(app).get(WHO_TO_TELL_URI).expect(OK)
+      const res = await request(app).get(WHO_TO_TELL_URI).expect(StatusCodes.OK)
 
       assert.include(res.text, 'Who to tell about the company closing')
     })
@@ -37,7 +37,7 @@ describe('WhoToTellController', () => {
 
       await request(app).post(WHO_TO_TELL_URI)
         .send(testObject)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', SEARCH_COMPANY_URI)
     })
   })
@@ -54,7 +54,7 @@ describe('WhoToTellController', () => {
       container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
     })
 
-    const res = await request(app).post(WHO_TO_TELL_URI).send(testObject).expect(BAD_REQUEST)
+    const res = await request(app).post(WHO_TO_TELL_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
     assert.equal(res.text.match(/Test confirmation error/g)!.length, 2)
   })
 })

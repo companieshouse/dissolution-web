@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
@@ -16,7 +16,7 @@ describe('NotSelectedSignatoryController', () => {
 
       const res = await request(app)
         .get(NOT_SELECTED_SIGNATORY)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 

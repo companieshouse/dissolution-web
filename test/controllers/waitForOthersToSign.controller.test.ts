@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Application } from 'express'
-import { OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
 import { createApp } from './helpers/application.factory'
@@ -42,7 +42,7 @@ describe('WaitForOthersToSignController', () => {
 
       const res = await request(app)
         .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -56,7 +56,7 @@ describe('WaitForOthersToSignController', () => {
 
       const res = await request(app)
         .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 

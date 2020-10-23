@@ -20,13 +20,14 @@
     "analyse-code": "sonar-scanner"
   },
   "dependencies": {
+    "@companieshouse/api-sdk-node": "^1.0.2",
+    "@companieshouse/node-session-handler": "^4.1.5",
+    "@companieshouse/structured-logging-node": "^1.0.4",
+    "@companieshouse/web-security-node": "^1.0.2",
     "@hapi/joi": "^17.1.1",
-    "api-sdk-node": "git+ssh://git@github.com/companieshouse/api-sdk-node.git#0.2.3",
     "aws-sdk": "^2.777.0",
     "axios": "^0.20.0",
     "body-parser": "^1.18.2",
-    "ch-logging": "git+ssh://git@github.com/companieshouse/ch-structured-logging-node.git#a3e0dcc57f91f63803e02ceef2cc5e4038de9a19",
-    "ch-node-session-handler": "git+ssh://git@github.com/companieshouse/node-session-handler.git#3.0.2",
     "cookie-parser": "^1.4.5",
     "crypto": "^1.0.1",
     "dashify": "^2.0.0",
@@ -43,8 +44,7 @@
     "reflect-metadata": "^0.1.13",
     "tsconfig-paths": "^3.9.0",
     "tslib": "^2.0.1",
-    "uuid": "^8.3.1",
-    "web-security-node": "git@github.com:companieshouse/web-security-node.git#0729df976b7273701ccef449e5a9a7818459dbaf"
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",

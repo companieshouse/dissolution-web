@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
-import { CreatePaymentRequest, Payment } from 'api-sdk-node/dist/services/payment/types'
-import { ApiResponse, ApiResult } from 'api-sdk-node/dist/services/resource'
+import { CreatePaymentRequest, Payment } from '@companieshouse/api-sdk-node/dist/services/payment/types'
+import { ApiResponse, ApiResult } from '@companieshouse/api-sdk-node/dist/services/resource'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import APIClientFactory from './apiClient.factory'

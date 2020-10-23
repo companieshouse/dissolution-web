@@ -1,8 +1,8 @@
-import { CreatePaymentRequest, Payment } from 'api-sdk-node/dist/services/payment'
-import { ApiResponse, ApiResult } from 'api-sdk-node/dist/services/resource'
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
+import { CreatePaymentRequest, Payment } from '@companieshouse/api-sdk-node/dist/services/payment'
+import { ApiResponse, ApiResult } from '@companieshouse/api-sdk-node/dist/services/resource'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
 import { assert } from 'chai'
-import { INTERNAL_SERVER_ERROR } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCreatePaymentRequest, generatePaymentResult } from '../../fixtures/payment.fixtures'
 
@@ -61,7 +61,7 @@ describe('PaymentService', () => {
     })
 
     it('should reject with an error if payment session failed to create', async () => {
-      paymentResponse.httpStatusCode = INTERNAL_SERVER_ERROR
+      paymentResponse.httpStatusCode = StatusCodes.INTERNAL_SERVER_ERROR
 
       when(
         mapper.mapToCreatePaymentRequest(

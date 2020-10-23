@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Application, Request } from 'express'
-import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
@@ -75,7 +75,7 @@ describe('SelectSignatoriesController', () => {
 
       const res = await request(app)
         .get(SELECT_SIGNATORIES_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -99,7 +99,7 @@ describe('SelectSignatoriesController', () => {
 
       const res = await request(app)
         .get(SELECT_SIGNATORIES_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -122,7 +122,7 @@ describe('SelectSignatoriesController', () => {
 
       const res = await request(app)
         .get(SELECT_SIGNATORIES_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -145,7 +145,7 @@ describe('SelectSignatoriesController', () => {
 
       const res = await request(app)
         .get(SELECT_SIGNATORIES_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -184,7 +184,7 @@ describe('SelectSignatoriesController', () => {
       const res = await request(app)
         .post(SELECT_SIGNATORIES_URI)
         .send(form)
-        .expect(BAD_REQUEST)
+        .expect(StatusCodes.BAD_REQUEST)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -209,7 +209,7 @@ describe('SelectSignatoriesController', () => {
         await request(app)
           .post(SELECT_SIGNATORIES_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).never()
       })
@@ -228,7 +228,7 @@ describe('SelectSignatoriesController', () => {
         await request(app)
           .post(SELECT_SIGNATORIES_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).once()
 
@@ -255,7 +255,7 @@ describe('SelectSignatoriesController', () => {
         await request(app)
           .post(SELECT_SIGNATORIES_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(mapper.mapAsSignatory(director1)).once()
         verify(session.setDissolutionSession(anything(), anything())).once()
@@ -282,7 +282,7 @@ describe('SelectSignatoriesController', () => {
       await request(app)
         .post(SELECT_SIGNATORIES_URI)
         .send(form)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', DEFINE_SIGNATORY_INFO_URI)
     })
   })

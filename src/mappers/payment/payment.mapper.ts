@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import { CreatePaymentRequest } from 'api-sdk-node/dist/services/payment'
+import { CreatePaymentRequest } from '@companieshouse/api-sdk-node/dist/services/payment'
 import { provide } from 'inversify-binding-decorators'
 
 @provide(PaymentMapper)

@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Application, Request } from 'express'
-import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
@@ -74,7 +74,7 @@ describe('SelectDirectorController', () => {
 
       const res = await request(app)
         .get(SELECT_DIRECTOR_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -99,7 +99,7 @@ describe('SelectDirectorController', () => {
 
       const res = await request(app)
         .get(SELECT_DIRECTOR_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -122,7 +122,7 @@ describe('SelectDirectorController', () => {
 
       const res = await request(app)
         .get(SELECT_DIRECTOR_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -145,7 +145,7 @@ describe('SelectDirectorController', () => {
 
       const res = await request(app)
         .get(SELECT_DIRECTOR_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -182,7 +182,7 @@ describe('SelectDirectorController', () => {
       const res = await request(app)
         .post(SELECT_DIRECTOR_URI)
         .send(form)
-        .expect(BAD_REQUEST)
+        .expect(StatusCodes.BAD_REQUEST)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -206,7 +206,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).never()
       })
@@ -224,7 +224,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).once()
 
@@ -252,7 +252,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(mapper.mapAsApplicant(director, directorEmail)).once()
         verify(session.setDissolutionSession(anything(), anything())).once()
@@ -281,7 +281,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(mapper.mapAsSignatory(director)).once()
         verify(session.setDissolutionSession(anything(), anything())).once()
@@ -309,7 +309,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).once()
 
@@ -336,7 +336,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', CHECK_YOUR_ANSWERS_URI)
       })
 
@@ -353,7 +353,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', DEFINE_SIGNATORY_INFO_URI)
       })
 
@@ -371,7 +371,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', SELECT_SIGNATORIES_URI)
       })
 
@@ -389,7 +389,7 @@ describe('SelectDirectorController', () => {
         await request(app)
           .post(SELECT_DIRECTOR_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
           .expect('Location', SELECT_SIGNATORIES_URI)
       })
     })

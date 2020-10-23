@@ -1,8 +1,8 @@
 import 'reflect-metadata'
 
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { Session } from 'ch-node-session-handler'
-import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
+import { Session } from '@companieshouse/node-session-handler'
+import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/model/SessionInterfaces'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
 import { assert } from 'chai'
 import { RequestHandler, Response } from 'express'
 import sinon from 'sinon'

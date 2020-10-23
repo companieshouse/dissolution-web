@@ -1,6 +1,6 @@
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { SignInInfoKeys } from 'ch-node-session-handler/lib/session/keys/SignInInfoKeys'
-import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
+import { SignInInfoKeys } from '@companieshouse/node-session-handler/lib/session/keys/SignInInfoKeys'
+import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/model/SessionInterfaces'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 
 import AuthConfig from 'app/models/authConfig'

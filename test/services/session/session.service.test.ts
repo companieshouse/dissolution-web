@@ -1,5 +1,5 @@
-import { SessionKey } from 'ch-node-session-handler/lib/session/keys/SessionKey'
-import { ISignInInfo } from 'ch-node-session-handler/lib/session/model/SessionInterfaces'
+import { SessionKey } from '@companieshouse/node-session-handler/lib/session/keys/SessionKey'
+import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/model/SessionInterfaces'
 import { assert } from 'chai'
 import { Request } from 'express'
 import sinon from 'sinon'
@@ -48,9 +48,18 @@ describe('SessionService', () => {
       const req: Request = generateRequest()
       req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(signInInfo)
 
-      const result: string = service.getUserEmail(req)
+      const result: Optional<string> = service.getUserEmail(req)
 
       assert.equal(result, EMAIL)
+    })
+
+    it(`should return undefined if there is no sign in info present in the session`, () => {
+      const req: Request = generateRequest()
+      req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(undefined)
+
+      const result: Optional<string> = service.getUserEmail(req)
+
+      assert.isUndefined(result)
     })
   })
 

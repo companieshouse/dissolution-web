@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
 import { Application } from 'express'
 import { inject, Container } from 'inversify'
 import { provide } from 'inversify-binding-decorators'

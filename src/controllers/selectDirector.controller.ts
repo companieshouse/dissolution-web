@@ -1,4 +1,4 @@
-import { BAD_REQUEST, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
@@ -86,7 +86,7 @@ export class SelectDirectorController extends BaseController {
       errors
     }
 
-    return super.render('select-director', viewModel, errors ? BAD_REQUEST : OK)
+    return super.render('select-director', viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
   }
 
   private getSelectedDirector(directors: DirectorDetails[], body: SelectDirectorFormModel): Optional<DirectorDetails> {
@@ -117,7 +117,7 @@ export class SelectDirectorController extends BaseController {
 
   private prepareDirectorsToSign(directors: DirectorDetails[], selectedDirector?: Optional<DirectorDetails>): DirectorToSign[] {
     if (selectedDirector) {
-      return [this.mapper.mapAsApplicant(selectedDirector, this.session.getUserEmail(this.httpContext.request))]
+      return [this.mapper.mapAsApplicant(selectedDirector, this.session.getUserEmail(this.httpContext.request)!)]
     }
 
     if (directors.length === 1) {

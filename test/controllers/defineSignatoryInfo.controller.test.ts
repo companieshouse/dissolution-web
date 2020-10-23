@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Application, Request } from 'express'
-import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
@@ -77,7 +77,7 @@ describe('DefineSignatoryInfoController', () => {
 
       const res = await request(app)
         .get(DEFINE_SIGNATORY_INFO_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -110,7 +110,7 @@ describe('DefineSignatoryInfoController', () => {
 
       const res = await request(app)
         .get(DEFINE_SIGNATORY_INFO_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -128,7 +128,7 @@ describe('DefineSignatoryInfoController', () => {
 
       const res = await request(app)
         .get(DEFINE_SIGNATORY_INFO_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -158,7 +158,7 @@ describe('DefineSignatoryInfoController', () => {
 
       const res = await request(app)
         .get(DEFINE_SIGNATORY_INFO_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -187,7 +187,7 @@ describe('DefineSignatoryInfoController', () => {
 
         const res = await request(app)
           .get(DEFINE_SIGNATORY_INFO_URI)
-          .expect(OK)
+          .expect(StatusCodes.OK)
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -205,7 +205,7 @@ describe('DefineSignatoryInfoController', () => {
 
         const res = await request(app)
           .get(DEFINE_SIGNATORY_INFO_URI)
-          .expect(OK)
+          .expect(StatusCodes.OK)
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -235,7 +235,7 @@ describe('DefineSignatoryInfoController', () => {
       const res = await request(app)
         .post(DEFINE_SIGNATORY_INFO_URI)
         .send(form)
-        .expect(BAD_REQUEST)
+        .expect(StatusCodes.BAD_REQUEST)
 
       verify(validator.validate(deepEqual(form), anything())).once()
 
@@ -259,7 +259,7 @@ describe('DefineSignatoryInfoController', () => {
         await request(app)
           .post(DEFINE_SIGNATORY_INFO_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).never()
       })
@@ -277,7 +277,7 @@ describe('DefineSignatoryInfoController', () => {
         await request(app)
           .post(DEFINE_SIGNATORY_INFO_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(session.setDissolutionSession(anything(), anything())).once()
 
@@ -298,7 +298,7 @@ describe('DefineSignatoryInfoController', () => {
         await request(app)
           .post(DEFINE_SIGNATORY_INFO_URI)
           .send(form)
-          .expect(MOVED_TEMPORARILY)
+          .expect(StatusCodes.MOVED_TEMPORARILY)
 
         verify(signatoryService.updateSignatoriesWithContactInfo(anything(), deepEqual(form))).once()
 
@@ -323,7 +323,7 @@ describe('DefineSignatoryInfoController', () => {
       await request(app)
         .post(DEFINE_SIGNATORY_INFO_URI)
         .send(form)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', CHECK_YOUR_ANSWERS_URI)
     })
   })

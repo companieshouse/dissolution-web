@@ -1,5 +1,5 @@
+import { AuthOptions } from '@companieshouse/web-security-node'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { AuthOptions } from 'web-security-node'
 
 import { HEALTHCHECK_URI, ROOT_URI, SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from 'app/paths'
 import UriFactory from 'app/utils/uri.factory'

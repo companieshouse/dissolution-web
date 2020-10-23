@@ -1,9 +1,9 @@
 import 'reflect-metadata'
 
-import { CreatePaymentRequest, Payment } from 'api-sdk-node/dist/services/payment'
-import { ApiResponse } from 'api-sdk-node/dist/services/resource'
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { CREATED } from 'http-status-codes'
+import { CreatePaymentRequest, Payment } from '@companieshouse/api-sdk-node/dist/services/payment'
+import { ApiResponse } from '@companieshouse/api-sdk-node/dist/services/resource'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
+import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import PaymentApiClient from '../clients/paymentApi.client'
@@ -40,7 +40,7 @@ export default class PaymentService {
 
     const response: ApiResponse<Payment> = await this.client.createPayment(token, createPaymentRequest)
 
-    if (response.httpStatusCode !== CREATED) {
+    if (response.httpStatusCode !== StatusCodes.CREATED) {
       this.logger.error(JSON.stringify(response))
 
       return Promise.reject(new Error('Payment session failed to create'))

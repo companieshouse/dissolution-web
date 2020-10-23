@@ -1,4 +1,4 @@
-import { BAD_REQUEST, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
 import { RedirectResult } from 'inversify-express-utils/dts/results'
@@ -46,6 +46,6 @@ export class WhoToTellController extends BaseController {
       errors
     }
 
-    return super.render('who-to-tell', viewModel, errors ? BAD_REQUEST : OK)
+    return super.render('who-to-tell', viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
   }
 }

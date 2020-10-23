@@ -1,11 +1,11 @@
 import 'reflect-metadata'
 
+import { createLoggerMiddleware } from '@companieshouse/structured-logging-node'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
 import bodyParser from 'body-parser'
-import { createLoggerMiddleware } from 'ch-logging'
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
 import cookieParser from 'cookie-parser'
 import { Application, NextFunction, Request, Response } from 'express'
-import { INTERNAL_SERVER_ERROR } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middleware'
@@ -37,7 +37,7 @@ export default class ServerMiddlewareLoader {
     app.use((err: any, _: Request, res: Response, _2: NextFunction) => {
       this.logger.error(`${err.constructor.name} - ${err.message}`)
 
-      return res.status(err.statusCode || INTERNAL_SERVER_ERROR).render('error')
+      return res.status(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).render('error')
     })
   }
 }

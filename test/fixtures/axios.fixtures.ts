@@ -1,10 +1,10 @@
 import { AxiosError, AxiosResponse } from 'axios'
-import { OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 
 export function generateAxiosResponse<T>(data: T): AxiosResponse<T> {
   return {
     data,
-    status: OK,
+    status: StatusCodes.OK,
     statusText: 'Ok',
     headers: {
       'content-type': 'application/octet-stream',

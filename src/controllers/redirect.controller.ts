@@ -86,14 +86,14 @@ export class RedirectController extends BaseController {
   }
 
   private handlePendingPaymentRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
-    const userEmail: string = this.session.getUserEmail(this.httpContext.request)
+    const userEmail: string = this.session.getUserEmail(this.httpContext.request)!
     const redirectUri: string = this.getPendingPaymentRedirectUri(dissolution, userEmail)
 
     return this.saveSessionAndRedirect(session, redirectUri)
   }
 
   private handlePendingApprovalRedirect(dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
-    const userEmail: string = this.session.getUserEmail(this.httpContext.request)
+    const userEmail: string = this.session.getUserEmail(this.httpContext.request)!
     const signatoriesForUser: DissolutionGetDirector[] = this.getSignatoriesForUser(dissolution, userEmail)
     const signatoryPendingApproval: Optional<DissolutionGetDirector> = signatoriesForUser.find(signatory => !signatory.approved_at)
 

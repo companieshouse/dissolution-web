@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import { assert } from 'chai'
 import { Request } from 'express'
-import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
@@ -46,7 +46,7 @@ describe('SearchCompanyController', () => {
 
       const res = await request(app)
         .get(SEARCH_COMPANY_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -72,7 +72,7 @@ describe('SearchCompanyController', () => {
       const res = await request(app)
         .post(SEARCH_COMPANY_URI)
         .send(form)
-        .expect(BAD_REQUEST)
+        .expect(StatusCodes.BAD_REQUEST)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -96,7 +96,7 @@ describe('SearchCompanyController', () => {
       const res = await request(app)
         .post(SEARCH_COMPANY_URI)
         .send(form)
-        .expect(BAD_REQUEST)
+        .expect(StatusCodes.BAD_REQUEST)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -120,7 +120,7 @@ describe('SearchCompanyController', () => {
       await request(app)
         .post(SEARCH_COMPANY_URI)
         .send(form)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', VIEW_COMPANY_INFORMATION_URI)
 
       verify(session.setDissolutionSession(anything(), anything())).once()
@@ -146,7 +146,7 @@ describe('SearchCompanyController', () => {
       await request(app)
         .post(SEARCH_COMPANY_URI)
         .send(form)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', VIEW_COMPANY_INFORMATION_URI)
     })
   })

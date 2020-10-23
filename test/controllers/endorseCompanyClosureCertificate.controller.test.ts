@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 
 import { assert } from 'chai'
-import { BAD_REQUEST, MOVED_TEMPORARILY, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
 import { generateEndorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel.fixtures'
@@ -58,7 +58,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const res = await request(app)
         .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
       const dateString = new Date().toDateString()
@@ -86,7 +86,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const res = await request(app)
         .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
       const dateString = new Date().toDateString()
@@ -107,7 +107,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const res = await request(app)
         .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -128,7 +128,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       const res = await request(app)
         .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-        .expect(OK)
+        .expect(StatusCodes.OK)
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
@@ -156,7 +156,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
 
       await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
         .send(testObject)
-        .expect(MOVED_TEMPORARILY)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_GATE_URI)
     })
 
@@ -172,7 +172,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
         container.rebind(SessionService).toConstantValue(instance(session))
       })
 
-      const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(BAD_REQUEST)
+      const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
       assert.isTrue(htmlAssertHelper.selectorExists('.govuk-error-summary'))
     })

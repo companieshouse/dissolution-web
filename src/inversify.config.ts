@@ -1,14 +1,14 @@
 import 'reflect-metadata'
 
+import { CookieConfig, SessionMiddleware, SessionStore } from '@companieshouse/node-session-handler'
+import { createLogger } from '@companieshouse/structured-logging-node'
+import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
+import { authMiddleware as commonAuthMiddleware } from '@companieshouse/web-security-node'
 import S3 from 'aws-sdk/clients/s3'
 import axios, { AxiosInstance } from 'axios'
-import { createLogger } from 'ch-logging'
-import ApplicationLogger from 'ch-logging/lib/ApplicationLogger'
-import { CookieConfig, SessionMiddleware, SessionStore } from 'ch-node-session-handler'
 import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
-import { authMiddleware as commonAuthMiddleware } from 'web-security-node'
 import PiwikConfig from './models/piwikConfig'
 
 import { APP_NAME } from 'app/constants/app.const'

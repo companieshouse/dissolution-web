@@ -1,7 +1,7 @@
-import { CompanyProfile } from 'api-sdk-node/dist/services/company-profile/types'
-import Resource from 'api-sdk-node/dist/services/resource'
+import { CompanyProfile } from '@companieshouse/api-sdk-node/dist/services/company-profile/types'
+import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
 import { assert } from 'chai'
-import { NOT_FOUND, OK } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { instance, mock, when } from 'ts-mockito'
 import { generateCompanyDetails, generateCompanyProfile, generateCompanyProfileResource } from '../../fixtures/companyProfile.fixtures'
 
@@ -33,7 +33,7 @@ describe('CompanyService', () => {
   describe('doesCompanyExist', () => {
     it('should return true if a company exists with the provided company number', async () => {
       const response: Resource<CompanyProfile> = generateCompanyProfileResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
       response.resource = generateCompanyProfile()
 
       when(client.getCompanyProfile(TOKEN, COMPANY_NUMBER)).thenResolve(response)
@@ -45,7 +45,7 @@ describe('CompanyService', () => {
 
     it('should return false if a company does not exist with the provided company number', async () => {
       const response: Resource<CompanyProfile> = generateCompanyProfileResource()
-      response.httpStatusCode = NOT_FOUND
+      response.httpStatusCode = StatusCodes.NOT_FOUND
       response.resource = undefined
 
       when(client.getCompanyProfile(TOKEN, COMPANY_NUMBER)).thenResolve(response)
@@ -59,7 +59,7 @@ describe('CompanyService', () => {
   describe('getCompanyDetails', () => {
     it('should reject with an error if company does not exist', async () => {
       const response: Resource<CompanyProfile> = generateCompanyProfileResource()
-      response.httpStatusCode = NOT_FOUND
+      response.httpStatusCode = StatusCodes.NOT_FOUND
       response.resource = undefined
 
       when(client.getCompanyProfile(TOKEN, COMPANY_NUMBER)).thenResolve(response)
@@ -74,7 +74,7 @@ describe('CompanyService', () => {
 
     it('should map the company to a company details object and return it', async () => {
       const response: Resource<CompanyProfile> = generateCompanyProfileResource()
-      response.httpStatusCode = OK
+      response.httpStatusCode = StatusCodes.OK
       response.resource = generateCompanyProfile()
 
       const companyDetails: CompanyDetails = generateCompanyDetails()
