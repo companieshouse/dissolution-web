@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "api-sdk-node": "git+ssh://git@github.com/companieshouse/api-sdk-node.git#0.2.3",
+    "api-sdk-node": "git+ssh://git@github.com/companieshouse/api-sdk-node.git#1.0.2",
     "aws-sdk": "^2.777.0",
     "axios": "^0.20.0",
     "body-parser": "^1.18.2",
