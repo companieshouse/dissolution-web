@@ -12,6 +12,7 @@ import ValidationErrors from 'app/models/view/validationErrors.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from 'app/paths'
 import formSchema from 'app/schemas/endorseCertificate.schema'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
+import IpAddressService from 'app/services/ip-address/ipAddress.service'
 import SessionService from 'app/services/session/session.service'
 import FormValidator from 'app/utils/formValidator.util'
 
@@ -25,7 +26,8 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
   public constructor(@inject(SessionService) private session: SessionService,
                     @inject(FormValidator) private validator: FormValidator,
-                    @inject(DissolutionService) private dissolutionService: DissolutionService) {
+                    @inject(DissolutionService) private dissolutionService: DissolutionService,
+                    @inject(IpAddressService) private ipAddressService: IpAddressService) {
     super()
   }
 
@@ -49,8 +51,9 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
   private async approveDissolution(): Promise<void>  {
     const token: string = this.session.getAccessToken(this.httpContext.request)
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const ipAddress: string = this.ipAddressService.getIpAddress(this.httpContext.request)
 
-    await this.dissolutionService.approveDissolution(token, dissolutionSession)
+    await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress)
   }
 
   private async renderView(errors?: ValidationErrors): Promise<string> {

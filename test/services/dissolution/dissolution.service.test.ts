@@ -93,13 +93,14 @@ describe('DissolutionService', () => {
   describe('approveDissolution', () => {
     it('should call dissolution api client to approve the dissolution for the provided email', async () => {
       const officerId: string = 'abc123'
+      const ipAddress: string = '127.0.0.1'
       dissolutionSession.approval = { ...generateApprovalModel(), officerId }
 
       const body: DissolutionPatchRequest = generateDissolutionPatchRequest()
 
-      when(mapper.mapToDissolutionPatchRequest(officerId)).thenReturn(body)
+      when(mapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body)
 
-      await service.approveDissolution(TOKEN, dissolutionSession)
+      await service.approveDissolution(TOKEN, dissolutionSession, ipAddress)
 
       verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once()
     })

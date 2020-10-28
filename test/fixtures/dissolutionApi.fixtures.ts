@@ -86,7 +86,8 @@ export function generateApprovalModel(): DissolutionApprovalModel {
 export function generateDissolutionPatchRequest(): DissolutionPatchRequest {
   return {
     officer_id: 'abc123',
-    has_approved: true
+    has_approved: true,
+    ip_address: '127.0.0.1'
   }
 }
 
