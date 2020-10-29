@@ -16,6 +16,7 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from 'app/paths'
 import formSchema from 'app/schemas/endorseCertificate.schema'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
+import IpAddressService from 'app/services/ip-address/ipAddress.service'
 import SessionService from 'app/services/session/session.service'
 import FormValidator from 'app/utils/formValidator.util'
 
@@ -27,10 +28,12 @@ describe('EndorseCompanyClosureCertificateController', () => {
   let session: SessionService
   let mockedDissolutionService: DissolutionService
   let mockedFormValidator: FormValidator
+  let mockedIpAddressService: IpAddressService
 
   const TOKEN = 'some-token'
   const EMAIL = 'some-email.com'
   const COMPANY_NUMBER = '01777777'
+  const IP_ADDRESS = '127.0.0.1'
 
   let dissolutionSession: DissolutionSession
 
@@ -38,6 +41,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
     session = mock(SessionService)
     mockedDissolutionService = mock(DissolutionService)
     mockedFormValidator = mock(FormValidator)
+    mockedIpAddressService= mock(IpAddressService)
 
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
     dissolutionSession.approval = generateApprovalModel()
@@ -145,13 +149,16 @@ describe('EndorseCompanyClosureCertificateController', () => {
     it('should redirect successfully if validator returns no errors', async () => {
       const testObject = generateEndorseCertificateFormModel()
 
-      when(mockedDissolutionService.approveDissolution(anything(), anything())).thenResolve()
+      when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
+      when(mockedDissolutionService.approveDissolution(anything(), anything(), IP_ADDRESS)).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
+      when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
 
       const app = createApp(container => {
         container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
         container.rebind(SessionService).toConstantValue(instance(session))
         container.rebind(DissolutionService).toConstantValue(instance(mockedDissolutionService))
+        container.rebind(IpAddressService).toConstantValue(instance(mockedIpAddressService))
       })
 
       await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
@@ -164,7 +171,7 @@ describe('EndorseCompanyClosureCertificateController', () => {
       const testObject: EndorseCertificateFormModel = {confirmation: 'understood'}
       const mockError = generateValidationError('confirmation', 'Test confirmation error')
 
-      when(mockedDissolutionService.approveDissolution(TOKEN, anything())).thenResolve()
+      when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
       when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(mockError)
 
       const app = createApp(container => {

@@ -45,11 +45,13 @@ describe('Dissolution Request Mapper', () => {
   describe('mapToDissolutionPatchRequest', () => {
     it('should map the provided officer ID to patch request', () => {
       const officerId: string = 'abc123'
+      const ipAddress: string = '127.0.0.1'
 
-      const result: DissolutionPatchRequest = mapper.mapToDissolutionPatchRequest(officerId)
+      const result: DissolutionPatchRequest = mapper.mapToDissolutionPatchRequest(officerId, ipAddress)
 
       assert.equal(result.officer_id, officerId)
       assert.isTrue(result.has_approved)
+      assert.equal(result.ip_address, ipAddress)
     })
   })
 })

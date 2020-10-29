@@ -3,6 +3,7 @@ import { generateSession } from './session.fixtures'
 
 export function generateRequest(): Request {
   return {
-    session: generateSession()
+    session: generateSession(),
+    headers: {}
   } as Request
 }

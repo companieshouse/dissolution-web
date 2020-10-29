@@ -40,8 +40,12 @@ export default class DissolutionService {
     return await this.client.getDissolution(token, companyNumber)
   }
 
-  public async approveDissolution(token: string, dissolution: DissolutionSession): Promise<void> {
-    const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(dissolution.approval!.officerId)
+  public async approveDissolution(token: string, dissolution: DissolutionSession, ipAddress: string): Promise<void> {
+
+    const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(
+      dissolution.approval!.officerId,
+      ipAddress
+    )
     const companyNumber: string = dissolution.companyNumber!
 
     await this.client.patchDissolution(token, companyNumber, body)

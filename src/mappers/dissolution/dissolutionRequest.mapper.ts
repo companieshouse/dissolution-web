@@ -24,10 +24,11 @@ export default class DissolutionRequestMapper {
     }
   }
 
-  public mapToDissolutionPatchRequest(officerId: string): DissolutionPatchRequest {
+  public mapToDissolutionPatchRequest(officerId: string, ipAddress: string): DissolutionPatchRequest {
     return {
       officer_id: officerId,
-      has_approved: true
+      has_approved: true,
+      ip_address: ipAddress
     }
   }
 }
