@@ -46,6 +46,6 @@ export default class PaymentService {
       return Promise.reject(new Error('Payment session failed to create'))
     }
 
-    return `${response.resource!.links.journey}?summary=false`
+    return `${response.resource!.links.journey}`
   }
 }
