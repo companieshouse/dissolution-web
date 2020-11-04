@@ -31,8 +31,7 @@ export default class PaymentService {
 
     const applicationReferenceNumber: string = dissolutionSession.applicationReferenceNumber!
 
-    const companyNumber: string = dissolutionSession.companyNumber!
-    const paymentResource: string = `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}/payment`
+    const paymentResource: string = `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReferenceNumber}/payment`
 
     const createPaymentRequest: CreatePaymentRequest = this.mapper.mapToCreatePaymentRequest(
       paymentRedirectURI, applicationReferenceNumber, paymentResource, paymentStateUUID
