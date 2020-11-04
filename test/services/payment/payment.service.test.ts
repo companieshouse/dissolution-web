@@ -14,49 +14,64 @@ import PaymentService from 'app/services/payment/payment.service'
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('PaymentService', () => {
-  let mapper: PaymentMapper
-  const CHS_URL = 'http://some-ui-url'
-  const DISSOLUTIONS_API_URL = 'http://some-dissolutions-api-url'
-  let client: PaymentApiClient
-  let logger: ApplicationLogger
 
   let service: PaymentService
 
-  let dissolutionSession: DissolutionSession
+  let mapper: PaymentMapper
+  let client: PaymentApiClient
+  let logger: ApplicationLogger
 
-  const TOKEN = 'some-token'
-
-  const createPaymentRequest: CreatePaymentRequest = generateCreatePaymentRequest()
-  const paymentResult: ApiResult<ApiResponse<Payment>> = generatePaymentResult()
-  let paymentResponse: ApiResponse<Payment>
+  const CHS_URL = 'http://some-ui-url'
+  const DISSOLUTIONS_API_URL = 'http://some-dissolutions-api-url'
 
   beforeEach(() => {
     mapper = mock(PaymentMapper)
     client = mock(PaymentApiClient)
     logger = mock(ApplicationLogger)
 
-    dissolutionSession = generateDissolutionSession()
-
     service = new PaymentService(
-      instance(mapper), CHS_URL, DISSOLUTIONS_API_URL, instance(client), instance(logger)
+      instance(mapper),
+      CHS_URL,
+      DISSOLUTIONS_API_URL,
+      instance(client),
+      instance(logger)
     )
 
-    paymentResponse = paymentResult.value as ApiResponse<Payment>
+
   })
 
   describe('generatePaymentURL', () => {
+    const TOKEN = 'some-token'
+    const APP_REFERENCE: string = 'REF123'
+
+    const createPaymentRequest: CreatePaymentRequest = generateCreatePaymentRequest()
+    const paymentResult: ApiResult<ApiResponse<Payment>> = generatePaymentResult()
+
+    let dissolutionSession: DissolutionSession
+    let paymentResponse: ApiResponse<Payment>
+
+    beforeEach(() => {
+      dissolutionSession = generateDissolutionSession()
+      dissolutionSession.applicationReferenceNumber = APP_REFERENCE
+
+      paymentResponse = paymentResult.value as ApiResponse<Payment>
+    })
+
     it('should call the payment api client and return the payment URL', async () => {
-      when(
-        mapper.mapToCreatePaymentRequest(
-          anything(), anything(), anything(), createPaymentRequest.state
-        )
-      ).thenReturn(createPaymentRequest)
+      const expectedResource: string = `${DISSOLUTIONS_API_URL}/dissolution-request/${APP_REFERENCE}/payment`
+
+      when(mapper.mapToCreatePaymentRequest(
+          anything(), APP_REFERENCE, expectedResource, createPaymentRequest.state
+      )).thenReturn(createPaymentRequest)
       when(client.createPayment(TOKEN, createPaymentRequest)).thenResolve(paymentResponse)
 
       const paymentURL: string = await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state)
 
-      assert.equal(paymentURL, `${paymentResponse.resource?.links.journey}?summary=false`)
+      assert.equal(paymentURL, `${paymentResponse.resource!.links.journey}?summary=false`)
 
+      verify(mapper.mapToCreatePaymentRequest(
+        anything(), APP_REFERENCE, expectedResource, createPaymentRequest.state
+      )).once()
       verify(client.createPayment(TOKEN, createPaymentRequest)).once()
     })
 
