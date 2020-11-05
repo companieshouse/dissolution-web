@@ -35,6 +35,7 @@ export function initContainer(): Container {
   container.bind<string>(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue(getEnvOrThrow('CHIPS_PRESENTER_AUTH_URL'))
   container.bind<string>(TYPES.CHS_URL).toConstantValue(getEnvOrThrow('CHS_URL'))
   container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow('PAYMENTS_API_URL'))
+  container.bind<number>(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(Number(getEnvOrThrow('PAY_BY_ACCOUNT_FEATURE_ENABLED')))
   const piwikConfig: PiwikConfig = {
     url: getEnvOrThrow('PIWIK_URL'),
     siteId: getEnvOrThrow('PIWIK_SITE_ID'),

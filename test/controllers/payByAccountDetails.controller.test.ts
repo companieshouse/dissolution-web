@@ -16,6 +16,7 @@ import ValidationErrors from 'app/models/view/validationErrors.model'
 import { PAY_BY_ACCOUNT_DETAILS_URI, VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
 import payByAccountDetailsSchema from 'app/schemas/payByAccountDetails.schema'
 import PayByAccountService from 'app/services/payment/payByAccount.service'
+import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 describe('PayByAccountDetailsController', () => {
@@ -29,17 +30,20 @@ describe('PayByAccountDetailsController', () => {
   })
 
   describe('GET request', () => {
-    // TODO - Uncomment once feature toggle logic is added.
-    // it('should reject with an error (if toggle is disabled)', async () => {
-    //   const app: Application = createApp()
+    it('should reject with an error (if toggle is disabled)', async () => {
+      const app: Application = createApp(container => {
+        container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(0)
+      })
 
-    //   await request(app)
-    //     .get(PAY_BY_ACCOUNT_DETAILS_URI)
-    //     .expect(StatusCodes.INTERNAL_SERVER_ERROR)
-    // })
+      await request(app)
+        .get(PAY_BY_ACCOUNT_DETAILS_URI)
+        .expect(StatusCodes.INTERNAL_SERVER_ERROR)
+    })
 
     it('should render the pay by account details page (if toggle is enabled)', async () => {
-      const app: Application = createApp()
+      const app: Application = createApp(container => {
+        container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
+      })
 
       const res = await request(app)
         .get(PAY_BY_ACCOUNT_DETAILS_URI)

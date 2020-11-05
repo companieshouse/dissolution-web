@@ -10,6 +10,7 @@ import ValidationErrors from 'app/models/view/validationErrors.model'
 import { PAY_BY_ACCOUNT_DETAILS_URI, VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
 import payByAccountDetailsSchema from 'app/schemas/payByAccountDetails.schema'
 import PayByAccountService from 'app/services/payment/payByAccount.service'
+import TYPES from 'app/types'
 import FormValidator from 'app/utils/formValidator.util'
 
 interface ViewModel {
@@ -23,6 +24,7 @@ export class PayByAccountDetailsController extends BaseController {
   private readonly ERROR_INCORRECT_CREDENTIALS: string = 'Your Presenter ID or Presenter authentication code is incorrect'
 
   public constructor(
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
     @inject(FormValidator) private validator: FormValidator,
     @inject(PayByAccountService) private payByAccountService: PayByAccountService) {
     super()
@@ -30,7 +32,10 @@ export class PayByAccountDetailsController extends BaseController {
 
   @httpGet('')
   public async get(): Promise<string> {
-    // TODO - check feature toggle
+    if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
+      return Promise.reject('Feature not enabled')
+    }
+
     return this.renderView()
   }
 
@@ -46,7 +51,7 @@ export class PayByAccountDetailsController extends BaseController {
       return this.renderView(form, { presenterAuthCode: this.ERROR_INCORRECT_CREDENTIALS })
     }
 
-    // TODO in BI-2811 - send account number to Dissolution API
+    // TODO in BI-5811 - send account number to Dissolution API
 
     return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
   }
