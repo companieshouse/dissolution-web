@@ -1,4 +1,4 @@
 export default interface DissolutionLinks {
-  self: string,
+  self: string
   payment: string
 }

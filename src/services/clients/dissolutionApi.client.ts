@@ -6,6 +6,7 @@ import { provide } from 'inversify-binding-decorators'
 
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
@@ -23,8 +24,9 @@ export class DissolutionApiClient {
     const response: AxiosResponse<DissolutionCreateResponse> = await this.axios.post(
       this.generateUrl(companyNumber),
       body,
-      this.generateConfig(token)
+      this.generateConfigForOAuth(token)
     )
+
     return response.data
   }
 
@@ -32,7 +34,7 @@ export class DissolutionApiClient {
     try {
       const response: Optional<AxiosResponse<DissolutionGetResponse>> = await this.axios.get(
         this.generateUrl(companyNumber),
-        this.generateConfig(token)
+        this.generateConfigForOAuth(token)
       )
 
       return response!.data
@@ -45,19 +47,38 @@ export class DissolutionApiClient {
     }
   }
 
+  public async getDissolutionPaymentUIData(apiKey: string, applicationReference: string): Promise<DissolutionGetPaymentUIData> {
+      const response: AxiosResponse<DissolutionGetPaymentUIData> = await this.axios.get(
+        `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,
+        this.generateConfigForAPIKey(apiKey)
+      )
+
+      return response!.data
+  }
+
   public async patchDissolution(token: string, companyNumber: string, body: DissolutionPatchRequest): Promise<DissolutionPatchResponse> {
     const response: AxiosResponse<DissolutionPatchResponse> = await this.axios.patch(
       this.generateUrl(companyNumber),
       body,
-      this.generateConfig(token)
+      this.generateConfigForOAuth(token)
     )
     return response.data
   }
 
-  private generateConfig(token: string): AxiosRequestConfig {
+  private generateConfigForOAuth(token: string): AxiosRequestConfig {
     return {
       headers: {
         Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    }
+  }
+
+  private generateConfigForAPIKey(apiKey: string): AxiosRequestConfig {
+    return {
+      headers: {
+        Authorization: apiKey,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       }

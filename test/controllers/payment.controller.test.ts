@@ -11,7 +11,7 @@ import 'app/controllers/payment.controller'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { PAYMENT_URI, SEARCH_COMPANY_URI } from 'app/paths'
+import { PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import PaymentService from 'app/services/payment/payment.service'
 import SessionService from 'app/services/session/session.service'
@@ -60,7 +60,7 @@ describe('PaymentController', () => {
       const app = initApp()
 
       await request(app)
-        .get(PAYMENT_URI)
+        .get(PAYMENT_REVIEW_URI)
         .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', SEARCH_COMPANY_URI)
 
@@ -73,7 +73,7 @@ describe('PaymentController', () => {
       const app = initApp()
 
       await request(app)
-        .get(PAYMENT_URI)
+        .get(PAYMENT_REVIEW_URI)
         .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_URL)
 

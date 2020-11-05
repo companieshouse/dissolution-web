@@ -1,0 +1,55 @@
+{% extends "layout.njk" %}
+
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set title = "Review your payment - " + pageTitleSuffix %}
+
+{% block content %}
+  <form method="post">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Review your payment</h1>
+
+        {% set paymentRows = [] %}
+        {% for payment in paymentSummary.payments %}
+          {% set paymentRows = (
+            paymentRows.push(
+              {
+                text: payment.description
+              },
+              {
+                text: payment.cost,
+                format: "numeric"
+              }
+            ), paymentRows
+          ) %}
+        {% endfor %}
+
+        {{ govukTable({
+            head: [
+              {
+                text: "Item",
+                classes: 'govuk-!-width-three-quarters'
+              },
+              {
+                text: "Amount to pay",
+                classes: 'govuk-!-width-one-quarter',
+                format: "numeric"
+              }
+            ],
+            rows: [ paymentRows ]
+        }) }}
+
+        <h2 class="govuk-heading-m">The total amount to pay is {{ paymentSummary.total_cost }}</h2>
+
+        {{ govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'next-button'
+            }
+        }) }}
+      </div>
+    </div>
+  </form>
+{% endblock %}
