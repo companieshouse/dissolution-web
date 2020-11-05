@@ -2,6 +2,10 @@ import { CreatePaymentRequest, Payment } from '@companieshouse/api-sdk-node/dist
 import { ApiResponse, ApiResult } from '@companieshouse/api-sdk-node/dist/services/resource'
 import { StatusCodes } from 'http-status-codes'
 
+import PresenterAuthRequest from 'app/models/dto/presenterAuthRequest'
+import PresenterAuthResponse from 'app/models/dto/presenterAuthResponse'
+import PayByAccountDetailsFormModel from 'app/models/form/payByAccountDetails.model'
+
 export function generateCreatePaymentRequest(): CreatePaymentRequest {
   return {
     redirectUri: 'http://some-payment-callback-url',
@@ -47,5 +51,25 @@ export function generatePayment(): Payment {
     paymentMethod: 'credit-card',
     reference: 'reference',
     status: 'paid'
+  }
+}
+
+export function generatePayByAccountDetailsForm(): PayByAccountDetailsFormModel {
+  return {
+    presenterId: '1234',
+    presenterAuthCode: 'ABC123'
+  }
+}
+
+export function generatePresenterAuthRequest(): PresenterAuthRequest {
+  return {
+    id: '1234',
+    auth: 'ABC123'
+  }
+}
+
+export function generatePresenterAuthResponse(): PresenterAuthResponse {
+  return {
+    presenterAccountNumber: '1234567890'
   }
 }
