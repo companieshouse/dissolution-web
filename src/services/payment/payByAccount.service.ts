@@ -26,6 +26,7 @@ export default class PayByAccountService {
       const response: PresenterAuthResponse = await this.client.getAccountNumber(request)
       return response.presenterAccountNumber
     } catch (err) {
+      console.log(err)
       if (this.areCredentialsIncorrect(err)) {
         return null
       }
@@ -35,7 +36,7 @@ export default class PayByAccountService {
   }
 
   private areCredentialsIncorrect(err: Error | AxiosError): boolean {
-    return this.isAxiosError(err) && err.response!.status === StatusCodes.UNAUTHORIZED
+    return this.isAxiosError(err) && err.response?.status === StatusCodes.UNAUTHORIZED
   }
 
   private isAxiosError(err: Error | AxiosError): err is AxiosError {
