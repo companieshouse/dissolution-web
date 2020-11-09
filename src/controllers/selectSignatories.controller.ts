@@ -56,7 +56,6 @@ export class SelectSignatoriesController extends BaseController {
 
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
     const officerType: OfficerType = session.officerType!
-
     const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
 
     const errors: Optional<ValidationErrors> = this.validate(body, officerType, signatories.length, session)

@@ -4,6 +4,7 @@ import { controller, httpGet, httpPost, requestBody } from 'inversify-express-ut
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 
 import BaseController from 'app/controllers/base.controller'
+import { NotFoundError } from 'app/errors/notFoundError.error'
 import PayByAccountDetailsFormModel from 'app/models/form/payByAccountDetails.model'
 import Optional from 'app/models/optional'
 import ValidationErrors from 'app/models/view/validationErrors.model'
@@ -33,7 +34,7 @@ export class PayByAccountDetailsController extends BaseController {
   @httpGet('')
   public async get(): Promise<string> {
     if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-      return Promise.reject('Feature not enabled')
+      return Promise.reject(new NotFoundError('Feature toggle not enabled'))
     }
 
     return this.renderView()

@@ -37,7 +37,7 @@ describe('PayByAccountDetailsController', () => {
 
       await request(app)
         .get(PAY_BY_ACCOUNT_DETAILS_URI)
-        .expect(StatusCodes.INTERNAL_SERVER_ERROR)
+        .expect(StatusCodes.NOT_FOUND)
     })
 
     it('should render the pay by account details page (if toggle is enabled)', async () => {
