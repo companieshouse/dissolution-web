@@ -24,7 +24,7 @@ describe('Pay By Account Schema', () => {
     assert.equal(errors.error!.details.length, 1)
     assert.equal(errors.error!.details[0].context!.key, 'presenterId')
     assert.equal(errors.error!.details[0].type, `any.required`)
-    assert.equal(errors.error!.details[0].message, 'Presenter ID is required')
+    assert.equal(errors.error!.details[0].message, 'You must enter a Presenter ID')
   })
 
   it('should return an error when an empty presenter ID is provided', () => {
@@ -37,7 +37,7 @@ describe('Pay By Account Schema', () => {
     assert.equal(errors.error!.details.length, 1)
     assert.equal(errors.error!.details[0].context!.key, 'presenterId')
     assert.equal(errors.error!.details[0].type, `string.empty`)
-    assert.equal(errors.error!.details[0].message, 'Presenter ID is required')
+    assert.equal(errors.error!.details[0].message, 'You must enter a Presenter ID')
   })
 
   it('should return an error when a presenter auth code is not provided', () => {
@@ -50,7 +50,7 @@ describe('Pay By Account Schema', () => {
     assert.equal(errors.error!.details.length, 1)
     assert.equal(errors.error!.details[0].context!.key, 'presenterAuthCode')
     assert.equal(errors.error!.details[0].type, `any.required`)
-    assert.equal(errors.error!.details[0].message, 'Presenter authentication code is required')
+    assert.equal(errors.error!.details[0].message, 'You must enter a Presenter authentication code')
   })
 
   it('should return an error when an empty presenter auth code is provided', () => {
@@ -63,6 +63,6 @@ describe('Pay By Account Schema', () => {
     assert.equal(errors.error!.details.length, 1)
     assert.equal(errors.error!.details[0].context!.key, 'presenterAuthCode')
     assert.equal(errors.error!.details[0].type, `string.empty`)
-    assert.equal(errors.error!.details[0].message, 'Presenter authentication code is required')
+    assert.equal(errors.error!.details[0].message, 'You must enter a Presenter authentication code')
   })
 })
