@@ -1,0 +1,66 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/button/macro.njk'         import govukButton %}
+{% from "govuk/components/error-summary/macro.njk"  import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk"          import govukInput %}
+{% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
+
+{% set title = "Enter your details to pay by account - " + pageTitleSuffix %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: "Back",
+      href: Paths.HOW_DO_YOU_WANT_TO_PAY_URI
+    })
+  }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">Enter your details to pay by account</h1>
+
+      <form method="post">
+        {{
+          govukInput({
+            id: "presenter-id",
+            name: "presenterId",
+            classes: "govuk-!-width-full",
+            label: {
+              text: "Presenter ID"
+            },
+            errorMessage: {
+              text: errors.presenterId
+            } if errors.presenterId,
+            value: data.presenterId if data
+          })
+        }}
+
+        {{
+          govukInput({
+            id: "presenter-auth-code",
+            name: "presenterAuthCode",
+            classes: "govuk-!-width-full",
+            label: {
+              text: "Presenter authentication code"
+            },
+            errorMessage: {
+              text: errors.presenterAuthCode
+            } if errors.presenterAuthCode,
+            value: data.presenterAuthCode if data
+          })
+        }}
+
+        {{
+          govukButton({
+            text: 'Confirm payment',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

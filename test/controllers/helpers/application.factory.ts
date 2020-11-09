@@ -49,9 +49,11 @@ export const createApp = (configureBindings?: (container: Container) => void): A
 }
 
 const mockEnvVars = (container: Container): void => {
+  container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue('CHIPS_PRESENTER_AUTH_URL')
   container.bind(TYPES.CHS_URL).toConstantValue('CHS_URL')
   container.bind(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue('CHS_COMPANY_PROFILE_API_LOCAL_URL')
   container.bind(TYPES.DISSOLUTIONS_API_URL).toConstantValue('DISSOLUTIONS_API_URL')
+  container.bind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
 
   const logger = createLogger(APP_NAME)
   container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
