@@ -39,9 +39,7 @@ export default class DissolutionService {
     return await this.client.getDissolution(token, companyNumber)
   }
 
-  public async getDissolutionPaymentUIData(
-    apiKey: string, dissolutionSession: DissolutionSession
-  ): Promise<DissolutionGetPaymentUIData> {
+  public async getDissolutionPaymentUIData(apiKey: string, dissolutionSession: DissolutionSession): Promise<DissolutionGetPaymentUIData> {
     const applicationReference: string = dissolutionSession.applicationReferenceNumber!
 
     return await this.client.getDissolutionPaymentUIData(apiKey, applicationReference)

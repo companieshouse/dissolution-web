@@ -16,10 +16,12 @@
           {% set paymentRows = (
             paymentRows.push(
               {
-                text: payment.description
+                text: payment.description,
+                classes: 'item-' + loop.index0
               },
               {
                 text: payment.cost,
+                classes: 'amount-to-pay-' + loop.index0,
                 format: "numeric"
               }
             ), paymentRows
@@ -41,7 +43,7 @@
             rows: [ paymentRows ]
         }) }}
 
-        <h2 class="govuk-heading-m">The total amount to pay is {{ paymentSummary.total_cost }}</h2>
+        <h2 class="govuk-heading-m">The total amount to pay is <span id="total_cost">{{ paymentSummary.total_cost }}</span></h2>
 
         {{ govukButton({
             text: 'Continue',

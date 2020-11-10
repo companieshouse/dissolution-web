@@ -3,11 +3,14 @@ import ApplicationType from 'app/models/dto/applicationType.enum'
 import { DirectorRequest, DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionLinks from 'app/models/dto/dissolutionLinks'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
 import OfficerType from 'app/models/dto/officerType.enum'
+import PaymentItem from 'app/models/dto/paymentItem'
+import PaymentLinks from 'app/models/dto/paymentLinks'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 import { generateEmail } from 'test/fixtures/util.fixtures'
@@ -25,7 +28,7 @@ export function generateDissolutionCreateRequest(): DissolutionCreateRequest {
 export function generateDissolutionCreateResponse(referenceNumber: string = '123ABC'): DissolutionCreateResponse {
   return {
     application_reference_number: referenceNumber,
-    links: generateLinks()
+    links: generateDissolutionLinks()
   }
 }
 
@@ -33,7 +36,7 @@ export function generateDissolutionGetResponse(): DissolutionGetResponse {
   return {
     ETag: 'ETag',
     kind: 'kind',
-    links: generateLinks(),
+    links: generateDissolutionLinks(),
     application_status: ApplicationStatus.PENDING_APPROVAL,
     application_reference: 'asd',
     application_type: ApplicationType.DS01,
@@ -57,7 +60,7 @@ export function generateDirectorRequest(name: string): DirectorRequest {
   }
 }
 
-export function generateLinks(): DissolutionLinks {
+export function generateDissolutionLinks(): DissolutionLinks {
   return {
     self: 'self',
     payment: 'payment'
@@ -93,6 +96,37 @@ export function generateDissolutionPatchRequest(): DissolutionPatchRequest {
 
 export function generateDissolutionPatchResponse(): DissolutionPatchResponse {
   return {
-    links: generateLinks()
+    links: generateDissolutionLinks()
+  }
+}
+
+export function generateDissolutionGetPaymentUIData(): DissolutionGetPaymentUIData {
+  return {
+    ETag: 'ETag',
+    kind: 'kind',
+    links: generatePaymentLinks(),
+    company_number: '12345678',
+    items: [ generatePaymentItem(), generatePaymentItem() ]
+  }
+}
+
+function generatePaymentLinks(): PaymentLinks {
+  return {
+    self: 'self',
+    dissolution_request: 'dissolution_request'
+  }
+}
+
+function generatePaymentItem(): PaymentItem {
+  return {
+    description: 'Some payment description',
+    description_identifier: 'Some payment description identifier',
+    description_values: {},
+    product_type: ApplicationType.DS01,
+    amount: '8',
+    available_payment_methods: ['credit-card'],
+    class_of_payment: ['data-maintenance'],
+    kind: 'dissolution-request#payment-details',
+    resource_kind: 'dissolution-request#dissolution-request'
   }
 }

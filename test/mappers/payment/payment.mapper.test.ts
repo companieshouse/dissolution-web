@@ -1,8 +1,11 @@
 import { CreatePaymentRequest } from '@companieshouse/api-sdk-node/dist/services/payment'
 import { assert } from 'chai'
-import { generateCreatePaymentRequest } from '../../fixtures/payment.fixtures'
+import { generateDissolutionGetPaymentUIData } from '../../fixtures/dissolutionApi.fixtures'
+import { generateCreatePaymentRequest, generatePaymentSummary } from '../../fixtures/payment.fixtures'
 
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import PaymentSummary from 'app/models/dto/paymentSummary'
 
 describe('PaymentMapper', () => {
 
@@ -20,6 +23,19 @@ describe('PaymentMapper', () => {
       )
 
       assert.deepEqual(result, createPaymentRequest)
+    })
+  })
+
+  describe('mapToPaymentSummary', () => {
+    it('should map the dissolution payment UI data to a PaymentSummary object', () => {
+      const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData = generateDissolutionGetPaymentUIData()
+      const paymentSummary: PaymentSummary = generatePaymentSummary()
+
+      const result: PaymentSummary = mapper.mapToPaymentSummary(
+        dissolutionGetPaymentUIData
+      )
+
+      assert.deepEqual(result, paymentSummary)
     })
   })
 })

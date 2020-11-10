@@ -1,6 +1,6 @@
-import Payment from './payment'
+import PaymentDetails from './paymentDetails'
 
 export default interface PaymentSummary {
-  payments: Payment[]
+  payments: PaymentDetails[]
   total_cost: string
 }

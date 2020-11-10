@@ -1,60 +1,72 @@
 import 'reflect-metadata'
 
+import { assert } from 'chai'
 import { Application } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
-import { anything, instance, mock, verify, when } from 'ts-mockito'
+import { anything, instance, mock, when } from 'ts-mockito'
+import { generatePaymentSummary } from '../fixtures/payment.fixtures'
 import { generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
+import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/payment.controller'
+import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import PaymentSummary from 'app/models/dto/paymentSummary'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from 'app/paths'
+import { HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import PaymentService from 'app/services/payment/payment.service'
 import SessionService from 'app/services/session/session.service'
+import TYPES from 'app/types'
 
-import { generateDissolutionGetResponse } from 'test/fixtures/dissolutionApi.fixtures'
+import { generateDissolutionGetPaymentUIData, generateDissolutionGetResponse } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('PaymentController', () => {
 
   let dissolutionService: DissolutionService
-  let paymentService: PaymentService
   let sessionService: SessionService
+  let paymentService: PaymentService
+  let paymentMapper: PaymentMapper
 
   const TOKEN = 'some-token'
+  const API_KEY = 'some-api-key'
   const COMPANY_NUMBER = 'ABC123'
   const REDIRECT_URL = 'http://some-payment-ui-url'
 
   let dissolution: DissolutionGetResponse
   let dissolutionSession: DissolutionSession
 
+  function initApp(): Application {
+    return createApp(container => {
+      container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
+      container.rebind(SessionService).toConstantValue(instance(sessionService))
+      container.rebind(PaymentService).toConstantValue(instance(paymentService))
+      container.rebind(PaymentMapper).toConstantValue(instance(paymentMapper))
+      container.rebind(TYPES.CHS_API_KEY).toConstantValue(API_KEY)
+      container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
+    })
+  }
+
   before(() => {
     dissolutionService = mock(DissolutionService)
-    paymentService = mock(PaymentService)
     sessionService = mock(SessionService)
+    paymentService = mock(PaymentService)
+    paymentMapper = mock(PaymentMapper)
 
     dissolution = generateDissolutionGetResponse()
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
-
-    when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
-    when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-    when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
-    when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
   })
 
   describe('GET - ensure that the payment page loads correctly', () => {
-    function initApp(): Application {
-      return createApp(container => {
-        container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
-        container.rebind(SessionService).toConstantValue(instance(sessionService))
-        container.rebind(PaymentService).toConstantValue(instance(paymentService))
-      })
-    }
+    it('should redirect to the search company page if the application has already been paid for', async () => {
+      when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
+      when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
 
-    it('should redirect to the search company page if the application has been paid for', async () => {
       dissolution.application_status = ApplicationStatus.PAID
 
       const app = initApp()
@@ -63,21 +75,64 @@ describe('PaymentController', () => {
         .get(PAYMENT_REVIEW_URI)
         .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', SEARCH_COMPANY_URI)
-
-      verify(sessionService.setDissolutionSession(anything(), anything())).never()
     })
 
-    it('should redirect to the payment page if the application has not been paid for', async () => {
+    it('should redirect to the payment summary page if the application has not been paid for', async () => {
+      const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData = generateDissolutionGetPaymentUIData()
+      const paymentSummary: PaymentSummary = generatePaymentSummary()
+
+      when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
+      when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+      when(dissolutionService.getDissolutionPaymentUIData(API_KEY, dissolutionSession)).thenResolve(dissolutionGetPaymentUIData)
+      when(paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)).thenReturn(paymentSummary)
+
       dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
 
       const app = initApp()
 
-      await request(app)
+      const res = await request(app)
         .get(PAYMENT_REVIEW_URI)
+        .expect(StatusCodes.OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Review your payment'))
+      assert.isTrue(htmlAssertHelper.hasText('h1', 'Review your payment'))
+      assert.isTrue(htmlAssertHelper.hasText('.item-0', 'Some payment description'))
+      assert.isTrue(htmlAssertHelper.hasText('.amount-to-pay-0', '£8.00'))
+      assert.isTrue(htmlAssertHelper.hasText('#total_cost', '£16.00'))
+    })
+  })
+
+  describe('POST - ensure that the payment page submits successfully', () => {
+    it('should redirect to the how do you want to pay page (if the pay by account feature toggle is on)', async () => {
+      const app = initApp()
+
+      await request(app)
+        .post(PAYMENT_REVIEW_URI)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
+        .expect('Location', HOW_DO_YOU_WANT_TO_PAY_URI)
+    })
+
+    it('should redirect to the GOV.UK Pay journey (if the pay by account feature toggle is off)', async () => {
+      when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
+      when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+      when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
+
+      const app: Application = createApp(container => {
+        container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
+        container.rebind(SessionService).toConstantValue(instance(sessionService))
+        container.rebind(PaymentService).toConstantValue(instance(paymentService))
+        container.rebind(PaymentMapper).toConstantValue(instance(paymentMapper))
+        container.rebind(TYPES.CHS_API_KEY).toConstantValue(API_KEY)
+        container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(0)
+      })
+
+      await request(app)
+        .post(PAYMENT_REVIEW_URI)
         .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', REDIRECT_URL)
-
-      verify(sessionService.setDissolutionSession(anything(), anything())).once()
     })
   })
 })

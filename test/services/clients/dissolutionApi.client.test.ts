@@ -3,6 +3,7 @@ import { assert } from 'chai'
 import sinon from 'sinon'
 
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
@@ -10,7 +11,7 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
-  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetResponse,
+  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData, generateDissolutionGetResponse,
   generateDissolutionPatchRequest, generateDissolutionPatchResponse
 } from 'test/fixtures/dissolutionApi.fixtures'
 
@@ -24,6 +25,7 @@ describe('DissolutionApiClient', () => {
   let patchStub: sinon.SinonStub
 
   const TOKEN = 'some-token'
+  const API_KEY = 'some-api-key'
   const COMPANY_NUMBER = '12345678'
   const BODY = generateDissolutionCreateRequest()
   const GET_RESPONSE: AxiosResponse<DissolutionGetResponse> = generateAxiosResponse(generateDissolutionGetResponse())
@@ -127,6 +129,32 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers.Accept, 'application/json')
 
       assert.isNull(response)
+    })
+  })
+
+  describe('getDissolutionPaymentUIData', () => {
+    const APPLICATION_REFERENCE = 'ABC123'
+    const GET_PAYMENT_UI_DATA_RESPONSE: AxiosResponse<DissolutionGetPaymentUIData> =
+      generateAxiosResponse(generateDissolutionGetPaymentUIData())
+
+    let getPaymentUIDataStub: sinon.SinonStub
+
+    it('should return dissolution payment UI data from the API', async () => {
+      getPaymentUIDataStub = sinon.stub().resolves(GET_PAYMENT_UI_DATA_RESPONSE)
+      axiosInstance.get = getPaymentUIDataStub
+
+      const response = await client.getDissolutionPaymentUIData(API_KEY, APPLICATION_REFERENCE)
+
+      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${APPLICATION_REFERENCE}/payment`
+
+      assert.isTrue(getPaymentUIDataStub.called)
+
+      const [url, config] = getPaymentUIDataStub.args[0]
+      assert.equal(url, reqUrl)
+      assert.equal(config.headers.Authorization, API_KEY)
+      assert.equal(config.headers['Content-Type'], 'application/json')
+      assert.equal(config.headers.Accept, 'application/json')
+      assert.equal(response, GET_PAYMENT_UI_DATA_RESPONSE.data)
     })
   })
 

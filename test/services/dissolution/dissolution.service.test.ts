@@ -4,6 +4,7 @@ import { instance, mock, verify, when } from 'ts-mockito'
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import Optional from 'app/models/optional'
@@ -14,8 +15,8 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import DissolutionCertificateService from 'app/services/dissolution/dissolutionCertificate.service'
 
 import {
-  generateApprovalModel, generateDissolutionCreateRequest,
-  generateDissolutionCreateResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest
+  generateApprovalModel, generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData,
+  generateDissolutionGetResponse, generateDissolutionPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
@@ -87,6 +88,25 @@ describe('DissolutionService', () => {
       verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
       assert.equal(res, null)
+    })
+  })
+
+  describe('getDissolutionPaymentUIData', () => {
+    let dissolutionGetPaymentUIData: DissolutionGetPaymentUIData
+
+    before(() => {
+      dissolutionGetPaymentUIData = generateDissolutionGetPaymentUIData()
+    })
+
+    it('should call dissolution api client and return dissolution payment UI data', async () => {
+      when(client.getDissolutionPaymentUIData(TOKEN, dissolutionSession.applicationReferenceNumber!))
+        .thenResolve(dissolutionGetPaymentUIData)
+
+      const response: DissolutionGetPaymentUIData = await service.getDissolutionPaymentUIData(TOKEN, dissolutionSession)
+
+      verify(client.getDissolutionPaymentUIData(TOKEN, dissolutionSession.applicationReferenceNumber!)).once()
+
+      assert.equal(response, dissolutionGetPaymentUIData)
     })
   })
 

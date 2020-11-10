@@ -4,10 +4,10 @@ import { CreatePaymentRequest } from '@companieshouse/api-sdk-node/dist/services
 import { provide } from 'inversify-binding-decorators'
 
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
-import Payment from 'app/models/dto/payment'
+import Payment from 'app/models/dto/paymentDetails'
 import PaymentItem from 'app/models/dto/paymentItem'
 import PaymentSummary from 'app/models/dto/paymentSummary'
-import { convertToCurrency } from 'app/utils/currency.util'
+import convertToCurrency from 'app/utils/currencyConverter.util'
 
 @provide(PaymentMapper)
 export default class PaymentMapper {

@@ -53,7 +53,7 @@ export class DissolutionApiClient {
         this.generateConfigForAPIKey(apiKey)
       )
 
-      return response!.data
+      return response.data
   }
 
   public async patchDissolution(token: string, companyNumber: string, body: DissolutionPatchRequest): Promise<DissolutionPatchResponse> {
@@ -62,6 +62,7 @@ export class DissolutionApiClient {
       body,
       this.generateConfigForOAuth(token)
     )
+
     return response.data
   }
 
