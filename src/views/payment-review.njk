@@ -13,19 +13,22 @@
 
         {% set paymentRows = [] %}
         {% for payment in paymentSummary.payments %}
-          {% set paymentRows = (
-            paymentRows.push(
-              {
-                text: payment.description,
-                classes: 'item-' + loop.index0
-              },
-              {
-                text: payment.cost,
-                classes: 'amount-to-pay-' + loop.index0,
-                format: "numeric"
-              }
-            ), paymentRows
-          ) %}
+          {% set paymentRows =
+            (
+              paymentRows.push(
+                {
+                  text: payment.description,
+                  attributes: { id: 'item-' + loop.index0 }
+                },
+                {
+                  text: payment.cost,
+                  attributes: { id: 'amount-to-pay-' + loop.index0 },
+                  format: "numeric"
+                }
+              ),
+              paymentRows
+            )
+          %}
         {% endfor %}
 
         {{ govukTable({

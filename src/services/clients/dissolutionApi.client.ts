@@ -17,6 +17,7 @@ import TYPES from 'app/types'
 export class DissolutionApiClient {
   public constructor(
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
+    @inject(TYPES.CHS_API_KEY) private CHS_API_KEY: string,
     @inject(TYPES.AxiosInstance) private axios: AxiosInstance
   ) {}
 
@@ -47,10 +48,10 @@ export class DissolutionApiClient {
     }
   }
 
-  public async getDissolutionPaymentUIData(apiKey: string, applicationReference: string): Promise<DissolutionGetPaymentUIData> {
+  public async getDissolutionPaymentUIData(applicationReference: string): Promise<DissolutionGetPaymentUIData> {
       const response: AxiosResponse<DissolutionGetPaymentUIData> = await this.axios.get(
         `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,
-        this.generateConfigForAPIKey(apiKey)
+        this.generateConfigForAPIKey()
       )
 
       return response.data
@@ -71,17 +72,17 @@ export class DissolutionApiClient {
       headers: {
         Authorization: 'Bearer ' + token,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       }
     }
   }
 
-  private generateConfigForAPIKey(apiKey: string): AxiosRequestConfig {
+  private generateConfigForAPIKey(): AxiosRequestConfig {
     return {
       headers: {
-        Authorization: apiKey,
+        Authorization: this.CHS_API_KEY,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       }
     }
   }

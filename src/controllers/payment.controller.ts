@@ -4,9 +4,7 @@ import { RedirectResult } from 'inversify-express-utils/dts/results'
 import { v4 as uuidv4 } from 'uuid'
 import BaseController from './base.controller'
 
-import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
-import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import PaymentSummary from 'app/models/dto/paymentSummary'
 import Optional from 'app/models/optional'
@@ -28,8 +26,6 @@ export class PaymentController extends BaseController {
     @inject(SessionService) private sessionService: SessionService,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
-    @inject(PaymentMapper) private paymentMapper: PaymentMapper,
-    @inject(TYPES.CHS_API_KEY) private CHS_API_KEY: string,
     @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
   ) {
     super()
@@ -44,10 +40,7 @@ export class PaymentController extends BaseController {
       return this.redirect(SEARCH_COMPANY_URI)
     }
 
-    const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData =
-      await this.dissolutionService.getDissolutionPaymentUIData(this.CHS_API_KEY, dissolutionSession)
-
-    const paymentSummary: PaymentSummary = this.paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)
+    const paymentSummary: PaymentSummary = await this.dissolutionService.getDissolutionPaymentSummary(dissolutionSession)
 
     return this.renderView(paymentSummary)
   }

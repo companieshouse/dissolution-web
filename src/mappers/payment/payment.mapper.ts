@@ -24,14 +24,18 @@ export default class PaymentMapper {
   }
 
   public mapToPaymentSummary(dissolutionGetPaymentUIData: DissolutionGetPaymentUIData): PaymentSummary {
-    const totalCost: number = dissolutionGetPaymentUIData.items.reduce(
-      (total: number, paymentItem: PaymentItem) => total + Number(paymentItem.amount), 0
-    )
+    const totalCost: number = this.calculateTotalCostOfPaymentItems(dissolutionGetPaymentUIData.items)
 
     return {
       payments: dissolutionGetPaymentUIData.items.map(this.mapToPayment),
       total_cost: convertToCurrency(totalCost)
     }
+  }
+
+  private calculateTotalCostOfPaymentItems(paymentItems: PaymentItem[]): number {
+    return paymentItems.reduce(
+      (totalCost: number, paymentItem: PaymentItem) => totalCost + Number(paymentItem.amount), 0
+    )
   }
 
   private mapToPayment(paymentItem: PaymentItem): Payment {

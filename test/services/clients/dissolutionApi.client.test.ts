@@ -18,12 +18,12 @@ import {
 describe('DissolutionApiClient', () => {
 
   let axiosInstance: AxiosInstance
-  let dissolutionApiUrl: string
   let client: DissolutionApiClient
   let getStub: sinon.SinonStub
   let postStub: sinon.SinonStub
   let patchStub: sinon.SinonStub
 
+  const DISSOLUTION_API_URL = 'http://apiurl.com'
   const TOKEN = 'some-token'
   const API_KEY = 'some-api-key'
   const COMPANY_NUMBER = '12345678'
@@ -34,9 +34,8 @@ describe('DissolutionApiClient', () => {
 
   beforeEach(() => {
     axiosInstance = axios.create()
-    dissolutionApiUrl = 'http://apiurl.com'
 
-    client = new DissolutionApiClient(dissolutionApiUrl, axiosInstance)
+    client = new DissolutionApiClient(DISSOLUTION_API_URL, API_KEY, axiosInstance)
   })
 
   describe('createDissolution', () => {
@@ -46,7 +45,7 @@ describe('DissolutionApiClient', () => {
 
       const response = await client.createDissolution(TOKEN, COMPANY_NUMBER, BODY)
 
-      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}`
 
       assert.isTrue(postStub.called)
 
@@ -68,7 +67,7 @@ describe('DissolutionApiClient', () => {
 
       const response = await client.getDissolution(TOKEN, COMPANY_NUMBER)
 
-      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}`
 
       assert.isTrue(getStub.called)
 
@@ -95,7 +94,7 @@ describe('DissolutionApiClient', () => {
         assert.equal(e.response!.status, error.response!.status)
       }
 
-      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}`
 
       assert.isTrue(getStub.called)
 
@@ -118,7 +117,7 @@ describe('DissolutionApiClient', () => {
 
       const response = await client.getDissolution(TOKEN, COMPANY_NUMBER)
 
-      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}`
 
       assert.isTrue(getStub.called)
 
@@ -143,9 +142,9 @@ describe('DissolutionApiClient', () => {
       getPaymentUIDataStub = sinon.stub().resolves(GET_PAYMENT_UI_DATA_RESPONSE)
       axiosInstance.get = getPaymentUIDataStub
 
-      const response = await client.getDissolutionPaymentUIData(API_KEY, APPLICATION_REFERENCE)
+      const response = await client.getDissolutionPaymentUIData(APPLICATION_REFERENCE)
 
-      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${APPLICATION_REFERENCE}/payment`
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${APPLICATION_REFERENCE}/payment`
 
       assert.isTrue(getPaymentUIDataStub.called)
 
@@ -167,7 +166,7 @@ describe('DissolutionApiClient', () => {
 
       const response: DissolutionPatchResponse = await client.patchDissolution(TOKEN, COMPANY_NUMBER, request)
 
-      const reqUrl: string = `${dissolutionApiUrl}/dissolution-request/${COMPANY_NUMBER}`
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}`
 
       assert.isTrue(patchStub.called)
 

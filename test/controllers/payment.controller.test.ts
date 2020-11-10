@@ -11,11 +11,8 @@ import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/payment.controller'
-import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
-import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
-import PaymentSummary from 'app/models/dto/paymentSummary'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
@@ -23,17 +20,15 @@ import PaymentService from 'app/services/payment/payment.service'
 import SessionService from 'app/services/session/session.service'
 import TYPES from 'app/types'
 
-import { generateDissolutionGetPaymentUIData, generateDissolutionGetResponse } from 'test/fixtures/dissolutionApi.fixtures'
+import { generateDissolutionGetResponse } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('PaymentController', () => {
 
   let dissolutionService: DissolutionService
   let sessionService: SessionService
   let paymentService: PaymentService
-  let paymentMapper: PaymentMapper
 
   const TOKEN = 'some-token'
-  const API_KEY = 'some-api-key'
   const COMPANY_NUMBER = 'ABC123'
   const REDIRECT_URL = 'http://some-payment-ui-url'
 
@@ -45,8 +40,6 @@ describe('PaymentController', () => {
       container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
       container.rebind(SessionService).toConstantValue(instance(sessionService))
       container.rebind(PaymentService).toConstantValue(instance(paymentService))
-      container.rebind(PaymentMapper).toConstantValue(instance(paymentMapper))
-      container.rebind(TYPES.CHS_API_KEY).toConstantValue(API_KEY)
       container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
     })
   }
@@ -55,7 +48,6 @@ describe('PaymentController', () => {
     dissolutionService = mock(DissolutionService)
     sessionService = mock(SessionService)
     paymentService = mock(PaymentService)
-    paymentMapper = mock(PaymentMapper)
 
     dissolution = generateDissolutionGetResponse()
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
@@ -78,14 +70,10 @@ describe('PaymentController', () => {
     })
 
     it('should redirect to the payment summary page if the application has not been paid for', async () => {
-      const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData = generateDissolutionGetPaymentUIData()
-      const paymentSummary: PaymentSummary = generatePaymentSummary()
-
       when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
       when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
-      when(dissolutionService.getDissolutionPaymentUIData(API_KEY, dissolutionSession)).thenResolve(dissolutionGetPaymentUIData)
-      when(paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)).thenReturn(paymentSummary)
+      when(dissolutionService.getDissolutionPaymentSummary(dissolutionSession)).thenResolve(generatePaymentSummary())
 
       dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
 
@@ -98,9 +86,8 @@ describe('PaymentController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Review your payment'))
-      assert.isTrue(htmlAssertHelper.hasText('h1', 'Review your payment'))
-      assert.isTrue(htmlAssertHelper.hasText('.item-0', 'Some payment description'))
-      assert.isTrue(htmlAssertHelper.hasText('.amount-to-pay-0', '£8.00'))
+      assert.isTrue(htmlAssertHelper.hasText('#item-0', 'Some payment description'))
+      assert.isTrue(htmlAssertHelper.hasText('#amount-to-pay-0', '£8.00'))
       assert.isTrue(htmlAssertHelper.hasText('#total_cost', '£16.00'))
     })
   })
@@ -124,8 +111,6 @@ describe('PaymentController', () => {
         container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
         container.rebind(SessionService).toConstantValue(instance(sessionService))
         container.rebind(PaymentService).toConstantValue(instance(paymentService))
-        container.rebind(PaymentMapper).toConstantValue(instance(paymentMapper))
-        container.rebind(TYPES.CHS_API_KEY).toConstantValue(API_KEY)
         container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(0)
       })
 
