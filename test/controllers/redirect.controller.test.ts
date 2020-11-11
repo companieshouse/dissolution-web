@@ -20,7 +20,7 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import {
   CERTIFICATE_SIGNED_URI, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
   NOT_SELECTED_SIGNATORY, PAYMENT_CALLBACK_URI,
-  PAYMENT_URI,
+  PAYMENT_REVIEW_URI,
   REDIRECT_GATE_URI,
   SEARCH_COMPANY_URI,
   SELECT_DIRECTOR_URI,
@@ -190,7 +190,7 @@ describe('RedirectController', () => {
         await request(initApp())
           .get(REDIRECT_GATE_URI)
           .expect(StatusCodes.MOVED_TEMPORARILY)
-          .expect('Location', PAYMENT_URI)
+          .expect('Location', PAYMENT_REVIEW_URI)
       })
 
       it('should redirect to certificate signed when the user is not the applicant', async () => {
@@ -329,7 +329,7 @@ describe('RedirectController', () => {
           ref: REF
         })
         .expect(StatusCodes.MOVED_TEMPORARILY)
-        .expect('Location', PAYMENT_URI)
+        .expect('Location', PAYMENT_REVIEW_URI)
     })
 
     it('should redirect to search company if status is cancelled', async () => {

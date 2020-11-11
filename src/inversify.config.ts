@@ -27,15 +27,14 @@ export function initContainer(): Container {
   const container: Container = new Container()
 
   // Env
-  container.bind<number>(TYPES.PORT).toConstantValue(Number(getEnvOrDefault('PORT', '3000')))
-  container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv('NODE_ENV'))
   container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow('CDN_HOST'))
-  container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow('CHS_COMPANY_PROFILE_API_LOCAL_URL'))
-  container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
   container.bind<string>(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue(getEnvOrThrow('CHIPS_PRESENTER_AUTH_URL'))
+  container.bind<string>(TYPES.CHS_API_KEY).toConstantValue((getEnvOrThrow('CHS_API_KEY')))
+  container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow('CHS_COMPANY_PROFILE_API_LOCAL_URL'))
   container.bind<string>(TYPES.CHS_URL).toConstantValue(getEnvOrThrow('CHS_URL'))
+  container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
+  container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv('NODE_ENV'))
   container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow('PAYMENTS_API_URL'))
-  container.bind<number>(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(Number(getEnvOrThrow('PAY_BY_ACCOUNT_FEATURE_ENABLED')))
   const piwikConfig: PiwikConfig = {
     url: getEnvOrThrow('PIWIK_URL'),
     siteId: getEnvOrThrow('PIWIK_SITE_ID'),
@@ -45,6 +44,10 @@ export function initContainer(): Container {
     partnershipGoalId: Number(getEnvOrThrow('PIWIK_PARTNERSHIP_GOAL_ID'))
   }
   container.bind<PiwikConfig>(TYPES.PIWIK_CONFIG).toConstantValue(piwikConfig)
+  container.bind<number>(TYPES.PORT).toConstantValue(Number(getEnvOrDefault('PORT', '3000')))
+
+  // Feature toggles
+  container.bind<number>(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(Number(getEnvOrThrow('PAY_BY_ACCOUNT_FEATURE_ENABLED')))
 
   // AWS
   container.bind<S3>(TYPES.S3).toConstantValue(new S3({ region: getEnvOrThrow('ENV_REGION_AWS') }))

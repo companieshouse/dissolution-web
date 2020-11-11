@@ -14,7 +14,7 @@ import {
   CERTIFICATE_SIGNED_URI,
   ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
   NOT_SELECTED_SIGNATORY,
-  PAYMENT_URI,
+  PAYMENT_REVIEW_URI,
   REDIRECT_GATE_URI,
   SEARCH_COMPANY_URI, SELECT_DIRECTOR_URI,
   VIEW_FINAL_CONFIRMATION_URI,
@@ -128,7 +128,7 @@ export class RedirectController extends BaseController {
 
   private getPendingPaymentRedirectUri(dissolution: DissolutionGetResponse, userEmail: string): string {
     if (this.isApplicant(dissolution, userEmail)) {
-      return PAYMENT_URI
+      return PAYMENT_REVIEW_URI
     } else if (this.getSignatoriesForUser(dissolution, userEmail).length > 0) {
       return CERTIFICATE_SIGNED_URI
     } else {
@@ -143,7 +143,7 @@ export class RedirectController extends BaseController {
       case PaymentStatus.CANCELLED:
         return SEARCH_COMPANY_URI
       case PaymentStatus.FAILED:
-        return PAYMENT_URI
+        return PAYMENT_REVIEW_URI
       default:
         throw new Error('Unexpected payment status received')
     }

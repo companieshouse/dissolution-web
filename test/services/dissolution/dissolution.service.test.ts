@@ -1,11 +1,15 @@
 import { assert } from 'chai'
 import { instance, mock, verify, when } from 'ts-mockito'
+import { generatePaymentSummary } from '../../fixtures/payment.fixtures'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
+import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import PaymentSummary from 'app/models/dto/paymentSummary'
 import Optional from 'app/models/optional'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -14,17 +18,18 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import DissolutionCertificateService from 'app/services/dissolution/dissolutionCertificate.service'
 
 import {
-  generateApprovalModel, generateDissolutionCreateRequest,
-  generateDissolutionCreateResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest
+  generateApprovalModel, generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData,
+  generateDissolutionGetResponse, generateDissolutionPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 describe('DissolutionService', () => {
   let service: DissolutionService
 
-  let mapper: DissolutionRequestMapper
+  let dissolutionRequestMapper: DissolutionRequestMapper
   let client: DissolutionApiClient
   let certificateService: DissolutionCertificateService
+  let paymentMapper: PaymentMapper
 
   let dissolutionCreateResponse: DissolutionCreateResponse
   let dissolutionGetResponse: DissolutionGetResponse
@@ -35,28 +40,28 @@ describe('DissolutionService', () => {
   const MAPPED_BODY: DissolutionCreateRequest = generateDissolutionCreateRequest()
 
   beforeEach(() => {
-    mapper = mock(DissolutionRequestMapper)
+    dissolutionRequestMapper = mock(DissolutionRequestMapper)
     client = mock(DissolutionApiClient)
     certificateService = mock(DissolutionCertificateService)
+    paymentMapper = mock(PaymentMapper)
 
     dissolutionCreateResponse = generateDissolutionCreateResponse()
     dissolutionGetResponse = generateDissolutionGetResponse()
     dissolutionSession = generateDissolutionSession()
 
     service = new DissolutionService(
-      instance(mapper),
+      instance(dissolutionRequestMapper),
       instance(client),
-      instance(certificateService)
+      instance(certificateService),
+      instance(paymentMapper)
     )
   })
 
   describe('createDissolution', () => {
     it('should call dissolution api client and return reference number', async () => {
-      when(mapper.mapToDissolutionRequest(dissolutionSession))
-        .thenReturn(MAPPED_BODY)
+      when(dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)).thenReturn(MAPPED_BODY)
 
-      when(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY))
-        .thenResolve(dissolutionCreateResponse)
+      when(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY)).thenResolve(dissolutionCreateResponse)
 
       const res: Optional<string> = await service.createDissolution(TOKEN, dissolutionSession)
 
@@ -68,8 +73,7 @@ describe('DissolutionService', () => {
 
   describe('getDissolution', () => {
     it('should call dissolution api client and return dissolution info if dissolution is present', async () => {
-      when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!))
-        .thenResolve(dissolutionGetResponse)
+      when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).thenResolve(dissolutionGetResponse)
 
       const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
 
@@ -79,14 +83,34 @@ describe('DissolutionService', () => {
     })
 
     it('should call dissolution api client and return null if dissolution is not present', async () => {
-      when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!))
-        .thenResolve(null)
+      when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).thenResolve(null)
 
       const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
 
       verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
       assert.equal(res, null)
+    })
+  })
+
+  describe('getDissolutionPaymentSummary', () => {
+    let dissolutionGetPaymentUIData: DissolutionGetPaymentUIData
+    let paymentSummary: PaymentSummary
+
+    before(() => {
+      dissolutionGetPaymentUIData = generateDissolutionGetPaymentUIData()
+      paymentSummary = generatePaymentSummary()
+    })
+
+    it('should call dissolution api client and return the dissolution payment summary', async () => {
+      when(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).thenResolve(dissolutionGetPaymentUIData)
+      when(paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)).thenReturn(paymentSummary)
+
+      const response: PaymentSummary = await service.getDissolutionPaymentSummary(dissolutionSession)
+
+      verify(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).once()
+
+      assert.equal(response, paymentSummary)
     })
   })
 
@@ -98,7 +122,7 @@ describe('DissolutionService', () => {
 
       const body: DissolutionPatchRequest = generateDissolutionPatchRequest()
 
-      when(mapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body)
+      when(dissolutionRequestMapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body)
 
       await service.approveDissolution(TOKEN, dissolutionSession, ipAddress)
 
