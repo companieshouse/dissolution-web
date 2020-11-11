@@ -2,11 +2,11 @@ import { CreatePaymentRequest, Payment } from '@companieshouse/api-sdk-node/dist
 import { ApiResponse, ApiResult } from '@companieshouse/api-sdk-node/dist/services/resource'
 import { StatusCodes } from 'http-status-codes'
 
+import PaymentDetails from 'app/models/dto/paymentDetails'
 import PaymentSummary from 'app/models/dto/paymentSummary'
 import PresenterAuthRequest from 'app/models/dto/presenterAuthRequest'
 import PresenterAuthResponse from 'app/models/dto/presenterAuthResponse'
 import PayByAccountDetailsFormModel from 'app/models/form/payByAccountDetails.model'
-import PaymentDetails from 'app/models/dto/paymentDetails'
 
 export function generateCreatePaymentRequest(): CreatePaymentRequest {
   return {
