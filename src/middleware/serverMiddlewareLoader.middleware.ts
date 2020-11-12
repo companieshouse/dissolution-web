@@ -5,6 +5,7 @@ import ApplicationLogger from '@companieshouse/structured-logging-node/lib/Appli
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import { Application, NextFunction, Request, Response } from 'express'
+import helmet from 'helmet'
 import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
@@ -27,6 +28,8 @@ export default class ServerMiddlewareLoader {
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use(cookieParser())
     app.use(createLoggerMiddleware(APP_NAME))
+    app.use(helmet.hidePoweredBy())
+    app.use(helmet.contentSecurityPolicy())
 
     this.customServerMiddlewareLoader.loadCustomServerMiddleware(app)
 
