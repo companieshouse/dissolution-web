@@ -1,0 +1,64 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/back-link/macro.njk'     import govukBackLink %}
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from "govuk/components/radios/macro.njk"        import govukRadios %}
+{% from 'govuk/components/button/macro.njk'        import govukButton %}
+
+{% set title = "How do you want to pay for the application? - " + pageTitleSuffix %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: Paths.PAYMENT_REVIEW_URI
+    })
+  }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% include 'components/errors/error-summary.njk' %}
+      <form method="post">
+        {{
+          govukRadios({
+            name: "paymentType",
+            fieldset: {
+              legend: {
+                text: "How do you want to pay for the application?",
+                isPageHeading: true,
+                classes: "govuk-fieldset__legend--l"
+              }
+            },
+            errorMessage: {
+              text: errors.paymentType
+            } if errors.paymentType,
+            items: [
+              {
+                value: PaymentType.CREDIT_DEBIT_CARD,
+                text: "Credit or debit card",
+                checked: data.paymentType === PaymentType.CREDIT_DEBIT_CARD if data,
+                id: 'card-radio-button'
+              },
+              {
+                value: PaymentType.ACCOUNT,
+                text: "Companies House account",
+                checked: data.paymentType === PaymentType.ACCOUNT if data,
+                id: 'account-radio-button'
+              }
+            ]
+          })
+        }}
+
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}
