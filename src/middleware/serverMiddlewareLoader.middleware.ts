@@ -13,11 +13,15 @@ import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middlew
 import NunjucksLoader from './nunjucksLoader.middleware'
 
 import { APP_NAME } from 'app/constants/app.const'
+import PiwikConfig from 'app/models/piwikConfig'
+import TYPES from 'app/types'
 
 @provide(ServerMiddlewareLoader)
 export default class ServerMiddlewareLoader {
 
   public constructor(
+    @inject(TYPES.CDN_HOST) private CDN_HOST: string,
+    @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
     @inject(NunjucksLoader) private nunjucks: NunjucksLoader,
     @inject(ApplicationLogger) private logger: ApplicationLogger,
     @inject(CustomServerMiddlewareLoader) private customServerMiddlewareLoader: CustomServerMiddlewareLoader
@@ -33,9 +37,12 @@ export default class ServerMiddlewareLoader {
       helmet.contentSecurityPolicy({
         directives: {
           defaultSrc: ['\'self\''],
-          scriptSrc: ['\'self\'', 'example.com'],
+          scriptSrc: ['\'self\'', 'code.jquery.com', this.CDN_HOST, '\'unsafe-inline\'',
+            ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)],
           objectSrc: ['\'none\''],
-          upgradeInsecureRequests: [],
+          fontSrc: ['\'self\'', this.CDN_HOST],
+          styleSrc: ['\'self\'', this.CDN_HOST],
+          imgSrc: ['\'self\'', this.CDN_HOST, ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)]
         }
       })
     )
@@ -51,5 +58,9 @@ export default class ServerMiddlewareLoader {
 
       return res.status(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).render('error')
     })
+  }
+
+  private static extractPiwikHost(piwikConfig: PiwikConfig): string {
+    return new URL(piwikConfig.url).hostname
   }
 }
