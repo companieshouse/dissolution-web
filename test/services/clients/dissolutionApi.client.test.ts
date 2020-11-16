@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { assert } from 'chai'
+import { StatusCodes } from 'http-status-codes'
 import sinon from 'sinon'
 
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
@@ -7,12 +8,13 @@ import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUID
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
   generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData, generateDissolutionGetResponse,
-  generateDissolutionPatchRequest, generateDissolutionPatchResponse
+  generateDissolutionPatchRequest, generateDissolutionPatchResponse, generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
@@ -26,6 +28,7 @@ describe('DissolutionApiClient', () => {
   const DISSOLUTION_API_URL = 'http://apiurl.com'
   const TOKEN = 'some-token'
   const API_KEY = 'some-api-key'
+  const APPLICATION_REFERENCE = 'ABC123'
   const COMPANY_NUMBER = '12345678'
   const BODY = generateDissolutionCreateRequest()
   const GET_RESPONSE: AxiosResponse<DissolutionGetResponse> = generateAxiosResponse(generateDissolutionGetResponse())
@@ -82,7 +85,7 @@ describe('DissolutionApiClient', () => {
 
     it('should throw an error if any other error than 404 occurs', async () => {
       const error: AxiosError = generateAxiosError(generateDissolutionGetResponse())
-      error.response!.status = 400
+      error.response!.status = StatusCodes.BAD_REQUEST
 
       getStub = sinon.stub().rejects(error)
       axiosInstance.get = getStub
@@ -110,7 +113,7 @@ describe('DissolutionApiClient', () => {
         {
           response:
             {
-              status: 404
+              status: StatusCodes.NOT_FOUND
             }
         })
       axiosInstance.get = getStub
@@ -132,7 +135,6 @@ describe('DissolutionApiClient', () => {
   })
 
   describe('getDissolutionPaymentUIData', () => {
-    const APPLICATION_REFERENCE = 'ABC123'
     const GET_PAYMENT_UI_DATA_RESPONSE: AxiosResponse<DissolutionGetPaymentUIData> =
       generateAxiosResponse(generateDissolutionGetPaymentUIData())
 
@@ -158,7 +160,7 @@ describe('DissolutionApiClient', () => {
   })
 
   describe('patchDissolution', () => {
-    it('should create a dissolution request in the api and return reference number', async () => {
+    it('should update a dissolution from the dissolution patch request', async () => {
       const request: DissolutionPatchRequest = generateDissolutionPatchRequest()
 
       patchStub = sinon.stub().resolves(PATCH_RESPONSE)
@@ -178,6 +180,36 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers.Accept, 'application/json')
 
       assert.equal(response, PATCH_RESPONSE.data)
+    })
+  })
+
+  describe('patchDissolutionPaymentData', () => {
+    const request: DissolutionPaymentPatchRequest = generateDissolutionPaymentPatchRequest()
+
+    it('should update the payment details of a dissolution from the dissolution payment patch request', () => {
+      patchStub = sinon.stub().resolves()
+      axiosInstance.patch = patchStub
+
+      assert.doesNotThrow(async () => await client.patchDissolutionPaymentData(APPLICATION_REFERENCE, request))
+
+      assert.isTrue(patchStub.called)
+    })
+
+    it('should throw an error if there was an issue with the request', async () => {
+      const error: AxiosError = generateAxiosError({})
+      error.response!.status = StatusCodes.INTERNAL_SERVER_ERROR
+
+      patchStub = sinon.stub().rejects(error)
+      axiosInstance.patch = patchStub
+
+      try {
+        await client.patchDissolutionPaymentData(APPLICATION_REFERENCE, request)
+        assert.fail()
+      } catch (err) {
+        assert.equal(err.response!.status, error.response!.status)
+      }
+
+      assert.isTrue(patchStub.called)
     })
   })
 })

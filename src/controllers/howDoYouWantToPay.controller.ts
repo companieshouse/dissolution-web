@@ -30,9 +30,9 @@ interface ViewModel {
 export class HowDoYouWantToPayController extends BaseController {
 
   public constructor(
-    @inject(SessionService) private session: SessionService,
+    @inject(SessionService) private sessionService: SessionService,
     @inject(FormValidator) private validator: FormValidator,
-    @inject(DissolutionService) private service: DissolutionService,
+    @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
     @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
   ) {
@@ -45,10 +45,9 @@ export class HowDoYouWantToPayController extends BaseController {
       return Promise.reject(new NotFoundError('Feature toggle not enabled'))
     }
 
-    const token: string = this.session.getAccessToken(this.httpContext.request)
-    const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
-    if (await this.isAlreadyPaid(dissolutionSession, token)) {
+    if (await this.isAlreadyPaid(dissolutionSession)) {
       return this.redirect(SEARCH_COMPANY_URI)
     }
 
@@ -57,10 +56,9 @@ export class HowDoYouWantToPayController extends BaseController {
 
   @httpPost('')
   public async post(@requestBody() body: HowDoYouWantToPayFormModel): Promise<string | RedirectResult>  {
-    const token: string = this.session.getAccessToken(this.httpContext.request)
-    const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
-    if (await this.isAlreadyPaid(dissolutionSession, token)) {
+    if (await this.isAlreadyPaid(dissolutionSession)) {
       return this.redirect(SEARCH_COMPANY_URI)
     }
 
@@ -98,7 +96,7 @@ export class HowDoYouWantToPayController extends BaseController {
   }
 
   private async getCreditCardPaymentUrl(dissolutionSession: DissolutionSession): Promise<string> {
-    const token: string = this.session.getAccessToken(this.httpContext.request)
+    const token: string = this.sessionService.getAccessToken(this.httpContext.request)
 
     dissolutionSession.paymentStateUUID = uuidv4()
 
@@ -116,15 +114,13 @@ export class HowDoYouWantToPayController extends BaseController {
       howDoYouWantToPayForm
     }
 
-    this.session.setDissolutionSession(this.httpContext.request, updatedSession)
+    this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 
-  private async getDissolution(session: DissolutionSession, token: string): Promise<Optional<DissolutionGetResponse>> {
-    return this.service.getDissolution(token, session)
-  }
+  private async isAlreadyPaid(dissolutionSession: DissolutionSession): Promise<boolean> {
+    const token: string = this.sessionService.getAccessToken(this.httpContext.request)
 
-  private async isAlreadyPaid(dissolutionSession: DissolutionSession, token: string): Promise<boolean> {
-    const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token)
+    const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(token, dissolutionSession)
 
     return dissolution!.application_status === ApplicationStatus.PAID
   }

@@ -10,7 +10,7 @@ import { generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
-import 'app/controllers/payment.controller'
+import 'app/controllers/paymentReview.controller'
 import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -22,7 +22,7 @@ import TYPES from 'app/types'
 
 import { generateDissolutionGetResponse } from 'test/fixtures/dissolutionApi.fixtures'
 
-describe('PaymentController', () => {
+describe('PaymentReviewController', () => {
 
   let dissolutionService: DissolutionService
   let sessionService: SessionService
@@ -53,7 +53,7 @@ describe('PaymentController', () => {
     dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
   })
 
-  describe('GET - ensure that the payment page loads correctly', () => {
+  describe('GET - ensure that the payment review page loads correctly', () => {
     it('should redirect to the search company page if the application has already been paid for', async () => {
       when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
       when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
@@ -69,7 +69,7 @@ describe('PaymentController', () => {
         .expect('Location', SEARCH_COMPANY_URI)
     })
 
-    it('should redirect to the payment summary page if the application has not been paid for', async () => {
+    it('should redirect to the payment review page if the application has not been paid for', async () => {
       when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
       when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
       when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
@@ -92,7 +92,7 @@ describe('PaymentController', () => {
     })
   })
 
-  describe('POST - ensure that the payment page submits successfully', () => {
+  describe('POST - ensure that the payment review page submits successfully', () => {
     it('should redirect to the how do you want to pay page (if the pay by account feature toggle is on)', async () => {
       const app = initApp()
 
