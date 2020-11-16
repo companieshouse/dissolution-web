@@ -29,7 +29,16 @@ export default class ServerMiddlewareLoader {
     app.use(cookieParser())
     app.use(createLoggerMiddleware(APP_NAME))
     app.use(helmet.hidePoweredBy())
-    app.use(helmet.contentSecurityPolicy())
+    app.use(
+      helmet.contentSecurityPolicy({
+        directives: {
+          defaultSrc: ['\'self\''],
+          scriptSrc: ['\'self\'', 'example.com'],
+          objectSrc: ['\'none\''],
+          upgradeInsecureRequests: [],
+        }
+      })
+    )
 
     this.customServerMiddlewareLoader.loadCustomServerMiddleware(app)
 
