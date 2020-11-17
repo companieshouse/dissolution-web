@@ -61,7 +61,8 @@ export default class ServerMiddlewareLoader {
         directives: {
           defaultSrc: [`'self'`],
           scriptSrc: [`'self'`, 'code.jquery.com', this.CDN_HOST, `'nonce-${nonce}'`,
-            ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)],
+            ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG),
+            `'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='`],
           objectSrc: [`'none'`],
           fontSrc: [`'self'`, this.CDN_HOST],
           styleSrc: [`'self'`, this.CDN_HOST],
