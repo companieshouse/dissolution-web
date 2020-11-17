@@ -1,7 +1,9 @@
-import 'reflect-metadata'
-
 import { createLoggerMiddleware } from '@companieshouse/structured-logging-node'
 import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
+
+import { APP_NAME } from 'app/constants/app.const'
+import PiwikConfig from 'app/models/piwikConfig'
+import TYPES from 'app/types'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import { Application, NextFunction, Request, Response } from 'express'
@@ -10,13 +12,11 @@ import { ContentSecurityPolicyOptions } from 'helmet/dist/middlewares/content-se
 import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
+import nocache from 'nocache'
+import 'reflect-metadata'
 import { v4 as uuidv4 } from 'uuid'
 import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middleware'
 import NunjucksLoader from './nunjucksLoader.middleware'
-
-import { APP_NAME } from 'app/constants/app.const'
-import PiwikConfig from 'app/models/piwikConfig'
-import TYPES from 'app/types'
 
 @provide(ServerMiddlewareLoader)
 export default class ServerMiddlewareLoader {
@@ -27,13 +27,14 @@ export default class ServerMiddlewareLoader {
     @inject(NunjucksLoader) private nunjucks: NunjucksLoader,
     @inject(ApplicationLogger) private logger: ApplicationLogger,
     @inject(CustomServerMiddlewareLoader) private customServerMiddlewareLoader: CustomServerMiddlewareLoader
-  ) {}
+  ) {
+  }
 
   public loadServerMiddleware(app: Application, directory: string): void {
     const nonce: string = uuidv4()
 
     app.use(bodyParser.json())
-    app.use(bodyParser.urlencoded({ extended: true }))
+    app.use(bodyParser.urlencoded({extended: true}))
     app.use(cookieParser())
     app.use(createLoggerMiddleware(APP_NAME))
     this.setHeaders(app, nonce)
@@ -56,9 +57,15 @@ export default class ServerMiddlewareLoader {
   }
 
   private setHeaders(app: Application, nonce: string): void {
-    app.use(helmet.hidePoweredBy())
+    app.use(nocache())
     app.use(
-      helmet.contentSecurityPolicy(this.prepareCSPConfig(nonce))
+      helmet({
+        contentSecurityPolicy: this.prepareCSPConfig(nonce),
+        hsts: {
+          maxAge: 31536000,
+          includeSubDomains: true,
+        }
+      })
     )
   }
 
