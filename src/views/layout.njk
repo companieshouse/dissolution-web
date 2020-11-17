@@ -93,9 +93,9 @@
 {% block bodyEnd %}
   {# Run JavaScript at end of the <body>, to avoid blocking the initial render. #}
   <script src="//{{ cdn.host }}/javascripts/govuk-frontend/v3.6.0/govuk-frontend-3.6.0.min.js"></script>
-  <script>window.GOVUKFrontend.initAll()</script>
+  <script nonce={{ nonce | dump | safe }}>window.GOVUKFrontend.initAll()</script>
   <script src="//{{ cdn.host }}/javascripts/app/piwik-enable.js"></script>
-  <script type="application/javascript">
+  <script nonce={{ nonce | dump | safe }} type="application/javascript">
     (function() {
       bindPiwikListener('dissolutions', '{{ piwik.url }}', {{ piwik.siteId }});
     }());

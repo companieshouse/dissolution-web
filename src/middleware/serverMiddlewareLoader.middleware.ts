@@ -9,6 +9,7 @@ import helmet from 'helmet'
 import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
+import { v4 as uuidv4 } from 'uuid'
 import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middleware'
 import NunjucksLoader from './nunjucksLoader.middleware'
 
@@ -28,28 +29,17 @@ export default class ServerMiddlewareLoader {
   ) {}
 
   public loadServerMiddleware(app: Application, directory: string): void {
+    const nonce: string = uuidv4()
+
     app.use(bodyParser.json())
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use(cookieParser())
     app.use(createLoggerMiddleware(APP_NAME))
-    app.use(helmet.hidePoweredBy())
-    app.use(
-      helmet.contentSecurityPolicy({
-        directives: {
-          defaultSrc: ['\'self\''],
-          scriptSrc: ['\'self\'', 'code.jquery.com', this.CDN_HOST, '\'unsafe-inline\'',
-            ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)],
-          objectSrc: ['\'none\''],
-          fontSrc: ['\'self\'', this.CDN_HOST],
-          styleSrc: ['\'self\'', this.CDN_HOST],
-          imgSrc: ['\'self\'', this.CDN_HOST, ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)]
-        }
-      })
-    )
+    this.setHeaders(app, nonce)
 
     this.customServerMiddlewareLoader.loadCustomServerMiddleware(app)
 
-    this.nunjucks.configureNunjucks(app, directory)
+    this.nunjucks.configureNunjucks(app, directory, nonce)
   }
 
   public configureErrorHandling(app: Application): void {
@@ -62,5 +52,22 @@ export default class ServerMiddlewareLoader {
 
   private static extractPiwikHost(piwikConfig: PiwikConfig): string {
     return new URL(piwikConfig.url).hostname
+  }
+
+  private setHeaders(app: Application, nonce: string): void {
+    app.use(helmet.hidePoweredBy())
+    app.use(
+      helmet.contentSecurityPolicy({
+        directives: {
+          defaultSrc: [`'self'`],
+          scriptSrc: [`'self'`, 'code.jquery.com', this.CDN_HOST, `'nonce-${nonce}'`,
+            ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)],
+          objectSrc: [`'none'`],
+          fontSrc: [`'self'`, this.CDN_HOST],
+          styleSrc: [`'self'`, this.CDN_HOST],
+          imgSrc: [`'self'`, this.CDN_HOST, ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)]
+        }
+      })
+    )
   }
 }
