@@ -46,7 +46,7 @@ export default class ServerMiddlewareLoader {
     app.use((err: any, _: Request, res: Response, _2: NextFunction) => {
       this.logger.error(`${err.constructor.name} - ${err.message}`)
 
-      return res.status(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).render('error')
+      return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).render('error')
     })
   }
 

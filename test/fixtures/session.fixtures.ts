@@ -4,6 +4,7 @@ import { ISignInInfo } from '@companieshouse/node-session-handler/lib/session/mo
 import sinon from 'sinon'
 
 import OfficerType from 'app/models/dto/officerType.enum'
+import PaymentType from 'app/models/dto/paymentType.enum'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -42,7 +43,8 @@ export function generateDissolutionSession(companyNumber: string = '12345678'): 
       generateDirectorToSign(),
       generateDirectorToSign()
     ],
-    officerType: OfficerType.DIRECTOR
+    officerType: OfficerType.DIRECTOR,
+    paymentType: PaymentType.CREDIT_DEBIT_CARD
   }
 }
 
