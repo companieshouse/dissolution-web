@@ -6,6 +6,7 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import { Application, NextFunction, Request, Response } from 'express'
 import helmet from 'helmet'
+import { ContentSecurityPolicyOptions } from 'helmet/dist/middlewares/content-security-policy'
 import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
@@ -57,18 +58,22 @@ export default class ServerMiddlewareLoader {
   private setHeaders(app: Application, nonce: string): void {
     app.use(helmet.hidePoweredBy())
     app.use(
-      helmet.contentSecurityPolicy({
-        directives: {
-          defaultSrc: [`'self'`],
-          scriptSrc: [`'self'`, 'code.jquery.com', this.CDN_HOST, `'nonce-${nonce}'`,
-            ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG),
-            `'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='`],
-          objectSrc: [`'none'`],
-          fontSrc: [`'self'`, this.CDN_HOST],
-          styleSrc: [`'self'`, this.CDN_HOST],
-          imgSrc: [`'self'`, this.CDN_HOST, ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)]
-        }
-      })
+      helmet.contentSecurityPolicy(this.prepareCSPConfig(nonce))
     )
+  }
+
+  private prepareCSPConfig(nonce: string): ContentSecurityPolicyOptions {
+    return {
+      directives: {
+        defaultSrc: [`'self'`],
+        scriptSrc: [`'self'`, 'code.jquery.com', this.CDN_HOST, `'nonce-${nonce}'`,
+          ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG),
+          `'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='`],
+        objectSrc: [`'none'`],
+        fontSrc: [`'self'`, this.CDN_HOST],
+        styleSrc: [`'self'`, this.CDN_HOST],
+        imgSrc: [`'self'`, this.CDN_HOST, ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)]
+      }
+    }
   }
 }
