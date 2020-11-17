@@ -1,9 +1,7 @@
+import 'reflect-metadata'
+
 import { createLoggerMiddleware } from '@companieshouse/structured-logging-node'
 import ApplicationLogger from '@companieshouse/structured-logging-node/lib/ApplicationLogger'
-
-import { APP_NAME } from 'app/constants/app.const'
-import PiwikConfig from 'app/models/piwikConfig'
-import TYPES from 'app/types'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import { Application, NextFunction, Request, Response } from 'express'
@@ -13,10 +11,13 @@ import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import nocache from 'nocache'
-import 'reflect-metadata'
 import { v4 as uuidv4 } from 'uuid'
 import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middleware'
 import NunjucksLoader from './nunjucksLoader.middleware'
+
+import { APP_NAME } from 'app/constants/app.const'
+import PiwikConfig from 'app/models/piwikConfig'
+import TYPES from 'app/types'
 
 @provide(ServerMiddlewareLoader)
 export default class ServerMiddlewareLoader {
@@ -57,13 +58,15 @@ export default class ServerMiddlewareLoader {
   }
 
   private setHeaders(app: Application, nonce: string): void {
+    const ONE_YEAR_SECONDS = 31536000
+
     app.use(nocache())
     app.use(
       helmet({
         contentSecurityPolicy: this.prepareCSPConfig(nonce),
         hsts: {
-          maxAge: 31536000,
-          includeSubDomains: true,
+          maxAge: ONE_YEAR_SECONDS,
+          includeSubDomains: true
         }
       })
     )
