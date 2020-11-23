@@ -9,6 +9,7 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import PaymentSummary from 'app/models/dto/paymentSummary'
 import Optional from 'app/models/optional'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
@@ -19,7 +20,7 @@ import DissolutionCertificateService from 'app/services/dissolution/dissolutionC
 
 import {
   generateApprovalModel, generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData,
-  generateDissolutionGetResponse, generateDissolutionPatchRequest
+  generateDissolutionGetResponse, generateDissolutionPatchRequest, generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
@@ -111,6 +112,19 @@ describe('DissolutionService', () => {
       verify(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).once()
 
       assert.equal(response, paymentSummary)
+    })
+  })
+
+  describe('addPayByAccountPaymentData', () => {
+    const accountNumber: string = '222222'
+    const dissolutionPaymentPatchRequest: DissolutionPaymentPatchRequest = generateDissolutionPaymentPatchRequest()
+
+    it('should call dissolution api client to update the payment data of a dissolution', async () => {
+      when(paymentMapper.mapToPayByAccountPaymentPatchRequest(dissolutionSession, accountNumber)).thenReturn(dissolutionPaymentPatchRequest)
+
+      await service.addPayByAccountPaymentData(dissolutionSession, accountNumber)
+
+      verify(client.patchDissolutionPaymentData(dissolutionSession.applicationReferenceNumber!, dissolutionPaymentPatchRequest)).once()
     })
   })
 

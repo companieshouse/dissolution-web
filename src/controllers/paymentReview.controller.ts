@@ -20,7 +20,7 @@ interface ViewModel {
 }
 
 @controller(PAYMENT_REVIEW_URI)
-export class PaymentController extends BaseController {
+export class PaymentReviewController extends BaseController {
 
   public constructor(
     @inject(SessionService) private sessionService: SessionService,
