@@ -16,7 +16,8 @@ export default class PresenterApiClient {
     @inject(TYPES.AxiosInstance) private axios: AxiosInstance) {}
 
   public async getAccountNumber(params: PresenterAuthRequest): Promise<PresenterAuthResponse> {
-    const response: AxiosResponse<PresenterAuthResponse> = await this.axios.get(this.CHIPS_PRESENTER_AUTH_URL, { params })
+    const response: AxiosResponse<PresenterAuthResponse> = await this.axios
+      .get(`${this.CHIPS_PRESENTER_AUTH_URL}/presenterauth`, { params })
     return response.data
   }
 }

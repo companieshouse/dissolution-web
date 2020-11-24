@@ -17,7 +17,7 @@ describe('PresenterApiClient', () => {
 
   let getStub: sinon.SinonStub
 
-  const CHIPS_PRESENTER_AUTH_URL: string = 'http://presenter-api/presenterauth'
+  const CHIPS_PRESENTER_AUTH_URL: string = 'http://presenter-api'
 
   beforeEach(() => {
     axiosInstance = axios.create()
@@ -38,7 +38,7 @@ describe('PresenterApiClient', () => {
       assert.isTrue(getStub.called)
 
       const [url, config] = getStub.args[0]
-      assert.equal(url, CHIPS_PRESENTER_AUTH_URL)
+      assert.equal(url, `${CHIPS_PRESENTER_AUTH_URL}/presenterauth`)
       assert.equal(config.params, request)
 
       assert.equal(result, response.data)
