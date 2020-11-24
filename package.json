@@ -8,16 +8,16 @@
   },
   "license": "MIT",
   "scripts": {
-    "start": "node dist/app.js",
-    "build": "gulp build",
-    "watch": "npm run build:clean && gulp start:watch",
+    "analyse-code": "sonar-scanner",
+    "build": "gulp build && tsc",
     "build:clean": "gulp build:clean",
     "sass:watch": "gulp sass:watch",
     "lint": "tsc --project tsconfig.json --noEmit && tslint --project tsconfig.json --config tslint.json",
     "lint:scss": "sass-lint './src/public/sass/**/*.scss' --verbose --ignore 'node_modules/**/*.scss'",
+    "start": "node dist/app.js",
     "test": "mocha 'test/**/*.test.ts'",
     "test:coverage": "nyc npm test",
-    "analyse-code": "sonar-scanner"
+    "watch": "npm run build:clean && gulp start:watch"
   },
   "dependencies": {
     "@companieshouse/api-sdk-node": "^1.0.2",

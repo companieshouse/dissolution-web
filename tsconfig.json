@@ -1,18 +1,20 @@
 {
     "compilerOptions": {
+      "target": "es6",
       "module": "commonjs",
+      "rootDir": "./src",
+      "outDir": "dist",
+      "sourceMap": true,
       "strict": true,
       "noUnusedLocals": true,
       "noUnusedParameters": true,
       "noImplicitReturns": true,
       "noFallthroughCasesInSwitch": true,
       "pretty": true,
-      "sourceMap": true,
       "baseUrl": "./src",
       "removeComments": true,
       "experimentalDecorators": true,
       "esModuleInterop": true,
-      "target": "es6",
       "emitDecoratorMetadata": true,
       "moduleResolution": "node",
       "importHelpers": true,
@@ -25,5 +27,11 @@
         "app/*": ["./*"],
         "test/*": ["../test/*"]
       }
-    }
+    },
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
   }
