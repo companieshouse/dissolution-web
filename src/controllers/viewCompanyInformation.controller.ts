@@ -5,13 +5,18 @@ import BaseController from './base.controller'
 import CompanyDetails from 'app/models/companyDetails.model'
 import OfficerType from 'app/models/dto/officerType.enum'
 import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
+import CompanyStatus from 'app/models/mapper/companyStatus.enum'
+import OverseasCompanyPrefix from 'app/models/mapper/overseasCompanyPrefix.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import DirectorDetails from 'app/models/view/directorDetails.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
+import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
 import CompanyService from 'app/services/company/company.service'
 import SessionService from 'app/services/session/session.service'
 
 interface ViewModel {
   company: CompanyDetails
+  error: string | null
 }
 
 @controller(VIEW_COMPANY_INFORMATION_URI)
@@ -19,7 +24,8 @@ export class ViewCompanyInformationController extends BaseController {
 
   public constructor(
     @inject(SessionService) private session: SessionService,
-    @inject(CompanyService) private companyService: CompanyService) {
+    @inject(CompanyService) private companyService: CompanyService,
+    @inject(CompanyOfficersService) private companyOfficersService: CompanyOfficersService) {
     super()
   }
 
@@ -29,10 +35,17 @@ export class ViewCompanyInformationController extends BaseController {
 
     const company: CompanyDetails = await this.getCompanyInfo(session)
 
+    const token: string = this.session.getAccessToken(this.httpContext.request)
+
+    const companyOfficers: DirectorDetails[] = await this.companyOfficersService.getActiveDirectorsForCompany(token, company.companyNumber)
+
+    const error: string | null = this.validateCompanyDetails(company, companyOfficers)
+
     this.updateSession(session, company)
 
     const viewModel: ViewModel = {
-      company
+      company,
+      error
     }
     return super.render('view-company-information', viewModel)
   }
@@ -55,5 +68,25 @@ export class ViewCompanyInformationController extends BaseController {
       officerType: company.companyType === ClosableCompanyType.LLP ? OfficerType.MEMBER : OfficerType.DIRECTOR
     }
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
+  }
+
+  private validateCompanyDetails(company: CompanyDetails, companyOfficers: DirectorDetails[]): string | null {
+    if (!Object.values(ClosableCompanyType).some(val => val === company.companyType)) {
+      return 'Company type of <company type> cannot be closed via this service. <a Read guidance here (opens in new tab)'
+    }
+
+    if (company.companyStatus !== CompanyStatus.ACTIVE) {
+      return 'The company is not currently active and cannot be closed.'
+    }
+
+    if (!Object.values(OverseasCompanyPrefix).some(invalidPrefix => company.companyNumber.startsWith(invalidPrefix))) {
+      return 'This is an overseas company, and cannot be closed using this service.'
+    }
+
+    if (companyOfficers.length === 0) {
+      return 'The company has no active directors.'
+    }
+
+    return null
   }
 }

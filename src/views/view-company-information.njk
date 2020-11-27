@@ -24,15 +24,10 @@
       {% include 'components/errors/error-summary.njk' %}
 
       <h1 class="govuk-heading-xl">View company information</h1>
-      {% if not company.canClose %}
+      {% if error %}
         <div id="cannot-close-error" class="govuk-inset-text">
           <h2 class="govuk-heading-l">You cannot use this service</h2>
-          <p class="govuk-body">This could be because the company:</p>
-          <ul class="govuk-list govuk-list--bullet">
-            <li>is not active</li>
-            <li>cannot be closed</li>
-            <li>is an overseas company</li>
-          </ul>
+          <p class="govuk-body">{{ error }}</p>
         </div>
       {% endif %}
 

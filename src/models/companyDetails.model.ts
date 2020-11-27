@@ -5,5 +5,4 @@ export default interface CompanyDetails {
   companyIncDate: string
   companyType: string
   companyRegOffice: string
-  canClose: boolean
 }
