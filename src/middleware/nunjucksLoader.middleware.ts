@@ -17,7 +17,8 @@ export default class NunjucksLoader {
 
   public constructor(
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
-    @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig
+    @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
   ) {}
 
   public configureNunjucks(app: express.Application, directory: string, nonce: string): void {
@@ -57,5 +58,7 @@ export default class NunjucksLoader {
     app.locals.pageTitleSuffix = PAGE_TITLE_SUFFIX
 
     app.locals.nonce = nonce
+
+    app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED
   }
 }
