@@ -99,7 +99,6 @@ describe('ViewCompanyInformationController', () => {
 
     it('should display the continue button and not show an error when company is closable', async () => {
       const company: CompanyDetails = generateCompanyDetails()
-      company.canClose = true
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
 
@@ -120,7 +119,6 @@ describe('ViewCompanyInformationController', () => {
 
     it('should not display the continue button and show an error when company is not closable', async () => {
       const company: CompanyDetails = generateCompanyDetails()
-      company.canClose = false
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
 
