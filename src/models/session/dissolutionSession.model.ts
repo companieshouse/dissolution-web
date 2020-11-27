@@ -1,3 +1,5 @@
+import PaymentType from '../dto/paymentType.enum'
+import HowDoYouWantToPayModel from '../form/howDoYouWantToPay.model'
 import DissolutionConfirmation from './dissolutionConfirmation.model'
 
 import OfficerType from 'app/models/dto/officerType.enum'
@@ -13,6 +15,7 @@ export default interface DissolutionSession {
   selectDirectorForm?: SelectDirectorFormModel
   selectSignatoriesForm?: SelectSignatoriesFormModel
   defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
+  howDoYouWantToPayForm?: HowDoYouWantToPayModel
   directorsToSign?: DirectorToSign[]
   applicationReferenceNumber?: string
   approval?: DissolutionApprovalModel
@@ -20,4 +23,5 @@ export default interface DissolutionSession {
   isMultiDirector?: boolean
   isApplicantADirector?: boolean
   paymentStateUUID?: string
+  paymentType?: PaymentType
 }

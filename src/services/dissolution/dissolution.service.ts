@@ -11,6 +11,7 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import PaymentSummary from 'app/models/dto/paymentSummary'
 import Optional from 'app/models/optional'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
@@ -48,6 +49,16 @@ export default class DissolutionService {
     const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData = await this.client.getDissolutionPaymentUIData(applicationReference)
 
     return this.paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)
+  }
+
+  public async addPayByAccountPaymentData(dissolutionSession: DissolutionSession, accountNumber: string): Promise<void> {
+    const applicationReference: string = dissolutionSession.applicationReferenceNumber!
+
+    const dissolutionPaymentPatchRequest: DissolutionPaymentPatchRequest = this.paymentMapper.mapToPayByAccountPaymentPatchRequest(
+      dissolutionSession, accountNumber
+    )
+
+    return await this.client.patchDissolutionPaymentData(applicationReference, dissolutionPaymentPatchRequest)
   }
 
   public async approveDissolution(token: string, dissolution: DissolutionSession, ipAddress: string): Promise<void> {

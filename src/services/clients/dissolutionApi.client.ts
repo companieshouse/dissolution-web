@@ -10,6 +10,7 @@ import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUID
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import Optional from 'app/models/optional'
 import TYPES from 'app/types'
 
@@ -65,6 +66,14 @@ export class DissolutionApiClient {
     )
 
     return response.data
+  }
+
+  public async patchDissolutionPaymentData(applicationReference: string, body: DissolutionPaymentPatchRequest): Promise<void> {
+    return await this.axios.patch(
+      `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,
+      body,
+      this.generateConfigForAPIKey()
+    )
   }
 
   private generateConfigForOAuth(token: string): AxiosRequestConfig {

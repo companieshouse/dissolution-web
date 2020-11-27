@@ -17,10 +17,11 @@ export default class NunjucksLoader {
 
   public constructor(
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
-    @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig
+    @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
   ) {}
 
-  public configureNunjucks(app: express.Application, directory: string): void {
+  public configureNunjucks(app: express.Application, directory: string, nonce: string): void {
     app.use(ROOT_URI, express.static(path.join(directory, '/node_modules/govuk-frontend')))
     app.use(ROOT_URI, express.static(path.join(directory, '/node_modules/govuk-frontend/govuk')))
     app.use('/assets', express.static(path.join(directory, '/assets')))
@@ -42,10 +43,10 @@ export default class NunjucksLoader {
     addFilters(env)
     addGlobals(env)
 
-    this.addLocals(app)
+    this.addLocals(app, nonce)
   }
 
-  private addLocals(app: express.Application): void {
+  private addLocals(app: express.Application, nonce: string): void {
     app.locals.cdn = {
       host: this.CDN_HOST
     }
@@ -55,5 +56,9 @@ export default class NunjucksLoader {
     app.locals.serviceName = SERVICE_NAME
 
     app.locals.pageTitleSuffix = PAGE_TITLE_SUFFIX
+
+    app.locals.nonce = nonce
+
+    app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED
   }
 }

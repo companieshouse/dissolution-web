@@ -8,9 +8,12 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionLinks from 'app/models/dto/dissolutionLinks'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import OfficerType from 'app/models/dto/officerType.enum'
 import PaymentItem from 'app/models/dto/paymentItem'
 import PaymentLinks from 'app/models/dto/paymentLinks'
+import PaymentStatus from 'app/models/dto/paymentStatus.enum'
+import PaymentType from 'app/models/dto/paymentType.enum'
 import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 
 import { generateEmail } from 'test/fixtures/util.fixtures'
@@ -97,6 +100,16 @@ export function generateDissolutionPatchRequest(): DissolutionPatchRequest {
 export function generateDissolutionPatchResponse(): DissolutionPatchResponse {
   return {
     links: generateDissolutionLinks()
+  }
+}
+
+export function generateDissolutionPaymentPatchRequest(): DissolutionPaymentPatchRequest {
+  return {
+    status: PaymentStatus.PAID,
+    payment_reference: 'QZWXEC',
+    paid_at: new Date(),
+    payment_method: PaymentType.ACCOUNT,
+    account_number: '222222'
   }
 }
 

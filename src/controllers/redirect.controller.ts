@@ -65,6 +65,8 @@ export class RedirectController extends BaseController {
     const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
     if (session.paymentStateUUID !== state) {
+      console.log(session.paymentStateUUID)
+      console.log(state)
       return Promise.reject('State value is invalid')
     }
 

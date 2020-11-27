@@ -4,8 +4,10 @@ import { StatusCodes } from 'http-status-codes'
 
 import PaymentDetails from 'app/models/dto/paymentDetails'
 import PaymentSummary from 'app/models/dto/paymentSummary'
+import PaymentType from 'app/models/dto/paymentType.enum'
 import PresenterAuthRequest from 'app/models/dto/presenterAuthRequest'
 import PresenterAuthResponse from 'app/models/dto/presenterAuthResponse'
+import HowDoYouWantToPayFormModel from 'app/models/form/howDoYouWantToPay.model'
 import PayByAccountDetailsFormModel from 'app/models/form/payByAccountDetails.model'
 
 export function generateCreatePaymentRequest(): CreatePaymentRequest {
@@ -87,5 +89,11 @@ export function generatePresenterAuthRequest(): PresenterAuthRequest {
 export function generatePresenterAuthResponse(): PresenterAuthResponse {
   return {
     presenterAccountNumber: '1234567890'
+  }
+}
+
+export function generateHowDoYouWantToPayForm(): HowDoYouWantToPayFormModel {
+  return {
+    paymentType: PaymentType.CREDIT_DEBIT_CARD
   }
 }

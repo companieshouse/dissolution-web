@@ -4,9 +4,12 @@ import { CreatePaymentRequest } from '@companieshouse/api-sdk-node/dist/services
 import { provide } from 'inversify-binding-decorators'
 
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import Payment from 'app/models/dto/paymentDetails'
 import PaymentItem from 'app/models/dto/paymentItem'
+import PaymentStatus from 'app/models/dto/paymentStatus.enum'
 import PaymentSummary from 'app/models/dto/paymentSummary'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import convertToCurrency from 'app/utils/currencyConverter.util'
 
 @provide(PaymentMapper)
@@ -29,6 +32,17 @@ export default class PaymentMapper {
     return {
       payments: dissolutionGetPaymentUIData.items.map(this.mapToPayment),
       total_cost: convertToCurrency(totalCost)
+    }
+  }
+
+  public mapToPayByAccountPaymentPatchRequest(
+    dissolutionSession: DissolutionSession, accountNumber: string
+  ): DissolutionPaymentPatchRequest {
+    return {
+      status: PaymentStatus.PAID,
+      paid_at: new Date(),
+      payment_method: dissolutionSession.paymentType,
+      account_number: accountNumber
     }
   }
 
