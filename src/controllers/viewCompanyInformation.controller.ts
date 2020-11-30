@@ -7,6 +7,7 @@ import OfficerType from 'app/models/dto/officerType.enum'
 import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
 import CompanyStatus from 'app/models/mapper/companyStatus.enum'
 import OverseasCompanyPrefix from 'app/models/mapper/overseasCompanyPrefix.enum'
+import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
@@ -16,7 +17,7 @@ import SessionService from 'app/services/session/session.service'
 
 interface ViewModel {
   company: CompanyDetails
-  error: string | null
+  error: Optional<string>
 }
 
 @controller(VIEW_COMPANY_INFORMATION_URI)
@@ -39,7 +40,7 @@ export class ViewCompanyInformationController extends BaseController {
 
     const companyOfficers: DirectorDetails[] = await this.companyOfficersService.getActiveDirectorsForCompany(token, company.companyNumber)
 
-    const error: string | null = this.validateCompanyDetails(company, companyOfficers)
+    const error: Optional<string> = this.validateCompanyDetails(company, companyOfficers)
 
     this.updateSession(session, company)
 
@@ -70,7 +71,7 @@ export class ViewCompanyInformationController extends BaseController {
     this.session.setDissolutionSession(this.httpContext.request, updatedSession)
   }
 
-  private validateCompanyDetails(company: CompanyDetails, companyOfficers: DirectorDetails[]): string | null {
+  private validateCompanyDetails(company: CompanyDetails, companyOfficers: DirectorDetails[]): Optional<string> {
     if (!Object.values(ClosableCompanyType).some(val => val === company.companyType)) {
       return `Company type of ${company.companyType} cannot be closed via this service.
               <a target="_blank" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#when-a-company-cannot-apply-to-be-struck-off-the-register"> Read guidance here (opens in new tab)</a>.`
