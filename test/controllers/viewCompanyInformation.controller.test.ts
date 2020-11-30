@@ -262,7 +262,7 @@ describe('ViewCompanyInformationController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('#cannot-close-error-message', 'The company has no active directors / members.'))
+      assert.isTrue(htmlAssertHelper.hasText('#cannot-close-error-message', 'The company has no active members / directors.'))
     })
   })
 
