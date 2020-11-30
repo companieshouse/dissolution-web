@@ -27,7 +27,7 @@
       {% if error %}
         <div id="cannot-close-error" class="govuk-inset-text">
           <h2 class="govuk-heading-l">You cannot use this service</h2>
-          <p class="govuk-body">{{ error }}</p>
+          <p class="govuk-body" id="cannot-close-error-message">{{ error }}</p>
         </div>
       {% endif %}
 
@@ -98,7 +98,7 @@
               id: 'submit',
               onclick: '_paq.push(["trackGoal", ' + company.companyType | asCompanyTypeGoalId(piwik) + ']);' if piwik
             }
-          }) if company.canClose
+          }) if not error
         }}
       </form>
       <p>

@@ -72,19 +72,20 @@ export class ViewCompanyInformationController extends BaseController {
 
   private validateCompanyDetails(company: CompanyDetails, companyOfficers: DirectorDetails[]): string | null {
     if (!Object.values(ClosableCompanyType).some(val => val === company.companyType)) {
-      return 'Company type of <company type> cannot be closed via this service. <a Read guidance here (opens in new tab)'
+      return `Company type of ${company.companyType} cannot be closed via this service.
+ <a target="_blank" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#when-a-company-cannot-apply-to-be-struck-off-the-register"> Read guidance here (opens in new tab)</a>.`
     }
 
     if (company.companyStatus !== CompanyStatus.ACTIVE) {
       return 'The company is not currently active and cannot be closed.'
     }
 
-    if (!Object.values(OverseasCompanyPrefix).some(invalidPrefix => company.companyNumber.startsWith(invalidPrefix))) {
+    if (Object.values(OverseasCompanyPrefix).some(invalidPrefix => company.companyNumber.startsWith(invalidPrefix))) {
       return 'This is an overseas company, and cannot be closed using this service.'
     }
 
     if (companyOfficers.length === 0) {
-      return 'The company has no active directors.'
+      return 'The company has no active directors / members.'
     }
 
     return null

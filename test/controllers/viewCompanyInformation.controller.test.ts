@@ -11,6 +11,7 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 import 'app/controllers/viewCompanyInformation.controller'
 import CompanyDetails from 'app/models/companyDetails.model'
 import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
+import OverseasCompanyPrefix from 'app/models/mapper/overseasCompanyPrefix.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from 'app/paths'
 import CompanyOfficersService from 'app/services/company-officers/companyOfficers.service'
@@ -44,8 +45,12 @@ describe('ViewCompanyInformationController', () => {
 
   describe('GET request', () => {
     it('should render the view company information page with company info', async () => {
-      const company = generateCompanyDetails()
-      company.companyType = ClosableCompanyType.LLP
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = ClosableCompanyType.LTD
+
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
       when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([generateDirectorDetails()])
 
@@ -113,8 +118,6 @@ describe('ViewCompanyInformationController', () => {
       company.companyName = 'Some company name'
       company.companyStatus = 'active'
       company.companyType = ClosableCompanyType.LTD
-      company.companyRegOffice = 'some address'
-      company.companyIncDate = '2020-06-24T13:51:57.623Z'
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
       when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([generateDirectorDetails()])
@@ -137,12 +140,19 @@ describe('ViewCompanyInformationController', () => {
 
     it('should not display the continue button and show an error when company is not closable', async () => {
       const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'inactive'
+      company.companyType = ClosableCompanyType.LTD
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([generateDirectorDetails()])
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
         container.rebind(CompanyService).toConstantValue(instance(companyService))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService))
+
       })
 
       const res = await request(app)
@@ -153,6 +163,106 @@ describe('ViewCompanyInformationController', () => {
 
       assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#submit'))
       assert.isTrue(htmlAssertHelper.selectorExists('#cannot-close-error'))
+    })
+
+    it('should display error message when company is not of closable type', async () => {
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = 'chicken'
+
+      when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([generateDirectorDetails()])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyService).toConstantValue(instance(companyService))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService))
+      })
+
+      const res = await request(app)
+        .get(VIEW_COMPANY_INFORMATION_URI)
+        .expect(StatusCodes.OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.containsText('#cannot-close-error-message', 'Company type of chicken cannot be closed via this service.'))
+    })
+
+    it('should display error message when company is not active', async () => {
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'inactive'
+      company.companyType = ClosableCompanyType.LLP
+
+      when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([generateDirectorDetails()])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyService).toConstantValue(instance(companyService))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService))
+      })
+
+      const res = await request(app)
+        .get(VIEW_COMPANY_INFORMATION_URI)
+        .expect(StatusCodes.OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('#cannot-close-error-message', 'The company is not currently active and cannot be closed.'))
+    })
+
+    it('should display error message when company has an overseas prefix', async () => {
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = OverseasCompanyPrefix.FC + COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = ClosableCompanyType.LLP
+
+      when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([generateDirectorDetails()])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyService).toConstantValue(instance(companyService))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService))
+      })
+
+      const res = await request(app)
+        .get(VIEW_COMPANY_INFORMATION_URI)
+        .expect(StatusCodes.OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('#cannot-close-error-message', 'This is an overseas company, and cannot be closed using this service.'))
+    })
+
+    it('should display error message when company has no active directors', async () => {
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = ClosableCompanyType.LLP
+
+      when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([])
+
+      const app = createApp(container => {
+        container.rebind(SessionService).toConstantValue(instance(session))
+        container.rebind(CompanyService).toConstantValue(instance(companyService))
+        container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService))
+      })
+
+      const res = await request(app)
+        .get(VIEW_COMPANY_INFORMATION_URI)
+        .expect(StatusCodes.OK)
+
+      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+      assert.isTrue(htmlAssertHelper.hasText('#cannot-close-error-message', 'The company has no active directors / members.'))
     })
   })
 
