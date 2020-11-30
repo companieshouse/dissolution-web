@@ -27,7 +27,7 @@
       {% if error %}
         <div id="cannot-close-error" class="govuk-inset-text">
           <h2 class="govuk-heading-l">You cannot use this service</h2>
-          <p class="govuk-body" id="cannot-close-error-message">{{ error }}</p>
+          <p class="govuk-body" id="cannot-close-error-message">{{ error | safe }}</p>
         </div>
       {% endif %}
 
