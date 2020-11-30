@@ -8,6 +8,7 @@
       "port": 9229,
       "localRoot": "${workspaceFolder}/dist",
       "remoteRoot": "/app/dist",
+      "restart": true,
       "protocol": "inspector"
     }
   ]
