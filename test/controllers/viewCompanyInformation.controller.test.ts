@@ -40,7 +40,14 @@ describe('ViewCompanyInformationController', () => {
 
   describe('GET request', () => {
     it('should render the view company information page with company info', async () => {
-      when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(generateCompanyDetails())
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = ClosableCompanyType.LTD
+
+      when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
@@ -66,6 +73,7 @@ describe('ViewCompanyInformationController', () => {
       company.companyIncDate = '2020-06-24T13:51:57.623Z'
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
@@ -97,11 +105,15 @@ describe('ViewCompanyInformationController', () => {
       assert.isTrue(htmlAssertHelper.hasText('#company-address-value', 'some address'))
     })
 
-    it('should display the continue button and not show an error when company is closable', async () => {
+    it('should display the continue button and not show an error when company validation passes', async () => {
       const company: CompanyDetails = generateCompanyDetails()
-      company.canClose = true
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = ClosableCompanyType.LTD
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
@@ -120,9 +132,13 @@ describe('ViewCompanyInformationController', () => {
 
     it('should not display the continue button and show an error when company is not closable', async () => {
       const company: CompanyDetails = generateCompanyDetails()
-      company.canClose = false
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'inactive'
+      company.companyType = ClosableCompanyType.LTD
 
       when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+      when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve('error message')
 
       const app = createApp(container => {
         container.rebind(SessionService).toConstantValue(instance(session))
@@ -137,6 +153,7 @@ describe('ViewCompanyInformationController', () => {
 
       assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#submit'))
       assert.isTrue(htmlAssertHelper.selectorExists('#cannot-close-error'))
+      assert.isTrue(htmlAssertHelper.containsText('#cannot-close-error-message', 'error message'))
     })
   })
 
