@@ -9,7 +9,7 @@ import CompanyProfileClient from '../clients/companyProfile.client'
 import {
   COMPANY_NOT_ACTIVE_ERROR_MSG,
   COMPANY_OVERSEAS_ERROR_MSG,
-  NO_ACTIVE_DIRECTORS_ERROR_MSG
+  NO_ACTIVE_DIRECTORS_ERROR_MSG, NO_ACTIVE_MEMBERS_ERROR_MSG
 } from 'app/constants/app.const'
 import CompanyDetailsMapper from 'app/mappers/company/companyDetails.mapper'
 import CompanyDetails from 'app/models/companyDetails.model'
@@ -44,8 +44,6 @@ export default class CompanyService {
   }
 
   public async validateCompanyDetails(company: CompanyDetails, token: string): Promise<Optional<string>> {
-
-
     if (!Object.values(ClosableCompanyType).some(val => val === company.companyType)) {
       return `Company type of ${company.companyType} cannot be closed via this service.
               <br><a target="_blank" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#when-a-company-cannot-apply-to-be-struck-off-the-register"> Read guidance here (opens in new tab)</a>.`
@@ -62,7 +60,7 @@ export default class CompanyService {
     const companyOfficers: DirectorDetails[] = await this.companyOfficersService.getActiveDirectorsForCompany(token, company.companyNumber)
 
     if (companyOfficers.length === 0) {
-      return NO_ACTIVE_DIRECTORS_ERROR_MSG
+      return company.companyType === ClosableCompanyType.LLP ? NO_ACTIVE_MEMBERS_ERROR_MSG : NO_ACTIVE_DIRECTORS_ERROR_MSG
     }
 
     return null

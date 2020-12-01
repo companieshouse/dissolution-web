@@ -163,7 +163,7 @@ describe('CompanyService', () => {
       assert.equal(error, 'This is an overseas company, and cannot be closed using this service.')
     })
 
-    it('should return error when company has no active directors', async () => {
+    it('should return error when company is llp has no active members', async () => {
 
       const companyOfficers: DirectorDetails[] = []
       const company: CompanyDetails = generateCompanyDetails()
@@ -176,7 +176,23 @@ describe('CompanyService', () => {
 
       const error: Optional<string> = await service.validateCompanyDetails(company, TOKEN)
 
-      assert.equal(error, 'The company has no active members / directors.')
+      assert.equal(error, 'The company has no active members.')
+    })
+
+    it('should return error when company is not llp has no active directors', async () => {
+
+      const companyOfficers: DirectorDetails[] = []
+      const company: CompanyDetails = generateCompanyDetails()
+      company.companyNumber = COMPANY_NUMBER
+      company.companyName = 'Some company name'
+      company.companyStatus = 'active'
+      company.companyType = ClosableCompanyType.LTD
+
+      when(officersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve(companyOfficers)
+
+      const error: Optional<string> = await service.validateCompanyDetails(company, TOKEN)
+
+      assert.equal(error, 'The company has no active directors.')
     })
   })
 })
