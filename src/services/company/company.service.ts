@@ -11,6 +11,7 @@ import {
   COMPANY_OVERSEAS_ERROR_MSG,
   NO_ACTIVE_DIRECTORS_ERROR_MSG, NO_ACTIVE_MEMBERS_ERROR_MSG
 } from 'app/constants/app.const'
+import { asCompanyTypeText } from 'app/filters/asCompanyTypeText.filter'
 import CompanyDetailsMapper from 'app/mappers/company/companyDetails.mapper'
 import CompanyDetails from 'app/models/companyDetails.model'
 import ClosableCompanyType from 'app/models/mapper/closableCompanyType.enum'
@@ -45,7 +46,7 @@ export default class CompanyService {
 
   public async validateCompanyDetails(company: CompanyDetails, token: string): Promise<Optional<string>> {
     if (!Object.values(ClosableCompanyType).some(val => val === company.companyType)) {
-      return `Company type of ${company.companyType} cannot be closed via this service.
+      return `Company type of ${asCompanyTypeText(company.companyType)} cannot be closed via this service.
               <br><a target="_blank" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#when-a-company-cannot-apply-to-be-struck-off-the-register"> Read guidance here (opens in new tab)</a>.`
     }
 

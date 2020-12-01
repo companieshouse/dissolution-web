@@ -38,5 +38,5 @@ export const companyTypeList: CompanyTypeList = {
 }
 
 export function asCompanyTypeText(companyType: string): string {
-  return companyTypeList[companyType]
+  return companyTypeList[companyType] === undefined ? companyType : companyTypeList[companyType]
 }
