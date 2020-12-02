@@ -12,7 +12,6 @@ clean:
 	rm -f ./build.log
 
 package-install:
-	npm audit
 	npm install
 
 .PHONY: build
@@ -29,6 +28,10 @@ test: test-unit
 .PHONY: test-unit
 test-unit:
 	npm run test:coverage
+
+.PHONY: security-check
+security-check:
+	npm audit
 
 .PHONY: package
 package: build

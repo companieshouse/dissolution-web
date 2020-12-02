@@ -78,7 +78,6 @@ export function generateCompanyDetails(): CompanyDetails {
     companyStatus: 'active',
     companyType: ClosableCompanyType.LTD,
     companyIncDate: new Date().toISOString(),
-    companyRegOffice: 'Some address',
-    canClose: true
+    companyRegOffice: 'Some address'
   }
 }
