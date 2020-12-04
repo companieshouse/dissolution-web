@@ -4,7 +4,7 @@ import { assert } from 'chai'
 import { Request } from 'express'
 import sinon from 'sinon'
 import { generateRequest } from '../../fixtures/http.fixtures'
-import { generateDissolutionSession, generateISignInInfo } from '../../fixtures/session.fixtures'
+import { generateDissolutionSession, generateISignInInfo, TOKEN } from '../../fixtures/session.fixtures'
 
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -23,8 +23,6 @@ describe('SessionService', () => {
   })
 
   describe('getAccessToken', () => {
-    const TOKEN = 'some-token'
-
     it('should retrieve the access token from the session', () => {
       const signInInfo: ISignInInfo = generateISignInInfo()
       signInInfo.access_token!.access_token = TOKEN

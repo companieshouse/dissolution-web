@@ -8,6 +8,7 @@ import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-m
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { generateSearchCompanyForm } from '../fixtures/companyProfile.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
+import { TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -28,8 +29,6 @@ describe('SearchCompanyController', () => {
   let companyService: CompanyService
   let sanitizer: CompanyNumberSanitizer
   let session: SessionService
-
-  const TOKEN = 'some-token'
 
   beforeEach(() => {
     validator = mock(FormValidator)

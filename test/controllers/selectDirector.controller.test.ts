@@ -8,7 +8,7 @@ import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-m
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { generateDirectorDetails, generateSelectDirectorFormModel } from '../fixtures/companyOfficers.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
-import { generateDirectorToSign, generateDissolutionSession } from '../fixtures/session.fixtures'
+import { generateDirectorToSign, generateDissolutionSession, TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -38,7 +38,6 @@ describe('SelectDirectorController', () => {
   let validator: FormValidator
   let mapper: DirectorToSignMapper
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
 
   const DIRECTOR_1_ID = '123'

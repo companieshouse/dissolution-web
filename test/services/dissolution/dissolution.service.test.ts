@@ -1,6 +1,7 @@
 import { assert } from 'chai'
 import { instance, mock, verify, when } from 'ts-mockito'
 import { generatePaymentSummary } from '../../fixtures/payment.fixtures'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
@@ -37,7 +38,6 @@ describe('DissolutionService', () => {
   let dissolutionSession: DissolutionSession
 
   const REFERENCE_NUMBER = '123ABC'
-  const TOKEN = 'some-token'
   const MAPPED_BODY: DissolutionCreateRequest = generateDissolutionCreateRequest()
 
   beforeEach(() => {

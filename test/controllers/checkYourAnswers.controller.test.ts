@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCheckYourAnswersDirector } from '../fixtures/checkYourAnswersDirector.fixtures'
+import { TOKEN } from '../fixtures/session.fixtures'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/checkYourAnswers.controller'
@@ -23,7 +24,6 @@ describe('CheckYourAnswersController', () => {
   let service: DissolutionService
   let mapper: CheckYourAnswersDirectorMapper
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
   const DIRECTOR_1_NAME = 'Geoff Smith'
   const DIRECTOR_1_EMAIL = 'test@mail.com'

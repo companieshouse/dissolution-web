@@ -6,6 +6,7 @@ import request from 'supertest'
 import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
 import { generateEndorseCertificateFormModel } from '../fixtures/endorseCertificateFormModel.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
+import { TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -30,7 +31,6 @@ describe('EndorseCompanyClosureCertificateController', () => {
   let mockedFormValidator: FormValidator
   let mockedIpAddressService: IpAddressService
 
-  const TOKEN = 'some-token'
   const EMAIL = 'some-email.com'
   const COMPANY_NUMBER = '01777777'
   const IP_ADDRESS = '127.0.0.1'

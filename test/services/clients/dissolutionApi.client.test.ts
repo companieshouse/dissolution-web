@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { assert } from 'chai'
 import { StatusCodes } from 'http-status-codes'
 import sinon from 'sinon'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
@@ -26,7 +27,6 @@ describe('DissolutionApiClient', () => {
   let patchStub: sinon.SinonStub
 
   const DISSOLUTION_API_URL = 'http://apiurl.com'
-  const TOKEN = 'some-token'
   const API_KEY = 'some-api-key'
   const APPLICATION_REFERENCE = 'ABC123'
   const COMPANY_NUMBER = '12345678'

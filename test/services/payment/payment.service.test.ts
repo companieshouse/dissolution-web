@@ -5,6 +5,7 @@ import { assert } from 'chai'
 import { StatusCodes } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCreatePaymentRequest, generatePaymentResult } from '../../fixtures/payment.fixtures'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -41,7 +42,6 @@ describe('PaymentService', () => {
   })
 
   describe('generatePaymentURL', () => {
-    const TOKEN = 'some-token'
     const APP_REFERENCE: string = 'REF123'
 
     const createPaymentRequest: CreatePaymentRequest = generateCreatePaymentRequest()

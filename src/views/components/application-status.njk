@@ -11,7 +11,7 @@
         signatoryRows.push(
           [
             {
-              html: signatory.name if not signatory.on_behalf_name else '<div>' + signatory.on_behalf_name + '</div><div>signing on behalf of ' + signatory.name + '</div>',
+              html: signatory.name if not signatory.on_behalf_name else '<div class="on_behalf_name_' + loop.index0 + '">' + signatory.on_behalf_name + '</div><div class="on_behalf_of_signatory_name_section_' + loop.index0 + '">signing on behalf of ' + signatory.name + '</div>',
               attributes: { id: "name-" + loop.index0 }
             },
             {

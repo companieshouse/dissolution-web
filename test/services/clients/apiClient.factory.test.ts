@@ -2,6 +2,7 @@ import CompanyOfficersService from '@companieshouse/api-sdk-node/dist/services/c
 import CompanyProfileService from '@companieshouse/api-sdk-node/dist/services/company-profile/service'
 import { PaymentService } from '@companieshouse/api-sdk-node/dist/services/payment'
 import { assert } from 'chai'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import APIClientFactory from 'app/services/clients/apiClient.factory'
 
@@ -9,7 +10,6 @@ describe('APIClientFactory', () => {
 
   let factory: APIClientFactory
 
-  const TOKEN = 'some-token'
   const COMPANY_PROFILE_API_URL = 'http://some-company-profile-url'
   const PAYMENTS_API_URL = 'http://some-payments-api-url'
 
