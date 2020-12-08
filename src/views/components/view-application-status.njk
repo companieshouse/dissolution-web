@@ -1,0 +1,54 @@
+{% from "govuk/components/table/macro.njk"  import govukTable %}
+{% from "govuk/components/tag/macro.njk"    import govukTag %}
+
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-l">Application status</h2>
+    <p class="govuk-body">Refresh the page to see updated information. If you exit this page, you can return to it by signing in to <a href="{{ Paths.ROOT_URI }}">the Apply to strike off and dissolve a company service</a>.</p>
+  </div>
+
+  {% set signatoryRows = [] %}
+  {% for signatory in viewApplicationStatus.signatories %}
+    {% set signatoryRows =
+      (
+        signatoryRows.push(
+          [
+            {
+              text: signatory.name,
+              attributes: { id: "name-" + loop.index0 }
+            },
+            {
+              text: signatory.email,
+              attributes: { id: "email-" + loop.index0 }
+            },
+            {
+              html: govukTag({
+                text: "Signed" if signatory.hasApproved else "Not signed",
+                classes: "govuk-tag--grey" if not signatory.hasApproved
+              }),
+              attributes: { id: "signed-" + loop.index0 }
+            }
+          ]
+        ),
+        signatoryRows
+      )
+    %}
+  {% endfor %}
+
+  <div class="govuk-grid-column-full">
+    {{ govukTable({
+      head: [
+        {
+          text: "Name"
+        },
+        {
+          text: "Email"
+        },
+        {
+          text: "Signed"
+        }
+      ],
+      rows: signatoryRows
+    }) }}
+  </div>
+</div>

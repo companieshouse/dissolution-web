@@ -9,6 +9,8 @@ import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
+export const TOKEN = 'some-token'
+
 export function generateSession(): Session {
   const session: Session = new Session()
 

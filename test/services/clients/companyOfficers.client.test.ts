@@ -4,6 +4,7 @@ import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
 import { assert } from 'chai'
 import { instance, mock, when } from 'ts-mockito'
 import { generateCompanyOfficersResource } from '../../fixtures/companyOfficers.fixtures'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import APIClientFactory from 'app/services/clients/apiClient.factory'
 import CompanyOfficersClient from 'app/services/clients/companyOfficers.client'
@@ -15,7 +16,6 @@ describe('CompanyOfficersClient', () => {
   let factory: APIClientFactory
   let companyOfficersService: CompanyOfficersService
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = '12345678'
 
   beforeEach(() => {

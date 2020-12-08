@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, capture, instance, mock, verify, when } from 'ts-mockito'
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
+import { TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/redirect.controller'
@@ -41,7 +42,6 @@ describe('RedirectController', () => {
 
   const USER_EMAIL = 'myemail@mail.com'
   const OTHER_USER_EMAIL = 'another@mail.com'
-  const TOKEN = 'some-token'
 
   beforeEach(() => {
     session = mock(SessionService)

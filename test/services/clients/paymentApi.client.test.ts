@@ -3,6 +3,7 @@ import { ApiResponse, ApiResult } from '@companieshouse/api-sdk-node/dist/servic
 import { assert } from 'chai'
 import { instance, mock, when } from 'ts-mockito'
 import { generateCreatePaymentRequest, generatePaymentResult } from '../../fixtures/payment.fixtures'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import APIClientFactory from 'app/services/clients/apiClient.factory'
 import PaymentApiClient from 'app/services/clients/paymentApi.client'
@@ -13,8 +14,6 @@ describe('PaymentApiClient', () => {
 
   let factory: APIClientFactory
   let paymentService: PaymentService
-
-  const TOKEN = 'some-token'
 
   beforeEach(() => {
     factory = mock(APIClientFactory)

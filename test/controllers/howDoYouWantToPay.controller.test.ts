@@ -8,7 +8,7 @@ import { anything, capture, deepEqual, instance, mock, verify, when } from 'ts-m
 import { ArgCaptor2 } from 'ts-mockito/lib/capture/ArgCaptor'
 import { generateValidationError } from '../fixtures/error.fixtures'
 import { generateHowDoYouWantToPayForm } from '../fixtures/payment.fixtures'
-import { generateDissolutionSession } from '../fixtures/session.fixtures'
+import { generateDissolutionSession, TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -33,7 +33,6 @@ describe('HowDoYouWantToPayController', () => {
   let paymentService: PaymentService
   let sessionService: SessionService
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = 'ABC123'
   const REDIRECT_CARD_URL = 'http://card-payment-ui-url'
 

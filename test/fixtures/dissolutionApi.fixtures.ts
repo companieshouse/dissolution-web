@@ -70,11 +70,13 @@ export function generateDissolutionLinks(): DissolutionLinks {
   }
 }
 
-export function generateGetDirector(name: string = 'Jane Smith'): DissolutionGetDirector {
+export function generateGetDirector(name: string = 'Jane Smith', approvedAt?: string, onBehalfName?: string): DissolutionGetDirector {
   return {
     officer_id: 'abc123',
     name,
     email: generateEmail(name),
+    approved_at: approvedAt,
+    on_behalf_name: onBehalfName
   }
 }
 
