@@ -5,15 +5,18 @@ import { Application } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
-import { generateDissolutionGetResponse, generateGetDirector } from '../fixtures/dissolutionApi.fixtures'
+import { generateDissolutionGetResponse } from '../fixtures/dissolutionApi.fixtures'
 import { TOKEN } from '../fixtures/session.fixtures'
+import { generateViewApplicationStatusModel, generateViewApplicationStatusSignatory } from '../fixtures/viewApplicationStatus.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/waitForOthersToSign.controller'
+import ViewApplicationStatusMapper from 'app/mappers/view-application-status/viewApplicationStatus.mapper'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse.ts'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
 import { WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
@@ -22,27 +25,34 @@ import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 let session: SessionService
 let dissolutionService: DissolutionService
+let viewApplicationStatusMapper: ViewApplicationStatusMapper
 
 const COMPANY_NUMBER = '01777777'
 
 let app: Application
+
 let dissolutionSession: DissolutionSession
 let dissolution: DissolutionGetResponse
+let viewApplicationStatus: ViewApplicationStatus
 
 beforeEach(() => {
   session = mock(SessionService)
   dissolutionService = mock(DissolutionService)
+  viewApplicationStatusMapper = mock(ViewApplicationStatusMapper)
 
   dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
   dissolution = generateDissolutionGetResponse()
+  viewApplicationStatus = generateViewApplicationStatusModel()
 
   when(session.getAccessToken(anything())).thenReturn(TOKEN)
   when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
   when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+  when(viewApplicationStatusMapper.mapToViewModel(dissolution)).thenReturn(viewApplicationStatus)
 
   app = createApp(container => {
     container.rebind(SessionService).toConstantValue(instance(session))
     container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
+    container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
   })
 })
 
@@ -76,122 +86,58 @@ describe('WaitForOthersToSignController', () => {
       assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all members have signed, we will email you with instructions to pay for and submit the application.'))
     })
 
-    it('should display three signatories who all have not signed on the Application status table', async () => {
-      dissolution.directors = [
-        generateGetDirector('Adam Adams'),
-        generateGetDirector('Bob Bobby'),
-        generateGetDirector('Carl Carlton')
-      ]
+    describe('View Application Status', () => {
+      it('should display each signatory on a separate row', async () => {
+        viewApplicationStatus.signatories = [
+          generateViewApplicationStatusSignatory(),
+          generateViewApplicationStatusSignatory(),
+        ]
 
-      const res = await request(app)
-        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-        .expect(StatusCodes.OK)
+        const res = await request(app)
+          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+          .expect(StatusCodes.OK)
 
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('#name-0', 'Adam Adams'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-0', 'adama@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-0', 'Not signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-0 strong', 'govuk-tag govuk-tag--grey'))
+        assert.isTrue(htmlAssertHelper.selectorExists('#name-0'))
+        assert.isTrue(htmlAssertHelper.selectorExists('#name-1'))
+        assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#name-2'))
+      })
 
-      assert.isTrue(htmlAssertHelper.hasText('#name-1', 'Bob Bobby'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-1', 'bobb@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-1', 'Not signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-1 strong', 'govuk-tag govuk-tag--grey'))
+      it('should display the signatory info correctly', async () => {
+        viewApplicationStatus.signatories = [
+          { ...generateViewApplicationStatusSignatory(), name: 'Jane Smith', email: 'jane@mail.com' },
+          { ...generateViewApplicationStatusSignatory(), name: 'John Doe', email: 'john@mail.com' }
+        ]
 
-      assert.isTrue(htmlAssertHelper.hasText('#name-2', 'Carl Carlton'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-2', 'carlc@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-2', 'Not signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-2 strong', 'govuk-tag govuk-tag--grey'))
-    })
+        const res = await request(app)
+          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+          .expect(StatusCodes.OK)
 
-    it('should display two signatories who have signed and one who has not signed on the Application status table', async () => {
-      dissolution.directors = [
-        generateGetDirector('Adam Adams', 'some-approved-at-timestamp'),
-        generateGetDirector('Bob Bobby', 'some-approved-at-timestamp'),
-        generateGetDirector('Carl Carlton')
-      ]
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      const res = await request(app)
-        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-        .expect(StatusCodes.OK)
+        assert.isTrue(htmlAssertHelper.hasText('#name-0', 'Jane Smith'))
+        assert.isTrue(htmlAssertHelper.hasText('#email-0', 'jane@mail.com'))
 
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+        assert.isTrue(htmlAssertHelper.hasText('#name-1', 'John Doe'))
+        assert.isTrue(htmlAssertHelper.hasText('#email-1', 'john@mail.com'))
+      })
 
-      assert.isTrue(htmlAssertHelper.hasText('#name-0', 'Adam Adams'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-0', 'adama@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-0', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-0 strong', 'govuk-tag'))
+      it('should display the correct signed status for each signatory', async () => {
+        viewApplicationStatus.signatories = [
+          { ...generateViewApplicationStatusSignatory(), hasApproved: true },
+          { ...generateViewApplicationStatusSignatory(), hasApproved: false }
+        ]
 
-      assert.isTrue(htmlAssertHelper.hasText('#name-1', 'Bob Bobby'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-1', 'bobb@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-1', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-1 strong', 'govuk-tag'))
+        const res = await request(app)
+          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+          .expect(StatusCodes.OK)
 
-      assert.isTrue(htmlAssertHelper.hasText('#name-2', 'Carl Carlton'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-2', 'carlc@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-2', 'Not signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-2 strong', 'govuk-tag govuk-tag--grey'))
-    })
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-    it('should display three signatories who all have signed on the Application status table', async () => {
-      dissolution.directors = [
-        generateGetDirector('Adam Adams', 'some-approved-at-timestamp'),
-        generateGetDirector('Bob Bobby', 'some-approved-at-timestamp'),
-        generateGetDirector('Carl Carlton', 'some-approved-at-timestamp')
-      ]
-
-      const res = await request(app)
-        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-        .expect(StatusCodes.OK)
-
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-      assert.isTrue(htmlAssertHelper.hasText('#name-0', 'Adam Adams'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-0', 'adama@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-0', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-0 strong', 'govuk-tag'))
-
-      assert.isTrue(htmlAssertHelper.hasText('#name-1', 'Bob Bobby'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-1', 'bobb@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-1', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-1 strong', 'govuk-tag'))
-
-      assert.isTrue(htmlAssertHelper.hasText('#name-2', 'Carl Carlton'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-2', 'carlc@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-2', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-2 strong', 'govuk-tag'))
-    })
-
-    it('should display three signatories, one who has signed, one signing on behalf of someone who has signed, and one signing on behalf of someone who has not signed on the Application status table', async () => {
-      dissolution.directors = [
-        generateGetDirector('Adam Adams', 'some-approved-at-timestamp'),
-        generateGetDirector('Bob Bobby', 'some-approved-at-timestamp', 'Dennis Dawson'),
-        generateGetDirector('Carl Carlton', '', 'Ed Edwards')
-      ]
-
-      const res = await request(app)
-        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-        .expect(StatusCodes.OK)
-
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-      assert.isTrue(htmlAssertHelper.hasText('#name-0', 'Adam Adams'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-0', 'adama@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-0', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-0 strong', 'govuk-tag'))
-
-      assert.isTrue(htmlAssertHelper.hasText('.on_behalf_name_1', 'Dennis Dawson'))
-      assert.isTrue(htmlAssertHelper.hasText('.on_behalf_of_signatory_name_section_1', 'signing on behalf of Bob Bobby'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-1', 'bobb@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-1', 'Signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-1 strong', 'govuk-tag'))
-
-      assert.isTrue(htmlAssertHelper.hasText('.on_behalf_name_2', 'Ed Edwards'))
-      assert.isTrue(htmlAssertHelper.hasText('.on_behalf_of_signatory_name_section_2', 'signing on behalf of Carl Carlton'))
-      assert.isTrue(htmlAssertHelper.hasText('#email-2', 'carlc@company.com'))
-      assert.isTrue(htmlAssertHelper.containsText('#signed-2', 'Not signed'))
-      assert.isTrue(htmlAssertHelper.hasClass('#signed-2 strong', 'govuk-tag govuk-tag--grey'))
+        assert.isTrue(htmlAssertHelper.hasText('#signed-0 .govuk-tag', 'Signed'))
+        assert.isTrue(htmlAssertHelper.hasText('#signed-1 .govuk-tag', 'Not signed'))
+      })
     })
   })
 })

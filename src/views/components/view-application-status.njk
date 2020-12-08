@@ -1,3 +1,5 @@
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+
 <div class="govuk-grid-row govuk-!-margin-top-4">
   <div class="govuk-grid-column-two-thirds">
     <h2 class="govuk-heading-l">Application status</h2>
@@ -5,13 +7,13 @@
   </div>
 
   {% set signatoryRows = [] %}
-  {% for signatory in signatories %}
+  {% for signatory in viewApplicationStatus.signatories %}
     {% set signatoryRows =
       (
         signatoryRows.push(
           [
             {
-              html: signatory.name if not signatory.on_behalf_name else '<div class="on_behalf_name_' + loop.index0 + '">' + signatory.on_behalf_name + '</div><div class="on_behalf_of_signatory_name_section_' + loop.index0 + '">signing on behalf of ' + signatory.name + '</div>',
+              text: signatory.name,
               attributes: { id: "name-" + loop.index0 }
             },
             {
@@ -19,7 +21,10 @@
               attributes: { id: "email-" + loop.index0 }
             },
             {
-              html: '<strong class="govuk-tag">Signed</strong>' if signatory.approved_at else '<strong class="govuk-tag govuk-tag--grey">Not signed</strong>',
+              html: govukTag({
+                text: "Signed" if signatory.hasApproved else "Not signed",
+                classes: "govuk-tag--grey" if not signatory.hasApproved
+              }),
               attributes: { id: "signed-" + loop.index0 }
             }
           ]

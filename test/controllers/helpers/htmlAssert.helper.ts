@@ -21,10 +21,6 @@ export default class HtmlAssertHelper {
     return this.getAttributeValue(selector, 'value')
   }
 
-  public hasClass(selector: string, attr: string): boolean {
-    return this.getElement(selector)?.className === attr
-  }
-
   public hasText(selector: string, expectedValue: string): boolean {
     return this.getText(selector) === expectedValue
   }
