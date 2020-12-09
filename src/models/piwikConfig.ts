@@ -5,4 +5,8 @@ export default interface PiwikConfig {
   confirmationPagePDFGoalId: number
   limitedCompanyGoalId: number
   partnershipGoalId: number
+  limitedCompanyConfirmationGoalId: number
+  partnershipConfirmationGoalId: number
+  multiDirectorConfirmationGoalId: number
+  singleDirectorConfirmationGoalId: number
 }

@@ -5,14 +5,18 @@ import { Application } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
+import { generateDissolutionGetResponse } from '../fixtures/dissolutionApi.fixtures'
 import { generateDissolutionSession } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/viewFinalConfirmation.controller'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import OfficerType from 'app/models/dto/officerType.enum'
+import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { VIEW_FINAL_CONFIRMATION_URI } from 'app/paths'
+import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
 describe('ViewFinalConfirmationController', () => {
@@ -20,19 +24,30 @@ describe('ViewFinalConfirmationController', () => {
   const APPLICATION_REFERENCE_NUMBER = 'OVFFTH'
 
   let session: SessionService
+  let dissolution: Optional<DissolutionGetResponse>
+  let dissolutionService: DissolutionService
   let dissolutionSession: DissolutionSession
   let app: Application
 
+  const TOKEN = 'some-token'
+
   beforeEach(() => {
     session = mock(SessionService)
+
+    dissolutionService = mock(DissolutionService)
+
+    dissolution = generateDissolutionGetResponse()
 
     dissolutionSession = generateDissolutionSession()
     dissolutionSession.applicationReferenceNumber = APPLICATION_REFERENCE_NUMBER
 
     app = createApp(container => {
       container.rebind(SessionService).toConstantValue(instance(session))
+      container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
     })
 
+    when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+    when(session.getAccessToken(anything())).thenReturn(TOKEN)
     when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
   })
 

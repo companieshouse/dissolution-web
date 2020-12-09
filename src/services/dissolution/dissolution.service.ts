@@ -38,6 +38,7 @@ export default class DissolutionService {
   }
 
   public async getDissolution(token: string, dissolutionSession: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
+    console.log('should not be visible')
     const companyNumber: string = dissolutionSession.companyNumber!
 
     return await this.client.getDissolution(token, companyNumber)

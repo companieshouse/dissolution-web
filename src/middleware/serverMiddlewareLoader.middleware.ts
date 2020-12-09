@@ -73,16 +73,18 @@ export default class ServerMiddlewareLoader {
   }
 
   private prepareCSPConfig(nonce: string): ContentSecurityPolicyOptions {
+    const piwikConfig = ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)
     return {
       directives: {
-        defaultSrc: [`'self'`],
+        defaultSrc: [`'self'`, piwikConfig],
         scriptSrc: [`'self'`, 'code.jquery.com', this.CDN_HOST, `'nonce-${nonce}'`,
-          ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG),
+        piwikConfig,
           `'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='`],
+        connectSrc: [`'self'`, piwikConfig],
         objectSrc: [`'none'`],
         fontSrc: [`'self'`, this.CDN_HOST],
         styleSrc: [`'self'`, this.CDN_HOST],
-        imgSrc: [`'self'`, this.CDN_HOST, ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)]
+        imgSrc: [`'self'`, this.CDN_HOST, piwikConfig]
       }
     }
   }

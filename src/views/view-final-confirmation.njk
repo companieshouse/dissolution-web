@@ -33,7 +33,19 @@
         })
       }}
       
-      <p class="govuk-body"><a href="{{ Paths.CERTIFICATE_DOWNLOAD_URI }}" target="_blank" onclick="_paq.push(['trackGoal', {{ piwik.confirmationPagePDFGoalId }}]);" class="govuk-link">Download the signed copy of the application (opens in a new tab)</a>.</p>
+      <p class="govuk-body"><a id="certificate-download" href="{{ Paths.CERTIFICATE_DOWNLOAD_URI }}" target="_blank" class="govuk-link">Download the signed copy of the application (opens in a new tab)</a>.</p>
     </div>
   </div>
+  {% if piwik %}
+    <script nonce={{ nonce | dump | safe }}>
+      $(document).ready(() => {
+        _paq.push(['trackGoal', {{ applicationType | asApplicationTypeConfirmationGoalId(piwik) }}])
+        _paq.push(['trackGoal', {{ isMultiDirector | asDirectorSingleMultiConfirmationGoalId(piwik) }}])
+        _paq.push(['trackEvent', 'Confirmation', 'Payment Type Confirmation', '{{ paymentType }}']);
+        $('#certificate-download').on('click', () => {
+          _paq.push(["trackGoal", {{ piwik.confirmationPagePDFGoalId }}]);
+        });
+      })
+    </script>
+  {% endif %}
 {% endblock %}
