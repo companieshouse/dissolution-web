@@ -22,7 +22,8 @@ Code Style Guide: https://github.com/companieshouse/dissolution-web/wiki/Code-St
 - [ ] All UI Tests Passing
 - [ ] Pulled latest master into feature branch
 - [ ] Sonar Analysis
-- [ ] New Docker environment variables are consistent with those on the Rebel1 environment
+- [ ] Master branch on Rebel1 and CIDev CI/CD pipeline is green
+- [ ] Any Docker environment variables added are consistent with those on our upstream environments (Rebel1, CIDev etc)
 - [ ] If your pull request depends on any other, please link them in the description
 
 ## Screenshots of new or updated views
