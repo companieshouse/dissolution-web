@@ -69,7 +69,7 @@ describe('WaitForOthersToSignController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'The directors must sign the application before you can submit it'))
-      assert.isTrue(htmlAssertHelper.hasText('#email', 'We will email the directors and ask them to sign the application.'))
+      assert.isTrue(htmlAssertHelper.hasText('#email', 'We have emailed the directors, or those signing on their behalf, asking them to sign the application. It may take some time for them to do this.'))
       assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all directors have signed, we will email you with instructions to pay for and submit the application.'))
     })
 
@@ -83,7 +83,7 @@ describe('WaitForOthersToSignController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'The members must sign the application before you can submit it'))
-      assert.isTrue(htmlAssertHelper.hasText('#email', 'We will email the members and ask them to sign the application.'))
+      assert.isTrue(htmlAssertHelper.hasText('#email', 'We have emailed the members, or those signing on their behalf, asking them to sign the application. It may take some time for them to do this.'))
       assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all members have signed, we will email you with instructions to pay for and submit the application.'))
     })
 
