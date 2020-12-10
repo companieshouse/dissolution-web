@@ -47,8 +47,8 @@ describe('CertificateSignedController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Application signed'))
-      assert.isTrue(htmlAssertHelper.hasText('#signatures', 'We need to receive signatures from all signing directors before the person making the application can pay for and submit it. It may take some time for others to sign.'))
-      assert.isTrue(htmlAssertHelper.hasText('#parties', 'The directors must then send this to all interested parties within 7 days of submission.'))
+      assert.isTrue(htmlAssertHelper.hasText('#signatures', 'We need to receive signatures from all signing directors before the person making the application can pay for and submit it. It may take some time for others to sign. You can check who has signed below.'))
+      assert.isTrue(htmlAssertHelper.hasText('#parties', 'The directors must send this to all interested parties within 7 days of the application being submitted.'))
     })
 
     it('should render the CertificateSigned page with member text if the company is LLP', async () => {
@@ -61,8 +61,8 @@ describe('CertificateSignedController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h1', 'Application signed'))
-      assert.isTrue(htmlAssertHelper.hasText('#signatures', 'We need to receive signatures from all signing members before the person making the application can pay for and submit it. It may take some time for others to sign.'))
-      assert.isTrue(htmlAssertHelper.hasText('#parties', 'The members must then send this to all interested parties within 7 days of submission.'))
+      assert.isTrue(htmlAssertHelper.hasText('#signatures', 'We need to receive signatures from all signing directors before the person making the application can pay for and submit it. It may take some time for others to sign. You can check who has signed below.'))
+      assert.isTrue(htmlAssertHelper.hasText('#parties', 'The members must send this to all interested parties within 7 days of the application being submitted.'))
     })
   })
 })
