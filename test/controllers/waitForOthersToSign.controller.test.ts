@@ -13,11 +13,12 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/waitForOthersToSign.controller'
 import ViewApplicationStatusMapper from 'app/mappers/view-application-status/viewApplicationStatus.mapper'
+import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse.ts'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
-import { WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
+import { PAYMENT_REVIEW_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -84,6 +85,15 @@ describe('WaitForOthersToSignController', () => {
       assert.isTrue(htmlAssertHelper.hasText('h1', 'The members must sign the application before you can submit it'))
       assert.isTrue(htmlAssertHelper.hasText('#email', 'We will email the members and ask them to sign the application.'))
       assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all members have signed, we will email you with instructions to pay for and submit the application.'))
+    })
+
+    it('should redirect applicant to the Payment Review page if all the signatories have signed', async () => {
+      dissolution.application_status = ApplicationStatus.PENDING_PAYMENT
+
+      await request(app)
+        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+        .expect(StatusCodes.MOVED_TEMPORARILY)
+        .expect('Location', PAYMENT_REVIEW_URI)
     })
 
     describe('View Application Status', () => {
