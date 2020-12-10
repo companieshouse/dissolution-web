@@ -6,20 +6,31 @@
 {% set title = "Wait for others to sign - " + pageTitleSuffix %}
 
 {% block content %}
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-two-thirds">
-        <div class="interruption-card">
-          <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-1">The {{ officerType }}s must sign the application before you can submit it</h1>
-        </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="interruption-card">
+        <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-1">The {{ officerType }}s must sign the application before you can submit it</h1>
       </div>
     </div>
+  </div>
 
-    <div class="govuk-grid-row govuk-!-margin-top-4">
-      <div class="govuk-grid-column-two-thirds">
-        <p id="email" class="govuk-body">We will email the {{ officerType }}s and ask them to sign the application.</p>
-        <p id="signed" class="govuk-body">When all {{ officerType }}s have signed, we will email you with instructions to pay for and submit the application.</p>
-        <p class="govuk-body">You can now exit this page.</p>
-      </div>
+  <div class="govuk-grid-row govuk-!-margin-top-4">
+    <div class="govuk-grid-column-two-thirds">
+      <p id="email" class="govuk-body">We have emailed the {{ officerType }}s, or those signing on their behalf, asking them to sign the application. It may take some time for them to do this.</p>
+
+      <p class="govuk-body">If they have not yet received the email, we recommend that they check their junk folders. You can also check their details and resend the email below.</p>
+
+      <p class="govuk-body">Alternatively, they can sign the application by signing in to <a href="{{ Paths.ROOT_URI }}">the Apply to strike off and dissolve a company service</a>.</p>
+
+      <p class="govuk-body">Each person signing the application will need:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>to sign in to or create their own Companies House account</li>
+        <li>the company number</li>
+        <li>the company authentication code</li>
+      </ul>
+
+      <p id="signed" class="govuk-body">When all {{ officerType }}s have signed, we will email you with instructions to pay for and submit the application.</p>
+    </div>
   </div>
 
   {% include 'components/view-application-status.njk' %}
