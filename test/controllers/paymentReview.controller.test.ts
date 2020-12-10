@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
 import { generatePaymentSummary } from '../fixtures/payment.fixtures'
-import { generateDissolutionSession } from '../fixtures/session.fixtures'
+import { generateDissolutionSession, TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -28,7 +28,6 @@ describe('PaymentReviewController', () => {
   let sessionService: SessionService
   let paymentService: PaymentService
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = 'ABC123'
   const REDIRECT_URL = 'http://some-payment-ui-url'
 

@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes'
 import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generateCompanyOfficer, generateCompanyOfficers, generateCompanyOfficersResource,
   generateDirectorDetails } from '../../fixtures/companyOfficers.fixtures'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import DirectorDetailsMapper from 'app/mappers/company-officers/directorDetails.mapper'
 import OfficerRole from 'app/models/dto/officerRole.enum'
@@ -19,7 +20,6 @@ describe('CompanyOfficersService', () => {
   let client: CompanyOfficersClient
   let directorMapper: DirectorDetailsMapper
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = '12345678'
 
   beforeEach(() => {

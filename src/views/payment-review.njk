@@ -16,15 +16,17 @@
           {% set paymentRows =
             (
               paymentRows.push(
-                {
-                  text: payment.description,
-                  attributes: { id: 'item-' + loop.index0 }
-                },
-                {
-                  text: payment.cost,
-                  attributes: { id: 'amount-to-pay-' + loop.index0 },
-                  format: "numeric"
-                }
+                [
+                  {
+                    text: payment.description,
+                    attributes: { id: 'item-' + loop.index0 }
+                  },
+                  {
+                    text: payment.cost,
+                    attributes: { id: 'amount-to-pay-' + loop.index0 },
+                    format: "numeric"
+                  }
+                ]
               ),
               paymentRows
             )
@@ -43,7 +45,7 @@
                 format: "numeric"
               }
             ],
-            rows: [ paymentRows ]
+            rows: paymentRows
         }) }}
 
         <h2 class="govuk-heading-m">The total amount to pay is <span id="total_cost">{{ paymentSummary.total_cost }}</span></h2>

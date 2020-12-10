@@ -4,6 +4,7 @@ import { assert } from 'chai'
 import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
+import { TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -23,7 +24,6 @@ describe('ViewCompanyInformationController', () => {
   let session: SessionService
   let companyService: CompanyService
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = '01777777'
 
   let dissolutionSession: DissolutionSession

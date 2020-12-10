@@ -5,34 +5,55 @@ import { Application } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import request from 'supertest'
 import { anything, instance, mock, when } from 'ts-mockito'
+import { generateDissolutionGetResponse } from '../fixtures/dissolutionApi.fixtures'
+import { TOKEN } from '../fixtures/session.fixtures'
+import { generateViewApplicationStatusModel, generateViewApplicationStatusSignatory } from '../fixtures/viewApplicationStatus.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/waitForOthersToSign.controller'
+import ViewApplicationStatusMapper from 'app/mappers/view-application-status/viewApplicationStatus.mapper'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse.ts'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
 import { WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
+import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
 let session: SessionService
+let dissolutionService: DissolutionService
+let viewApplicationStatusMapper: ViewApplicationStatusMapper
 
 const COMPANY_NUMBER = '01777777'
 
 let app: Application
+
 let dissolutionSession: DissolutionSession
+let dissolution: DissolutionGetResponse
+let viewApplicationStatus: ViewApplicationStatus
 
 beforeEach(() => {
   session = mock(SessionService)
-  dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+  dissolutionService = mock(DissolutionService)
+  viewApplicationStatusMapper = mock(ViewApplicationStatusMapper)
 
+  dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
+  dissolution = generateDissolutionGetResponse()
+  viewApplicationStatus = generateViewApplicationStatusModel()
+
+  when(session.getAccessToken(anything())).thenReturn(TOKEN)
   when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+  when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+  when(viewApplicationStatusMapper.mapToViewModel(dissolution)).thenReturn(viewApplicationStatus)
 
   app = createApp(container => {
     container.rebind(SessionService).toConstantValue(instance(session))
+    container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
+    container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
   })
-
 })
 
 describe('WaitForOthersToSignController', () => {
@@ -63,6 +84,60 @@ describe('WaitForOthersToSignController', () => {
       assert.isTrue(htmlAssertHelper.hasText('h1', 'The members must sign the application before you can submit it'))
       assert.isTrue(htmlAssertHelper.hasText('#email', 'We will email the members and ask them to sign the application.'))
       assert.isTrue(htmlAssertHelper.hasText('#signed', 'When all members have signed, we will email you with instructions to pay for and submit the application.'))
+    })
+
+    describe('View Application Status', () => {
+      it('should display each signatory on a separate row', async () => {
+        viewApplicationStatus.signatories = [
+          generateViewApplicationStatusSignatory(),
+          generateViewApplicationStatusSignatory(),
+        ]
+
+        const res = await request(app)
+          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+          .expect(StatusCodes.OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.isTrue(htmlAssertHelper.selectorExists('#name-0'))
+        assert.isTrue(htmlAssertHelper.selectorExists('#name-1'))
+        assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#name-2'))
+      })
+
+      it('should display the signatory info correctly', async () => {
+        viewApplicationStatus.signatories = [
+          { ...generateViewApplicationStatusSignatory(), name: 'Jane Smith', email: 'jane@mail.com' },
+          { ...generateViewApplicationStatusSignatory(), name: 'John Doe', email: 'john@mail.com' }
+        ]
+
+        const res = await request(app)
+          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+          .expect(StatusCodes.OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.isTrue(htmlAssertHelper.hasText('#name-0', 'Jane Smith'))
+        assert.isTrue(htmlAssertHelper.hasText('#email-0', 'jane@mail.com'))
+
+        assert.isTrue(htmlAssertHelper.hasText('#name-1', 'John Doe'))
+        assert.isTrue(htmlAssertHelper.hasText('#email-1', 'john@mail.com'))
+      })
+
+      it('should display the correct signed status for each signatory', async () => {
+        viewApplicationStatus.signatories = [
+          { ...generateViewApplicationStatusSignatory(), hasApproved: true },
+          { ...generateViewApplicationStatusSignatory(), hasApproved: false }
+        ]
+
+        const res = await request(app)
+          .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+          .expect(StatusCodes.OK)
+
+        const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+        assert.isTrue(htmlAssertHelper.hasText('#signed-0 .govuk-tag', 'Signed'))
+        assert.isTrue(htmlAssertHelper.hasText('#signed-1 .govuk-tag', 'Not signed'))
+      })
     })
   })
 })

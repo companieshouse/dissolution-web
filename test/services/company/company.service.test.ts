@@ -4,6 +4,7 @@ import { assert } from 'chai'
 import { StatusCodes } from 'http-status-codes'
 import { instance, mock, when } from 'ts-mockito'
 import { generateCompanyDetails, generateCompanyProfile, generateCompanyProfileResource } from '../../fixtures/companyProfile.fixtures'
+import { TOKEN } from '../../fixtures/session.fixtures'
 
 import CompanyDetailsMapper from 'app/mappers/company/companyDetails.mapper'
 import CompanyDetails from 'app/models/companyDetails.model'
@@ -25,7 +26,6 @@ describe('CompanyService', () => {
   let mapper: CompanyDetailsMapper
   let officersService: CompanyOfficersService
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = '12345678'
 
   beforeEach(() => {

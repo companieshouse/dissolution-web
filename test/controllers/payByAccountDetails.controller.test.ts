@@ -8,7 +8,7 @@ import { anything, deepEqual, instance, mock, when } from 'ts-mockito'
 import { generateDissolutionGetResponse } from '../fixtures/dissolutionApi.fixtures'
 import { generateValidationError } from '../fixtures/error.fixtures'
 import { generatePayByAccountDetailsForm } from '../fixtures/payment.fixtures'
-import { generateDissolutionSession } from '../fixtures/session.fixtures'
+import { generateDissolutionSession, TOKEN } from '../fixtures/session.fixtures'
 import { createApp } from './helpers/application.factory'
 import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
@@ -28,7 +28,6 @@ import FormValidator from 'app/utils/formValidator.util'
 
 describe('PayByAccountDetailsController', () => {
 
-  const TOKEN = 'some-token'
   const COMPANY_NUMBER = 'ABC123'
 
   let sessionService: SessionService
