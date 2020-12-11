@@ -9,7 +9,7 @@
       <div class="govuk-grid-column-two-thirds">
         <div class="interruption-card">
           <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-8">Application signed</h1>
-          <p class="govuk-body govuk-!-font-size-36 govuk-!-margin-bottom-1">Check the application's progress with the person who is submitting it</p>
+          <p class="govuk-body govuk-!-font-size-36 govuk-!-margin-bottom-1">The person making the application should notify you once it has been submitted.</p>
         </div>
       </div>
     </div>
@@ -17,17 +17,19 @@
     <div class="govuk-grid-row govuk-!-margin-top-4">
       <div class="govuk-grid-column-two-thirds">
 
-        <p id="signatures" class="govuk-body">We need to receive signatures from all signing {{ officerType }}s before the person making the application can pay for and submit it. It may take some time for others to sign.</p>
+        <p id="signatures" class="govuk-body">We need to receive signatures from all signing {{ officerType }}s before the person making the application can pay for and submit it. It may take some time for others to sign. You can check who has signed below. </p>
 
         <h2 class="govuk-heading-s">What to do next</h2>
 
-        <p class="govuk-body">The person making the application can download a signed PDF copy of it after it has been submitted.</p>
-        <p id="parties" class="govuk-body">The {{ officerType }}s must then send this to all interested parties within 7 days of submission.</p>
+        <p class="govuk-body">Once the application has been submitted, you will be able to download a signed PDF copy by signing back in to the Apply to strike off and dissolve a company service.<a href="{{ Paths.SEARCH_COMPANY_URI }}">https://find-and-update.company-information.service.gov.uk/close-a-company/search-company</a></p>
+        <p id="parties" class="govuk-body">The {{ officerType }}s must send this to all interested parties within 7 days of the application being submitted.</p>
 
         {{ govukWarningText({
           text: "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
           iconFallbackText: "Warning"
         }) }}
+
+        <p class="govuk-body">Read the <a class="govuk-link piwik-event" data-event-id="who-to-tell-read-guidance" target="_blank" href="{{ documentationUrl }}">full list of interested parties you must tell about the company closing (opens in a new tab)</a>.</p>
 
       </div>
   </div>
