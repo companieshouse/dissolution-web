@@ -4,7 +4,9 @@
       <span id="signed_in_user_email" class="sign-out-user-banner__email">
         {{ userEmail }}
       </span>
-      <a id="sign_out" class="sign-out-user-banner__sign-out-link" href="/signout" rel="noreferrer">Sign out</a>
+      <a id="sign_out" class="sign-out-user-banner__sign-out-link" href="/signout" rel="noreferrer" {% if piwik %}data-event-id="sign-out-link"{% endif %}>
+        Sign out
+      </a>
     </div>
   </div>
 {% endif %}

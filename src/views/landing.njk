@@ -27,8 +27,7 @@
             isStartButton: true,
             attributes: {
               id: 'start-now',
-              'data-event-id': 'start-now-button' if piwik,
-              onclick: '_paq.push(["trackGoal", ' + piwik.landingPageStartGoalId + ']);' if piwik
+              'data-event-id': 'start-now-button' if piwik
             }
           })
         }}
@@ -37,4 +36,13 @@
       <p class="govuk-body-s">Read the <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration" target="_blank" class="govuk-link">guidance for striking off and dissolving a company (opens in a new tab)</a>.</p>
     </div>
   </div>
+  {% if piwik %}
+    <script nonce={{ nonce | dump | safe }}>
+      $(document).ready(() => {
+        $('#start-now').on('click', () => {
+          _paq.push(["trackGoal", {{ piwik.landingPageStartGoalId }}]);
+        });
+      })
+    </script>
+  {% endif %}
 {% endblock %}

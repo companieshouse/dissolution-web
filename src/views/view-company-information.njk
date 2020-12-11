@@ -95,8 +95,7 @@
           govukButton({
             text: 'Confirm and continue',
             attributes: {
-              id: 'submit',
-              onclick: '_paq.push(["trackGoal", ' + company.companyType | asCompanyTypeGoalId(piwik) + ']);' if piwik
+              id: 'submit'
             }
           }) if not error
         }}
@@ -106,4 +105,13 @@
       </p>
     </div>
   </div>
+  {% if piwik %}
+    <script nonce={{ nonce | dump | safe }}>
+      $(document).ready(function() {
+        $('#submit').on('click', function() {
+          _paq.push(["trackGoal", {{ company.companyType | asCompanyTypeGoalId(piwik) }}]);
+        });
+      })
+    </script>
+  {% endif %}
 {% endblock %}

@@ -41,7 +41,11 @@ export function initContainer(): Container {
     landingPageStartGoalId: Number(getEnvOrThrow('PIWIK_LANDING_PAGE_START_GOAL_ID')),
     confirmationPagePDFGoalId: Number(getEnvOrThrow('PIWIK_CONFIRMATION_PAGE_PDF_GOAL_ID')),
     limitedCompanyGoalId: Number(getEnvOrThrow('PIWIK_LIMITED_COMPANY_GOAL_ID')),
-    partnershipGoalId: Number(getEnvOrThrow('PIWIK_PARTNERSHIP_GOAL_ID'))
+    partnershipGoalId: Number(getEnvOrThrow('PIWIK_PARTNERSHIP_GOAL_ID')),
+    limitedCompanyConfirmationGoalId: Number(getEnvOrThrow('PIWIK_LIMITED_COMPANY_CONFIRMATION_GOAL_ID')),
+    partnershipConfirmationGoalId: Number(getEnvOrThrow('PIWIK_PARTNERSHIP_CONFIRMATION_GOAL_ID')),
+    multiDirectorConfirmationGoalId: Number(getEnvOrThrow('PIWIK_MULTI_DIRECTOR_CONFIRMATION_GOAL_ID')),
+    singleDirectorConfirmationGoalId: Number(getEnvOrThrow('PIWIK_SINGLE_DIRECTOR_CONFIRMATION_GOAL_ID'))
   }
   container.bind<PiwikConfig>(TYPES.PIWIK_CONFIG).toConstantValue(piwikConfig)
   container.bind<number>(TYPES.PORT).toConstantValue(Number(getEnvOrDefault('PORT', '3000')))
