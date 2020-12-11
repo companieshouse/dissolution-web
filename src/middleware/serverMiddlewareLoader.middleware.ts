@@ -15,7 +15,6 @@ import { v4 as uuidv4 } from 'uuid'
 import CustomServerMiddlewareLoader from './customServerMiddlewareLoader.middleware'
 import NunjucksLoader from './nunjucksLoader.middleware'
 
-
 import { APP_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
 import TYPES from 'app/types'
