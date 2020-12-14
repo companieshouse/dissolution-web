@@ -41,10 +41,15 @@
 
       <p id="declaration-paragraph" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of
         {{ approvalModel.officerType }}s apply for this {{ approvalModel.officerType | asCompanyDisplayName }} to be
-        struck off the Register and declare that none of the circumstances described in  
+        struck off the Register and declare that: </p>
+        <ol class="govuk-list govuk-list--number">
+          <li>none of the circumstances described in  
           <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1004" target="_blank" class="govuk-link">section 1004 of the Companies Act 2006 (opens in a new tab)</a>
-          or  <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1005" target="_blank" class="govuk-link">section 1005 of the Companies Act 2006 (opens in a new tab)</a>
-           (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections.)</p>
+           or  <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1005" target="_blank" class="govuk-link">section 1005 of the Companies Act 2006 (opens in a new tab)</a>
+           (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections from making an application) exists in relation to the company and</li>
+          <li>we have complied with the requirements of sections 1006 and 1007 of the Act and have given/will give copies of the application to the people listed in those sections required</li>
+        </ol>
+    
 
       {% set confirmationLabel %}
         {% if not approvalModel.onBehalfName %}
@@ -74,7 +79,7 @@
         }}
         {{
           govukButton({
-            text: 'Sign the application',
+            text: 'Continue',
             attributes: {
               id: 'submit'
             }
