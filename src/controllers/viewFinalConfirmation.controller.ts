@@ -2,6 +2,7 @@ import { inject } from 'inversify'
 import { controller, httpGet } from 'inversify-express-utils'
 
 import BaseController from 'app/controllers/base.controller'
+import ApplicationType from 'app/models/dto/applicationType.enum'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import OfficerType from 'app/models/dto/officerType.enum'
 import PaymentType from 'app/models/dto/paymentType.enum'
@@ -15,7 +16,8 @@ interface ViewModel {
   applicationReferenceNumber: string,
   officerType: OfficerType,
   paymentType: PaymentType,
-  isMultiDirector: boolean
+  isMultiDirector: boolean,
+  applicationType: ApplicationType
 }
 
 @controller(VIEW_FINAL_CONFIRMATION_URI)
@@ -39,7 +41,8 @@ export class ViewFinalConfirmationController extends BaseController {
       applicationReferenceNumber: this.getApplicationReferenceNumber(),
       officerType: dissolutionSession.officerType!,
       paymentType: dissolutionSession.paymentType!,
-      isMultiDirector: dissolution!.directors.length > 1
+      isMultiDirector: dissolution!.directors.length > 1,
+      applicationType: dissolution!.application_type
     }
 
     return super.render('view-final-confirmation', viewModel)
