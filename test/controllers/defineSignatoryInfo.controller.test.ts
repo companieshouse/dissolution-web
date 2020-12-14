@@ -14,7 +14,8 @@ import HtmlAssertHelper from './helpers/htmlAssert.helper'
 
 import 'app/controllers/defineSignatoryInfo.controller'
 import OfficerType from 'app/models/dto/officerType.enum'
-import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
+import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
+import SignatorySigning from 'app/models/form/signatorySigning.enum'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
@@ -135,7 +136,7 @@ describe('DefineSignatoryInfoController', () => {
       assert.isTrue(htmlAssertHelper.hasText('h1', 'How will the members be signing the application?'))
     })
 
-    it('should prepopulate the select director page with the selected director from session', async () => {
+    it('should prepopulate the define signatory info page with the selected signatories from session', async () => {
       const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
 
       form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
@@ -194,7 +195,7 @@ describe('DefineSignatoryInfoController', () => {
         assert.equal(htmlAssertHelper.getAttributeValue('.govuk-back-link', 'href'), SELECT_SIGNATORIES_URI)
       })
 
-      it('should set the button button to the select director page if multi director journey', async () => {
+      it('should set the back button to the select director page if multi director journey', async () => {
         dissolutionSession.isMultiDirector = false
 
         when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)

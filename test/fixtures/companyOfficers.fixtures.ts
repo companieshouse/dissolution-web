@@ -2,9 +2,11 @@ import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Iden
 import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
 import { StatusCodes } from 'http-status-codes'
 
-import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
+import ChangeDetailsFormModel from 'app/models/form/changeDetails.model'
+import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
+import SignatorySigning from 'app/models/form/signatorySigning.enum'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 
 export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
@@ -116,5 +118,20 @@ export function generateDefineSignatoryInfoFormModel(): DefineSignatoryInfoFormM
     isSigning_456def: SignatorySigning.ON_BEHALF,
     onBehalfName_456def: 'Mr Accountant',
     onBehalfEmail_456def: 'accountant@mail.com'
+  }
+}
+
+export function generateWillSignChangeDetailsFormModel(): ChangeDetailsFormModel {
+  return {
+    isSigning: SignatorySigning.WILL_SIGN,
+    directorEmail: 'director@mail.com'
+  }
+}
+
+export function generateOnBehalfChangeDetailsFormModel(): ChangeDetailsFormModel {
+  return {
+    isSigning: SignatorySigning.ON_BEHALF,
+    onBehalfName: 'Mr Accountant',
+    onBehalfEmail: 'accountant@mail.com'
   }
 }

@@ -2,6 +2,7 @@ import ApplicationStatus from 'app/models/dto/applicationStatus.enum'
 import ApplicationType from 'app/models/dto/applicationType.enum'
 import { DirectorRequest, DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionDirectorPatchRequest from 'app/models/dto/dissolutionDirectorPatchRequest'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
@@ -143,5 +144,11 @@ function generatePaymentItem(): PaymentItem {
     class_of_payment: ['data-maintenance'],
     kind: 'dissolution-request#payment-details',
     resource_kind: 'dissolution-request#dissolution-request'
+  }
+}
+
+export function generateDissolutionDirectorPatchRequest(): DissolutionDirectorPatchRequest {
+  return {
+    email: 'director@mail.com'
   }
 }

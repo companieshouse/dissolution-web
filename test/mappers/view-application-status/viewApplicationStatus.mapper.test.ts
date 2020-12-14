@@ -14,13 +14,25 @@ describe('ViewApplicationStatusMapper', () => {
 
     beforeEach(() => dissolution = generateDissolutionGetResponse())
 
+    it('should not show the change column if user is not the applicant', () => {
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, false)
+
+      assert.isFalse(result.showChangeColumn)
+    })
+
+    it('should show the change column if user is the applicant', () => {
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+
+      assert.isTrue(result.showChangeColumn)
+    })
+
     it('should map each director to a signatory', () => {
       dissolution.directors = [
         generateGetDirector(),
         generateGetDirector()
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
 
       assert.equal(result.signatories.length, 2)
     })
@@ -30,7 +42,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), officer_id: 'abc123', email: 'test@mail.com' }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
 
       assert.equal(result.signatories[0].id, 'abc123')
       assert.equal(result.signatories[0].email, 'test@mail.com')
@@ -41,7 +53,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), name: 'Jane Smith', on_behalf_name: undefined }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
 
       assert.equal(result.signatories[0].name, 'Jane Smith')
     })
@@ -51,7 +63,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), name: 'Jane Smith', on_behalf_name: 'Mr Accountant' }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
 
       assert.equal(result.signatories[0].name, 'Mr Accountant signing on behalf of Jane Smith')
     })
@@ -61,7 +73,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: new Date().toISOString() }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
 
       assert.isTrue(result.signatories[0].hasApproved)
     })
@@ -71,9 +83,39 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: undefined }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
 
       assert.isFalse(result.signatories[0].hasApproved)
+    })
+
+    it('should map canChange to true if user is the applicant and signatory has not signed', () => {
+      dissolution.directors = [
+        { ...generateGetDirector(), approved_at: undefined }
+      ]
+
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+
+      assert.isTrue(result.signatories[0].canChange)
+    })
+
+    it('should map canChange to false if signatory has already signed', () => {
+      dissolution.directors = [
+        { ...generateGetDirector(), approved_at: new Date().toISOString() }
+      ]
+
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+
+      assert.isFalse(result.signatories[0].canChange)
+    })
+
+    it('should map canChange to false if user is not the applicant', () => {
+      dissolution.directors = [
+        { ...generateGetDirector(), approved_at: undefined }
+      ]
+
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, false)
+
+      assert.isFalse(result.signatories[0].canChange)
     })
   })
 })

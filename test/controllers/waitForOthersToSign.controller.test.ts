@@ -18,7 +18,7 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse.ts'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
-import { PAYMENT_REVIEW_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
+import { APPLICATION_STATUS_URI, PAYMENT_REVIEW_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -48,7 +48,7 @@ beforeEach(() => {
   when(session.getAccessToken(anything())).thenReturn(TOKEN)
   when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
   when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
-  when(viewApplicationStatusMapper.mapToViewModel(dissolution)).thenReturn(viewApplicationStatus)
+  when(viewApplicationStatusMapper.mapToViewModel(dissolution, true)).thenReturn(viewApplicationStatus)
 
   app = createApp(container => {
     container.rebind(SessionService).toConstantValue(instance(session))
@@ -147,6 +147,38 @@ describe('WaitForOthersToSignController', () => {
 
         assert.isTrue(htmlAssertHelper.hasText('#signed-0 .govuk-tag', 'Signed'))
         assert.isTrue(htmlAssertHelper.hasText('#signed-1 .govuk-tag', 'Not signed'))
+      })
+
+      describe('change', () => {
+        it('should display the change column', async () => {
+          viewApplicationStatus.showChangeColumn = true
+
+          const res = await request(app)
+            .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+            .expect(StatusCodes.OK)
+
+          const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+          assert.isTrue(htmlAssertHelper.selectorExists('#change-col'))
+        })
+
+        it('should display the change link beside each editable signatory', async () => {
+          viewApplicationStatus.showChangeColumn = true
+          viewApplicationStatus.signatories = [
+            { ...generateViewApplicationStatusSignatory(), canChange: true, id: 'abc123' },
+            { ...generateViewApplicationStatusSignatory(), canChange: false }
+          ]
+
+          const res = await request(app)
+            .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+            .expect(StatusCodes.OK)
+
+          const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+          assert.isTrue(htmlAssertHelper.selectorExists('#change-0'))
+          assert.equal(htmlAssertHelper.getAttributeValue('#change-0 a', 'href'), `${APPLICATION_STATUS_URI}/abc123/change`)
+          assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#change-1'))
+        })
       })
     })
   })

@@ -1,4 +1,5 @@
 export interface ViewApplicationStatus {
+  showChangeColumn: boolean
   signatories: ViewApplicationStatusSignatory[]
 }
 
@@ -7,4 +8,5 @@ export interface ViewApplicationStatusSignatory {
   name: string
   email: string
   hasApproved: boolean
+  canChange: boolean
 }

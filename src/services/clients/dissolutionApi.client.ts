@@ -6,6 +6,7 @@ import { provide } from 'inversify-binding-decorators'
 
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionDirectorPatchRequest from 'app/models/dto/dissolutionDirectorPatchRequest'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
@@ -68,6 +69,15 @@ export class DissolutionApiClient {
     return response.data
   }
 
+  public async patchDissolutionDirector(
+    token: string, companyNumber: string, directorId: string, body: DissolutionDirectorPatchRequest): Promise<void> {
+    await this.axios.patch(
+      this.generateUrlForDirector(companyNumber, directorId),
+      body,
+      this.generateConfigForOAuth(token)
+    )
+  }
+
   public async patchDissolutionPaymentData(applicationReference: string, body: DissolutionPaymentPatchRequest): Promise<void> {
     return await this.axios.patch(
       `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,
@@ -98,5 +108,9 @@ export class DissolutionApiClient {
 
   private generateUrl(companyNumber: string): string {
     return `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`
+  }
+
+  private generateUrlForDirector(companyNumber: string, directorId: string): string {
+    return `${this.generateUrl(companyNumber)}/directors/${directorId}`
   }
 }

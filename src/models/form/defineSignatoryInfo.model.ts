@@ -10,8 +10,3 @@ export interface DefineSignatoryInfoFormModel {
   *  onBehalfEmail_${signatoryId}?: string
   */
 }
-
-export enum SignatorySigning {
-  WILL_SIGN = 'will-sign',
-  ON_BEHALF = 'on-behalf'
-}
