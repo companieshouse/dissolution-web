@@ -5,6 +5,7 @@ import sinon from 'sinon'
 import { TOKEN } from '../../fixtures/session.fixtures'
 
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
+import DissolutionDirectorPatchRequest from 'app/models/dto/dissolutionDirectorPatchRequest'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
@@ -14,8 +15,9 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
-  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData, generateDissolutionGetResponse,
-  generateDissolutionPatchRequest, generateDissolutionPatchResponse, generateDissolutionPaymentPatchRequest
+  generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionDirectorPatchRequest,
+  generateDissolutionGetPaymentUIData, generateDissolutionGetResponse, generateDissolutionPatchRequest,
+  generateDissolutionPatchResponse, generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
@@ -180,6 +182,30 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers.Accept, 'application/json')
 
       assert.equal(response, PATCH_RESPONSE.data)
+    })
+  })
+
+  describe('patchDissolutionDirector', () => {
+    const DIRECTOR_ID: string = 'abc123'
+
+    it('should update a dissolution director from the dissolution director patch request', async () => {
+      const request: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest()
+
+      patchStub = sinon.stub().resolves()
+      axiosInstance.patch = patchStub
+
+      await client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, DIRECTOR_ID, request)
+
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}/directors/${DIRECTOR_ID}`
+
+      assert.isTrue(patchStub.called)
+
+      const [url, body, config] = patchStub.args[0]
+      assert.equal(url, reqUrl)
+      assert.equal(body, request)
+      assert.equal(config.headers.Authorization, 'Bearer ' + TOKEN)
+      assert.equal(config.headers['Content-Type'], 'application/json')
+      assert.equal(config.headers.Accept, 'application/json')
     })
   })
 

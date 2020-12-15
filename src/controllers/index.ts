@@ -1,5 +1,7 @@
+import 'app/controllers/applicationStatus.controller'
 import 'app/controllers/certificateDownload.controller'
 import 'app/controllers/certificateSigned.controller'
+import 'app/controllers/changeDetails.controller'
 import 'app/controllers/checkYourAnswers.controller'
 import 'app/controllers/defineSignatoryInfo.controller'
 import 'app/controllers/endorseCompanyClosureCertificate.controller'

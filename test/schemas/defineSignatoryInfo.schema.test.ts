@@ -4,7 +4,8 @@ import { generateDefineSignatoryInfoFormModel } from '../fixtures/companyOfficer
 import { generateDirectorToSign } from '../fixtures/session.fixtures'
 
 import OfficerType from 'app/models/dto/officerType.enum'
-import { DefineSignatoryInfoFormModel, SignatorySigning } from 'app/models/form/defineSignatoryInfo.model'
+import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
+import SignatorySigning from 'app/models/form/signatorySigning.enum'
 import DirectorToSign from 'app/models/session/directorToSign.model'
 import defineSignatoryInfoSchema from 'app/schemas/defineSignatoryInfo.schema'
 
@@ -16,20 +17,15 @@ describe('Define Signatory Info Schema', () => {
   const SIGNATORY_1_ID_LOWER = SIGNATORY_1_ID.toLowerCase()
   const SIGNATORY_2_ID_LOWER = SIGNATORY_2_ID.toLowerCase()
 
-  const SIGNATORY_1_NAME = 'Signatory 1'
-  const SIGNATORY_2_NAME = 'Signatory 2'
-
   let signatory1: DirectorToSign
   let signatory2: DirectorToSign
 
   beforeEach(() => {
     signatory1 = generateDirectorToSign()
     signatory1.id = SIGNATORY_1_ID
-    signatory1.name = SIGNATORY_1_NAME
 
     signatory2 = generateDirectorToSign()
     signatory2.id = SIGNATORY_2_ID
-    signatory2.name = SIGNATORY_2_NAME
   })
 
   it('should return no errors when data is valid', () => {

@@ -47,7 +47,7 @@ export class WaitForOthersToSignController extends BaseController {
   private async renderView(officerType: OfficerType, dissolution: DissolutionGetResponse): Promise<string> {
     const viewModel: ViewModel = {
       officerType,
-      viewApplicationStatus: this.viewApplicationStatusMapper.mapToViewModel(dissolution)
+      viewApplicationStatus: this.viewApplicationStatusMapper.mapToViewModel(dissolution, true)
     }
 
     return super.render('wait-for-others-to-sign', viewModel)

@@ -9,18 +9,20 @@ import { ViewApplicationStatus, ViewApplicationStatusSignatory } from 'app/model
 @provide(ViewApplicationStatusMapper)
 export default class ViewApplicationStatusMapper {
 
-  public mapToViewModel(dissolution: DissolutionGetResponse): ViewApplicationStatus {
+  public mapToViewModel(dissolution: DissolutionGetResponse, isApplicant: boolean): ViewApplicationStatus {
     return {
-      signatories: dissolution.directors.map(director => this.mapToSignatory(director))
+      showChangeColumn: isApplicant,
+      signatories: dissolution.directors.map(director => this.mapToSignatory(director, isApplicant))
     }
   }
 
-  private mapToSignatory(signatory: DissolutionGetDirector): ViewApplicationStatusSignatory {
+  private mapToSignatory(signatory: DissolutionGetDirector, isApplicant: boolean): ViewApplicationStatusSignatory {
     return {
       id: signatory.officer_id,
       name: this.mapToSignatoryDisplayName(signatory),
       email: signatory.email,
-      hasApproved: !!signatory.approved_at
+      hasApproved: !!signatory.approved_at,
+      canChange: isApplicant && !signatory.approved_at
     }
   }
 

@@ -1,20 +1,19 @@
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/input/macro.njk"  import govukInput %}
 
-{% set signatoryId = (signatory.id | lower) %}
-{% set fieldsetId = "signatory_" + signatoryId %}
+{% set fieldsetId = "signatory" + formSuffix %}
 
-{% set isSigningName = "isSigning_" + signatoryId %}
-{% set isSigningId = "is-signing_" + signatoryId %}
+{% set isSigningName = "isSigning" + formSuffix %}
+{% set isSigningId = "is-signing" + formSuffix %}
 
-{% set directorEmailName = "directorEmail_" + signatoryId %}
-{% set directorEmailId = "director-email_" + signatoryId %}
+{% set directorEmailName = "directorEmail" + formSuffix %}
+{% set directorEmailId = "director-email" + formSuffix %}
 
-{% set onBehalfNameName = "onBehalfName_" + signatoryId %}
-{% set onBehalfNameId = "on-behalf-name_" + signatoryId %}
+{% set onBehalfNameName = "onBehalfName" + formSuffix %}
+{% set onBehalfNameId = "on-behalf-name" + formSuffix %}
 
-{% set onBehalfEmailName = "onBehalfEmail_" + signatoryId %}
-{% set onBehalfEmailId = "on-behalf-email_" + signatoryId %}
+{% set onBehalfEmailName = "onBehalfEmail" + formSuffix %}
+{% set onBehalfEmailId = "on-behalf-email" + formSuffix %}
 
 {% set willSignSection %}
   {{
@@ -25,7 +24,7 @@
       autocomplete: "email",
       classes: "govuk-!-width-full",
       label: {
-        text: "What is the email address for " + signatory.name + "?"
+        text: "What is the email address for " + signatoryName + "?"
       },
       hint: {
         text: "We will use this email to ask them to sign the application."
@@ -48,7 +47,7 @@
       name: onBehalfNameName,
       classes: "govuk-!-width-full",
       label: {
-        text: "What is the name of the person signing for " + signatory.name + "?"
+        text: "What is the name of the person signing for " + signatoryName + "?"
       },
       errorMessage: {
         text: errors[onBehalfNameName]
@@ -68,7 +67,7 @@
       autocomplete: "email",
       classes: "govuk-!-width-full",
       label: {
-        text: "What is the email address of the person signing for " + signatory.name + "?"
+        text: "What is the email address of the person signing for " + signatoryName + "?"
       },
       hint: {
         text: "We will use this email to ask them to sign the application."
@@ -93,7 +92,7 @@
         id: fieldsetId
       },
       legend: {
-        text: signatory.name,
+        text: signatoryName,
         classes: "govuk-fieldset__legend--m"
       }
     },

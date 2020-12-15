@@ -2,6 +2,7 @@ import { ViewApplicationStatus, ViewApplicationStatusSignatory } from 'app/model
 
 export function generateViewApplicationStatusModel(): ViewApplicationStatus {
   return {
+    showChangeColumn: false,
     signatories: [
       generateViewApplicationStatusSignatory()
     ]
@@ -13,6 +14,7 @@ export function generateViewApplicationStatusSignatory(): ViewApplicationStatusS
     id: 'abc123',
     name: 'Jane Smith',
     email: 'test@mail.com',
-    hasApproved: true
+    hasApproved: true,
+    canChange: false
   }
 }
