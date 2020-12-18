@@ -6,7 +6,7 @@ import { provide } from 'inversify-binding-decorators'
 import nunjucks from 'nunjucks'
 import * as path from 'path'
 
-import { PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
+import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
 import { ROOT_URI } from 'app/paths'
 import TYPES from 'app/types'
@@ -60,5 +60,9 @@ export default class NunjucksLoader {
     app.locals.nonce = nonce
 
     app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED
+
+    app.locals.bannerFeedbackLink = BANNER_FEEDBACK_LINK
+
+    app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
   }
 }
