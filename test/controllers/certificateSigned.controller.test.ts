@@ -14,7 +14,7 @@ import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import OfficerType from 'app/models/dto/officerType.enum'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
-import { APPLICATION_STATUS_URI, CERTIFICATE_SIGNED_URI } from 'app/paths'
+import { CERTIFICATE_SIGNED_URI } from 'app/paths'
 import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -144,8 +144,8 @@ describe('CertificateSignedController', () => {
     })
 
     describe('change', () => {
-      it('should display the change column', async () => {
-        viewApplicationStatus.showChangeColumn = true
+      it('should not display the change column', async () => {
+        viewApplicationStatus.showChangeColumn = false
 
         const res = await request(app)
           .get(CERTIFICATE_SIGNED_URI)
@@ -153,13 +153,13 @@ describe('CertificateSignedController', () => {
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-        assert.isTrue(htmlAssertHelper.selectorExists('#change-col'))
+        assert.isFalse(htmlAssertHelper.selectorExists('#change-col'))
       })
 
-      it('should display the change link beside each editable signatory', async () => {
-        viewApplicationStatus.showChangeColumn = true
+      it('should not display the change link beside each editable signatory', async () => {
+        viewApplicationStatus.showChangeColumn = false
         viewApplicationStatus.signatories = [
-          { ...generateViewApplicationStatusSignatory(), canChange: true, id: 'abc123' },
+          { ...generateViewApplicationStatusSignatory(), canChange: false, id: 'abc123' },
           { ...generateViewApplicationStatusSignatory(), canChange: false }
         ]
 
@@ -169,9 +169,7 @@ describe('CertificateSignedController', () => {
 
         const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-        assert.isTrue(htmlAssertHelper.selectorExists('#change-0'))
-        assert.equal(htmlAssertHelper.getAttributeValue('#change-0 a', 'href'), `${APPLICATION_STATUS_URI}/abc123/change`)
-        assert.isTrue(htmlAssertHelper.selectorDoesNotExist('#change-1'))
+        assert.isFalse(htmlAssertHelper.selectorExists('#change-0'))
       })
     })
   })
