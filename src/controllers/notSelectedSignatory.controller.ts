@@ -37,8 +37,10 @@ export class NotSelectedSignatoryController extends BaseController {
   }
 
   private async renderView(dissolution: DissolutionGetResponse): Promise<string> {
+    const viewApplicationStatus: ViewApplicationStatus = this.viewApplicationStatusMapper.mapToViewModel(dissolution, false)
+
     const viewModel: ViewModel = {
-      viewApplicationStatus: this.viewApplicationStatusMapper.mapToViewModel(dissolution, false)
+      viewApplicationStatus
     }
 
     return super.render('not-selected-signatory', viewModel)
