@@ -26,6 +26,10 @@
               attributes: { id: "change-" + loop.index0 }
             } if signatory.canChange,
             {
+              html: '<a>Email sent </a>' if signatory.reminderSent else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Resend email</a>',
+              attributes: { id: "resend-" + loop.index0 }
+            } if not signatory.hasApproved,
+            {
               html: govukTag({
                 text: "Signed" if signatory.hasApproved else "Not signed",
                 classes: "govuk-tag--grey" if not signatory.hasApproved
@@ -52,6 +56,9 @@
           text: "Change",
           attributes: { id: "change-col" }
         } if viewApplicationStatus.showChangeColumn,
+        {
+          text: "Resend"
+        },
         {
           text: "Signed"
         }

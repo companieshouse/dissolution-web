@@ -22,7 +22,8 @@ export default class ViewApplicationStatusMapper {
       name: this.mapToSignatoryDisplayName(signatory),
       email: signatory.email,
       hasApproved: !!signatory.approved_at,
-      canChange: isApplicant && !signatory.approved_at
+      canChange: isApplicant && !signatory.approved_at,
+      reminderSent: false
     }
   }
 
