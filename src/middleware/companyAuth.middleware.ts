@@ -65,7 +65,7 @@ async function getAuthRedirectUri(
   req: Request, authConfig: AuthConfig, encryptionService: JwtEncryptionService, sessionService: SessionService, companyNumber?: string
 ): Promise<string> {
   const originalUrl: string = req.originalUrl
-  const scope: string = OAUTH_USER_SCOPE + " " + OAUTH_COMPANY_SCOPE_PREFIX + companyNumber
+  const scope: string = OAUTH_USER_SCOPE + ' ' + OAUTH_COMPANY_SCOPE_PREFIX + companyNumber
   const nonce: string = encryptionService.generateNonce()
   const encodedNonce: string = await encryptionService.jweEncodeWithNonce(originalUrl, nonce)
 
