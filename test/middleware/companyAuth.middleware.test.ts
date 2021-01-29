@@ -101,6 +101,6 @@ describe('AuthMiddleware', () => {
 
     const redirectUrl: string = redirectStub.args[0][0]
 
-    assert.include(redirectUrl, 'http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://api.companieshouse.gov.uk/company/12345678')
+    assert.include(redirectUrl, 'http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678')
   })
 })
