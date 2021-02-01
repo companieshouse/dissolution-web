@@ -10,7 +10,8 @@ import { HEALTHCHECK_URI, ROOT_URI, SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION
 import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
 import SessionService from 'app/services/session/session.service'
 
-const OATH_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
+const OAUTH_COMPANY_SCOPE_PREFIX = 'https://api.companieshouse.gov.uk/company/'
+const OAUTH_USER_SCOPE = 'https://account.companieshouse.gov.uk/user.write-full'
 
 const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
   ROOT_URI,
@@ -64,7 +65,7 @@ async function getAuthRedirectUri(
   req: Request, authConfig: AuthConfig, encryptionService: JwtEncryptionService, sessionService: SessionService, companyNumber?: string
 ): Promise<string> {
   const originalUrl: string = req.originalUrl
-  const scope: string = OATH_SCOPE_PREFIX + companyNumber
+  const scope: string = OAUTH_USER_SCOPE + ' ' + OAUTH_COMPANY_SCOPE_PREFIX + companyNumber
   const nonce: string = encryptionService.generateNonce()
   const encodedNonce: string = await encryptionService.jweEncodeWithNonce(originalUrl, nonce)
 
