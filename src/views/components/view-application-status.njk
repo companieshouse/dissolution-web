@@ -26,7 +26,7 @@
               attributes: { id: "change-" + loop.index0 }
             } if signatory.canChange,
             {
-              html: '<a>Email sent </a>' if signatory.reminderSent else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Resend email</a>',
+              html: '<a>Email sent </a>' if signatory.reminderSent else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/send-email">Resend email</a>',
               attributes: { id: "resend-" + loop.index0 }
             } if not signatory.hasApproved,
             {
