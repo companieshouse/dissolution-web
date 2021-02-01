@@ -50,6 +50,14 @@ export class WaitForOthersToSignController extends BaseController {
       viewApplicationStatus: this.viewApplicationStatusMapper.mapToViewModel(dissolution, true)
     }
 
+    console.log('-------- ---------------------- ---------')
+    console.log(viewModel.viewApplicationStatus)
+    console.log('-------- ---------------------- ---------')
     return super.render('wait-for-others-to-sign', viewModel)
   }
+
+  // private async resendEmail(companyNumber: string, email: string): Promise<boolean> {
+  //   const response: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, email)
+  //   return response;
+  // }
 }

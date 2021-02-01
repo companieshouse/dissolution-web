@@ -37,6 +37,11 @@ export default class DissolutionService {
     return response.application_reference_number
   }
 
+  public async sendEmailNotification(companyNumber: string, directorEmail: string): Promise<boolean> {
+    const response: boolean = await this.client.sendEmailNotification(companyNumber, directorEmail)
+    return response;
+  }
+
   public async getDissolution(token: string, dissolutionSession: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
     const companyNumber: string = dissolutionSession.companyNumber!
 
