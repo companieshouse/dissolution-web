@@ -42,6 +42,10 @@ export default class DissolutionService {
     return response;
   }
 
+  public myPrint() {
+    console.log("------------------------> HELLO!")
+  }
+
   public async getDissolution(token: string, dissolutionSession: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
     const companyNumber: string = dissolutionSession.companyNumber!
 

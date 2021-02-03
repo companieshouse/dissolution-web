@@ -4,13 +4,15 @@ import { provide } from 'inversify-binding-decorators'
 
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
+import DissolutionService from 'app/services/dissolution/dissolution.service'
 import { ViewApplicationStatus, ViewApplicationStatusSignatory } from 'app/models/view/viewApplicationStatus.model'
 
 @provide(ViewApplicationStatusMapper)
 export default class ViewApplicationStatusMapper {
 
-  public mapToViewModel(dissolution: DissolutionGetResponse, isApplicant: boolean): ViewApplicationStatus {
+  public mapToViewModel(dissolutionService: DissolutionService, dissolution: DissolutionGetResponse, isApplicant: boolean): ViewApplicationStatus {
     return {
+      dissolutionService,
       showChangeColumn: isApplicant,
       signatories: dissolution.directors.map(director => this.mapToSignatory(director, isApplicant))
     }

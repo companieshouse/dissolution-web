@@ -1,4 +1,7 @@
+import DissolutionService from "app/services/dissolution/dissolution.service";
+
 export interface ViewApplicationStatus {
+  dissolutionService: DissolutionService
   showChangeColumn: boolean
   signatories: ViewApplicationStatusSignatory[]
 }
