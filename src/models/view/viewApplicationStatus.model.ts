@@ -1,4 +1,7 @@
+import DissolutionSession from "../session/dissolutionSession.model";
+
 export interface ViewApplicationStatus {
+  dissolutionSession: DissolutionSession
   showChangeColumn: boolean
   signatories: ViewApplicationStatusSignatory[]
 }
@@ -9,4 +12,5 @@ export interface ViewApplicationStatusSignatory {
   email: string
   hasApproved: boolean
   canChange: boolean
+  reminderSent: boolean
 }

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach VS Code debugger to Docker application (for debugging)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "localRoot": "${workspaceFolder}/dist",
+      "remoteRoot": "/app/dist",
+      "restart": true,
+      "protocol": "inspector"
+    }
+  ]
+}

@@ -15,6 +15,7 @@ import DissolutionService from 'app/services/dissolution/dissolution.service'
 import SessionService from 'app/services/session/session.service'
 
 interface ViewModel {
+  dissolutionSession: DissolutionSession
   officerType: OfficerType
   viewApplicationStatus: ViewApplicationStatus
 }
@@ -45,9 +46,11 @@ export class WaitForOthersToSignController extends BaseController {
   }
 
   private async renderView(officerType: OfficerType, dissolution: DissolutionGetResponse): Promise<string> {
+    const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
     const viewModel: ViewModel = {
+      dissolutionSession,
       officerType,
-      viewApplicationStatus: this.viewApplicationStatusMapper.mapToViewModel(dissolution, true)
+      viewApplicationStatus: this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution, true)
     }
 
     return super.render('wait-for-others-to-sign', viewModel)
