@@ -4,7 +4,7 @@ import { provide } from 'inversify-binding-decorators'
 
 import { DirectorRequest, DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 @provide(DissolutionRequestMapper)

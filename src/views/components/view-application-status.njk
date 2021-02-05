@@ -9,6 +9,12 @@
 
   {% set signatoryRows = [] %}
   {% for signatory in viewApplicationStatus.signatories %}
+    {% set isReminded = false %}
+    {% for director in signatory.remindDirectorList %}
+        {% if director.id === signatory.id %}
+          {% set isReminded = director.reminderSent %}
+        {% endif %}
+    {% endfor %}
     {% set signatoryRows =
       (
         signatoryRows.push(
@@ -26,7 +32,7 @@
               attributes: { id: "change-" + loop.index0 }
             } if signatory.canChange,
             {
-              html: '<a>Email sent </a>' if signatory.reminderSent else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
+              html: '<a>Email sent </a>' if isReminded else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
               attributes: { id: "resend-" + loop.index0 }
             } if not signatory.hasApproved,
             {

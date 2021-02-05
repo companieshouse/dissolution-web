@@ -1,4 +1,5 @@
 import DissolutionSession from "../session/dissolutionSession.model";
+import { RemindDirector } from 'app/models/session/directorToSign.model'
 
 export interface ViewApplicationStatus {
   dissolutionSession: DissolutionSession
@@ -12,5 +13,5 @@ export interface ViewApplicationStatusSignatory {
   email: string
   hasApproved: boolean
   canChange: boolean
-  reminderSent: boolean
+  remindDirectorList: RemindDirector[]
 }

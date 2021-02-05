@@ -41,11 +41,16 @@ public async resend(@requestParam('signatoryEmail') signatoryEmail: string): Pro
 
   const companyNumber: string = dissolutionSession.companyNumber!
   const email: string = signatoryEmail
-  const response: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, email)
+  const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, email)
 
   this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
-    if (signatory.email == email) {
-      dissolutionSession.reminderSent = response
+    if (signatory.email === email) {
+      const id = signatory.id
+      console.log(dissolutionSession.remindDirectorList)
+      if (dissolutionSession.remindDirectorList === undefined){
+        dissolutionSession.remindDirectorList = new Array()
+      }
+      dissolutionSession.remindDirectorList!.push({id, reminderSent})
     }
   })
 
