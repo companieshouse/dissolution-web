@@ -48,12 +48,18 @@
                 value: {
                   text: director.email
                 },
+                actions: {
+                  items: [{
+                    href: Paths.SELECT_DIRECTOR_URI,
+                    text: "Change",
+                    visuallyHiddenText: "email address"
+                  }]
+                },
                 classes: "director-email"
               }
             ]
           })
         }}
-        <p class="govuk-!-margin-bottom-9"><a class="govuk-link piwik-event" data-event-id="check-answers-change-email" href="{{ Paths.SELECT_DIRECTOR_URI }}">Change</a></p>
       {% endfor %}
 
       <form method="post">
