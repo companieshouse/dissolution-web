@@ -4,7 +4,7 @@ import { generateDirectorToSign } from '../../fixtures/session.fixtures'
 
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import SignatorySigning from 'app/models/form/signatorySigning.enum'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 import SignatoryService from 'app/services/signatories/signatory.service'
 
 describe('SignatoryService', () => {

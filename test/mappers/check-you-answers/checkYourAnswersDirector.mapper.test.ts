@@ -2,7 +2,7 @@ import { assert } from 'chai'
 import { generateDirectorToSign } from '../../fixtures/session.fixtures'
 
 import CheckYourAnswersDirectorMapper from 'app/mappers/check-your-answers/checkYourAnswersDirector.mapper'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 import CheckYourAnswersDirector from 'app/models/view/checkYourAnswersDirector.model'
 
 describe('CheckYourAnswersDirectorMapper', () => {

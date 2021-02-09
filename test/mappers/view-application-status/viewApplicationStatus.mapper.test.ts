@@ -4,6 +4,8 @@ import { generateDissolutionGetResponse, generateGetDirector } from '../../fixtu
 import ViewApplicationStatusMapper from 'app/mappers/view-application-status/viewApplicationStatus.mapper'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
+import { generateDissolutionSession } from '../../fixtures/session.fixtures'
+import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 describe('ViewApplicationStatusMapper', () => {
 
@@ -11,17 +13,19 @@ describe('ViewApplicationStatusMapper', () => {
 
   describe('mapToViewModel', () => {
     let dissolution: DissolutionGetResponse
+    let dissolutionSession: DissolutionSession
 
     beforeEach(() => dissolution = generateDissolutionGetResponse())
+    beforeEach(() => dissolutionSession = generateDissolutionSession('123456'))
 
     it('should not show the change column if user is not the applicant', () => {
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, false)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, false)
 
       assert.isFalse(result.showChangeColumn)
     })
 
     it('should show the change column if user is the applicant', () => {
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.isTrue(result.showChangeColumn)
     })
@@ -32,7 +36,7 @@ describe('ViewApplicationStatusMapper', () => {
         generateGetDirector()
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.equal(result.signatories.length, 2)
     })
@@ -42,7 +46,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), officer_id: 'abc123', email: 'test@mail.com' }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.equal(result.signatories[0].id, 'abc123')
       assert.equal(result.signatories[0].email, 'test@mail.com')
@@ -53,7 +57,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), name: 'Jane Smith', on_behalf_name: undefined }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.equal(result.signatories[0].name, 'Jane Smith')
     })
@@ -63,7 +67,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), name: 'Jane Smith', on_behalf_name: 'Mr Accountant' }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.equal(result.signatories[0].name, 'Mr Accountant signing on behalf of Jane Smith')
     })
@@ -73,7 +77,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: new Date().toISOString() }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.isTrue(result.signatories[0].hasApproved)
     })
@@ -83,7 +87,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: undefined }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.isFalse(result.signatories[0].hasApproved)
     })
@@ -93,7 +97,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: undefined }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.isTrue(result.signatories[0].canChange)
     })
@@ -103,7 +107,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: new Date().toISOString() }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, true)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
 
       assert.isFalse(result.signatories[0].canChange)
     })
@@ -113,7 +117,7 @@ describe('ViewApplicationStatusMapper', () => {
         { ...generateGetDirector(), approved_at: undefined }
       ]
 
-      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolution, false)
+      const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, false)
 
       assert.isFalse(result.signatories[0].canChange)
     })

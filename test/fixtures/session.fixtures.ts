@@ -5,7 +5,7 @@ import sinon from 'sinon'
 
 import OfficerType from 'app/models/dto/officerType.enum'
 import PaymentType from 'app/models/dto/paymentType.enum'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import {DirectorToSign} from 'app/models/session/directorToSign.model'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
