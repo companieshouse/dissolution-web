@@ -34,29 +34,29 @@ export class ApplicationStatusController extends BaseController {
   }
 
   @httpGet('/:signatoryEmail/send-email')
-public async resend(@requestParam('signatoryEmail') signatoryEmail: string): Promise<RedirectResult>{
-  const token: string = this.session.getAccessToken(this.httpContext.request)
-  const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-  const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(token, dissolutionSession)
+  public async resend(@requestParam('signatoryEmail') signatoryEmail: string): Promise<RedirectResult>{
+    const token: string = this.session.getAccessToken(this.httpContext.request)
+    const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(token, dissolutionSession)
 
-  const companyNumber: string = dissolutionSession.companyNumber!
-  const email: string = signatoryEmail
-  const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, email)
+    const companyNumber: string = dissolutionSession.companyNumber!
+    const email: string = signatoryEmail
+    const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, email)
 
-  this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
-    if (signatory.email === email) {
-      const id = signatory.id
-      console.log(dissolutionSession.remindDirectorList)
-      if (dissolutionSession.remindDirectorList === undefined){
-        dissolutionSession.remindDirectorList = new Array()
+    this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
+      if (signatory.email === email) {
+        const id = signatory.id
+        console.log(dissolutionSession.remindDirectorList)
+        if (dissolutionSession.remindDirectorList === undefined){
+          dissolutionSession.remindDirectorList = new Array()
+        }
+        dissolutionSession.remindDirectorList!.push({id, reminderSent})
       }
-      dissolutionSession.remindDirectorList!.push({id, reminderSent})
-    }
-  })
+    })
 
-  this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+    this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
-  return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
-}
+    return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+  }
 
 }
