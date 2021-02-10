@@ -10,7 +10,8 @@ import DissolutionSession from 'app/models/session/dissolutionSession.model'
 @provide(ViewApplicationStatusMapper)
 export default class ViewApplicationStatusMapper {
 
-  public mapToViewModel(dissolutionSession: DissolutionSession, dissolution: DissolutionGetResponse, isApplicant: boolean): ViewApplicationStatus {
+  public mapToViewModel(dissolutionSession: DissolutionSession, dissolution: DissolutionGetResponse, isApplicant: boolean): 
+  ViewApplicationStatus {
     return {
       dissolutionSession,
       showChangeColumn: isApplicant,
@@ -18,7 +19,8 @@ export default class ViewApplicationStatusMapper {
     }
   }
 
-  private mapToSignatory(dissolutionSession: DissolutionSession, signatory: DissolutionGetDirector, isApplicant: boolean): ViewApplicationStatusSignatory {
+  private mapToSignatory(dissolutionSession: DissolutionSession, signatory: DissolutionGetDirector, isApplicant: boolean): 
+  ViewApplicationStatusSignatory {
     return {
       id: signatory.officer_id,
       name: this.mapToSignatoryDisplayName(signatory),

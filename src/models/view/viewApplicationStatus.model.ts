@@ -1,4 +1,4 @@
-import DissolutionSession from "../session/dissolutionSession.model";
+import DissolutionSession from '../session/dissolutionSession.model'
 import { DirectorToRemind } from 'app/models/session/directorToSign.model'
 
 export interface ViewApplicationStatus {
