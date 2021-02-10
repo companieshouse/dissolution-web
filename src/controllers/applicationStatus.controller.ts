@@ -39,13 +39,11 @@ export class ApplicationStatusController extends BaseController {
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
     const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(token, dissolutionSession)
 
-    const companyNumber: string = dissolutionSession.companyNumber!
-    const email: string = signatoryEmail
-    const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, email)
+    const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
 
     this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
-      if (signatory.email === email) {
-        const id = signatory.id
+      if (signatory.email === signatoryEmail) {
+        const id: string = signatory.id
         console.log(dissolutionSession.remindDirectorList)
         if (dissolutionSession.remindDirectorList === undefined){
           dissolutionSession.remindDirectorList = new Array()
