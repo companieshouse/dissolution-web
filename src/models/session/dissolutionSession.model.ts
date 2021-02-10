@@ -24,5 +24,5 @@ export default interface DissolutionSession {
   isApplicantADirector?: boolean
   paymentStateUUID?: string
   paymentType?: PaymentType
-  remindDirectorList?: DirectorToRemind[]
+  remindDirectorList: DirectorToRemind[]
 }

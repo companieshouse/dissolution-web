@@ -91,11 +91,12 @@ describe('ApplicationStatusController', () => {
         .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
       
       const reminderList: DirectorToRemind[] = [generateDirectorToRemind()] 
+
+      console.log(dissolutionSession.remindDirectorList[0].reminderSent)
       
-      // assert.equal(dissolutionSession.remindDirectorList!, reminderList)
-      assert.equal(dissolutionSession.remindDirectorList?.length, reminderList.length)
-      // assert.equal(dissolutionSession.remindDirectorList[0].id!, reminderList[0].id)
-      // assert.equal(dissolutionSession.remindDirectorList[0]?.reminderSent, reminderList[0].reminderSent)
+      assert.equal(dissolutionSession.remindDirectorList.length, reminderList.length)
+      assert.equal(dissolutionSession.remindDirectorList[0].id, reminderList[0].id)
+      assert.equal(dissolutionSession.remindDirectorList[0].reminderSent, reminderList[0].reminderSent)
     })
   })
 })

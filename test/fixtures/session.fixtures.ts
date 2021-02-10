@@ -48,7 +48,8 @@ export function generateDissolutionSession(companyNumber: string = '12345678'): 
       generateDirectorToSign()
     ],
     officerType: OfficerType.DIRECTOR,
-    paymentType: PaymentType.CREDIT_DEBIT_CARD
+    paymentType: PaymentType.CREDIT_DEBIT_CARD,
+    remindDirectorList: []
   }
 }
 

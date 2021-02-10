@@ -25,7 +25,7 @@ export default class ViewApplicationStatusMapper {
       email: signatory.email,
       hasApproved: !!signatory.approved_at,
       canChange: isApplicant && !signatory.approved_at,
-      remindDirectorList: dissolutionSession.remindDirectorList!
+      remindDirectorList: dissolutionSession.remindDirectorList
     }
   }
 

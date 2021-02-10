@@ -45,9 +45,6 @@ export class ApplicationStatusController extends BaseController {
       if (signatory.email === signatoryEmail) {
         const id: string = signatory.id
         console.log(dissolutionSession.remindDirectorList)
-        if (dissolutionSession.remindDirectorList === undefined){
-          dissolutionSession.remindDirectorList = new Array()
-        }
         dissolutionSession.remindDirectorList!.push({id, reminderSent})
       }
     })
