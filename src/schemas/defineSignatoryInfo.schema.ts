@@ -2,7 +2,7 @@ import * as Joi from '@hapi/joi'
 import { generateSchemaForSignatoryDetails } from './signatoryDetails.schema'
 
 import OfficerType from 'app/models/dto/officerType.enum'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 
 export default function defineSignatoryInfoSchema(signatories: DirectorToSign[], officerType: OfficerType): Joi.ObjectSchema {
   return Joi.object(generateSchemaForSignatories(signatories, officerType))

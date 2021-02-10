@@ -8,7 +8,7 @@ import DirectorToSignMapper from 'app/mappers/check-your-answers/directorToSign.
 import OfficerType from 'app/models/dto/officerType.enum'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import Optional from 'app/models/optional'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import DirectorDetails from 'app/models/view/directorDetails.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'

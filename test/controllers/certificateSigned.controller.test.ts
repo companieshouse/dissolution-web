@@ -56,7 +56,7 @@ beforeEach(() => {
   when(session.getAccessToken(anything())).thenReturn(TOKEN)
   when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
   when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
-  when(viewApplicationStatusMapper.mapToViewModel(dissolution, false)).thenReturn(viewApplicationStatus)
+  when(viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution, false)).thenReturn(viewApplicationStatus)
 })
 
 describe('CertificateSignedController', () => {

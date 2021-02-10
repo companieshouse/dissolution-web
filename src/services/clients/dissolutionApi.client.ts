@@ -50,6 +50,14 @@ export class DissolutionApiClient {
     }
   }
 
+  public async sendEmailNotification(companyNumber: string, directorEmail: string): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await this.axios.post(
+      `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}/resend-email/${directorEmail}`,
+      this.generateConfigForAPIKey()
+    )
+    return response.data
+  }
+
   public async getDissolutionPaymentUIData(applicationReference: string): Promise<DissolutionGetPaymentUIData> {
       const response: AxiosResponse<DissolutionGetPaymentUIData> = await this.axios.get(
         `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,

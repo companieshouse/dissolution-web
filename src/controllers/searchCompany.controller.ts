@@ -73,7 +73,8 @@ export class SearchCompanyController extends BaseController {
   private updateSession(body: SearchCompanyFormModel): void {
     const updatedSession: DissolutionSession = {
       ...this.sessionService.getDissolutionSession(this.httpContext.request),
-      companyNumber: body.companyNumber
+      companyNumber: body.companyNumber,
+      remindDirectorList: []
     }
     this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
   }

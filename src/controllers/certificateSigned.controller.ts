@@ -37,7 +37,8 @@ export class CertificateSignedController extends BaseController {
   }
 
   private async renderView(officerType: OfficerType, dissolution: DissolutionGetResponse): Promise<string> {
-    const viewApplicationStatus: ViewApplicationStatus = this.viewApplicationStatusMapper.mapToViewModel(dissolution, false)
+    const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    const viewApplicationStatus: ViewApplicationStatus = this.viewApplicationStatusMapper.mapToViewModel(session, dissolution, false)
 
     const viewModel: ViewModel = {
       officerType,
