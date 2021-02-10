@@ -35,17 +35,20 @@ export class ApplicationStatusController extends BaseController {
 
   @httpGet('/:signatoryEmail/send-email')
   public async resend(@requestParam('signatoryEmail') signatoryEmail: string): Promise<RedirectResult>{
-    const token: string = this.session.getAccessToken(this.httpContext.request)
+
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(token, dissolutionSession)
+
+    const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
+      this.session.getAccessToken(this.httpContext.request),
+      dissolutionSession
+    )
 
     const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
 
     this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
       if (signatory.email === signatoryEmail) {
         const id: string = signatory.id
-        console.log(dissolutionSession.remindDirectorList)
-        dissolutionSession.remindDirectorList!.push({id, reminderSent})
+        dissolutionSession.remindDirectorList.push({id, reminderSent})
       }
     })
 

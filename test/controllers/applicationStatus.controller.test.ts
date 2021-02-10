@@ -90,9 +90,7 @@ describe('ApplicationStatusController', () => {
         .expect(StatusCodes.MOVED_TEMPORARILY)
         .expect('Location', WAIT_FOR_OTHERS_TO_SIGN_URI)
       
-      const reminderList: DirectorToRemind[] = [generateDirectorToRemind()] 
-
-      console.log(dissolutionSession.remindDirectorList[0].reminderSent)
+      const reminderList: DirectorToRemind[] = [generateDirectorToRemind()]
       
       assert.equal(dissolutionSession.remindDirectorList.length, reminderList.length)
       assert.equal(dissolutionSession.remindDirectorList[0].id, reminderList[0].id)
