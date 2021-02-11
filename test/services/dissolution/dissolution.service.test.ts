@@ -22,7 +22,7 @@ import DissolutionCertificateService from 'app/services/dissolution/dissolutionC
 
 import {
   generateApprovalModel, generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData,
-  generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest, 
+  generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest,
   generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
@@ -79,7 +79,7 @@ describe('DissolutionService', () => {
     it('should call dissolution api client and return a boolean', async () => {
       when(client.sendEmailNotification(anything(),anything())).thenResolve(GET_RESEND_EMAIL_RESPONSE)
 
-      const res: boolean = await service.sendEmailNotification('companyNo', EMAIL);
+      const res: boolean = await service.sendEmailNotification('companyNo', EMAIL)
 
       verify(client.sendEmailNotification('companyNo', EMAIL)).once()
 

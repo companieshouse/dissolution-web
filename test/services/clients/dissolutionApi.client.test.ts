@@ -17,7 +17,7 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
   generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionDirectorPatchRequest,
-  generateDissolutionGetPaymentUIData, generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse, 
+  generateDissolutionGetPaymentUIData, generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse,
   generateDissolutionPatchRequest, generateDissolutionPatchResponse, generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 
