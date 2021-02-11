@@ -2,11 +2,12 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { assert } from 'chai'
 import { StatusCodes } from 'http-status-codes'
 import sinon from 'sinon'
-import { TOKEN } from '../../fixtures/session.fixtures'
+import { EMAIL, TOKEN } from '../../fixtures/session.fixtures'
 
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionDirectorPatchRequest from 'app/models/dto/dissolutionDirectorPatchRequest'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import DissolutionGetResendEmailResponse from 'app/models/dto/dissolutionGetResendEmailResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
@@ -16,8 +17,8 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 import { generateAxiosError, generateAxiosResponse } from 'test/fixtures/axios.fixtures'
 import {
   generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionDirectorPatchRequest,
-  generateDissolutionGetPaymentUIData, generateDissolutionGetResponse, generateDissolutionPatchRequest,
-  generateDissolutionPatchResponse, generateDissolutionPaymentPatchRequest
+  generateDissolutionGetPaymentUIData, generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse, 
+  generateDissolutionPatchRequest, generateDissolutionPatchResponse, generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 
 describe('DissolutionApiClient', () => {
@@ -133,6 +134,28 @@ describe('DissolutionApiClient', () => {
       assert.equal(config.headers.Accept, 'application/json')
 
       assert.isNull(response)
+    })
+  })
+
+  describe('sendEmailNotification', () => {
+    const GET_RESEND_EMAIL_RESPONSE: AxiosResponse<DissolutionGetResendEmailResponse> =
+      generateAxiosResponse(generateDissolutionGetResendEmailResponse())
+    it('should return a boolean success status from the API', async () => {
+      postStub = sinon.stub().resolves(GET_RESEND_EMAIL_RESPONSE)
+      axiosInstance.post = postStub
+
+      const response = await client.sendEmailNotification(COMPANY_NUMBER, EMAIL)
+
+      const reqUrl: string = `${DISSOLUTION_API_URL}/dissolution-request/${COMPANY_NUMBER}/resend-email/${EMAIL}`
+
+      assert.isTrue(postStub.called)
+
+      const [url, config] = postStub.args[0]
+      assert.equal(url, reqUrl)
+      assert.equal(config.headers.Authorization, API_KEY)
+      assert.equal(config.headers['Content-Type'], 'application/json')
+      assert.equal(config.headers.Accept, 'application/json')
+      assert.equal(response, GET_RESEND_EMAIL_RESPONSE.data)
     })
   })
 

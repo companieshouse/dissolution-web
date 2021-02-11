@@ -8,6 +8,7 @@ import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateReques
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionDirectorPatchRequest from 'app/models/dto/dissolutionDirectorPatchRequest'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import DissolutionGetResendEmailResponse from 'app/models/dto/dissolutionGetResendEmailResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPatchResponse from 'app/models/dto/dissolutionPatchResponse'
@@ -50,8 +51,8 @@ export class DissolutionApiClient {
     }
   }
 
-  public async sendEmailNotification(companyNumber: string, directorEmail: string): Promise<boolean> {
-    const response: AxiosResponse<boolean> = await this.axios.post(
+  public async sendEmailNotification(companyNumber: string, directorEmail: string): Promise<DissolutionGetResendEmailResponse> {
+    const response: AxiosResponse<DissolutionGetResendEmailResponse> = await this.axios.post(
       `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}/resend-email/${directorEmail}`,
       this.generateConfigForAPIKey()
     )

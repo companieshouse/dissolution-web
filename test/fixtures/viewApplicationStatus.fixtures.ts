@@ -1,6 +1,5 @@
-import { generateDirectorToSign, generateDissolutionSession } from './session.fixtures'
-
 import { ViewApplicationStatus, ViewApplicationStatusSignatory } from 'app/models/view/viewApplicationStatus.model'
+import { generateDirectorToRemind, generateDissolutionSession } from './session.fixtures'
 
 export function generateViewApplicationStatusModel(): ViewApplicationStatus {
   return {
@@ -20,9 +19,9 @@ export function generateViewApplicationStatusSignatory(): ViewApplicationStatusS
     hasApproved: true,
     canChange: false,
     remindDirectorList: [
-      generateDirectorToSign(),
-      generateDirectorToSign(),
-      generateDirectorToSign()
+      generateDirectorToRemind(),
+      generateDirectorToRemind(),
+      generateDirectorToRemind()
     ]
   }
 }

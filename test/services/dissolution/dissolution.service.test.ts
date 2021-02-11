@@ -1,13 +1,14 @@
 import { assert } from 'chai'
-import { instance, mock, verify, when } from 'ts-mockito'
+import { anything, instance, mock, verify, when } from 'ts-mockito'
 import { generatePaymentSummary } from '../../fixtures/payment.fixtures'
-import { TOKEN } from '../../fixtures/session.fixtures'
+import { EMAIL, TOKEN } from '../../fixtures/session.fixtures'
 
 import DissolutionRequestMapper from 'app/mappers/dissolution/dissolutionRequest.mapper'
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import DissolutionGetResendEmailResponse from 'app/models/dto/dissolutionGetResendEmailResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
@@ -21,7 +22,8 @@ import DissolutionCertificateService from 'app/services/dissolution/dissolutionC
 
 import {
   generateApprovalModel, generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData,
-  generateDissolutionGetResponse, generateDissolutionPatchRequest, generateDissolutionPaymentPatchRequest
+  generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest, 
+  generateDissolutionPaymentPatchRequest
 } from 'test/fixtures/dissolutionApi.fixtures'
 import { generateDissolutionConfirmation, generateDissolutionSession } from 'test/fixtures/session.fixtures'
 
@@ -39,6 +41,7 @@ describe('DissolutionService', () => {
 
   const REFERENCE_NUMBER = '123ABC'
   const MAPPED_BODY: DissolutionCreateRequest = generateDissolutionCreateRequest()
+  const GET_RESEND_EMAIL_RESPONSE: DissolutionGetResendEmailResponse = generateDissolutionGetResendEmailResponse()
 
   beforeEach(() => {
     dissolutionRequestMapper = mock(DissolutionRequestMapper)
@@ -69,6 +72,18 @@ describe('DissolutionService', () => {
       verify(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY)).once()
 
       assert.equal(res, REFERENCE_NUMBER)
+    })
+  })
+
+  describe('sendEmailNotification', () => {
+    it('should call dissolution api client and return a boolean', async () => {
+      when(client.sendEmailNotification(anything(),anything())).thenResolve(GET_RESEND_EMAIL_RESPONSE)
+
+      const res: boolean = await service.sendEmailNotification('companyNo', EMAIL);
+
+      verify(client.sendEmailNotification('companyNo', EMAIL)).once()
+
+      assert.isTrue(res)
     })
   })
 

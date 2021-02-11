@@ -9,6 +9,7 @@ import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import { DissolutionCreateRequest } from 'app/models/dto/dissolutionCreateRequest'
 import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import DissolutionGetResendEmailResponse from 'app/models/dto/dissolutionGetResendEmailResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
 import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
@@ -44,7 +45,9 @@ export default class DissolutionService {
   }
 
   public async sendEmailNotification(companyNumber: string, directorEmail: string): Promise<boolean> {
-    return await this.client.sendEmailNotification(companyNumber, directorEmail)
+    const response: DissolutionGetResendEmailResponse = await this.client.sendEmailNotification(companyNumber, directorEmail)
+
+    return response.reminderSent
   }
 
   public async getDissolutionPaymentSummary(dissolutionSession: DissolutionSession): Promise<PaymentSummary> {
