@@ -38,7 +38,7 @@ export class NotSelectedSignatoryController extends BaseController {
 
   private async renderView(dissolution: DissolutionGetResponse): Promise<string> {
     const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-    const viewApplicationStatus: ViewApplicationStatus = this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, 
+    const viewApplicationStatus: ViewApplicationStatus = this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession,
       dissolution, false)
 
     const viewModel: ViewModel = {

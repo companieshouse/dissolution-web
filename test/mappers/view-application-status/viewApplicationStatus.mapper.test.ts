@@ -1,11 +1,11 @@
 import { assert } from 'chai'
 import { generateDissolutionGetResponse, generateGetDirector } from '../../fixtures/dissolutionApi.fixtures'
+import { generateDissolutionSession } from '../../fixtures/session.fixtures'
 
 import ViewApplicationStatusMapper from 'app/mappers/view-application-status/viewApplicationStatus.mapper'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
-import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
-import { generateDissolutionSession } from '../../fixtures/session.fixtures'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'
 
 describe('ViewApplicationStatusMapper', () => {
 
