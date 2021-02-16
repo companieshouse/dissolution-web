@@ -151,7 +151,7 @@ describe('DissolutionApiClient', () => {
       assert.isTrue(postStub.called)
 
       const [url, coNum, config] = postStub.args[0]
-      
+
       assert.equal(url, reqUrl)
       assert.equal(coNum, COMPANY_NUMBER)
       assert.equal(config.headers.Authorization, API_KEY)
