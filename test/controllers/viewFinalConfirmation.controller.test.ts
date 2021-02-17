@@ -74,7 +74,7 @@ describe('ViewFinalConfirmationController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h2', 'What to do next'))
-      assert.isTrue(htmlAssertHelper.containsText('#inform', 'You must inform all directors that the application has been submitted, including those who signed it.'))
+      assert.isTrue(htmlAssertHelper.containsText('#inform', 'A strike off notice for the company will be published in the local Gazette. After 2 months, the notice will expire.'))
     })
 
     it('should render the ViewFinalConfirmation page with member text if the company is LLP', async () => {
@@ -87,7 +87,7 @@ describe('ViewFinalConfirmationController', () => {
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
       assert.isTrue(htmlAssertHelper.hasText('h2', 'What to do next'))
-      assert.isTrue(htmlAssertHelper.containsText('#inform', 'You must inform all members that the application has been submitted, including those who signed it.'))
+      assert.isTrue(htmlAssertHelper.containsText('#inform', 'A strike off notice for the company will be published in the local Gazette. After 2 months, the notice will expire.'))
     })
   })
 })
