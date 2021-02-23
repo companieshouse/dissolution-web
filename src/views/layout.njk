@@ -24,98 +24,57 @@
 {% endblock %}
 
 {% block header %}
-  {% set html %}
-    <p>We use some essential cookies to make our services work.</p>
-    <p>We'd also like to use analytics cookies so we can understand how you use our services and to make improvements.</p>
-  {% endset %}
+  <div class="govuk-cookie-banner" role="region" aria-label="Cookies on Companies House services" cookie-banner hidden>
+    <div class="govuk-cookie-banner__message govuk-width-container" cookie-message="accept-or-reject" hidden>
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on Companies House services</h2>
+          <div class="govuk-cookie-banner__content">
+            <p>We use some essential cookies to make our services work.</p>
+            <p>We'd also like to use analytics cookies so we can understand how you use our services and to make improvements.</p>
+          </div>
+        </div>
+      </div>
+      <div class="govuk-button-group">
+        <button type="button" class="govuk-button" data-module="govuk-button" cookie-button="accept">
+          Accept analytics cookies
+        </button>
+        <button type="button" class="govuk-button" data-module="govuk-button" cookie-button="reject">
+          Reject analytics cookies
+        </button>
+        <a class="govuk-link" href="{{ chs.url }}/help/cookies">View cookies</a>
+      </div>
+    </div>
+    <div class="govuk-cookie-banner__message govuk-width-container" role="alert" cookie-message="accepted" hidden>
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="govuk-cookie-banner__content">
+            <p>You've accepted analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
+          </div>
+        </div>
+      </div>
+      <div class="govuk-button-group">
+        <button class="govuk-button" data-module="govuk-button" cookie-button="hide-accepted">
+          Hide this message
+        </button>
+      </div>
+    </div>
+    <div class="govuk-cookie-banner__message govuk-width-container" role="alert" cookie-message="rejected" hidden>
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="govuk-cookie-banner__content">
+            <p>You've rejected analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
+          </div>
+        </div>
+      </div>
+      <div class="govuk-button-group">
+        <button class="govuk-button" data-module="govuk-button" cookie-button="hide-rejected">
+          Hide this message
+        </button>
+      </div>
+    </div>
+  </div>
 
-  {% set acceptHtml %}
-    <p>You've accepted analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
-  {% endset %}
-
-  {% set rejectHtml %}
-    <p>You've rejected analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
-  {% endset %}
-
-  {{ govukCookieBanner({
-    ariaLabel: "Cookies on Companies House services",
-    hidden: true,
-    attributes: {
-      "cookie-banner": null
-    },
-    messages: [
-      {
-        headingText: "Cookies on Companies House services",
-        hidden: true,
-        attributes: {
-          "cookie-message": "accept-or-reject"
-        },
-        html: html,
-        actions: [
-          {
-            text: "Accept analytics cookies",
-            type: "button",
-            name: "cookies",
-            value: "accept",
-            attributes: {
-              "cookie-button": "accept"
-            }
-          },
-          {
-            text: "Reject analytics cookies",
-            type: "button",
-            name: "cookies",
-            value: "reject",
-            attributes: {
-              "cookie-button": "reject"
-            }
-          },
-          {
-            text: "View cookies",
-            href: chs.url + "/help/cookies"
-          }
-        ]
-      },
-      {
-        html: acceptHtml,
-        role: "alert",
-        hidden: true,
-        attributes: {
-          "cookie-message": "accepted"
-        },
-        actions: [
-          {
-            text: "Hide this message",
-            type: "button",
-            name: "hide",
-            value: "hide",
-            attributes: {
-              "cookie-button": "hide-accepted"
-            }
-          }
-        ]
-      },
-      {
-        html: rejectHtml,
-        role: "alert",
-        hidden: true,
-        attributes: {
-          "cookie-message": "rejected"
-        },
-        actions: [
-          {
-            text: "Hide this message",
-            type: "button",
-            name: "hide",
-            value: "hide",
-            attributes: {
-              "cookie-button": "hide-rejected"
-            }
-          }
-        ]
-      }
-    ]
-  }) }}
   {{
     govukHeader({
       homepageUrl: Paths.ROOT_URI,
