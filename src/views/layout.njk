@@ -39,17 +39,17 @@
 
   {{ govukCookieBanner({
     ariaLabel: "Cookies on Companies House services",
-    hidden: true,
     attributes: {
-      "cookie-banner": null
+      id: "cookie-banner"
     },
+    hidden: true,
     messages: [
       {
         headingText: "Cookies on Companies House services",
-        hidden: true,
         attributes: {
-          "cookie-message": "accept-or-reject"
+          id: "accept-or-reject-message"
         },
+        hidden: true,
         html: html,
         actions: [
           {
@@ -58,7 +58,7 @@
             name: "cookies",
             value: "accept",
             attributes: {
-              "cookie-button": "accept"
+              id: "accept-cookies-button"
             }
           },
           {
@@ -67,7 +67,7 @@
             name: "cookies",
             value: "reject",
             attributes: {
-              "cookie-button": "reject"
+              id: "reject-cookies-button"
             }
           },
           {
@@ -79,10 +79,10 @@
       {
         html: acceptHtml,
         role: "alert",
-        hidden: true,
         attributes: {
-          "cookie-message": "accepted"
+          id: "accepted-cookies-message"
         },
+        hidden: true,
         actions: [
           {
             text: "Hide this message",
@@ -90,7 +90,7 @@
             name: "hide",
             value: "hide",
             attributes: {
-              "cookie-button": "hide-accepted"
+              id: "hide-accepted-message-button"
             }
           }
         ]
@@ -98,10 +98,10 @@
       {
         html: rejectHtml,
         role: "alert",
-        hidden: true,
         attributes: {
-          "cookie-message": "rejected"
+          id: "rejected-cookies-message"
         },
+        hidden: true,
         actions: [
           {
             text: "Hide this message",
@@ -109,7 +109,7 @@
             name: "hide",
             value: "hide",
             attributes: {
-              "cookie-button": "hide-rejected"
+              id: "hide-rejected-message-button"
             }
           }
         ]
@@ -195,13 +195,13 @@
     };
 
     document.addEventListener('DOMContentLoaded', function () {
-      var acceptButton = document.querySelector('[cookie-button="accept"]')
+      var acceptButton = document.getElementById('accept-cookies-button')
       acceptButton.addEventListener('click', function() {CookieConsent.acceptCookies(startPiwik)})
-      var rejectButton = document.querySelector('[cookie-button="reject"]')
+      var rejectButton = document.getElementById('reject-cookies-button')
       rejectButton.addEventListener('click', CookieConsent.rejectCookies)
-      var hideAcceptedButton = document.querySelector('[cookie-button="hide-accepted"]')
+      var hideAcceptedButton = document.getElementById('hide-accepted-message-button')
       hideAcceptedButton.addEventListener('click', CookieConsent.hideCookieBanners)
-      var hideRejectedButton = document.querySelector('[cookie-button="hide-rejected"]')
+      var hideRejectedButton = document.getElementById('hide-rejected-message-button')
       hideRejectedButton.addEventListener('click', CookieConsent.hideCookieBanners)
     })
 
