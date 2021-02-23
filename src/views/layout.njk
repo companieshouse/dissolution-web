@@ -24,8 +24,8 @@
 {% endblock %}
 
 {% block header %}
-  <div class="govuk-cookie-banner" role="region" aria-label="Cookies on Companies House services" cookie-banner hidden>
-    <div class="govuk-cookie-banner__message govuk-width-container" cookie-message="accept-or-reject" hidden>
+  <div id="cookie-banner" class="govuk-cookie-banner" role="region" aria-label="Cookies on Companies House services" hidden>
+    <div id="accept-or-reject-message" class="govuk-cookie-banner__message govuk-width-container" hidden>
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
           <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on Companies House services</h2>
@@ -36,16 +36,16 @@
         </div>
       </div>
       <div class="govuk-button-group">
-        <button type="button" class="govuk-button" data-module="govuk-button" cookie-button="accept">
+        <button id="accept-cookies-button" type="button" class="govuk-button" data-module="govuk-button">
           Accept analytics cookies
         </button>
-        <button type="button" class="govuk-button" data-module="govuk-button" cookie-button="reject">
+        <button id="reject-cookies-button" type="button" class="govuk-button" data-module="govuk-button">
           Reject analytics cookies
         </button>
         <a class="govuk-link" href="{{ chs.url }}/help/cookies">View cookies</a>
       </div>
     </div>
-    <div class="govuk-cookie-banner__message govuk-width-container" role="alert" cookie-message="accepted" hidden>
+    <div id="accepted-cookies-message" class="govuk-cookie-banner__message govuk-width-container" role="alert" hidden>
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
           <div class="govuk-cookie-banner__content">
@@ -54,12 +54,12 @@
         </div>
       </div>
       <div class="govuk-button-group">
-        <button class="govuk-button" data-module="govuk-button" cookie-button="hide-accepted">
+        <button id="hide-accepted-message-button" class="govuk-button" data-module="govuk-button">
           Hide this message
         </button>
       </div>
     </div>
-    <div class="govuk-cookie-banner__message govuk-width-container" role="alert" cookie-message="rejected" hidden>
+    <div id="rejected-cookies-message" class="govuk-cookie-banner__message govuk-width-container" role="alert" hidden>
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
           <div class="govuk-cookie-banner__content">
@@ -68,7 +68,7 @@
         </div>
       </div>
       <div class="govuk-button-group">
-        <button class="govuk-button" data-module="govuk-button" cookie-button="hide-rejected">
+        <button id="hide-rejected-message-button" class="govuk-button" data-module="govuk-button">
           Hide this message
         </button>
       </div>
@@ -154,13 +154,13 @@
     };
 
     document.addEventListener('DOMContentLoaded', function () {
-      var acceptButton = document.querySelector('[cookie-button="accept"]')
+      var acceptButton = document.getElementById('accept-cookies-button')
       acceptButton.addEventListener('click', function() {CookieConsent.acceptCookies(startPiwik)})
-      var rejectButton = document.querySelector('[cookie-button="reject"]')
+      var rejectButton = document.getElementById('reject-cookies-button')
       rejectButton.addEventListener('click', CookieConsent.rejectCookies)
-      var hideAcceptedButton = document.querySelector('[cookie-button="hide-accepted"]')
+      var hideAcceptedButton = document.getElementById('hide-accepted-message-button')
       hideAcceptedButton.addEventListener('click', CookieConsent.hideCookieBanners)
-      var hideRejectedButton = document.querySelector('[cookie-button="hide-rejected"]')
+      var hideRejectedButton = document.getElementById('hide-rejected-message-button')
       hideRejectedButton.addEventListener('click', CookieConsent.hideCookieBanners)
     })
 
