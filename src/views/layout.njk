@@ -1,12 +1,13 @@
 {% extends 'govuk/template.njk' %}
 
-{% from 'govuk/components/footer/macro.njk'       import govukFooter %}
-{% from 'govuk/components/header/macro.njk'       import govukHeader %}
-{% from 'govuk/components/phase-banner/macro.njk' import govukPhaseBanner %}
+{% from "govuk/components/cookie-banner/macro.njk"  import govukCookieBanner %}
+{% from 'govuk/components/footer/macro.njk'         import govukFooter %}
+{% from 'govuk/components/header/macro.njk'         import govukHeader %}
+{% from 'govuk/components/phase-banner/macro.njk'   import govukPhaseBanner %}
 
 {% block head %}
   <!--[if !IE 8]><!-->
-  <link href="//{{ cdn.host }}/stylesheets/govuk-frontend/v3.6.0/govuk-frontend-3.11.0.min.css" rel="stylesheet"/>
+  <link href="//{{ cdn.host }}/stylesheets/govuk-frontend/v3.11.0/govuk-frontend-3.11.0.min.css" rel="stylesheet"/>
   <link href="//{{ cdn.host }}/stylesheets/services/dissolution/application.css" rel="stylesheet"/>
 
   <!--<![endif]-->
@@ -23,42 +24,98 @@
 {% endblock %}
 
 {% block header %}
-  <div class="govuk-cookie-banner" role="region" aria-label="Cookies on Companies House services">
-    <div id="cookie-banner" class="govuk-cookie-banner__message govuk-width-container" hidden>
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on Companies House services</h2>
-          <div class="govuk-cookie-banner__content">
-            <p>We use some essential cookies to make our services work.</p>
-            <p>We'd also like to use analytics cookies so we can understand how you use our services and to make improvements.</p>
-          </div>
-        </div>
-      </div>
-      <div class="govuk-button-group">
-        <button id="ch-accept-cookies" type="button" class="govuk-button" data-module="govuk-button">
-          Accept analytics cookies
-        </button>
-        <button id="ch-reject-cookies"  type="button" class="govuk-button" data-module="govuk-button">
-          Reject analytics cookies
-        </button>
-        <a class="govuk-link" href="chsUrl/help/cookies">View cookies</a>
-      </div>
-    </div>
-    <div id="govuk-cookie-banner__message" class="govuk-cookie-banner__message govuk-width-container" role="alert" hidden>
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          <div class="govuk-cookie-banner__content">
-            <p>You've accepted analytics cookies. You can <a href="chsUrl/help/cookies">change your cookie settings</a> at any time.</p>
-          </div>
-        </div>
-      </div>
-      <div class="govuk-button-group">
-        <button id="ch-hide-cookie-banner" class="govuk-button" data-module="govuk-button">
-          Hide this message
-        </button>
-      </div>
-    </div>
-  </div>
+  {% set html %}
+    <p>We use some essential cookies to make our services work.</p>
+    <p>We'd also like to use analytics cookies so we can understand how you use our services and to make improvements.</p>
+  {% endset %}
+
+  {% set acceptHtml %}
+    <p>You've accepted analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
+  {% endset %}
+
+  {% set rejectHtml %}
+    <p>You've rejected analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
+  {% endset %}
+
+  {{ govukCookieBanner({
+    ariaLabel: "Cookies on Companies House services",
+    hidden: true,
+    attributes: {
+      "cookie-banner": null
+    },
+    messages: [
+      {
+        headingText: "Cookies on Companies House services",
+        hidden: true,
+        attributes: {
+          "cookie-message": "accept-or-reject"
+        },
+        html: html,
+        actions: [
+          {
+            text: "Accept analytics cookies",
+            type: "button",
+            name: "cookies",
+            value: "accept",
+            attributes: {
+              "cookie-button": "accept"
+            }
+          },
+          {
+            text: "Reject analytics cookies",
+            type: "button",
+            name: "cookies",
+            value: "reject",
+            attributes: {
+              "cookie-button": "reject"
+            }
+          },
+          {
+            text: "View cookies",
+            href: chs.url + "/help/cookies"
+          }
+        ]
+      },
+      {
+        html: acceptHtml,
+        role: "alert",
+        hidden: true,
+        attributes: {
+          "cookie-message": "accepted"
+        },
+        actions: [
+          {
+            text: "Hide this message",
+            type: "button",
+            name: "hide",
+            value: "hide",
+            attributes: {
+              "cookie-button": "hide-accepted"
+            }
+          }
+        ]
+      },
+      {
+        html: rejectHtml,
+        role: "alert",
+        hidden: true,
+        attributes: {
+          "cookie-message": "rejected"
+        },
+        actions: [
+          {
+            text: "Hide this message",
+            type: "button",
+            name: "hide",
+            value: "hide",
+            attributes: {
+              "cookie-button": "hide-rejected"
+            }
+          }
+        ]
+      }
+    ]
+  }) }}
   {{
     govukHeader({
       homepageUrl: Paths.ROOT_URI,
@@ -128,7 +185,7 @@
 
 {% block bodyEnd %}
   {# Run JavaScript at end of the <body>, to avoid blocking the initial render. #}
-  <script src="//{{ cdn.host }}/javascripts/govuk-frontend/v3.6.0/govuk-frontend-3.11.0.min.js"></script>
+  <script src="//{{ cdn.host }}/javascripts/govuk-frontend/v3.11.0/govuk-frontend-3.11.0.min.js"></script>
   <script nonce={{ nonce | dump | safe }}>window.GOVUKFrontend.initAll()</script>
   <script src="//{{ cdn.host }}/javascripts/app/piwik-enable.js"></script>
   <script src="//{{ cdn.host }}/javascripts/app/cookie-consent-1.0.0.js"></script>
@@ -138,12 +195,14 @@
     };
 
     document.addEventListener('DOMContentLoaded', function () {
-      var acceptButton = document.getElementById('ch-accept-cookies')
+      var acceptButton = document.querySelector('[cookie-button="accept"]')
       acceptButton.addEventListener('click', function() {CookieConsent.acceptCookies(startPiwik)})
-      var rejectButton = document.getElementById('ch-reject-cookies')
-      rejectButton.addEventListener('click', function() {CookieConsent.rejectCookies()})
-      var hideButton = document.getElementById('ch-hide-cookie-banner')
-      hideButton.addEventListener('click', function() {CookieConsent.hideBannerAlert()})
+      var rejectButton = document.querySelector('[cookie-button="reject"]')
+      rejectButton.addEventListener('click', CookieConsent.rejectCookies)
+      var hideAcceptedButton = document.querySelector('[cookie-button="hide-accepted"]')
+      hideAcceptedButton.addEventListener('click', CookieConsent.hideCookieBanners)
+      var hideRejectedButton = document.querySelector('[cookie-button="hide-rejected"]')
+      hideRejectedButton.addEventListener('click', CookieConsent.hideCookieBanners)
     })
 
     CookieConsent.start(startPiwik)
