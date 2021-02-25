@@ -16,6 +16,12 @@
           integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
           crossorigin="anonymous"></script>
 
+  <script nonce={{ nonce | dump | safe }} type="application/javascript">
+    var SERVICE_NAME = 'dissolutions'
+    var PIWIK_URL = '{{ piwik.url }}'
+    var PIWIK_SITE_ID = '{{ piwik.siteId }}'
+  </script>
+
   {% block download %}{% endblock %}
 {% endblock %}
 
@@ -24,98 +30,7 @@
 {% endblock %}
 
 {% block header %}
-  {% set html %}
-    <p>We use some essential cookies to make our services work.</p>
-    <p>We'd also like to use analytics cookies so we can understand how you use our services and to make improvements.</p>
-  {% endset %}
-
-  {% set acceptHtml %}
-    <p>You've accepted analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
-  {% endset %}
-
-  {% set rejectHtml %}
-    <p>You've rejected analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
-  {% endset %}
-
-  {{ govukCookieBanner({
-    ariaLabel: "Cookies on Companies House services",
-    attributes: {
-      id: "cookie-banner"
-    },
-    hidden: true,
-    messages: [
-      {
-        headingText: "Cookies on Companies House services",
-        attributes: {
-          id: "accept-or-reject-message"
-        },
-        hidden: true,
-        html: html,
-        actions: [
-          {
-            text: "Accept analytics cookies",
-            type: "button",
-            name: "cookies",
-            value: "accept",
-            attributes: {
-              id: "accept-cookies-button"
-            }
-          },
-          {
-            text: "Reject analytics cookies",
-            type: "button",
-            name: "cookies",
-            value: "reject",
-            attributes: {
-              id: "reject-cookies-button"
-            }
-          },
-          {
-            text: "View cookies",
-            href: chs.url + "/help/cookies"
-          }
-        ]
-      },
-      {
-        html: acceptHtml,
-        role: "alert",
-        attributes: {
-          id: "accepted-cookies-message"
-        },
-        hidden: true,
-        actions: [
-          {
-            text: "Hide this message",
-            type: "button",
-            name: "hide",
-            value: "hide",
-            attributes: {
-              id: "hide-accepted-message-button"
-            }
-          }
-        ]
-      },
-      {
-        html: rejectHtml,
-        role: "alert",
-        attributes: {
-          id: "rejected-cookies-message"
-        },
-        hidden: true,
-        actions: [
-          {
-            text: "Hide this message",
-            type: "button",
-            name: "hide",
-            value: "hide",
-            attributes: {
-              id: "hide-rejected-message-button"
-            }
-          }
-        ]
-      }
-    ]
-  }) }}
+  {% include "components/cookie-consent-banner.njk" %}
   {{
     govukHeader({
       homepageUrl: Paths.ROOT_URI,
@@ -188,28 +103,6 @@
   <script src="//{{ cdn.host }}/javascripts/govuk-frontend/v3.11.0/govuk-frontend-3.11.0.min.js"></script>
   <script nonce={{ nonce | dump | safe }}>window.GOVUKFrontend.initAll()</script>
   <script src="//{{ cdn.host }}/javascripts/app/piwik-enable.js"></script>
-  <script src="//{{ cdn.host }}/javascripts/app/cookie-consent-1.0.0.js"></script>
-  <script nonce={{ nonce | dump | safe }} type="application/javascript">
-    function startPiwik() {
-      bindPiwikListener('dissolutions', '{{ piwik.url }}', {{ piwik.siteId }});
-    };
-
-    document.addEventListener('DOMContentLoaded', function () {
-      var acceptButton = document.getElementById('accept-cookies-button')
-      acceptButton.addEventListener('click', function() {CookieConsent.acceptCookies(startPiwik)})
-      var rejectButton = document.getElementById('reject-cookies-button')
-      rejectButton.addEventListener('click', CookieConsent.rejectCookies)
-      var hideAcceptedButton = document.getElementById('hide-accepted-message-button')
-      hideAcceptedButton.addEventListener('click', CookieConsent.hideCookieBanners)
-      var hideRejectedButton = document.getElementById('hide-rejected-message-button')
-      hideRejectedButton.addEventListener('click', CookieConsent.hideCookieBanners)
-    })
-
-    CookieConsent.start(startPiwik)
-  </script>
-  <noscript>
-    <p>
-      <img src="{{ piwik.url }}/piwik.php?idsite={{ piwik.siteId }}" style="border:0;" alt="" />
-    </p>
-  </noscript>
+  <script src="//{{ cdn.host }}/javascripts/app/cookie-consent/cookie-consent-1.0.0.js"></script>
+  <script src="//{{ cdn.host }}/javascripts/app/cookie-consent/piwik-only-cookie-consent.js"></script>
 {% endblock %}
