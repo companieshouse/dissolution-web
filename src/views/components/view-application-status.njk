@@ -9,6 +9,12 @@
 
   {% set signatoryRows = [] %}
   {% for signatory in viewApplicationStatus.signatories %}
+    {% set isReminded = false %}
+    {% for director in signatory.remindDirectorList %}
+        {% if director.id === signatory.id %}
+          {% set isReminded = director.reminderSent %}
+        {% endif %}
+    {% endfor %}
     {% set signatoryRows =
       (
         signatoryRows.push(
@@ -25,6 +31,10 @@
               html: '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Change</a>',
               attributes: { id: "change-" + loop.index0 }
             } if signatory.canChange,
+            {
+              html: '<a>Email sent </a>' if isReminded else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
+              attributes: { id: "resend-" + loop.index0 }
+            } if not signatory.hasApproved,
             {
               html: govukTag({
                 text: "Signed" if signatory.hasApproved else "Not signed",
@@ -52,6 +62,9 @@
           text: "Change",
           attributes: { id: "change-col" }
         } if viewApplicationStatus.showChangeColumn,
+        {
+          text: "Resend"
+        },
         {
           text: "Signed"
         }

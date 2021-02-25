@@ -5,11 +5,12 @@ import sinon from 'sinon'
 
 import OfficerType from 'app/models/dto/officerType.enum'
 import PaymentType from 'app/models/dto/paymentType.enum'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToRemind, DirectorToSign } from 'app/models/session/directorToSign.model'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 
 export const TOKEN = 'some-token'
+export const EMAIL = 'test@mail.com'
 
 export function generateSession(): Session {
   const session: Session = new Session()
@@ -46,7 +47,8 @@ export function generateDissolutionSession(companyNumber: string = '12345678'): 
       generateDirectorToSign()
     ],
     officerType: OfficerType.DIRECTOR,
-    paymentType: PaymentType.CREDIT_DEBIT_CARD
+    paymentType: PaymentType.CREDIT_DEBIT_CARD,
+    remindDirectorList: []
   }
 }
 
@@ -56,6 +58,13 @@ export function generateDirectorToSign(): DirectorToSign {
     name: 'Bob Smith',
     email: 'test@mail.com',
     isApplicant: false
+  }
+}
+
+export function generateDirectorToRemind(): DirectorToRemind {
+  return {
+    id: 'abc123',
+    reminderSent: true
   }
 }
 

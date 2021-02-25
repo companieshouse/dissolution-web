@@ -16,7 +16,7 @@ import 'app/controllers/defineSignatoryInfo.controller'
 import OfficerType from 'app/models/dto/officerType.enum'
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import SignatorySigning from 'app/models/form/signatorySigning.enum'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import ValidationErrors from 'app/models/view/validationErrors.model'
 import {

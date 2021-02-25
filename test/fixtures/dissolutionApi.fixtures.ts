@@ -5,6 +5,7 @@ import DissolutionCreateResponse from 'app/models/dto/dissolutionCreateResponse'
 import DissolutionDirectorPatchRequest from 'app/models/dto/dissolutionDirectorPatchRequest'
 import DissolutionGetDirector from 'app/models/dto/dissolutionGetDirector'
 import DissolutionGetPaymentUIData from 'app/models/dto/dissolutionGetPaymentUIData'
+import DissolutionGetResendEmailResponse from 'app/models/dto/dissolutionGetResendEmailResponse'
 import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import DissolutionLinks from 'app/models/dto/dissolutionLinks'
 import DissolutionPatchRequest from 'app/models/dto/dissolutionPatchRequest'
@@ -150,5 +151,11 @@ function generatePaymentItem(): PaymentItem {
 export function generateDissolutionDirectorPatchRequest(): DissolutionDirectorPatchRequest {
   return {
     email: 'director@mail.com'
+  }
+}
+
+export function generateDissolutionGetResendEmailResponse(): DissolutionGetResendEmailResponse {
+  return {
+    reminderSent: true
   }
 }

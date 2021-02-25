@@ -4,7 +4,7 @@ import { provide } from 'inversify-binding-decorators'
 
 import { DefineSignatoryInfoFormModel } from 'app/models/form/defineSignatoryInfo.model'
 import SignatorySigning from 'app/models/form/signatorySigning.enum'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToSign } from 'app/models/session/directorToSign.model'
 
 @provide(SignatoryService)
 export default class SignatoryService {

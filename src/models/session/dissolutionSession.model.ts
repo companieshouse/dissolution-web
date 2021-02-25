@@ -5,7 +5,7 @@ import DissolutionApprovalModel from 'app/models/form/dissolutionApproval.model'
 import HowDoYouWantToPayModel from 'app/models/form/howDoYouWantToPay.model'
 import SelectDirectorFormModel from 'app/models/form/selectDirector.model'
 import SelectSignatoriesFormModel from 'app/models/form/selectSignatories.model'
-import DirectorToSign from 'app/models/session/directorToSign.model'
+import { DirectorToRemind, DirectorToSign } from 'app/models/session/directorToSign.model'
 import DissolutionConfirmation from 'app/models/session/dissolutionConfirmation.model'
 
 export default interface DissolutionSession {
@@ -24,4 +24,5 @@ export default interface DissolutionSession {
   isApplicantADirector?: boolean
   paymentStateUUID?: string
   paymentType?: PaymentType
+  remindDirectorList: DirectorToRemind[]
 }
