@@ -29,11 +29,17 @@
             },
             {
               html: '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Change</a>',
-              attributes: { id: "change-" + loop.index0 }
+              attributes: { 
+                id: "change-" + loop.index0,
+                'data-event-id': 'change-email-link_' if piwik 
+              }
             } if signatory.canChange,
             {
               html: '<a>Email sent </a>' if isReminded else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
-              attributes: { id: "resend-" + loop.index0 }
+              attributes: { 
+                id: "resend-" + loop.index0 ,
+                'data-event-id': 'resend-email-link_' if piwik 
+                }
             } if not signatory.hasApproved,
             {
               html: govukTag({
