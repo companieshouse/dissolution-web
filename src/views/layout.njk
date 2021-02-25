@@ -16,6 +16,12 @@
           integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
           crossorigin="anonymous"></script>
 
+  <script nonce={{ nonce | dump | safe }} type="application/javascript">
+    var SERVICE_NAME = 'dissolutions'
+    var PIWIK_URL = '{{ piwik.url }}'
+    var PIWIK_SITE_ID = '{{ piwik.siteId }}'
+  </script>
+
   {% block download %}{% endblock %}
 {% endblock %}
 
@@ -24,57 +30,7 @@
 {% endblock %}
 
 {% block header %}
-  <div id="cookie-banner" class="govuk-cookie-banner" role="region" aria-label="Cookies on Companies House services" hidden>
-    <div id="accept-or-reject-message" class="govuk-cookie-banner__message govuk-width-container" hidden>
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on Companies House services</h2>
-          <div class="govuk-cookie-banner__content">
-            <p>We use some essential cookies to make our services work.</p>
-            <p>We'd also like to use analytics cookies so we can understand how you use our services and to make improvements.</p>
-          </div>
-        </div>
-      </div>
-      <div class="govuk-button-group">
-        <button id="accept-cookies-button" type="button" class="govuk-button" data-module="govuk-button">
-          Accept analytics cookies
-        </button>
-        <button id="reject-cookies-button" type="button" class="govuk-button" data-module="govuk-button">
-          Reject analytics cookies
-        </button>
-        <a class="govuk-link" href="{{ chs.url }}/help/cookies">View cookies</a>
-      </div>
-    </div>
-    <div id="accepted-cookies-message" class="govuk-cookie-banner__message govuk-width-container" role="alert" hidden>
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          <div class="govuk-cookie-banner__content">
-            <p>You've accepted analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
-          </div>
-        </div>
-      </div>
-      <div class="govuk-button-group">
-        <button id="hide-accepted-message-button" class="govuk-button" data-module="govuk-button">
-          Hide this message
-        </button>
-      </div>
-    </div>
-    <div id="rejected-cookies-message" class="govuk-cookie-banner__message govuk-width-container" role="alert" hidden>
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          <div class="govuk-cookie-banner__content">
-            <p>You've rejected analytics cookies. You can <a href="{{ chs.url }}/help/cookies">change your cookie settings</a> at any time.</p>
-          </div>
-        </div>
-      </div>
-      <div class="govuk-button-group">
-        <button id="hide-rejected-message-button" class="govuk-button" data-module="govuk-button">
-          Hide this message
-        </button>
-      </div>
-    </div>
-  </div>
-
+  {% include "components/cookie-consent-banner.html" %}
   {{
     govukHeader({
       homepageUrl: Paths.ROOT_URI,
@@ -147,28 +103,6 @@
   <script src="//{{ cdn.host }}/javascripts/govuk-frontend/v3.11.0/govuk-frontend-3.11.0.min.js"></script>
   <script nonce={{ nonce | dump | safe }}>window.GOVUKFrontend.initAll()</script>
   <script src="//{{ cdn.host }}/javascripts/app/piwik-enable.js"></script>
-  <script src="//{{ cdn.host }}/javascripts/app/cookie-consent-1.0.0.js"></script>
-  <script nonce={{ nonce | dump | safe }} type="application/javascript">
-    function startPiwik() {
-      bindPiwikListener('dissolutions', '{{ piwik.url }}', {{ piwik.siteId }});
-    };
-
-    document.addEventListener('DOMContentLoaded', function () {
-      var acceptButton = document.getElementById('accept-cookies-button')
-      acceptButton.addEventListener('click', function() {CookieConsent.acceptCookies(startPiwik)})
-      var rejectButton = document.getElementById('reject-cookies-button')
-      rejectButton.addEventListener('click', CookieConsent.rejectCookies)
-      var hideAcceptedButton = document.getElementById('hide-accepted-message-button')
-      hideAcceptedButton.addEventListener('click', CookieConsent.hideCookieBanners)
-      var hideRejectedButton = document.getElementById('hide-rejected-message-button')
-      hideRejectedButton.addEventListener('click', CookieConsent.hideCookieBanners)
-    })
-
-    CookieConsent.start(startPiwik)
-  </script>
-  <noscript>
-    <p>
-      <img src="{{ piwik.url }}/piwik.php?idsite={{ piwik.siteId }}" style="border:0;" alt="" />
-    </p>
-  </noscript>
+  <script src="//{{ cdn.host }}/javascripts/app/cookie-consent/cookie-consent-1.0.0.js"></script>
+  <script src="//{{ cdn.host }}/javascripts/app/cookie-consent/piwik-only-cookie-consent.js"></script>
 {% endblock %}
