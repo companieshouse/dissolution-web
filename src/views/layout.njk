@@ -29,8 +29,11 @@
   {{ title }}
 {% endblock %}
 
-{% block header %}
+{% block bodyStart %}
   {% include "components/cookie-consent-banner.njk" %}
+{% endblock %}
+
+{% block header %}
   {{
     govukHeader({
       homepageUrl: Paths.ROOT_URI,
