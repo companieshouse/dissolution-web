@@ -17,9 +17,9 @@
           crossorigin="anonymous"></script>
 
   <script nonce={{ nonce | dump | safe }} type="application/javascript">
-    var SERVICE_NAME = 'dissolutions'
-    var PIWIK_URL = '{{ piwik.url }}'
-    var PIWIK_SITE_ID = '{{ piwik.siteId }}'
+    window.SERVICE_NAME = 'dissolutions'
+    window.PIWIK_URL = '{{ piwik.url }}'
+    window.PIWIK_SITE_ID = '{{ piwik.siteId }}'
   </script>
 
   {% block download %}{% endblock %}
