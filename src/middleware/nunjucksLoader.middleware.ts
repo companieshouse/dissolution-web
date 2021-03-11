@@ -17,6 +17,7 @@ export default class NunjucksLoader {
 
   public constructor(
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
+    @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
     @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
   ) {}
@@ -49,6 +50,10 @@ export default class NunjucksLoader {
   private addLocals(app: express.Application, nonce: string): void {
     app.locals.cdn = {
       host: this.CDN_HOST
+    }
+
+    app.locals.chs = {
+      url: this.CHS_URL
     }
 
     app.locals.piwik = this.PIWIK_CONFIG

@@ -60,7 +60,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h2', 'What to do next'))
+      assert.isTrue(htmlAssertHelper.hasText('#first-header', 'What to do next'))
       assert.isTrue(htmlAssertHelper.containsText('div.govuk-panel__body', APPLICATION_REFERENCE_NUMBER))
     })
 
@@ -73,7 +73,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h2', 'What to do next'))
+      assert.isTrue(htmlAssertHelper.hasText('#first-header', 'What to do next'))
       assert.isTrue(htmlAssertHelper.containsText('#inform', 'A strike off notice for the company will be published in the local Gazette. After 2 months, the notice will expire.'))
     })
 
@@ -86,7 +86,7 @@ describe('ViewFinalConfirmationController', () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-      assert.isTrue(htmlAssertHelper.hasText('h2', 'What to do next'))
+      assert.isTrue(htmlAssertHelper.hasText('#first-header', 'What to do next'))
       assert.isTrue(htmlAssertHelper.containsText('#inform', 'A strike off notice for the company will be published in the local Gazette. After 2 months, the notice will expire.'))
     })
   })
