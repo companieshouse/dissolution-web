@@ -39,14 +39,18 @@
                 text: "Credit or debit card",
                 checked: data.paymentType === PaymentType.CREDIT_DEBIT_CARD if data,
                 id: 'card-radio-button',
-                'data-event-id': 'payment-credit-debit-card-type-link' if piwik
+                attributes: {
+                  'data-event-id': 'payment-credit-debit-card-type-link' if piwik
+                }
               },
               {
                 value: PaymentType.ACCOUNT,
                 text: "Companies House account",
                 checked: data.paymentType === PaymentType.ACCOUNT if data,
                 id: 'account-radio-button',
-                'data-event-id': 'payment-ch-account-type-link' if piwik
+                attributes: {
+                  'data-event-id': 'payment-ch-account-type-link' if piwik
+                } 
               }
             ]
           })
