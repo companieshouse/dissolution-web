@@ -45,11 +45,8 @@
 
         {{  
           govukDetails({
-            summaryText: "Help with company number",
-            html: '<p>You can find it using the <a href="https://beta.companieshouse.gov.uk/" class="govuk-link" rel="noreferrer noopener" target="_blank">Companies House Service (opens in a new tab)</a>.</p>',
-            attributes: {
-              'data-event-id': 'help-with-company-number-link' if piwik
-            }
+            summaryHtml: '<div class="piwik-event" data-event-id="help-with-company-number-link"> Help with company number</div>',
+            html: '<p>You can find it using the <a href="https://beta.companieshouse.gov.uk/" class="govuk-link piwik-event" data-event-id="companieshouse-service-link" rel="noreferrer noopener" target="_blank">Companies House Service (opens in a new tab)</a>.</p>'
           })
         }}
 
