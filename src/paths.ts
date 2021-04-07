@@ -11,6 +11,7 @@ export const ERROR_URI = `${ROOT_URI}/error`
 export const NOT_SELECTED_SIGNATORY = `${ROOT_URI}/not-selected-signatory`
 
 // Pages
+export const ACCESSIBILITY_STATEMENT_URI = `${ROOT_URI}/accessibility-statement`
 export const WHO_TO_TELL_URI = `${ROOT_URI}/who-to-tell`
 export const SEARCH_COMPANY_URI = `${ROOT_URI}/search-company`
 export const VIEW_COMPANY_INFORMATION_URI = `${ROOT_URI}/view-company-information`

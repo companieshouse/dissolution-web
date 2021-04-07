@@ -6,7 +6,7 @@ import { NextFunction, Request, RequestHandler, Response } from 'express'
 import AuthConfig from 'app/models/authConfig'
 import Optional from 'app/models/optional'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
-import { HEALTHCHECK_URI, ROOT_URI, SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } from 'app/paths'
+import { ACCESSIBILITY_STATEMENT_URI, HEALTHCHECK_URI, ROOT_URI, SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } from 'app/paths'
 import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
 import SessionService from 'app/services/session/session.service'
 
@@ -23,7 +23,9 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
   SEARCH_COMPANY_URI,
   `${SEARCH_COMPANY_URI}/`,
   VIEW_COMPANY_INFORMATION_URI,
-  `${VIEW_COMPANY_INFORMATION_URI}/`
+  `${VIEW_COMPANY_INFORMATION_URI}/`,
+  ACCESSIBILITY_STATEMENT_URI,
+  `${ACCESSIBILITY_STATEMENT_URI}/`
 ]
 
 export default function CompanyAuthMiddleware(

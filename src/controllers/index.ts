@@ -1,3 +1,4 @@
+import 'app/controllers/accessibilityStatement.controller'
 import 'app/controllers/applicationStatus.controller'
 import 'app/controllers/certificateDownload.controller'
 import 'app/controllers/certificateSigned.controller'
