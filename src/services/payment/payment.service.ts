@@ -49,7 +49,7 @@ export default class PaymentService {
     }
 
     const dissolutionPaymentPatchRequest: DissolutionPaymentPatchRequest = this.mapper.mapToPaymentReferencePatchRequest(
-      response.resource!.reference
+      response.resource!.links.self.split('/')[1]
     )
     await this.dissolutionClient.patchDissolutionPaymentData(applicationReferenceNumber, dissolutionPaymentPatchRequest)
 
