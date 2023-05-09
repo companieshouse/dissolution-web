@@ -7,6 +7,9 @@ import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import PaymentApiClient from '../clients/paymentApi.client'
+import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
+import PaymentMapper from 'app/mappers/payment/payment.mapper'
 
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
@@ -21,7 +24,9 @@ export default class PaymentService {
     @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
     @inject(PaymentApiClient) private client: PaymentApiClient,
-    @inject(ApplicationLogger) private logger: ApplicationLogger
+    @inject(ApplicationLogger) private logger: ApplicationLogger,
+    @inject(DissolutionApiClient) private dissolutionClient: DissolutionApiClient,
+    @inject(PaymentMapper) private paymentMapper: PaymentMapper
   ) {}
 
   public async generatePaymentURL(
@@ -44,6 +49,11 @@ export default class PaymentService {
 
       return Promise.reject(new Error('Payment session failed to create'))
     }
+
+    const dissolutionPaymentPatchRequest: DissolutionPaymentPatchRequest = this.paymentMapper.mapToPaymentReferencePatchRequest(
+      response.resource!.reference
+    )
+    await this.dissolutionClient.patchDissolutionPaymentData(applicationReferenceNumber, dissolutionPaymentPatchRequest)
 
     return `${response.resource!.links.journey}?summary=false`
   }

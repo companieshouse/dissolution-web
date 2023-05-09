@@ -46,6 +46,12 @@ export default class PaymentMapper {
     }
   }
 
+  public mapToPaymentReferencePatchRequest(paymentRef: string): DissolutionPaymentPatchRequest {
+    return {
+      payment_reference: paymentRef
+    }
+  }
+
   private calculateTotalCostOfPaymentItems(paymentItems: PaymentItem[]): number {
     return paymentItems.reduce(
       (totalCost: number, paymentItem: PaymentItem) => totalCost + Number(paymentItem.amount), 0
