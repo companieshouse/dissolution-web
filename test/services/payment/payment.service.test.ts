@@ -9,6 +9,7 @@ import { TOKEN } from '../../fixtures/session.fixtures'
 
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 import PaymentApiClient from 'app/services/clients/paymentApi.client'
 import PaymentService from 'app/services/payment/payment.service'
 
@@ -20,6 +21,7 @@ describe('PaymentService', () => {
 
   let mapper: PaymentMapper
   let client: PaymentApiClient
+  let dissolutionClient: DissolutionApiClient
   let logger: ApplicationLogger
 
   const CHS_URL = 'http://some-ui-url'
@@ -28,6 +30,7 @@ describe('PaymentService', () => {
   beforeEach(() => {
     mapper = mock(PaymentMapper)
     client = mock(PaymentApiClient)
+    dissolutionClient = mock(dissolutionClient)
     logger = mock(ApplicationLogger)
 
     service = new PaymentService(
@@ -35,7 +38,8 @@ describe('PaymentService', () => {
       CHS_URL,
       DISSOLUTIONS_API_URL,
       instance(client),
-      instance(logger)
+      instance(logger),
+      instance(dissolutionClient)
     )
 
 
