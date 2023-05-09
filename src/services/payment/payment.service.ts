@@ -24,8 +24,7 @@ export default class PaymentService {
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
     @inject(PaymentApiClient) private client: PaymentApiClient,
     @inject(ApplicationLogger) private logger: ApplicationLogger,
-    @inject(DissolutionApiClient) private dissolutionClient: DissolutionApiClient,
-    @inject(PaymentMapper) private paymentMapper: PaymentMapper
+    @inject(DissolutionApiClient) private dissolutionClient: DissolutionApiClient
   ) {}
 
   public async generatePaymentURL(
@@ -49,7 +48,7 @@ export default class PaymentService {
       return Promise.reject(new Error('Payment session failed to create'))
     }
 
-    const dissolutionPaymentPatchRequest: DissolutionPaymentPatchRequest = this.paymentMapper.mapToPaymentReferencePatchRequest(
+    const dissolutionPaymentPatchRequest: DissolutionPaymentPatchRequest = this.mapper.mapToPaymentReferencePatchRequest(
       response.resource!.reference
     )
     await this.dissolutionClient.patchDissolutionPaymentData(applicationReferenceNumber, dissolutionPaymentPatchRequest)
