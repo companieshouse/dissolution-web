@@ -9,11 +9,11 @@ import { TOKEN } from '../../fixtures/session.fixtures'
 
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
+import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 import PaymentApiClient from 'app/services/clients/paymentApi.client'
 import PaymentService from 'app/services/payment/payment.service'
 
 import { generateDissolutionSession } from 'test/fixtures/session.fixtures'
-import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
 
 describe('PaymentService', () => {
 
