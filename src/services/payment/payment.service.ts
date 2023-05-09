@@ -11,7 +11,6 @@ import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client
 import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 
-import PaymentMapper from 'app/mappers/payment/payment.mapper'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { PAYMENT_CALLBACK_URI } from 'app/paths'
 import TYPES from 'app/types'
