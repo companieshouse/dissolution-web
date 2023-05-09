@@ -30,6 +30,7 @@ describe('PaymentService', () => {
   beforeEach(() => {
     mapper = mock(PaymentMapper)
     client = mock(PaymentApiClient)
+    dissolutionClient = mock(dissolutionClient)
     logger = mock(ApplicationLogger)
 
     service = new PaymentService(

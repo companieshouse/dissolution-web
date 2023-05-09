@@ -6,11 +6,11 @@ import ApplicationLogger from '@companieshouse/structured-logging-node/lib/Appli
 import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
+import { DissolutionApiClient } from '../clients/dissolutionApi.client'
 import PaymentApiClient from '../clients/paymentApi.client'
-import { DissolutionApiClient } from 'app/services/clients/dissolutionApi.client'
-import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import PaymentMapper from 'app/mappers/payment/payment.mapper'
 
+import DissolutionPaymentPatchRequest from 'app/models/dto/dissolutionPaymentPatchRequest'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { PAYMENT_CALLBACK_URI } from 'app/paths'
 import TYPES from 'app/types'
