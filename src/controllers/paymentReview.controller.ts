@@ -1,5 +1,6 @@
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost } from 'inversify-express-utils'
+// @ts-ignore
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import { v4 as uuidv4 } from 'uuid'
 import BaseController from './base.controller'

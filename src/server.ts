@@ -20,6 +20,7 @@ export default class Server {
     @inject(ApplicationLogger) private logger: ApplicationLogger) {}
 
   public start(container: Container): void {
+    // @ts-ignore
     const server: Application = new InversifyExpressServer(container)
       .setConfig((app: Application) => this.middlewareLoader.loadServerMiddleware(app, __dirname))
       .setErrorConfig((app: Application) => this.middlewareLoader.configureErrorHandling(app))

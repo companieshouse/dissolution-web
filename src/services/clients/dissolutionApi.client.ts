@@ -43,6 +43,7 @@ export class DissolutionApiClient {
 
       return response!.data
     } catch (err) {
+      // @ts-ignore
       if (err.response.status === 404) {
         return null
       }

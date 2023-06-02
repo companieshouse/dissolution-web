@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { inject } from 'inversify'
 import { controller, httpGet, httpPost, requestBody } from 'inversify-express-utils'
+// @ts-ignore
 import { RedirectResult } from 'inversify-express-utils/dts/results'
 import { v4 as uuidv4 } from 'uuid'
 
