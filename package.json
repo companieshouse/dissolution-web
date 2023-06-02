@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@companieshouse/api-sdk-node": "^1.0.2",
-    "@companieshouse/node-session-handler": "^4.1.5",
+    "@companieshouse/node-session-handler": "^4.1.6",
     "@companieshouse/structured-logging-node": "^1.0.4",
     "@companieshouse/web-security-node": "^1.0.2",
     "@hapi/joi": "^17.1.1",
