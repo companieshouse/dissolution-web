@@ -3,6 +3,5 @@ node_modules
 .idea
 .scannerwork/*
 .ssh
-.vscode/*
 coverage-report
 .nyc_output/
