@@ -38,7 +38,7 @@
     "inversify": "^5.0.1",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.3.2",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "momentjs": "^2.0.0",
     "nocache": "^2.1.0",
     "node-jose": "^2.0.0",
