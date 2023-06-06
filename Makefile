@@ -16,7 +16,7 @@ package-install:
 
 .PHONY: build
 build:	package-install lint
-	npm run build
+	bash -l -c 'nvm use && npm run build'
 
 .PHONY: lint
 lint:
@@ -27,11 +27,11 @@ test: test-unit
 
 .PHONY: test-unit
 test-unit:
-	npm run test:coverage
+	bash -l -c 'nvm use && npm run test:coverage'
 
 .PHONY: security-check
 security-check:
-	npm audit
+	bash -l -c 'nvm use && npm audit'
 
 .PHONY: package
 package: build
@@ -45,12 +45,12 @@ endif
 	cp -r ./package-lock.json $(tmpdir)
 	cp ./start.sh $(tmpdir)
 	cp ./routes.yaml $(tmpdir)
-	cd $(tmpdir) && npm install --production
+	cd $(tmpdir) && bash -l -c 'nvm use && npm install --production'
 	rm $(tmpdir)/package.json $(tmpdir)/package-lock.json
 	cd $(tmpdir) && zip -r ../$(artifact_name)-$(version).zip .
 	rm -rf $(tmpdir)
 
 .PHONY: sonar
 sonar:
-	npm run analyse-code
+	bash -l -c 'nvm use && npm run analyse-code'
 
