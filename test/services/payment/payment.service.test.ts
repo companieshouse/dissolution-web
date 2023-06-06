@@ -93,6 +93,7 @@ describe('PaymentService', () => {
         await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state)
         assert.fail()
       } catch (err) {
+        // @ts-ignore
         assert.equal(err.message, 'Payment session failed to create')
       }
     })

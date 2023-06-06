@@ -97,6 +97,7 @@ describe('DissolutionApiClient', () => {
         await client.getDissolution(TOKEN, COMPANY_NUMBER)
         assert.fail()
       } catch (e) {
+        // @ts-ignore
         assert.equal(e.response!.status, error.response!.status)
       }
 
@@ -257,6 +258,7 @@ describe('DissolutionApiClient', () => {
         await client.patchDissolutionPaymentData(APPLICATION_REFERENCE, request)
         assert.fail()
       } catch (err) {
+        // @ts-ignore
         assert.equal(err.response!.status, error.response!.status)
       }
 

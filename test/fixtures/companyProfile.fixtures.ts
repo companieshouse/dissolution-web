@@ -60,6 +60,7 @@ export function generateAccounts(): Accounts {
 
 export function generateConfirmationStatement(): ConfirmationStatement {
   return {
+    lastMadeUpTo: '', nextMadeUpTo: '',
     nextDue: `${new Date()}`,
     overdue: false
   }

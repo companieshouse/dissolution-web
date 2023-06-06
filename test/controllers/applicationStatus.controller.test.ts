@@ -13,7 +13,7 @@ import { createApp } from './helpers/application.factory'
 
 import 'app/controllers/applicationStatus.controller'
 import ViewApplicationStatusMapper from 'app/mappers/view-application-status/viewApplicationStatus.mapper'
-import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse.ts'
+import DissolutionGetResponse from 'app/models/dto/dissolutionGetResponse'
 import { DirectorToRemind } from 'app/models/session/directorToSign.model'
 import DissolutionSession from 'app/models/session/dissolutionSession.model'
 import { ViewApplicationStatus } from 'app/models/view/viewApplicationStatus.model'

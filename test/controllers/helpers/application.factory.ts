@@ -22,7 +22,8 @@ export const createApp = (configureBindings?: (container: Container) => void): A
   container.load(buildProviderModule())
   configureBindings?.(container)
 
-  return new InversifyExpressServer(container)
+  // @ts-ignore
+    return new InversifyExpressServer(container)
     .setConfig(server => {
 
       server.use(bodyParser.json())
