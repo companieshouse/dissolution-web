@@ -42,7 +42,7 @@ export class DissolutionApiClient {
       )
 
       return response!.data
-    } catch (err) {
+    } catch (err: any) {
       if (err.response.status === 404) {
         return null
       }

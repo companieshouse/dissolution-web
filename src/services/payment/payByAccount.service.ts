@@ -25,7 +25,7 @@ export default class PayByAccountService {
     try {
       const response: PresenterAuthResponse = await this.client.getAccountNumber(request)
       return response.presenterAccountNumber
-    } catch (err) {
+    } catch (err: any) {
       if (this.areCredentialsIncorrect(err)) {
         return null
       }
