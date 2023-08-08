@@ -1,5 +1,5 @@
-import moment from 'moment'
+import moment from "moment";
 
-export function asFormattedDate(companyIncDate: string): string {
-  return moment(companyIncDate).format('DD MMM YYYY')
+export function asFormattedDate (companyIncDate: string): string {
+    return moment(companyIncDate).format("DD MMM YYYY");
 }

@@ -1,40 +1,40 @@
-import CompanyProfileService from '@companieshouse/api-sdk-node/dist/services/company-profile/service'
-import { CompanyProfile } from '@companieshouse/api-sdk-node/dist/services/company-profile/types'
-import Resource from '@companieshouse/api-sdk-node/dist/services/resource'
-import { assert } from 'chai'
-import { instance, mock, when } from 'ts-mockito'
-import { generateCompanyProfileResource } from '../../fixtures/companyProfile.fixtures'
-import { TOKEN } from '../../fixtures/session.fixtures'
+import CompanyProfileService from "@companieshouse/api-sdk-node/dist/services/company-profile/service";
+import { CompanyProfile } from "@companieshouse/api-sdk-node/dist/services/company-profile/types";
+import Resource from "@companieshouse/api-sdk-node/dist/services/resource";
+import { assert } from "chai";
+import { instance, mock, when } from "ts-mockito";
+import { generateCompanyProfileResource } from "../../fixtures/companyProfile.fixtures";
+import { TOKEN } from "../../fixtures/session.fixtures";
 
-import APIClientFactory from 'app/services/clients/apiClient.factory'
-import CompanyProfileClient from 'app/services/clients/companyProfile.client'
+import APIClientFactory from "app/services/clients/apiClient.factory";
+import CompanyProfileClient from "app/services/clients/companyProfile.client";
 
-describe('CompanyProfileClient', () => {
+describe("CompanyProfileClient", () => {
 
-  let companyProfileClient: CompanyProfileClient
+    let companyProfileClient: CompanyProfileClient;
 
-  let factory: APIClientFactory
-  let companyProfileService: CompanyProfileService
+    let factory: APIClientFactory;
+    let companyProfileService: CompanyProfileService;
 
-  const COMPANY_NUMBER = '12345678'
+    const COMPANY_NUMBER = "12345678";
 
-  beforeEach(() => {
-    factory = mock(APIClientFactory)
-    companyProfileService = mock(CompanyProfileService)
+    beforeEach(() => {
+        factory = mock(APIClientFactory);
+        companyProfileService = mock(CompanyProfileService);
 
-    companyProfileClient = new CompanyProfileClient(instance(factory))
-  })
+        companyProfileClient = new CompanyProfileClient(instance(factory));
+    });
 
-  describe('getCompanyProfile', () => {
-    it('should fetch and return the company profile for the provided company number', async () => {
-      const response: Resource<CompanyProfile> = generateCompanyProfileResource()
+    describe("getCompanyProfile", () => {
+        it("should fetch and return the company profile for the provided company number", async () => {
+            const response: Resource<CompanyProfile> = generateCompanyProfileResource();
 
-      when(companyProfileService.getCompanyProfile(COMPANY_NUMBER)).thenResolve(response)
-      when(factory.getCompanyProfileService(TOKEN)).thenReturn(instance(companyProfileService))
+            when(companyProfileService.getCompanyProfile(COMPANY_NUMBER)).thenResolve(response);
+            when(factory.getCompanyProfileService(TOKEN)).thenReturn(instance(companyProfileService));
 
-      const result: Resource<CompanyProfile> = await companyProfileClient.getCompanyProfile(TOKEN, COMPANY_NUMBER)
+            const result: Resource<CompanyProfile> = await companyProfileClient.getCompanyProfile(TOKEN, COMPANY_NUMBER);
 
-      assert.equal(result, response)
-    })
-  })
-})
+            assert.equal(result, response);
+        });
+    });
+});

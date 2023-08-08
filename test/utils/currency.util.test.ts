@@ -1,19 +1,19 @@
-import 'reflect-metadata'
+import "reflect-metadata";
 
-import { assert } from 'chai'
+import { assert } from "chai";
 
-import convertToCurrency from 'app/utils/currencyConverter.util'
+import convertToCurrency from "app/utils/currencyConverter.util";
 
-describe('CurrencyConverter', () => {
-  it('should return the correct currency value if the value is 8', () => {
-    const currency: string = convertToCurrency(8)
+describe("CurrencyConverter", () => {
+    it("should return the correct currency value if the value is 8", () => {
+        const currency: string = convertToCurrency(8);
 
-    assert.equal('£8.00', currency)
-  })
+        assert.equal("£8.00", currency);
+    });
 
-  it('should return the correct currency value if the value is 8.00', () => {
-    const currency: string = convertToCurrency(8.00)
+    it("should return the correct currency value if the value is 8.00", () => {
+        const currency: string = convertToCurrency(8.00);
 
-    assert.equal('£8.00', currency)
-  })
-})
+        assert.equal("£8.00", currency);
+    });
+});

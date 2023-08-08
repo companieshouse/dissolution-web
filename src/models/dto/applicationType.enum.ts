@@ -1,6 +1,6 @@
 enum ApplicationType {
-  DS01 = 'ds01',
-  LLDS01 = 'llds01'
+  DS01 = "ds01",
+  LLDS01 = "llds01"
 }
 
-export default ApplicationType
+export default ApplicationType;

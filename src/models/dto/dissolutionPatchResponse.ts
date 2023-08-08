@@ -1,5 +1,5 @@
-import DissolutionLinks from './dissolutionLinks'
+import DissolutionLinks from "./dissolutionLinks";
 
 export default interface DissolutionPatchResponse {
   links: DissolutionLinks
-}
+};;;;;;;;;;;;;;;;;;;;

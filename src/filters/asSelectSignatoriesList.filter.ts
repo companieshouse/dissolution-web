@@ -1,4 +1,4 @@
-import DirectorDetails from 'app/models/view/directorDetails.model'
+import DirectorDetails from "app/models/view/directorDetails.model";
 
 export type GovUKCheckbox = {
   value: string
@@ -6,10 +6,10 @@ export type GovUKCheckbox = {
   checked: boolean
 }
 
-export function asSelectSignatoriesList(signatories: DirectorDetails[], choices?: string[]): GovUKCheckbox[] {
-  return signatories.map(signatory => ({
-    text: signatory.name,
-    value: signatory.id,
-    checked: choices?.includes(signatory.id) || false
-  }))
+export function asSelectSignatoriesList (signatories: DirectorDetails[], choices?: string[]): GovUKCheckbox[] {
+    return signatories.map(signatory => ({
+        text: signatory.name,
+        value: signatory.id,
+        checked: choices?.includes(signatory.id) || false
+    }));
 }

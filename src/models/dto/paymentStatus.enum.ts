@@ -1,7 +1,7 @@
 enum PaymentStatus {
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  PAID = 'paid'
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+  PAID = "paid"
 }
 
-export default PaymentStatus
+export default PaymentStatus;

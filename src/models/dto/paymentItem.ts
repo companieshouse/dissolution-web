@@ -1,4 +1,4 @@
-import ApplicationType from './applicationType.enum'
+import ApplicationType from "./applicationType.enum";
 
 export default interface PaymentItem {
   description: string
@@ -10,4 +10,4 @@ export default interface PaymentItem {
   class_of_payment: string[]
   kind: string
   resource_kind: string
-}
+};;;;;;;;;;;;;;;;;;;;

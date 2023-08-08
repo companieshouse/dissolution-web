@@ -4,4 +4,4 @@ export default interface DissolutionGetDirector {
   email: string
   approved_at?: string
   on_behalf_name?: string
-}
+};;;;;;;;;;;;;;;;;;;;

@@ -1,4 +1,4 @@
-import OfficerType from 'app/models/dto/officerType.enum'
+import OfficerType from "app/models/dto/officerType.enum";
 
 export default interface DissolutionApprovalModel {
   officerId: string
@@ -8,4 +8,4 @@ export default interface DissolutionApprovalModel {
   officerType: OfficerType
   onBehalfName?: string
   date: string
-}
+};;;;;;;;;;;;;;;;;;;;

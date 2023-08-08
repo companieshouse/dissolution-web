@@ -1,6 +1,6 @@
 enum PaymentType {
-  ACCOUNT = 'account',
-  CREDIT_DEBIT_CARD = 'credit-debit-card'
+  ACCOUNT = "account",
+  CREDIT_DEBIT_CARD = "credit-debit-card"
 }
 
-export default PaymentType
+export default PaymentType;

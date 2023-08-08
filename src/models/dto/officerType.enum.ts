@@ -1,6 +1,6 @@
 enum OfficerType {
-  MEMBER = 'member',
-  DIRECTOR = 'director'
+  MEMBER = "member",
+  DIRECTOR = "director"
 }
 
-export default OfficerType
+export default OfficerType;
