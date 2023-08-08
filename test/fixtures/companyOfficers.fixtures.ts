@@ -46,9 +46,13 @@ export function generateCompanyOfficer(): CompanyOfficer {
     formerNames: [generateFormerName()],
     identification: generateIdentification(),
     links: {
+      self: '/test/link',
       officer: {
         appointments: 'officers/456/appointments'
       }
+    },
+    contactDetails: {
+      contactName: 'test name'
     }
   }
 }

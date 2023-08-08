@@ -61,7 +61,8 @@ export function generateAccounts(): Accounts {
 export function generateConfirmationStatement(): ConfirmationStatement {
   return {
     nextDue: `${new Date()}`,
-    overdue: false
+    overdue: false,
+    nextMadeUpTo: `${new Date()}`
   }
 }
 
