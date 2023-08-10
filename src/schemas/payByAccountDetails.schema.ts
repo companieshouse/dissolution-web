@@ -1,7 +1,7 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "@hapi/joi"
 
-const emptyPresenterIdError: string = "You must enter a Presenter ID";
-const emptyPresenterAuthCodeError: string = "You must enter a Presenter authentication code";
+const emptyPresenterIdError: string = "You must enter a Presenter ID"
+const emptyPresenterAuthCodeError: string = "You must enter a Presenter authentication code"
 
 const payByAccountDetailsSchema = Joi.object({
     presenterId: Joi.string()
@@ -16,6 +16,6 @@ const payByAccountDetailsSchema = Joi.object({
             "string.empty": emptyPresenterAuthCodeError,
             "any.required": emptyPresenterAuthCodeError
         })
-});
+})
 
-export default payByAccountDetailsSchema;
+export default payByAccountDetailsSchema

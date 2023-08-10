@@ -1,4 +1,4 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "@hapi/joi"
 
 const formSchema = Joi.object({
     confirmation: Joi.string()
@@ -6,6 +6,6 @@ const formSchema = Joi.object({
         .messages({
             "any.required": "You must agree to continue"
         })
-});
+})
 
-export default formSchema;
+export default formSchema

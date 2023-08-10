@@ -13,8 +13,8 @@ export const companyStatusList: CompanyStatusList = {
     administration: "In Administration",
     open: "Open",
     closed: "Closed"
-};
+}
 
 export function asCompanyStatusText (companyStatus: string): string {
-    return companyStatusList[companyStatus];
+    return companyStatusList[companyStatus]
 }

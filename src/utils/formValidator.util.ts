@@ -1,8 +1,8 @@
-import { AnySchema, ValidationErrorItem, ValidationOptions, ValidationResult } from "@hapi/joi";
-import { provide } from "inversify-binding-decorators";
+import { AnySchema, ValidationErrorItem, ValidationOptions, ValidationResult } from "@hapi/joi"
+import { provide } from "inversify-binding-decorators"
 
-import Optional from "app/models/optional";
-import ValidationErrors from "app/models/view/validationErrors.model";
+import Optional from "app/models/optional"
+import ValidationErrors from "app/models/view/validationErrors.model"
 
 @provide(FormValidator)
 export default class FormValidator {
@@ -13,18 +13,18 @@ export default class FormValidator {
   }
 
   public validate (body: any, schema: AnySchema): Optional<ValidationErrors> {
-      const result: ValidationResult = schema.validate(body, this.VALIDATION_OPTIONS);
+      const result: ValidationResult = schema.validate(body, this.VALIDATION_OPTIONS)
 
       if (!result.error) {
-          return null;
+          return null
       }
-      return this.mapJoiErrorsToValidationErrors(result.error.details);
+      return this.mapJoiErrorsToValidationErrors(result.error.details)
   }
 
   private mapJoiErrorsToValidationErrors (errors: ValidationErrorItem[]): ValidationErrors {
       return errors.reduce((totalErrors: ValidationErrors, error: ValidationErrorItem) => ({
           ...totalErrors,
           [error.path.join(".")]: error.message
-      }), {});
+      }), {})
   }
 }

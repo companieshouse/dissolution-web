@@ -1,10 +1,10 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { randomBytes } from "crypto";
-import { provide } from "inversify-binding-decorators";
-import { JWE, JWK } from "node-jose";
+import { randomBytes } from "crypto"
+import { provide } from "inversify-binding-decorators"
+import { JWE, JWK } from "node-jose"
 
-import AuthConfig from "app/models/authConfig";
+import AuthConfig from "app/models/authConfig"
 
 interface AuthPayload {
   nonce: string,
@@ -16,19 +16,19 @@ export default class JwtEncryptionService {
     public constructor (private authConfig: AuthConfig) {}
 
     public generateNonce (): string {
-        const bytes = randomBytes(5);
-        const buffer = Buffer.from(bytes);
-        return buffer.toString("base64");
+        const bytes = randomBytes(5)
+        const buffer = Buffer.from(bytes)
+        return buffer.toString("base64")
     }
 
     public async jweEncodeWithNonce (returnUri: string, nonce: string): Promise<string> {
         const payloadObject: AuthPayload = {
             nonce,
             content: returnUri
-        };
+        }
 
-        const payload = JSON.stringify(payloadObject);
-        const decoded = Buffer.from(`${this.authConfig.accountRequestKey}`, "base64");
+        const payload = JSON.stringify(payloadObject)
+        const decoded = Buffer.from(`${this.authConfig.accountRequestKey}`, "base64")
 
         const ks = await JWK.asKeyStore([{
             alg: "A128CBC-HS256",
@@ -36,9 +36,9 @@ export default class JwtEncryptionService {
             kid: "key",
             kty: "oct",
             use: "enc"
-        }]);
+        }])
 
-        const key = await JWK.asKey(ks.get("key"));
+        const key = await JWK.asKey(ks.get("key"))
 
         return await JWE.createEncrypt({
             format: "compact",
@@ -46,6 +46,6 @@ export default class JwtEncryptionService {
                 alg: "dir",
                 enc: "A128CBC-HS256"
             }
-        }, key).update(payload).final();
+        }, key).update(payload).final()
     }
 }

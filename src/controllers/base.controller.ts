@@ -1,5 +1,5 @@
-import { StatusCodes } from "http-status-codes";
-import { BaseHttpController } from "inversify-express-utils";
+import { StatusCodes } from "http-status-codes"
+import { BaseHttpController } from "inversify-express-utils"
 
 export default abstract class BaseController<T extends object = {}> extends BaseHttpController {
 
@@ -8,7 +8,7 @@ export default abstract class BaseController<T extends object = {}> extends Base
             this.httpContext.response
                 .status(status)
                 .render(template, viewModel, (err: Error, html: string) => err ? reject(err) : resolve(html))
-        );
+        )
     }
 
 }

@@ -1,4 +1,4 @@
-import DirectorDetails from "app/models/view/directorDetails.model";
+import DirectorDetails from "app/models/view/directorDetails.model"
 
 export type GovUKCheckbox = {
   value: string
@@ -11,5 +11,5 @@ export function asSelectSignatoriesList (signatories: DirectorDetails[], choices
         text: signatory.name,
         value: signatory.id,
         checked: choices?.includes(signatory.id) || false
-    }));
+    }))
 }

@@ -3,4 +3,4 @@ enum SignatorySigning {
   ON_BEHALF = "on-behalf"
 }
 
-export default SignatorySigning;
+export default SignatorySigning

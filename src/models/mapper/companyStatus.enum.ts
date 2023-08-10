@@ -3,4 +3,4 @@ enum CompanyStatus {
   DISSOLVED = "dissolved"
 }
 
-export default CompanyStatus;
+export default CompanyStatus

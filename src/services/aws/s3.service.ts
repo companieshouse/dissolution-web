@@ -1,10 +1,10 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import S3 from "aws-sdk/clients/s3";
-import { inject } from "inversify";
-import { provide } from "inversify-binding-decorators";
+import S3 from "aws-sdk/clients/s3"
+import { inject } from "inversify"
+import { provide } from "inversify-binding-decorators"
 
-import TYPES from "app/types";
+import TYPES from "app/types"
 
 interface SignedUrlParams {
   Bucket: string
@@ -24,8 +24,8 @@ export default class S3Service {
           Bucket: bucket,
           Key: key,
           Expires: this.SIGNED_URL_EXPIRY_MINS
-      };
+      }
 
-      return this.s3.getSignedUrlPromise("getObject", params);
+      return this.s3.getSignedUrlPromise("getObject", params)
   }
 }

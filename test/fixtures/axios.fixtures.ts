@@ -1,5 +1,5 @@
-import { AxiosError, AxiosResponse } from "axios";
-import { StatusCodes } from "http-status-codes";
+import { AxiosError, AxiosResponse } from "axios"
+import { StatusCodes } from "http-status-codes"
 
 export function generateAxiosResponse<T> (data: T): AxiosResponse<T> {
     return {
@@ -11,7 +11,7 @@ export function generateAxiosResponse<T> (data: T): AxiosResponse<T> {
             "content-disposition": "some content disposition"
         },
         config: {}
-    };
+    }
 }
 
 export function generateAxiosError<T> (data: T): AxiosError {
@@ -21,8 +21,8 @@ export function generateAxiosError<T> (data: T): AxiosError {
         message: "",
         name: "",
         toJSON: () => {
-            return {};
+            return {}
         },
         response: generateAxiosResponse<T>(data)
-    };
+    }
 }

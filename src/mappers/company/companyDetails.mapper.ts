@@ -1,9 +1,9 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { CompanyProfile } from "@companieshouse/api-sdk-node/dist/services/company-profile/types";
-import { provide } from "inversify-binding-decorators";
+import { CompanyProfile } from "@companieshouse/api-sdk-node/dist/services/company-profile/types"
+import { provide } from "inversify-binding-decorators"
 
-import CompanyDetails from "app/models/companyDetails.model";
+import CompanyDetails from "app/models/companyDetails.model"
 
 @provide(CompanyDetailsMapper)
 export default class CompanyDetailsMapper {
@@ -16,7 +16,7 @@ export default class CompanyDetailsMapper {
             companyIncDate: company.dateOfCreation,
             companyType: company.type,
             companyRegOffice: this.getCompanyAddress(company)
-        };
+        }
     }
 
     private getCompanyAddress (company: CompanyProfile): string {
@@ -30,6 +30,6 @@ export default class CompanyDetailsMapper {
             company.registeredOfficeAddress.premises,
             company.registeredOfficeAddress.region]
             .filter(el => el != null && el.trim() !== "")
-            .join(", ");
+            .join(", ")
     }
 }

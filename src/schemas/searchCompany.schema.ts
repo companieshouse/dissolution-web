@@ -1,6 +1,6 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "@hapi/joi"
 
-const emptyCompanyNumberError: string = "You must enter a Company Number";
+const emptyCompanyNumberError: string = "You must enter a Company Number"
 const formSchema = Joi.object({
     companyNumber: Joi.string()
         .required()
@@ -10,6 +10,6 @@ const formSchema = Joi.object({
             "string.max": "Company number does not exist or is incorrect",
             "any.required": emptyCompanyNumberError
         })
-});
+})
 
-export default formSchema;
+export default formSchema

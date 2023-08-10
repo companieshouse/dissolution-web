@@ -1,6 +1,6 @@
-import { generateDirectorToRemind, generateDissolutionSession } from "./session.fixtures";
+import { generateDirectorToRemind, generateDissolutionSession } from "./session.fixtures"
 
-import { ViewApplicationStatus, ViewApplicationStatusSignatory } from "app/models/view/viewApplicationStatus.model";
+import { ViewApplicationStatus, ViewApplicationStatusSignatory } from "app/models/view/viewApplicationStatus.model"
 
 export function generateViewApplicationStatusModel (): ViewApplicationStatus {
     return {
@@ -9,7 +9,7 @@ export function generateViewApplicationStatusModel (): ViewApplicationStatus {
         signatories: [
             generateViewApplicationStatusSignatory()
         ]
-    };
+    }
 }
 
 export function generateViewApplicationStatusSignatory (): ViewApplicationStatusSignatory {
@@ -24,5 +24,5 @@ export function generateViewApplicationStatusSignatory (): ViewApplicationStatus
             generateDirectorToRemind(),
             generateDirectorToRemind()
         ]
-    };
+    }
 }

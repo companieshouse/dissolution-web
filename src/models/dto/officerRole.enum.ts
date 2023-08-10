@@ -9,4 +9,4 @@ enum OfficerRole {
   CORPORATE_LLP_DESIGNATED_MEMBER = "corporate-llp-designated-member"
 }
 
-export default OfficerRole;
+export default OfficerRole

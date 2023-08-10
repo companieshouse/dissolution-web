@@ -1,5 +1,5 @@
-import PaymentItem from "./paymentItem";
-import PaymentLinks from "./paymentLinks";
+import PaymentItem from "./paymentItem"
+import PaymentLinks from "./paymentLinks"
 
 export default interface DissolutionGetPaymentUIData {
   ETag: string
@@ -7,4 +7,4 @@ export default interface DissolutionGetPaymentUIData {
   links: PaymentLinks
   company_number: string
   items: PaymentItem[]
-};;;;;;;;;;;;;;;;;;;;
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

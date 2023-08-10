@@ -1,8 +1,8 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "@hapi/joi"
 
-import PaymentType from "app/models/dto/paymentType.enum";
+import PaymentType from "app/models/dto/paymentType.enum"
 
-export const ERROR_MESSAGE = "Select how the payment will be made";
+export const ERROR_MESSAGE = "Select how the payment will be made"
 
 export const howDoYouWantToPaySchema: Joi.ObjectSchema = Joi.object({
     paymentType: Joi.string()
@@ -13,4 +13,4 @@ export const howDoYouWantToPaySchema: Joi.ObjectSchema = Joi.object({
             "any.only": ERROR_MESSAGE,
             "string.empty": ERROR_MESSAGE
         })
-});
+})

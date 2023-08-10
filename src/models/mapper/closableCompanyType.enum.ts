@@ -12,4 +12,4 @@ enum ClosableCompanyType {
   NORTHERN_IRELAND_OTHER = "northern-ireland-other"
 }
 
-export default ClosableCompanyType;
+export default ClosableCompanyType

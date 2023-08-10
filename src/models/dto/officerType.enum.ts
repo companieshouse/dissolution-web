@@ -3,4 +3,4 @@ enum OfficerType {
   DIRECTOR = "director"
 }
 
-export default OfficerType;
+export default OfficerType

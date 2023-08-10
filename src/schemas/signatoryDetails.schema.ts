@@ -1,17 +1,17 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "@hapi/joi"
 
-import OfficerType from "app/models/dto/officerType.enum";
-import SignatorySigning from "app/models/form/signatorySigning.enum";
+import OfficerType from "app/models/dto/officerType.enum"
+import SignatorySigning from "app/models/form/signatorySigning.enum"
 
 export function generateSchemaForSignatoryDetails (officerType: OfficerType, formSuffix: string = ""): Joi.SchemaMap {
-    const isSigningKey: string = `isSigning${formSuffix}`;
+    const isSigningKey: string = `isSigning${formSuffix}`
 
     return {
         [isSigningKey]: generateIsSigningRadioSchema(officerType),
         [`directorEmail${formSuffix}`]: generateDirectorEmailSchema(isSigningKey, officerType),
         [`onBehalfName${formSuffix}`]: generateOnBehalfNameSchema(isSigningKey, officerType),
         [`onBehalfEmail${formSuffix}`]: generateOnBehalfEmailSchema(isSigningKey, officerType)
-    };
+    }
 }
 
 function generateIsSigningRadioSchema (officerType: OfficerType): Joi.StringSchema {
@@ -23,7 +23,7 @@ function generateIsSigningRadioSchema (officerType: OfficerType): Joi.StringSche
             "any.only": `Select how the ${officerType} will be signing the application`,
             "any.required": `Select how the ${officerType} will be signing the application`,
             "string.empty": `Select how the ${officerType} will be signing the application`
-        });
+        })
 }
 
 function generateDirectorEmailSchema (isSigningKey: string, officerType: OfficerType): Joi.AlternativesSchema {
@@ -39,7 +39,7 @@ function generateDirectorEmailSchema (isSigningKey: string, officerType: Officer
                     "string.empty": `Enter the email address for the ${officerType}`,
                     "string.email": `Enter a valid email address for the ${officerType}`
                 })
-        });
+        })
 }
 
 function generateOnBehalfNameSchema (isSigningKey: string, officerType: OfficerType): Joi.AlternativesSchema {
@@ -55,7 +55,7 @@ function generateOnBehalfNameSchema (isSigningKey: string, officerType: OfficerT
                     "string.empty": `Enter the name for the person signing on behalf of the ${officerType}`,
                     "string.max": `Enter a name that is less than 250 characters for the person signing on behalf of the ${officerType}`
                 })
-        });
+        })
 }
 
 function generateOnBehalfEmailSchema (isSigningKey: string, officerType: OfficerType): Joi.AlternativesSchema {
@@ -71,5 +71,5 @@ function generateOnBehalfEmailSchema (isSigningKey: string, officerType: Officer
                     "string.empty": `Enter the email address for the person signing on behalf of the ${officerType}`,
                     "string.email": `Enter a valid email address for the person signing on behalf of the ${officerType}`
                 })
-        });
+        })
 }

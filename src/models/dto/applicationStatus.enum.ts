@@ -4,4 +4,4 @@ enum ApplicationStatus {
   PAID = "paid"
 }
 
-export default ApplicationStatus;
+export default ApplicationStatus

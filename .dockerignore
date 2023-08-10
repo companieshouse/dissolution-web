@@ -1,5 +1,4 @@
 *
-!api-enumerations
 !dist
 !docker_start.sh
 !routes.yaml

@@ -35,8 +35,8 @@ export const companyTypeList: CompanyTypeList = {
     "charitable-incorporated-organisation": "Charitable incorporated organisation",
     "scottish-charitable-incorporated-organisation": "Scottish charitable incorporated organisation",
     "further-education-or-sixth-form-college-corporation": "Further education or sixth form college corporation"
-};
+}
 
 export function asCompanyTypeText (companyType: string): string {
-    return companyTypeList[companyType] === undefined ? companyType : companyTypeList[companyType];
+    return companyTypeList[companyType] === undefined ? companyType : companyTypeList[companyType]
 }

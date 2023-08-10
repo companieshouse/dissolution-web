@@ -1,14 +1,14 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { provide } from "inversify-binding-decorators";
-import moment from "moment";
+import { provide } from "inversify-binding-decorators"
+import moment from "moment"
 
-import ApplicationType from "app/models/dto/applicationType.enum";
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
-import OfficerType from "app/models/dto/officerType.enum";
-import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model";
-import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model";
+import ApplicationType from "app/models/dto/applicationType.enum"
+import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
+import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
+import OfficerType from "app/models/dto/officerType.enum"
+import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model"
+import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model"
 
 @provide(DissolutionSessionMapper)
 export default class DissolutionSessionMapper {
@@ -22,13 +22,13 @@ export default class DissolutionSessionMapper {
             officerType: dissolution.application_type === ApplicationType.LLDS01 ? OfficerType.MEMBER : OfficerType.DIRECTOR,
             onBehalfName: signatory.on_behalf_name,
             date: moment().format("DD MMMM YYYY")
-        };
+        }
     }
 
     public mapToDissolutionConfirmation (dissolution: DissolutionGetResponse): DissolutionConfirmation {
         return {
             certificateBucket: dissolution.certificate_bucket,
             certificateKey: dissolution.certificate_key
-        };
+        }
     }
 }

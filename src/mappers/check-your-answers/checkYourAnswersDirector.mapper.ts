@@ -1,9 +1,9 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { provide } from "inversify-binding-decorators";
+import { provide } from "inversify-binding-decorators"
 
-import { DirectorToSign } from "app/models/session/directorToSign.model";
-import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model";
+import { DirectorToSign } from "app/models/session/directorToSign.model"
+import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model"
 
 @provide(CheckYourAnswersDirectorMapper)
 export default class CheckYourAnswersDirectorMapper {
@@ -14,6 +14,6 @@ export default class CheckYourAnswersDirectorMapper {
             email: director.email!,
             isDirectorSigning: director.onBehalfName ? "No" : "Yes",
             onBehalfName: director.onBehalfName
-        };
+        }
     }
 }

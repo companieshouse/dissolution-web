@@ -3,4 +3,4 @@ enum ApplicationType {
   LLDS01 = "llds01"
 }
 
-export default ApplicationType;
+export default ApplicationType

@@ -1,6 +1,6 @@
-import dashify from "dashify";
+import dashify from "dashify"
 
-import ValidationErrors from "app/models/view/validationErrors.model";
+import ValidationErrors from "app/models/view/validationErrors.model"
 
 export interface GovUKError {
   href: string
@@ -11,5 +11,5 @@ export function asGovUKErrorList (errors: ValidationErrors): GovUKError[] {
     return Object.entries(errors).map(([key, message]) => ({
         href: `#${dashify(key)}`,
         text: message
-    }));
+    }))
 }

@@ -1,9 +1,9 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { provide } from "inversify-binding-decorators";
+import { provide } from "inversify-binding-decorators"
 
-import { DirectorToSign } from "app/models/session/directorToSign.model";
-import DirectorDetails from "app/models/view/directorDetails.model";
+import { DirectorToSign } from "app/models/session/directorToSign.model"
+import DirectorDetails from "app/models/view/directorDetails.model"
 
 @provide(DirectorToSignMapper)
 export default class DirectorToSignMapper {
@@ -14,7 +14,7 @@ export default class DirectorToSignMapper {
             name: selectedDirector.name,
             email,
             isApplicant: true
-        };
+        }
     }
 
     public mapAsSignatory (director: DirectorDetails): DirectorToSign {
@@ -22,6 +22,6 @@ export default class DirectorToSignMapper {
             id: director.id,
             name: director.name,
             isApplicant: false
-        };
+        }
     }
 }

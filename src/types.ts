@@ -16,6 +16,6 @@ const TYPES = {
     SaveUserEmailToLocals: "SaveUserEmailToLocals",
     SessionMiddleware: "SessionMiddleware",
     S3: "S3"
-};
+}
 
-export default TYPES;
+export default TYPES

@@ -4,4 +4,4 @@ enum PaymentStatus {
   PAID = "paid"
 }
 
-export default PaymentStatus;
+export default PaymentStatus

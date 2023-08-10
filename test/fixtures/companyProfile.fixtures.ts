@@ -1,16 +1,16 @@
-import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from "@companieshouse/api-sdk-node/dist/services/company-profile/types";
-import Resource from "@companieshouse/api-sdk-node/dist/services/resource";
-import { StatusCodes } from "http-status-codes";
+import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from "@companieshouse/api-sdk-node/dist/services/company-profile/types"
+import Resource from "@companieshouse/api-sdk-node/dist/services/resource"
+import { StatusCodes } from "http-status-codes"
 
-import CompanyDetails from "app/models/companyDetails.model";
-import SearchCompanyFormModel from "app/models/form/searchCompany.model";
-import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
+import CompanyDetails from "app/models/companyDetails.model"
+import SearchCompanyFormModel from "app/models/form/searchCompany.model"
+import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum"
 
 export function generateCompanyProfileResource (): Resource<CompanyProfile> {
     return {
         httpStatusCode: StatusCodes.OK,
         resource: generateCompanyProfile()
-    };
+    }
 }
 
 export function generateCompanyProfile (): CompanyProfile {
@@ -30,7 +30,7 @@ export function generateCompanyProfile (): CompanyProfile {
         accounts: generateAccounts(),
         confirmationStatement: generateConfirmationStatement(),
         links: {}
-    };
+    }
 }
 
 export function generateRegisteredOfficeAddress (): RegisteredOfficeAddress {
@@ -44,7 +44,7 @@ export function generateRegisteredOfficeAddress (): RegisteredOfficeAddress {
         postalCode: "ABC123",
         premises: "some premises",
         region: "south"
-    };
+    }
 }
 
 export function generateAccounts (): Accounts {
@@ -55,7 +55,7 @@ export function generateAccounts (): Accounts {
         },
         nextDue: `${new Date()}`,
         overdue: false
-    };
+    }
 }
 
 export function generateConfirmationStatement (): ConfirmationStatement {
@@ -63,13 +63,13 @@ export function generateConfirmationStatement (): ConfirmationStatement {
         nextDue: `${new Date()}`,
         overdue: false,
         nextMadeUpTo: `${new Date()}`
-    };
+    }
 }
 
 export function generateSearchCompanyForm (companyNumber: string = "1234"): SearchCompanyFormModel {
     return {
         companyNumber
-    };
+    }
 }
 
 export function generateCompanyDetails (): CompanyDetails {
@@ -80,5 +80,5 @@ export function generateCompanyDetails (): CompanyDetails {
         companyType: ClosableCompanyType.LTD,
         companyIncDate: new Date().toISOString(),
         companyRegOffice: "Some address"
-    };
+    }
 }

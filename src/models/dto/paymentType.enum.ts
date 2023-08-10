@@ -3,4 +3,4 @@ enum PaymentType {
   CREDIT_DEBIT_CARD = "credit-debit-card"
 }
 
-export default PaymentType;
+export default PaymentType

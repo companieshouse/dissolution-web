@@ -1,9 +1,9 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { provide } from "inversify-binding-decorators";
+import { provide } from "inversify-binding-decorators"
 
-import PresenterAuthRequest from "app/models/dto/presenterAuthRequest";
-import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model";
+import PresenterAuthRequest from "app/models/dto/presenterAuthRequest"
+import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model"
 
 @provide(PayByAccountMapper)
 export default class PayByAccountMapper {
@@ -12,6 +12,6 @@ export default class PayByAccountMapper {
         return {
             id: form.presenterId!,
             auth: form.presenterAuthCode!
-        };
+        }
     }
 }

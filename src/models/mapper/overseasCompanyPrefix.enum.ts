@@ -4,4 +4,4 @@ enum OverseasCompanyPrefix {
   NF = "NF"
 }
 
-export default OverseasCompanyPrefix;
+export default OverseasCompanyPrefix

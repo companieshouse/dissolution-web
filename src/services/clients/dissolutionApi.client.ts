@@ -1,20 +1,20 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { inject } from "inversify";
-import { provide } from "inversify-binding-decorators";
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios"
+import { inject } from "inversify"
+import { provide } from "inversify-binding-decorators"
 
-import { DissolutionCreateRequest } from "app/models/dto/dissolutionCreateRequest";
-import DissolutionCreateResponse from "app/models/dto/dissolutionCreateResponse";
-import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest";
-import DissolutionGetPaymentUIData from "app/models/dto/dissolutionGetPaymentUIData";
-import DissolutionGetResendEmailResponse from "app/models/dto/dissolutionGetResendEmailResponse";
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
-import DissolutionPatchRequest from "app/models/dto/dissolutionPatchRequest";
-import DissolutionPatchResponse from "app/models/dto/dissolutionPatchResponse";
-import DissolutionPaymentPatchRequest from "app/models/dto/dissolutionPaymentPatchRequest";
-import Optional from "app/models/optional";
-import TYPES from "app/types";
+import { DissolutionCreateRequest } from "app/models/dto/dissolutionCreateRequest"
+import DissolutionCreateResponse from "app/models/dto/dissolutionCreateResponse"
+import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest"
+import DissolutionGetPaymentUIData from "app/models/dto/dissolutionGetPaymentUIData"
+import DissolutionGetResendEmailResponse from "app/models/dto/dissolutionGetResendEmailResponse"
+import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
+import DissolutionPatchRequest from "app/models/dto/dissolutionPatchRequest"
+import DissolutionPatchResponse from "app/models/dto/dissolutionPatchResponse"
+import DissolutionPaymentPatchRequest from "app/models/dto/dissolutionPaymentPatchRequest"
+import Optional from "app/models/optional"
+import TYPES from "app/types"
 
 @provide(DissolutionApiClient)
 export class DissolutionApiClient {
@@ -29,9 +29,9 @@ export class DissolutionApiClient {
             this.generateUrl(companyNumber),
             body,
             this.generateConfigForOAuth(token)
-        );
+        )
 
-        return response.data;
+        return response.data
     }
 
     public async getDissolution (token: string, companyNumber: string): Promise<Optional<DissolutionGetResponse>> {
@@ -39,15 +39,15 @@ export class DissolutionApiClient {
             const response: Optional<AxiosResponse<DissolutionGetResponse>> = await this.axios.get(
                 this.generateUrl(companyNumber),
                 this.generateConfigForOAuth(token)
-            );
+            )
 
-            return response!.data;
+            return response!.data
         } catch (err: any) {
             if (err.response.status === 404) {
-                return null;
+                return null
             }
 
-            return Promise.reject(err);
+            return Promise.reject(err)
         }
     }
 
@@ -56,18 +56,18 @@ export class DissolutionApiClient {
             `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}/resend-email/${directorEmail}`,
             companyNumber,
             this.generateConfigForAPIKey()
-        );
-        const dResponse: DissolutionGetResendEmailResponse = { reminderSent: response.status === 200 };
-        return dResponse;
+        )
+        const dResponse: DissolutionGetResendEmailResponse = { reminderSent: response.status === 200 }
+        return dResponse
     }
 
     public async getDissolutionPaymentUIData (applicationReference: string): Promise<DissolutionGetPaymentUIData> {
         const response: AxiosResponse<DissolutionGetPaymentUIData> = await this.axios.get(
             `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,
             this.generateConfigForAPIKey()
-        );
+        )
 
-        return response.data;
+        return response.data
     }
 
     public async patchDissolution (token: string, companyNumber: string, body: DissolutionPatchRequest): Promise<DissolutionPatchResponse> {
@@ -75,9 +75,9 @@ export class DissolutionApiClient {
             this.generateUrl(companyNumber),
             body,
             this.generateConfigForOAuth(token)
-        );
+        )
 
-        return response.data;
+        return response.data
     }
 
     public async patchDissolutionDirector (
@@ -86,7 +86,7 @@ export class DissolutionApiClient {
             this.generateUrlForDirector(companyNumber, directorId),
             body,
             this.generateConfigForOAuth(token)
-        );
+        )
     }
 
     public async patchDissolutionPaymentData (applicationReference: string, body: DissolutionPaymentPatchRequest): Promise<void> {
@@ -94,7 +94,7 @@ export class DissolutionApiClient {
             `${this.DISSOLUTIONS_API_URL}/dissolution-request/${applicationReference}/payment`,
             body,
             this.generateConfigForAPIKey()
-        );
+        )
     }
 
     private generateConfigForOAuth (token: string): AxiosRequestConfig {
@@ -104,7 +104,7 @@ export class DissolutionApiClient {
                 "Content-Type": "application/json",
                 Accept: "application/json"
             }
-        };
+        }
     }
 
     private generateConfigForAPIKey (): AxiosRequestConfig {
@@ -114,14 +114,14 @@ export class DissolutionApiClient {
                 "Content-Type": "application/json",
                 Accept: "application/json"
             }
-        };
+        }
     }
 
     private generateUrl (companyNumber: string): string {
-        return `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`;
+        return `${this.DISSOLUTIONS_API_URL}/dissolution-request/${companyNumber}`
     }
 
     private generateUrlForDirector (companyNumber: string, directorId: string): string {
-        return `${this.generateUrl(companyNumber)}/directors/${directorId}`;
+        return `${this.generateUrl(companyNumber)}/directors/${directorId}`
     }
 }

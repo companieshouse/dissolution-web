@@ -1,13 +1,13 @@
-import "reflect-metadata";
+import "reflect-metadata"
 
-import { createApiClient } from "@companieshouse/api-sdk-node";
-import CompanyOfficersService from "@companieshouse/api-sdk-node/dist/services/company-officers/service";
-import CompanyProfileService from "@companieshouse/api-sdk-node/dist/services/company-profile/service";
-import PaymentService from "@companieshouse/api-sdk-node/dist/services/payment/service";
-import { inject } from "inversify";
-import { provide } from "inversify-binding-decorators";
+import { createApiClient } from "@companieshouse/api-sdk-node"
+import CompanyOfficersService from "@companieshouse/api-sdk-node/dist/services/company-officers/service"
+import CompanyProfileService from "@companieshouse/api-sdk-node/dist/services/company-profile/service"
+import PaymentService from "@companieshouse/api-sdk-node/dist/services/payment/service"
+import { inject } from "inversify"
+import { provide } from "inversify-binding-decorators"
 
-import TYPES from "app/types";
+import TYPES from "app/types"
 
 @provide(APIClientFactory)
 export default class APIClientFactory {
@@ -18,14 +18,14 @@ export default class APIClientFactory {
     ) {}
 
     public getCompanyProfileService (token: string): CompanyProfileService {
-        return createApiClient(undefined, token, this.COMPANY_PROFILE_API_URL).companyProfile;
+        return createApiClient(undefined, token, this.COMPANY_PROFILE_API_URL).companyProfile
     }
 
     public getCompanyOfficersService (token: string): CompanyOfficersService {
-        return createApiClient(undefined, token).companyOfficers;
+        return createApiClient(undefined, token).companyOfficers
     }
 
     public getPaymentService (token: string): PaymentService {
-        return createApiClient(undefined, token, this.PAYMENTS_API_URL).payment;
+        return createApiClient(undefined, token, this.PAYMENTS_API_URL).payment
     }
 }
