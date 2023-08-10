@@ -18,9 +18,13 @@
     "rules": {
         "indent": ["error", 4],
         "quotes": ["error", "double", { "allowTemplateLiterals": true }],
-        "semi": [2, "always"],
+        "semi": [1, "never"],
         "no-unused-vars": "off",
-        "padded-blocks": "off"
+        "no-return-assign": "off",
+        "no-useless-constructor": "off",
+        "camelcase": "off",
+        "padded-blocks": "off",
+        "prefer-promise-reject-errors": "off"
     },
     "plugins": [
         "@typescript-eslint"
