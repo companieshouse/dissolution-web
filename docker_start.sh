@@ -3,5 +3,4 @@
 npm i
 PORT=3000
 
-export NODE_PORT=${PORT}
-exec node /opt/app.js -- ${PORT}
+exec node /opt/dist/app.js -- ${PORT}
