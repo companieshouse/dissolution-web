@@ -14,6 +14,7 @@ locals {
 
   parameter_store_secrets    = {
     "vpc_name"                  = local.service_secrets["vpc_name"]
+    "cache_password"            = local.service_secrets["cache_password"]
     "chs_api_key"               = local.service_secrets["chs_api_key"]
     "internal_api_url"          = local.service_secrets["internal_api_url"]
     "oauth2_auth_uri"           = local.service_secrets["oauth2_auth_uri"]
@@ -24,9 +25,11 @@ locals {
     "oauth2_client_id"          = local.service_secrets["oauth2_client_id"]
     "oauth2_client_secret"      = local.service_secrets["oauth2_client_secret"]
     "payments_api_url"          = local.service_secrets["payments_api_url"]
+    "oauth2_request_key"        = local.service_secrets["oauth2_request_key"]
   }
 
   vpc_name                  = local.service_secrets["vpc_name"]
+  cache_password            = local.service_secrets["cache_password"]
   chs_api_key               = local.service_secrets["chs_api_key"]
   internal_api_url          = local.service_secrets["internal_api_url"]
   oauth2_auth_uri           = local.service_secrets["oauth2_auth_uri"]
@@ -37,6 +40,7 @@ locals {
   oauth2_client_id          = local.service_secrets["oauth2_client_id"]
   oauth2_client_secret      = local.service_secrets["oauth2_client_secret"]
   payments_api_url          = local.service_secrets["payments_api_url"]
+  oauth2_request_key        = local.service_secrets["oauth2_request_key"]
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
@@ -54,9 +58,11 @@ locals {
   task_secrets = [
     { "name": "COOKIE_SECRET", "valueFrom": "${local.secrets_arn_map.web-oauth2-cookie-secret}" },
     { "name": "CHS_API_KEY", "valueFrom": "${local.service_secrets_arn_map.chs_api_key}" },
+    { "name": "CACHE_PASSWORD", "valueFrom": "${local.service_secrets_arn_map.cache_password}" },
     { "name": "CACHE_SERVER", "valueFrom": "${local.service_secrets_arn_map.cache_server}" },
     { "name": "OAUTH2_CLIENT_ID", "valueFrom": "${local.service_secrets_arn_map.oauth2_client_id}" },  
     { "name": "OAUTH2_CLIENT_SECRET", "valueFrom": "${local.service_secrets_arn_map.oauth2_client_secret}" },
+    { "name": "OAUTH2_REQUEST_KEY", "valueFrom": "${local.service_secrets_arn_map.oauth2_request_key}" },
     { "name": "ACCOUNT_URL", "valueFrom": "${local.service_secrets_arn_map.account_url}" },
     { "name": "INTERNAL_API_URL", "valueFrom": "${local.service_secrets_arn_map.internal_api_url}" },
     { "name": "PAYMENTS_API_URL", "valueFrom": "${local.service_secrets_arn_map.payments_api_url}" }
@@ -68,28 +74,26 @@ locals {
     { "name": "CHS_URL", "value": "${var.chs_url}" },
     { "name": "PIWIK_URL", "value": "${var.piwik_url}" },
     { "name": "PIWIK_SITE_ID", "value": "${var.piwik_site_id}" },
+    { "name": "CACHE_DB", "value": "${var.cache_db}" },
     { "name": "CDN_HOST", "value": "//${var.cdn_host}" },
+    { "name": "CHIPS_PRESENTER_AUTH_URL", "value": "${var.chips_presenter_auth_url}" },
+    { "name": "CHS_COMPANY_PROFILE_API_LOCAL_URL", "value": "${var.chs_company_profile_api_local_url}" },
     { "name": "COOKIE_DOMAIN", "value": "${var.cookie_domain}" },
     { "name": "COOKIE_NAME", "value": "${var.cookie_name}" },
     { "name": "COOKIE_SECURE_ONLY", "value": "${var.cookie_secure_only}" },
     { "name": "DEFAULT_SESSION_EXPIRATION", "value": "${var.default_session_expiration}" }, # TODO Is this needed?
-    { "name": "PIWIK_START_GOAL_ID", "value": "${var.piwik_start_goal_id}" },
-    { "name": "PIWIK_UPDATE_START_GOAL_ID", "value": "${var.piwik_update_start_goal_id}" },
-    { "name": "SHOW_SERVICE_OFFLINE_PAGE", "value": "${var.show_service_offline_page}" },
-    { "name": "FEATURE_FLAG_ENABLE_UPDATE_STATEMENT_VALIDATION_05072023", "value": "${var.feature_flag_enable_update_statement_validation_05072023}" },
-    { "name": "FEATURE_FLAG_ENABLE_SAVE_AND_RESUME_17102022", "value": "${var.feature_flag_enable_save_and_resume_17102022}" },
-    { "name": "FEATURE_FLAG_ENABLE_ROE_UPDATE_24112022", "value": "${var.feature_flag_enable_roe_update_24112022}" },
-    { "name": "FEATURE_FLAG_ENABLE_ROE_REMOVE_24112022", "value": "${var.feature_flag_enable_roe_remove_24112022}" },
-    { "name": "FEATURE_FLAG_ENABLE_TRUSTS_WEB_07112022", "value": "${var.feature_flag_enable_trusts_web_07112022}" },
-    { "name": "FEATURE_FLAG_ENABLE_UPDATE_SAVE_AND_RESUME_07032023", "value": "${var.feature_flag_enable_update_save_and_resume_07032023}" },
-    { "name": "FEATURE_FLAG_DISABLE_UPDATE_PRIVATE_DATA_FETCH_28062023", "value": "${var.feature_flag_disable_update_private_data_fetch_28062023}" },
-    { "name": "FEATURE_FLAG_ENABLE_UPDATE_TRUSTS_30062023", "value": "${var.feature_flag_enable_update_trusts_30062023}" },
-    { "name": "LANDING_PAGE_URL", "value": "${var.landing_page_url}" },
-    { "name": "LANDING_PAGE_STARTING_NEW_URL", "value": "${var.landing_page_starting_new_url}" },
-    { "name": "PAYMENT_FEE", "value": "${var.payment_fee}" },
-    { "name": "UPDATE_LANDING_PAGE_URL", "value": "${var.update_landing_page_url}" },
-    { "name": "UPDATE_PAYMENT_FEE", "value": "${var.update_payment_fee}" },
-    { "name": "VF01_FORM_DOWNLOAD_URL", "value": "${var.vf01_form_download_url}" }, 
-    { "name": "API_URL", "value": "${var.api_url}" } # TODO Should this be a secret?
+    { "name": "DISSOLUTIONS_API_URL", "value": "${var.dissolutions_api_url}" },
+    { "name": "ENV_REGION_AWS", "value": "${var.aws_region}" },
+    { "name": "HUMAN_LOG", "value": "${var.human_log}" },
+    { "name": "PAY_BY_ACCOUNT_FEATURE_ENABLED", "value": "${var.pay_by_account_feature_enabled}" },
+    { "name": "PIWIK_CONFIRMATION_PAGE_PDF_GOAL_ID", "value": "${var.piwik_confirmation_page_pdf_goal_id}" },
+    { "name": "PIWIK_LANDING_PAGE_START_GOAL_ID", "value": "${var.piwik_landing_page_start_goal_id}" },
+    { "name": "PIWIK_LIMITED_COMPANY_GOAL_ID", "value": "${var.piwik_limited_company_goal_id}" },
+    { "name": "PIWIK_PARTNERSHIP_GOAL_ID", "value": "${var.piwik_partnership_goal_id}" },
+    { "name": "PIWIK_SINGLE_DIRECTOR_CONFIRMATION_GOAL_ID", "value": "${var.piwik_single_director_confirmation_goal_id}" },
+    { "name": "PIWIK_MULTI_DIRECTOR_CONFIRMATION_GOAL_ID", "value": "${var.piwik_multi_director_confirmation_goal_id}" },
+    { "name": "PIWIK_LIMITED_COMPANY_CONFIRMATION_GOAL_ID", "value": "${var.piwik_limited_company_confirmation_goal_id}" },
+    { "name": "PIWIK_PARTNERSHIP_CONFIRMATION_GOAL_ID", "value": "${var.piwik_partnership_confirmation_goal_id}" },
+    { "name": "API_URL", "value": "${var.api_url}" }
   ]
 }

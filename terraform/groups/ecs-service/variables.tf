@@ -99,11 +99,17 @@ variable "redirect_uri" {
   type        = string
   default     = "/"
 }
+variable "cache_db" {
+  type        = string
+  default     = "0"
+}
 variable "cache_pool_size" {
   type        = string
   default     = "8"
 }
-
+variable "chs_company_profile_api_local_url" {
+  type        = string
+}
 variable "cookie_domain" {
   type        = string
 }
@@ -119,57 +125,42 @@ variable "default_session_expiration" {
   type        = string
   default     = "3600"
 }
+variable "dissolutions_api_url" {
+  type        = string
+}
 variable "show_service_offline_page" {
   type        = string
 }
 variable "api_url" {
   type        = string
 }
-variable "piwik_start_goal_id" {
+variable "piwik_confirmation_page_pdf_goal_id" {
+  type        = string
+}
+variable "piwik_landing_page_start_goal_id" {
+  type        = string
+}
+variable "piwik_limited_company_goal_id" {
+  type        = string
+}
+variable "piwik_partnership_goal_id" {
+  type        = string
+}
+variable "piwik_single_director_confirmation_goal_id" {
+  type        = string
+}
+variable "piwik_multi_director_confirmation_goal_id" {
+  type        = string
+}
+variable "piwik_limited_company_confirmation_goal_id" {
+  type        = string
+}
+variable "piwik_partnership_confirmation_goal_id" {
   type        = string
 }
 variable "piwik_update_start_goal_id" {
   type        = string
 }
-variable "feature_flag_enable_update_statement_validation_05072023" {
-  type        = string
-}
-variable "feature_flag_enable_save_and_resume_17102022" {
-  type        = string
-}
-variable "feature_flag_enable_roe_update_24112022" {
-  type        = string
-}
-variable "feature_flag_enable_roe_remove_24112022" {
-  type        = string
-}
-variable "feature_flag_enable_trusts_web_07112022" {
-  type        = string
-}
-variable "feature_flag_enable_update_save_and_resume_07032023" {
-  type        = string
-}
-variable "feature_flag_disable_update_private_data_fetch_28062023" {
-  type        = string
-}
-variable "feature_flag_enable_update_trusts_30062023" {
-  type        = string
-}
-variable "landing_page_url" {
-  type        = string
-}
-variable "landing_page_starting_new_url" {
-  type        = string
-}
-variable "payment_fee" {
-  type        = string
-}
-variable "update_landing_page_url" {
-  type        = string
-}
-variable "update_payment_fee" {
-  type        = string
-}
-variable "vf01_form_download_url" {
+variable "piwik_update_start_goal_id" {
   type        = string
 }
