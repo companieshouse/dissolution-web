@@ -9,13 +9,14 @@
   <!--[if !IE 8]><!-->
   <link href="//{{ cdn.host }}/stylesheets/govuk-frontend/v3.11.0/govuk-frontend-3.11.0.min.css" rel="stylesheet"/>
   <link href="//{{ cdn.host }}/stylesheets/services/dissolution/application.css" rel="stylesheet"/>
+  <link href="//{{ cdn.host }}/stylesheets/extensions/languages-nav.css" rel="stylesheet"/>
 
   <!--<![endif]-->
 
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"
           integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
           crossorigin="anonymous"></script>
-  
+
   <script nonce={{ nonce | dump | safe }} type="application/javascript">
     window.SERVICE_NAME = 'dissolutions'
     window.PIWIK_URL = '{{ piwik.url }}'
@@ -62,6 +63,7 @@
     })
   }}
 
+  {% include "components/locales-banner.njk" %}
   {% include "components/sign-out-user-banner.njk" %}
 
   {% block backLink %}{% endblock %}
