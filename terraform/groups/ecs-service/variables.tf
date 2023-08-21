@@ -165,6 +165,3 @@ variable "piwik_partnership_confirmation_goal_id" {
 variable "piwik_update_start_goal_id" {
   type        = string
 }
-variable "piwik_update_start_goal_id" {
-  type        = string
-}
