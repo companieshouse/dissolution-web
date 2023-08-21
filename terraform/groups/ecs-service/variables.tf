@@ -78,11 +78,6 @@ variable "log_level" {
   description = "The log level for services to use: trace, debug, info or error"
 }
 
-variable "overseas_entities_web_version" {
-  type        = string
-  description = "The version of the overseas entities web container to run."
-}
-
 variable "chs_url" {
   type        = string
 }
@@ -132,9 +127,6 @@ variable "default_session_expiration" {
 variable "dissolutions_api_url" {
   type        = string
 }
-variable "show_service_offline_page" {
-  type        = string
-}
 variable "api_url" {
   type        = string
 }
@@ -160,8 +152,5 @@ variable "piwik_limited_company_confirmation_goal_id" {
   type        = string
 }
 variable "piwik_partnership_confirmation_goal_id" {
-  type        = string
-}
-variable "piwik_update_start_goal_id" {
   type        = string
 }
