@@ -1,5 +1,5 @@
-import PaymentStatus from './paymentStatus.enum'
-import PaymentType from './paymentType.enum'
+import PaymentStatus from "./paymentStatus.enum"
+import PaymentType from "./paymentType.enum"
 
 export default interface DissolutionPaymentPatchRequest {
   status?: PaymentStatus
@@ -7,4 +7,4 @@ export default interface DissolutionPaymentPatchRequest {
   paid_at?: Date
   payment_method?: PaymentType
   account_number?: string
-}
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

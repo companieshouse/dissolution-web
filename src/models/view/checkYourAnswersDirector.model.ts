@@ -3,4 +3,4 @@ export default interface CheckYourAnswersDirector {
   email: string
   isDirectorSigning: string
   onBehalfName?: string
-}
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
