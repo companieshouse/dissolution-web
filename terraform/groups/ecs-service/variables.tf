@@ -87,7 +87,10 @@ variable "cdn_host" {
 variable "account_local_url" {
   type        = string
 }
-
+variable "dissolution_web_version" {
+  type        = string
+  description = "The version of the overseas entities web container to run."
+}
 variable "piwik_url" {
   type        = string
 }
@@ -152,5 +155,14 @@ variable "piwik_limited_company_confirmation_goal_id" {
   type        = string
 }
 variable "piwik_partnership_confirmation_goal_id" {
+  type        = string
+}
+variable "chips_presenter_auth_url" {
+  type        = string
+}
+variable "human_log" {
+  type        = string
+}
+variable "pay_by_account_feature_enabled" {
   type        = string
 }
