@@ -1,0 +1,18 @@
+{
+  "_id": {
+    "serviceName": "dissolution-web",
+    "bundleId": "1.2.3",
+    "fileId": "2",
+    "ver": "1.0.2"
+  },
+  "suffix": "GOV.UK",
+  "Title": "Who to tell - ",
+  "btn_back": "Back",
+  "btn_continue": "Continue",
+  "lnk1": "documentationUrl",
+  "P100": "Directors or members must give a copy of this application to all interested parties within 7 days of it being submitted. You can download a PDF copy of the application after you submit it.",
+  "P200": "Read the ",
+  "P300": "full list of interested parties you must tell about the company closing (opens in a new tab)",
+  "P400": "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
+  "P500": "The directors or members understand that they are responsible for notifying all interested parties."
+}

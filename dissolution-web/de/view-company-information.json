@@ -1,0 +1,18 @@
+{
+  "_id": {
+    "serviceName": "auflösungs-web",
+    "bundleId": "1.2.3",
+    "fileId": "4",
+    "ver": "2.2.1"
+  },
+  "title": "Unternehmensinformationen anzeigen - ",
+  "h1": "Unternehmensinformationen anzeigen",
+  "P100": "Sie können diesen Dienst nicht nutzen",
+  "P200": "Firmennummer",
+  "P300": "Status",
+  "P400": "Firmendatum",
+  "P500": "Unternehmenstyp",
+  "P600": "Registrierte Büroadresse",
+  "P700": "Bestätigen und fortfahren",
+  "lnk1": "Wählen Sie eine andere Firma"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": {
+    "serviceName": "dissolution-web",
+    "bundleId": "1.2.3",
+    "fileId": "3",
+    "ver": "1.4.7"
+  },
+  "title": "Search company - ",
+  "btn_back": "Back",
+  "btn_continue": "Continue",
+  "P100": "What is the company number",
+  "P200": "This is the 8 character reference issued by Companies House when the company was set up.",
+  "P300": "Help with company number",
+  "P400": "You can find it using the ",
+  "P500": "(opens in a new tab)"
+}

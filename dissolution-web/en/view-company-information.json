@@ -1,0 +1,18 @@
+{
+  "_id": {
+    "serviceName": "dissolution-web",
+    "bundleId": "1.2.3",
+    "fileId": "4",
+    "ver": "2.2.1"
+  },
+  "title": "View company information - ",
+  "h1": "View company information",
+  "P100": "You cannot use this service",
+  "P200": "Company number",
+  "P300": "Status",
+  "P400": "Incorporation date",
+  "P500": "Company type",
+  "P600": "Registered office address",
+  "P700": "Confirm and continue",
+  "lnk1": "Choose a different company"
+}
