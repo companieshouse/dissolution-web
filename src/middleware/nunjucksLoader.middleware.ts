@@ -5,6 +5,9 @@ import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import nunjucks from 'nunjucks'
 import * as path from 'path'
+/// <reference path="../ch-node-utils.d.ts" />
+import * as chUtils from '@basilest-ch/ch-node-utils'
+
 
 import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
@@ -69,5 +72,9 @@ export default class NunjucksLoader {
     app.locals.bannerFeedbackLink = BANNER_FEEDBACK_LINK
 
     app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
+
+    app.locals.languageEnable = true
+
+    app.locals.languages = chUtils.languageNames.sourceLocale(path.join(__dirname, '../locale'))
   }
 }
