@@ -1,0 +1,22 @@
+{
+      "_id": {
+          "serviceName": "dissolution-web",
+          "bundleId":  "1.2.3",
+          "fileId":  "1",
+          "ver":  "4.5.6"
+      },
+      "serviceName": "Apply to strike off and dissolve a company",
+      "P100":  "Use this service to apply to close a public limited company, a private limited company, or a limited liability partnership (LLP).",
+      "P200":  "For companies with multiple directors, more than half of the directors need to sign the application before it can be submitted.",
+      "P300":  "It costs £8 and you'll need:",
+      "P400":  "to sign in to or create a Companies House account, which is different from a WebFiling account",
+      "P500":  "the company number",
+      "P600":  "the company authentication code",
+      "P700":  "an email address for each person signing the application",
+      "P800":  "to pay using a credit or debit card, or a Companies House account",
+      "P900":  "You can also sign in to this service to download a copy of your application after it has been submitted.",
+      "P1000": "Start now",
+      "P1100": "Before you start",
+      "P1200": "Read the" ,
+      "P1300": "https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration"
+}
