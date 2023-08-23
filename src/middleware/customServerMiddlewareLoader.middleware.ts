@@ -13,7 +13,8 @@ export default class CustomServerMiddlewareLoader {
     @inject(TYPES.SessionMiddleware) private sessionMiddleware: RequestHandler,
     @inject(TYPES.SaveUserEmailToLocals) private saveUserEmailToLocals: RequestHandler,
     @inject(TYPES.AuthMiddleware) private authMiddleware: RequestHandler,
-    @inject(TYPES.CompanyAuthMiddleware) private companyAuthMiddleware: RequestHandler
+    @inject(TYPES.CompanyAuthMiddleware) private companyAuthMiddleware: RequestHandler,
+    @inject(TYPES.ManageLocales) private manageLocales: RequestHandler
   ) {}
 
   public loadCustomServerMiddleware(app: Application): void {
@@ -22,5 +23,6 @@ export default class CustomServerMiddlewareLoader {
 
     app.use(this.authMiddleware)
     app.use(this.companyAuthMiddleware)
+    app.use(this.manageLocales)
   }
 }

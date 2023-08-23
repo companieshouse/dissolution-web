@@ -1,6 +1,5 @@
 artifact_name       := dissolution-web
 version             := "unversioned"
-locale_dir          := "locale"
 
 .PHONY: all
 all: build
@@ -46,7 +45,6 @@ endif
 	cp -r ./package-lock.json $(tmpdir)
 	cp ./start.sh $(tmpdir)
 	cp ./routes.yaml $(tmpdir)
-	mkdir $(tmpdir)/${locale_dir} && cp -r ./${locale_dir}/$(artifact_name) $(tmpdir)/${locale_dir}
 	cp -r ./local $(tmpdir)
 	cd $(tmpdir) && npm install --production
 	rm $(tmpdir)/package.json $(tmpdir)/package-lock.json

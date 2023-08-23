@@ -15,7 +15,10 @@ const TYPES = {
   PORT: 'PORT',
   SaveUserEmailToLocals: 'SaveUserEmailToLocals',
   SessionMiddleware: 'SessionMiddleware',
-  S3: 'S3'
+  ManageLocales: 'ManageLocales',
+  S3: 'S3',
+  LOCALES_ENABLED: 'LOCALES_ENABLED',
+  LOCALES_PATH:  'LOCALES_PATH'
 }
 
 export default TYPES

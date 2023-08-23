@@ -22,7 +22,9 @@ export default class NunjucksLoader {
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
     @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(TYPES.LOCALES_ENABLED) private LOCALES_ENABLED: boolean,
+    @inject(TYPES.LOCALES_PATH) private LOCALES_PATH: string
   ) {}
 
   public configureNunjucks(app: express.Application, directory: string, nonce: string): void {
@@ -73,8 +75,8 @@ export default class NunjucksLoader {
 
     app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
 
-    app.locals.languageEnable = true
+    app.locals.languageEnabled = this.LOCALES_ENABLED
 
-    app.locals.languages = chUtils.languageNames.sourceLocale(path.join(__dirname, '../locale'))
-  }
+    app.locals.languages = chUtils.languageNames.sourceLocale(path.join(__dirname, this.LOCALES_PATH))
+   }
 }
