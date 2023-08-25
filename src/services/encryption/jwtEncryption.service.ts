@@ -40,7 +40,7 @@ export default class JwtEncryptionService {
 
         const key = await JWK.asKey(ks.get("key"))
 
-        return await JWE.createEncrypt({
+        return JWE.createEncrypt({
             format: "compact",
             fields: {
                 alg: "dir",
