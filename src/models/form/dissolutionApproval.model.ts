@@ -8,4 +8,4 @@ export default interface DissolutionApprovalModel {
   officerType: OfficerType
   onBehalfName?: string
   date: string
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}

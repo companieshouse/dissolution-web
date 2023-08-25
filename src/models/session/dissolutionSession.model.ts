@@ -25,4 +25,4 @@ export default interface DissolutionSession {
   paymentStateUUID?: string
   paymentType?: PaymentType
   remindDirectorList: DirectorToRemind[]
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}

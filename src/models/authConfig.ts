@@ -3,4 +3,4 @@ export default interface AuthConfig {
   accountRequestKey: string
   accountClientId: string
   chsUrl: string
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}

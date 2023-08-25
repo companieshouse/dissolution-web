@@ -7,4 +7,4 @@ export default interface DissolutionPaymentPatchRequest {
   paid_at?: Date
   payment_method?: PaymentType
   account_number?: string
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}
