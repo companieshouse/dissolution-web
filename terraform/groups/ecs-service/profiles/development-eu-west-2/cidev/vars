@@ -8,16 +8,19 @@ kms_alias = "alias/development-eu-west-2/environment-services-kms"
 
 # service configs
 # Commented params moved to vault service secrets
-# cache_server 
-# oauth2_redirect_uri 
-# oauth2_auth_uri 
-# account_url 
+# cache_server
+# oauth2_redirect_uri
+# oauth2_auth_uri
+# account_url
+
+### CHS_API_KEY = <SECRET_IN_VAULT>
+
 log_level = "debug"
 chs_url = "https://cidev.aws.chdev.org"
 piwik_url = "https://matomo.platform.aws.chdev.org/"
 piwik_site_id = "7"
 cdn_host = "d3uvya5a8a1ncx.cloudfront.net"
-chips_presenter_auth_url = "http://enablement-presenter-api:8080/presenterauth"
+chips_presenter_auth_url = "http://localhost:18211/presenterauth"
 chs_company_profile_api_local_url = "https://api.cidev.aws.chdev.org"
 cache_db = "0"
 dissolutions_api_url = "https://api.cidev.aws.chdev.org"
@@ -25,12 +28,12 @@ human_log = "1"
 cookie_domain = "cidev.aws.chdev.org"
 account_local_url = "https://account.cidev.aws.chdev.org"
 pay_by_account_feature_enabled = "1"
-piwik_confirmation_page_pdf_goal_id = "998"
-piwik_landing_page_start_goal_id = "999"
-piwik_limited_company_goal_id = "999"
-piwik_partnership_goal_id = "999"
-piwik_single_director_confirmation_goal_id = "1000"
-piwik_multi_director_confirmation_goal_id = "1001"
-piwik_limited_company_confirmation_goal_id = "1002"
-piwik_partnership_confirmation_goal_id = "1003"
+piwik_confirmation_page_pdf_goal_id = "5"
+piwik_landing_page_start_goal_id = "4"
+piwik_limited_company_goal_id = "6"
+piwik_partnership_goal_id = "7"
+piwik_single_director_confirmation_goal_id = "11"
+piwik_multi_director_confirmation_goal_id = "12"
+piwik_limited_company_confirmation_goal_id = "13"
+piwik_partnership_confirmation_goal_id = "14"
 api_url = "https://api.cidev.aws.chdev.org"
