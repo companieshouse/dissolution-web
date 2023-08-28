@@ -10,6 +10,7 @@ import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
 import PiwikConfig from './models/piwikConfig'
+import LocalesConfig from './models/localesConfig'
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
@@ -36,7 +37,6 @@ export function initContainer(): Container {
   container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow('DISSOLUTIONS_API_URL'))
   container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv('NODE_ENV'))
   container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow('PAYMENTS_API_URL'))
-  container.bind<string>(TYPES.LOCALES_PATH).toConstantValue(getEnvOrThrow('LOCALES_PATH'))
   const piwikConfig: PiwikConfig = {
     url: getEnvOrThrow('PIWIK_URL'),
     siteId: getEnvOrThrow('PIWIK_SITE_ID'),
@@ -50,11 +50,19 @@ export function initContainer(): Container {
     singleDirectorConfirmationGoalId: Number(getEnvOrThrow('PIWIK_SINGLE_DIRECTOR_CONFIRMATION_GOAL_ID'))
   }
   container.bind<PiwikConfig>(TYPES.PIWIK_CONFIG).toConstantValue(piwikConfig)
+
+  // Locales
+  const localesConfig: LocalesConfig = {
+   enabled: Boolean(getEnvOrThrow('LOCALES_ENABLED')),
+   path: getEnvOrThrow('LOCALES_PATH')
+  }
+  container.bind<LocalesConfig>(TYPES.LOCALES_CONFIG).toConstantValue(localesConfig)
+  container.bind(TYPES.ManageLocales).toConstantValue(ManageLocales(localesConfig))
+
   container.bind<number>(TYPES.PORT).toConstantValue(Number(getEnvOrDefault('PORT', '3000')))
 
   // Feature toggles
   container.bind<number>(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(Number(getEnvOrThrow('PAY_BY_ACCOUNT_FEATURE_ENABLED')))
-  container.bind<boolean>(TYPES.LOCALES_ENABLED).toConstantValue(Boolean(getEnvOrThrow('LOCALES_ENABLED')))
 
   // AWS
   container.bind<S3>(TYPES.S3).toConstantValue(new S3({ region: getEnvOrThrow('ENV_REGION_AWS') }))
@@ -95,10 +103,6 @@ export function initContainer(): Container {
 
   container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(
     SaveUserEmailToLocals(sessionService)
-  )
-
-  container.bind(TYPES.ManageLocales).toConstantValue(
-   ManageLocales()
   )
 
   container.load(buildProviderModule())
