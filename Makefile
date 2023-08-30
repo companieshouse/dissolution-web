@@ -53,4 +53,3 @@ endif
 .PHONY: sonar
 sonar:
 	npm run analyse-code
-
