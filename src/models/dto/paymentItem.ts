@@ -10,4 +10,4 @@ export default interface PaymentItem {
   class_of_payment: string[]
   kind: string
   resource_kind: string
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}

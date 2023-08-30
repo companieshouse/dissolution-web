@@ -17,4 +17,4 @@ export default interface DissolutionGetResponse {
   directors: DissolutionGetDirector[]
   certificate_bucket: string
   certificate_key: string
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}

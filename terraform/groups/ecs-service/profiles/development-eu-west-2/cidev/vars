@@ -8,10 +8,13 @@ kms_alias = "alias/development-eu-west-2/environment-services-kms"
 
 # service configs
 # Commented params moved to vault service secrets
-# cache_server 
-# oauth2_redirect_uri 
-# oauth2_auth_uri 
-# account_url 
+# cache_server
+# oauth2_redirect_uri
+# oauth2_auth_uri
+# account_url
+
+### CHS_API_KEY = <SECRET_IN_VAULT>
+
 log_level = "debug"
 chs_url = "https://cidev.aws.chdev.org"
 piwik_url = "https://matomo.platform.aws.chdev.org/"
@@ -33,4 +36,8 @@ piwik_single_director_confirmation_goal_id = "11"
 piwik_multi_director_confirmation_goal_id = "12"
 piwik_limited_company_confirmation_goal_id = "13"
 piwik_partnership_confirmation_goal_id = "14"
+<<<<<<< HEAD
 api_url = "https://api.cidev.aws.chdev.org"
+=======
+api_url = "https://api.cidev.aws.chdev.org"
+>>>>>>> 22e83207596c9f767abce8941dcbffe4782432a1

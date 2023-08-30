@@ -7,4 +7,4 @@ export default interface DissolutionGetPaymentUIData {
   links: PaymentLinks
   company_number: string
   items: PaymentItem[]
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}

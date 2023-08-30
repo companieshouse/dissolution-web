@@ -9,4 +9,4 @@ export default interface PiwikConfig {
   partnershipConfirmationGoalId: number
   multiDirectorConfirmationGoalId: number
   singleDirectorConfirmationGoalId: number
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+}
