@@ -1,4 +1,4 @@
-import SignatorySigning from './signatorySigning.enum'
+import SignatorySigning from "./signatorySigning.enum"
 
 export default interface ChangeDetailsFormModel {
   isSigning?: SignatorySigning

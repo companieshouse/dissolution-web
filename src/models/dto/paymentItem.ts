@@ -1,4 +1,4 @@
-import ApplicationType from './applicationType.enum'
+import ApplicationType from "./applicationType.enum"
 
 export default interface PaymentItem {
   description: string

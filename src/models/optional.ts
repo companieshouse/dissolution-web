@@ -1,3 +1,3 @@
 type Optional<T> = T | null | undefined
 
-export default Optional
+export default Optional // eslint-disable-line

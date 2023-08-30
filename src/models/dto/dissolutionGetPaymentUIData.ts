@@ -1,5 +1,5 @@
-import PaymentItem from './paymentItem'
-import PaymentLinks from './paymentLinks'
+import PaymentItem from "./paymentItem"
+import PaymentLinks from "./paymentLinks"
 
 export default interface DissolutionGetPaymentUIData {
   ETag: string

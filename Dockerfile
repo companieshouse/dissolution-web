@@ -1,7 +1,9 @@
-FROM 169942020521.dkr.ecr.eu-west-1.amazonaws.com/base/node:14-alpine-builder
+FROM 416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-node-runtime-18
 
-FROM 169942020521.dkr.ecr.eu-west-1.amazonaws.com/base/node:14-alpine-runtime
+WORKDIR /opt
+COPY dist ./dist
+COPY ./package.json ./package-lock.json docker_start.sh routes.yaml ./
 
-CMD ["/app/dist/app.js"]
+CMD ["./docker_start.sh"]
 
 EXPOSE 3000
