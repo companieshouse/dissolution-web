@@ -36,8 +36,4 @@ piwik_single_director_confirmation_goal_id = "11"
 piwik_multi_director_confirmation_goal_id = "12"
 piwik_limited_company_confirmation_goal_id = "13"
 piwik_partnership_confirmation_goal_id = "14"
-<<<<<<< HEAD
 api_url = "https://api.cidev.aws.chdev.org"
-=======
-api_url = "https://api.cidev.aws.chdev.org"
->>>>>>> 22e83207596c9f767abce8941dcbffe4782432a1
