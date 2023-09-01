@@ -13,7 +13,7 @@
 {% block content %}
   {{
     govukBackLink({
-      text: "Back",
+      text: "{{ glob_btn_back }}",
       href: backUri
     })
   }}
@@ -23,11 +23,10 @@
       {% include 'components/errors/error-summary.njk' %}
 
        <label class="govuk-label" for="company-number">
-        <h1 class="govuk-heading-xl">What is the company number?</h1>
+        <h1 class="govuk-heading-xl">{{ srch_what }}</h1>
        </label>
        <div id="company-number-hint" class="govuk-hint">
-        This is the 8 character reference issued by Companies House when the company
-        was set up.
+       {{ srch_8char }}
        </div>
       <form method="post">
         {{
@@ -45,8 +44,8 @@
 
         {{  
           govukDetails({
-            summaryHtml: '<div class="piwik-event" data-event-id="help-with-company-number-link"> Help with company number</div>',
-            html: '<p>You can find it using the <a href="https://beta.companieshouse.gov.uk/" class="govuk-link piwik-event" data-event-id="companieshouse-service-link" rel="noreferrer noopener" target="_blank">Companies House Service (opens in a new tab)</a>.</p>'
+            summaryHtml: '<div class="piwik-event" data-event-id="help-with-company-number-link"> {{ srch_help }}</div>',
+            html: '<p>{{ srch_find }} <a href="https://beta.companieshouse.gov.uk/" class="govuk-link piwik-event" data-event-id="companieshouse-service-link" rel="noreferrer noopener" target="_blank">{{ srch_ch_service }}</a>.</p>'
           })
         }}
 

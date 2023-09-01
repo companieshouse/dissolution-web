@@ -6,11 +6,7 @@ import { provide } from 'inversify-binding-decorators'
 import nunjucks from 'nunjucks'
 import * as path from 'path'
 // / <reference path="../ch-node-utils.d.ts" />
-// import { sourceLocales } from '@basilest-ch/ch-node-utils'
-import chNodeUtils from '@basilest-ch/ch-node-utils'
-
-
-
+import { LanguageNames } from '@basilest-ch/ch-node-utils'
 
 import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
@@ -79,8 +75,8 @@ export default class NunjucksLoader {
 
     app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
 
-    console.log (chNodeUtils)
+    console.log ("======= NM: 1 ==========")
     app.locals.languageEnabled = this.LOCALES_CONFIG.enabled
-    app.locals.languages = chNodeUtils.languageNames.sourceLocales(path.join(__dirname, this.LOCALES_CONFIG.path))
+    app.locals.languages = LanguageNames.sourceLocales (path.join(__dirname, this.LOCALES_CONFIG.path))
    }
 }

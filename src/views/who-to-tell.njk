@@ -10,12 +10,12 @@
 
 {% set documentationUrl = 'https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#how-to-apply-for-strike-off-and-who-to-tell' %}
 
-{% set title = "Who to tell - " + pageTitleSuffix %}
+{% set title = "{{ who_who }}" + pageTitleSuffix %}
 
 {% block content %}
   {{
     govukBackLink({
-      text: "Back",
+      text: "{{ glob_btn_back }}",
       href: backUri
     })
   }}
@@ -23,13 +23,13 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">Who to tell about the company closing</h1>
-      <p class="govuk-body">Directors or members must give a copy of this application to all interested parties within 7 days of it being submitted. You can download a PDF copy of the application after you submit it.</p>
-      <p class="govuk-body">Read the <a class="govuk-link piwik-event" data-event-id="who-to-tell-read-guidance" target="_blank" href="{{ documentationUrl }}">full list of interested parties you must tell about the company closing (opens in a new tab)</a>.</p>
+      <h1 class="govuk-heading-xl">{{ who_who_close }}</h1>
+      <p class="govuk-body">{{ who_copy }}</p>
+      <p class="govuk-body">{{ glob_read }} <a class="govuk-link piwik-event" data-event-id="who-to-tell-read-guidance" target="_blank" href="{{ documentationUrl }}">{{ who_full_list }}</a>.</p>
 
       {{
         govukWarningText({
-          text: "It is a criminal offence not to tell all interested parties that an application has been made to close the company.",
+          text: "{{ who_criminal }}",
           iconFallbackText: "Warning"
         })
       }}
@@ -45,14 +45,14 @@
             items: [
               {
                 value: "understood",
-                text: "The directors or members understand that they are responsible for notifying all interested parties."
+                text: "{{ who_understand }}"
               }
             ]
           })
         }}
         {{
           govukButton({
-            text: 'Continue',
+            text: '{{ glob_btn_continue }}',
             attributes: {
               id: 'submit'
             }

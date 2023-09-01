@@ -3,12 +3,14 @@ import { QUERY_PAR_LANG } from 'app/constants/app.const'
 import LocalesConfig from 'app/models/localesConfig'
 
 import * as path from 'path'
-import chNodeUtils from '@basilest-ch/ch-node-utils'
+import { LanguageNames } from '@basilest-ch/ch-node-utils'
 
 export default function ManageLocales(localesConfig: LocalesConfig): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     let lang: string = <string>req.query[QUERY_PAR_LANG]
-    if (! chNodeUtils.languageNames.isSupportedLocale (path.join(__dirname, localesConfig.path), lang)) {
+    console.log("=====1=====Mng Loc")
+    console.log(localesConfig)
+    if (! LanguageNames.isSupportedLocale (path.join(__dirname, localesConfig.path), lang)) {
       lang = "en"
     }
     req.lang = lang // add info as metadata in the request

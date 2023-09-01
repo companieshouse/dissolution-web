@@ -10,12 +10,12 @@
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
-{% set title = "View company information - " + pageTitleSuffix %}
+{% set title = "{{ vci_view }}" + " - " + pageTitleSuffix %}
 
 {% block content %}
   {{
     govukBackLink({
-      text: "Back",
+      text: "{{ glob_btn_back }}",
       href: Paths.SEARCH_COMPANY_URI
     })
   }}
@@ -23,10 +23,10 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">View company information</h1>
+      <h1 class="govuk-heading-xl"> {{ vci_view }}</h1>
       {% if error %}
         <div id="cannot-close-error" class="govuk-inset-text">
-          <h2 class="govuk-heading-l">You cannot use this service</h2>
+          <h2 class="govuk-heading-l">{{ vci_cannot }}</h2>
           <p class="govuk-body" id="cannot-close-error-message">{{ error | safe }}</p>
         </div>
       {% endif %}
@@ -39,7 +39,7 @@
           rows: [
             [
               {
-                text: "Company number",
+                text: "{{ vci_co_num }}",
                 attributes: { id: 'company-number-header' }
               },
               {
@@ -49,7 +49,7 @@
             ],
             [
               {
-                text: "Status",
+                text: "{{ vci_status }}",
                 attributes: { id: 'company-status-header' }
               },
               {
@@ -59,7 +59,7 @@
             ],
             [
               {
-                text: "Incorporation date",
+                text: "{{ vci_inc_date }}",
                 attributes: { id: 'company-incorporation-date-header' }
               },
               {
@@ -69,7 +69,7 @@
             ],
             [
               {
-                text: "Company type",
+                text: "{{ vci_co_type }}",
                 attributes: { id: 'company-type-header' }
               },
               {
@@ -79,7 +79,7 @@
             ],
             [
               {
-                text: "Registered office address",
+                text: "{{ vci_reg_addr }}",
                 attributes: { id: 'company-address-header' }
               },
               {
@@ -93,7 +93,7 @@
       <form method="post">
         {{
           govukButton({
-            text: 'Confirm and continue',
+            text: '{{ glob_conf_continue }}',
             attributes: {
               id: 'submit'
             }
@@ -101,7 +101,7 @@
         }}
       </form>
       <p>
-        <a class="govuk-link piwik-event" href={{ Paths.SEARCH_COMPANY_URI }} data-event-id="choose-a-different-company-link">Choose a different company</a>
+        <a class="govuk-link piwik-event" href={{ Paths.SEARCH_COMPANY_URI }} data-event-id="choose-a-different-company-link">{{ vci_diff }}</a>
       </p>
     </div>
   </div>
