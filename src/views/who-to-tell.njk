@@ -15,7 +15,7 @@
 {% block content %}
   {{
     govukBackLink({
-      text: "{{ glob_btn_back }}",
+      text: glob_btn_back,
       href: backUri
     })
   }}
@@ -29,7 +29,7 @@
 
       {{
         govukWarningText({
-          text: "{{ who_criminal }}",
+          text: who_criminal,
           iconFallbackText: "Warning"
         })
       }}
@@ -45,14 +45,14 @@
             items: [
               {
                 value: "understood",
-                text: "{{ who_understand }}"
+                text: who_understand
               }
             ]
           })
         }}
         {{
           govukButton({
-            text: '{{ glob_btn_continue }}',
+            text: glob_btn_continue,
             attributes: {
               id: 'submit'
             }

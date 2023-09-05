@@ -13,7 +13,7 @@
 {% block content %}
   {{
     govukBackLink({
-      text: "{{ glob_btn_back }}",
+      text: glob_btn_back,
       href: backUri
     })
   }}
@@ -44,14 +44,14 @@
 
         {{  
           govukDetails({
-            summaryHtml: '<div class="piwik-event" data-event-id="help-with-company-number-link"> {{ srch_help }}</div>',
-            html: '<p>{{ srch_find }} <a href="https://beta.companieshouse.gov.uk/" class="govuk-link piwik-event" data-event-id="companieshouse-service-link" rel="noreferrer noopener" target="_blank">{{ srch_ch_service }}</a>.</p>'
+            summaryHtml: '<div class="piwik-event" data-event-id="help-with-company-number-link">' + srch_help + '</div>',
+            html: '<p>' + srch_find + '<a href="https://beta.companieshouse.gov.uk/" class="govuk-link piwik-event" data-event-id="companieshouse-service-link" rel="noreferrer noopener" target="_blank">' + srch_ch_service + '</a>.</p>'
           })
         }}
 
         {{ 
           govukButton({
-            text: 'Continue',
+            text: glob_btn_continue,
             attributes: {
               id: 'submit'
             }

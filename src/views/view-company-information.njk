@@ -15,7 +15,7 @@
 {% block content %}
   {{
     govukBackLink({
-      text: "{{ glob_btn_back }}",
+      text: glob_btn_back,
       href: Paths.SEARCH_COMPANY_URI
     })
   }}
@@ -39,7 +39,7 @@
           rows: [
             [
               {
-                text: "{{ vci_co_num }}",
+                text: vci_co_num,
                 attributes: { id: 'company-number-header' }
               },
               {
@@ -49,7 +49,7 @@
             ],
             [
               {
-                text: "{{ vci_status }}",
+                text: vci_status,
                 attributes: { id: 'company-status-header' }
               },
               {
@@ -59,7 +59,7 @@
             ],
             [
               {
-                text: "{{ vci_inc_date }}",
+                text: vci_inc_date,
                 attributes: { id: 'company-incorporation-date-header' }
               },
               {
@@ -69,7 +69,7 @@
             ],
             [
               {
-                text: "{{ vci_co_type }}",
+                text: vci_co_type,
                 attributes: { id: 'company-type-header' }
               },
               {
@@ -79,7 +79,7 @@
             ],
             [
               {
-                text: "{{ vci_reg_addr }}",
+                text: vci_reg_addr,
                 attributes: { id: 'company-address-header' }
               },
               {
@@ -93,7 +93,7 @@
       <form method="post">
         {{
           govukButton({
-            text: '{{ glob_conf_continue }}',
+            text: glob_conf_continue,
             attributes: {
               id: 'submit'
             }
