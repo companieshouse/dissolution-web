@@ -16,9 +16,6 @@ const TYPES = {
   SaveUserEmailToLocals: 'SaveUserEmailToLocals',
   SessionMiddleware: 'SessionMiddleware',
   S3: 'S3',
-//   i18nCh: 'i18nCh',
-//   LOCALES_CONFIG: Symbol.for('LOCALES_CONFIG'),
-//   LocalesConfig:  Symbol.for('LocalesConfig'),
   ManageLocales:  Symbol.for('ManageLocales')
 }
 

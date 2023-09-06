@@ -10,11 +10,9 @@ import { Container } from 'inversify'
 import { buildProviderModule } from 'inversify-binding-decorators'
 import IORedis from 'ioredis'
 import PiwikConfig from './models/piwikConfig'
-// import LocalesConfig from './models/localesConfig'
-// import i18nCh from '@basilest-ch/ch-node-utils'
+
 import * as path from 'path' 
 import LocalesService from "app/services/locales/locales.service"
-
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
@@ -96,26 +94,18 @@ export function initContainer(): Container {
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
     CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), sessionService, logger)
   )
-  // Locales
-  console.log("----------X1------------ inversify")
-  LocalesService.getInstance(
-   path.join(__dirname, getEnvOrThrow('LOCALES_PATH')), 
-   Boolean (getEnvOrThrow('LOCALES_ENABLED')))
-
-//   const locales_path = getEnvOrThrow('LOCALES_PATH')
-//   const localesConfig: LocalesConfig = {
-//       enabled: Boolean(getEnvOrThrow('LOCALES_ENABLED')),
-//       path: locales_path,
-//       i18n:  i18nCh.getInstance(locales_path)
-//   }
-//   container.bind<LocalesConfig>(TYPES.LOCALES_CONFIG).toConstantValue(localesConfig)
-  container.bind(TYPES.ManageLocales).toConstantValue(ManageLocales())
-// container.bind<LocalesConfig>(TYPES.LocalesConfig).toConstantValue(localesConfig)
-
 
   container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(
     SaveUserEmailToLocals(sessionService)
   )
+
+  // Locales
+  console.log("----------X1------------ inversify")
+  LocalesService.getInstance(
+      path.join(__dirname, getEnvOrThrow('LOCALES_PATH')), 
+      Boolean (getEnvOrThrow('LOCALES_ENABLED')))
+  container.bind(TYPES.ManageLocales).toConstantValue(ManageLocales())
+
 
   container.load(buildProviderModule())
 
