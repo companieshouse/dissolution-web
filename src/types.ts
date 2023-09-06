@@ -12,12 +12,14 @@ const TYPES = {
   PAYMENTS_API_URL: 'PAYMENTS_API_URL',
   PAY_BY_ACCOUNT_FEATURE_ENABLED: 'PAY_BY_ACCOUNT_FEATURE_ENABLED',
   PIWIK_CONFIG: 'PIWIK_CONFIG',
-  LOCALES_CONFIG: 'LOCALES_CONFIG',
   PORT: 'PORT',
   SaveUserEmailToLocals: 'SaveUserEmailToLocals',
   SessionMiddleware: 'SessionMiddleware',
-  ManageLocales: 'ManageLocales',
-  S3: 'S3'
+  S3: 'S3',
+//   i18nCh: 'i18nCh',
+//   LOCALES_CONFIG: Symbol.for('LOCALES_CONFIG'),
+//   LocalesConfig:  Symbol.for('LocalesConfig'),
+  ManageLocales:  Symbol.for('ManageLocales')
 }
 
 export default TYPES

@@ -10,7 +10,8 @@ import { LanguageNames } from '@basilest-ch/ch-node-utils'
 
 import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
-import LocalesConfig from 'app/models/localesConfig'
+// import LocalesConfig from 'app/models/localesConfig'
+import LocalesService from "app/services/locales/locales.service"
 import { ROOT_URI } from 'app/paths'
 import TYPES from 'app/types'
 import { addFilters, addGlobals } from 'app/utils/nunjucks.util'
@@ -22,7 +23,8 @@ export default class NunjucksLoader {
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
     @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
-    @inject(TYPES.LOCALES_CONFIG) private LOCALES_CONFIG: LocalesConfig,
+   //  @inject(TYPES.LOCALES_CONFIG) private LOCALES_CONFIG: LocalesConfig,
+   //  @inject(TYPES.LocalesConfig) private Locales_Conf: LocalesConfig,
     @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
   ) {}
 
@@ -76,7 +78,10 @@ export default class NunjucksLoader {
     app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
 
     console.log ("======= NM: 1 ==========")
-    app.locals.languageEnabled = this.LOCALES_CONFIG.enabled
-    app.locals.languages = LanguageNames.sourceLocales (path.join(__dirname, this.LOCALES_CONFIG.path))
-   }
+    console.log("----------X2 (NunjucksLoader) ------------")
+    app.locals.languageEnabled = LocalesService.getInstance().enabled
+   //  app.locals.languages = LanguageNames.sourceLocales (path.join(__dirname, this.Locales_Conf.path))
+   // app.locals.languages = LanguageNames.sourceLocales (path.join(__dirname, LocalesService.getInstance().localesFolder))
+   app.locals.languages = LanguageNames.sourceLocales (LocalesService.getInstance().localesFolder)
+}
 }
