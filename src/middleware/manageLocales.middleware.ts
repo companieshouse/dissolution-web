@@ -8,12 +8,18 @@ export default function ManageLocales(): RequestHandler {
       return (req: Request, res: Response, next: NextFunction) => {
          console.log("----------X2 (ManageLocales) ------------")
 
-    let lang: string = <string>req.query[QUERY_PAR_LANG]
-    console.log("=====1=====Mng Loc")
-   if (! LanguageNames.isSupportedLocale (LocalesService.getInstance().localesFolder, lang)) {
+    let lang: string | undefined = (<string>req.query[QUERY_PAR_LANG] || req.session?.getExtraData<string>(QUERY_PAR_LANG))
+    console.log(`=====1=====Mng Loc ....(init lang=${lang})`)
+    console.log(req.session)
+
+    console.log("=====2=====Mng Loc")
+   if (lang === undefined || ! LanguageNames.isSupportedLocale (LocalesService.getInstance().localesFolder, lang)) {
          lang = "en"
     }
-    req.lang = lang // add info as metadata in the request
+    if (req.session) {
+      req.session.setExtraData(QUERY_PAR_LANG, lang) // when there is a session store it there
+    }
+    req.lang = lang // store it also as metadata in the request
     const [pathWithoutQuery] = req.url.split('?')
     req.url = pathWithoutQuery // remove query params from url (so previous/old controllers keep working)
 

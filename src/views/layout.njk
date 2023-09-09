@@ -5,6 +5,9 @@
 {% from 'govuk/components/header/macro.njk'         import govukHeader %}
 {% from 'govuk/components/phase-banner/macro.njk'   import govukPhaseBanner %}
 
+{#% import "components/add-lang-to-url.njk" as lang2url %#}
+{% import "/opt/node_modules/@basilest-ch/ch-node-utils/templates/add-lang-to-url.njk"  as lang2url %}
+
 {% block head %}
   <!--[if !IE 8]><!-->
   <link href="//{{ cdn.host }}/stylesheets/govuk-frontend/v3.11.0/govuk-frontend-3.11.0.min.css" rel="stylesheet"/>
@@ -59,9 +62,15 @@
       tag: {
         text: 'Beta'
       },
-      html: 'This is a new service – your <a class="govuk-link" href="' + bannerFeedbackLink + '" target="_blank">feedback</a> will help us to improve it.'
+      html: lay_beta_banner_pre + ' <a class="govuk-link" href="' + bannerFeedbackLink + '" target="_blank">'+ lay_beta_banner_link + '</a> ' + lay_beta_banner_after
     })
   }}
+
+  {# node_modules/@basilest-ch/ch-node-utils/templates/add-lang-to-url.njk #}
+  {# node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk #}
+
+  {%include "/opt/node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %}
+
 
   {#% include "../../../../node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %#} {#template not found: /node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
   {#% include "../../../node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {#Error: template not found: /node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
@@ -91,23 +100,23 @@
         items: [
           {
             href: 'http://resources.companieshouse.gov.uk/legal/termsAndConditions.shtml',
-            text: 'Policies'
+            text: lay_policies
           },
           {
             href: 'https://www.gov.uk/help/cookies',
-            text: 'Cookies'
+            text: lay_cookies
           },
           {
             href: 'https://www.gov.uk/contact',
-            text: 'Contact us'
+            text: lay_contact_us
           },
           {
             href: 'https://developer.companieshouse.gov.uk/',
-            text: 'Developers'
+            text: lay_developers
           },
           {
             href: Paths.ACCESSIBILITY_STATEMENT_URI,
-            text: 'Accessibility statement'
+            text: lay_access_stm
           }
         ]
       }

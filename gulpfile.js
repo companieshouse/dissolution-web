@@ -14,8 +14,8 @@ const paths = {
     sassDest: ['src/public/css'],
     src: ['src'],
     nodeModules: ['node_modules'],
-    govukfrontend: ['node_modules/govuk-frontend'],
-    locale: ['node_modules/@basilest-ch/ch-node-utils/templates']
+    govukfrontend: ['node_modules/govuk-frontend']
+   //  locale: ['node_modules/@basilest-ch/ch-node-utils/templates']
 };
 
 gulp.task('clean:build', async function () {
@@ -38,9 +38,9 @@ gulp.task('copy-govukfrontend', function () {
     return gulp.src(paths.govukfrontend + '/**/*').pipe(gulp.dest(paths.build + '/' + paths.govukfrontend));
 });
 
-gulp.task('copy-locale', function () {
-    return gulp.src(paths.locale + '/**/*').pipe(gulp.dest(paths.build + '/' + paths.locale));
-});
+// gulp.task('copy-locale', function () {
+//     return gulp.src(paths.locale + '/**/*').pipe(gulp.dest(paths.build + '/' + paths.locale));
+// });
 
 gulp.task('compile-project', function () {
     return tsProject.src()
