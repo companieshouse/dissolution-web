@@ -1,23 +1,23 @@
-import 'reflect-metadata'
+import "reflect-metadata"
 
-import * as express from 'express'
-import { inject } from 'inversify'
-import { provide } from 'inversify-binding-decorators'
-import nunjucks from 'nunjucks'
-import * as path from 'path'
+import * as express from "express"
+import { inject } from "inversify"
+import { provide } from "inversify-binding-decorators"
+import nunjucks from "nunjucks"
+import * as path from "path"
 // / <reference path="../ch-node-utils.d.ts" />
-// import { sourceLocales } from '@basilest-ch/ch-node-utils'
-import chNodeUtils from '@basilest-ch/ch-node-utils'
+// import { sourceLocales } from "@basilest-ch/ch-node-utils"
+import chNodeUtils from "@basilest-ch/ch-node-utils"
 
 
 
 
-import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
-import PiwikConfig from 'app/models/piwikConfig'
-import LocalesConfig from 'app/models/localesConfig'
-import { ROOT_URI } from 'app/paths'
-import TYPES from 'app/types'
-import { addFilters, addGlobals } from 'app/utils/nunjucks.util'
+import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from "app/constants/app.const"
+import PiwikConfig from "app/models/piwikConfig"
+import LocalesConfig from "app/models/localesConfig"
+import { ROOT_URI } from "app/paths"
+import TYPES from "app/types"
+import { addFilters, addGlobals } from "app/utils/nunjucks.util"
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
@@ -31,18 +31,18 @@ export default class NunjucksLoader {
   ) {}
 
   public configureNunjucks(app: express.Application, directory: string, nonce: string): void {
-    app.use(ROOT_URI, express.static(path.join(directory, '/node_modules/govuk-frontend')))
-    app.use(ROOT_URI, express.static(path.join(directory, '/node_modules/govuk-frontend/govuk')))
-    app.use('/assets', express.static(path.join(directory, '/assets')))
+    app.use(ROOT_URI, express.static(path.join(directory, "/node_modules/govuk-frontend")))
+    app.use(ROOT_URI, express.static(path.join(directory, "/node_modules/govuk-frontend/govuk")))
+    app.use("/assets", express.static(path.join(directory, "/assets")))
 
-    app.set('view engine', 'njk')
+    app.set("view engine", "njk")
 
     const env: nunjucks.Environment = nunjucks.configure(
       [
-        'dist/views',
-        'node_modules/govuk-frontend',
-        'node_modules/govuk-frontend/components',
-        'node_modules/@basilest-ch/ch-node-utils/templates',
+        "dist/views",
+        "node_modules/govuk-frontend",
+        "node_modules/govuk-frontend/components",
+        "node_modules/@basilest-ch/ch-node-utils/templates",
       ],
       {
         autoescape: true,

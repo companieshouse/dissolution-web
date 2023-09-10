@@ -1,10 +1,10 @@
-import 'reflect-metadata'
+import "reflect-metadata"
 
-import { Application, RequestHandler } from 'express'
-import { inject } from 'inversify'
-import { provide } from 'inversify-binding-decorators'
+import { Application, RequestHandler } from "express"
+import { inject } from "inversify"
+import { provide } from "inversify-binding-decorators"
 
-import TYPES from 'app/types'
+import TYPES from "app/types"
 
 @provide(CustomServerMiddlewareLoader)
 export default class CustomServerMiddlewareLoader {
@@ -19,8 +19,8 @@ export default class CustomServerMiddlewareLoader {
 
   public loadCustomServerMiddleware(app: Application): void {
     app.use(this.sessionMiddleware)
-    app.use(this.manageLocales)  // intercept lang=... query-par. and remove it before forwarding to 
-                                 // the next controllers as they weren't expecting any
+    app.use(this.manageLocales)  // intercept lang=... query-par. and remove it before forwarding to
+                                 // the next controllers as they weren"t expecting any
     app.use(this.saveUserEmailToLocals)
 
     app.use(this.authMiddleware)
