@@ -88,7 +88,7 @@ export function initContainer(): Container {
     accountUrl: getEnvOrThrow("ACCOUNT_URL"),
     accountRequestKey: getEnvOrThrow("OAUTH2_REQUEST_KEY"),
     accountClientId: getEnvOrThrow("OAUTH2_CLIENT_ID"),
-    chsUrl: getEnvOrThrow("CHS_URL"),
+    chsUrl: getEnvOrThrow("CHS_URL")
   }
   container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
     CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), sessionService, logger)
