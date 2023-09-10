@@ -16,7 +16,7 @@ const TYPES = {
   SaveUserEmailToLocals: 'SaveUserEmailToLocals',
   SessionMiddleware: 'SessionMiddleware',
   S3: 'S3',
-  ManageLocales:  Symbol.for('ManageLocales')
+  LocalesMiddleware:  Symbol.for('LocalesMiddleware')
 }
 
 export default TYPES

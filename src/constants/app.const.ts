@@ -8,4 +8,3 @@ export const NO_ACTIVE_DIRECTORS_ERROR_MSG = 'The company has no active director
 export const NO_ACTIVE_MEMBERS_ERROR_MSG = 'The company has no active members.'
 export const BANNER_FEEDBACK_LINK = 'https://www.smartsurvey.co.uk/s/closing-a-company-feedback'
 export const CONFIRMATION_FEEDBACK_LINK = 'https://www.smartsurvey.co.uk/s/closing-a-company-confirmation'
-export const QUERY_PAR_LANG = 'lang'

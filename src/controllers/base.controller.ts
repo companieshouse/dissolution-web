@@ -1,14 +1,11 @@
 import { StatusCodes } from 'http-status-codes'
 import { BaseHttpController } from 'inversify-express-utils'
-import LocalesService from "app/services/locales/locales.service"
-import { QUERY_PAR_LANG } from 'app/constants/app.const'
-
+import { LocalesService, QUERY_PAR_LANG } from "@basilest-ch/ch-node-utils"
 
 export default abstract class BaseController<T extends object = {}> extends BaseHttpController {
 
   protected async render(template: string, viewModel?: T, status: number = StatusCodes.OK): Promise<string> {
    console.log("----------X2 (BaseController) ------------")
-   // const lang = <string>this.httpContext.request.lang || this.httpContext.request.session.getExtraData<string>(QUERY_PAR_LANG) || ""
    const lang = <string>this.httpContext.request.lang
    
    console.log(`=====1=====BaseController ....(rendering with lang=${lang})`)

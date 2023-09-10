@@ -14,13 +14,13 @@ export default class CustomServerMiddlewareLoader {
     @inject(TYPES.SaveUserEmailToLocals) private saveUserEmailToLocals: RequestHandler,
     @inject(TYPES.AuthMiddleware) private authMiddleware: RequestHandler,
     @inject(TYPES.CompanyAuthMiddleware) private companyAuthMiddleware: RequestHandler,
-    @inject(TYPES.ManageLocales) private manageLocales: RequestHandler
+    @inject(TYPES.LocalesMiddleware) private localesMiddleware: RequestHandler
   ) {}
 
   public loadCustomServerMiddleware(app: Application): void {
     app.use(this.sessionMiddleware)
-    app.use(this.manageLocales)  // intercept lang=... query-par. and remove it before forwarding to 
-                                 // the next controllers as they weren't expecting any
+    app.use(this.localesMiddleware)  // intercept lang=... query-par. and remove it before forwarding to
+                                     // the next controllers as they weren't expecting any
     app.use(this.saveUserEmailToLocals)
 
     app.use(this.authMiddleware)

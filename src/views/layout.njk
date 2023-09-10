@@ -5,7 +5,6 @@
 {% from 'govuk/components/header/macro.njk'         import govukHeader %}
 {% from 'govuk/components/phase-banner/macro.njk'   import govukPhaseBanner %}
 
-{#% import "components/add-lang-to-url.njk" as lang2url %#}
 {% import "/opt/node_modules/@basilest-ch/ch-node-utils/templates/add-lang-to-url.njk"  as lang2url %}
 
 {% block head %}
@@ -66,28 +65,7 @@
     })
   }}
 
-  {# node_modules/@basilest-ch/ch-node-utils/templates/add-lang-to-url.njk #}
-  {# node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk #}
-
   {%include "/opt/node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %}
-
-
-  {#% include "../../../../node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %#} {#template not found: /node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "../../../node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {#Error: template not found: /node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "../../node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {#template not found: /app/node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "../node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {#/app/dist/node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "/node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {#/node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {# node_modules/@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "@basilest-ch/ch-node-utils/templates/locales-banner.njk" %} {#@basilest-ch/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "/ch-node-utils/templates/locales-banner.njk" %} {#/ch-node-utils/templates/locales-banner.njk#}
-  {#% include "ch-node-utils/templates/locales-banner.njk" %} {#ch-node-utils/templates/locales-banner.njk#}
-  
-  {#% include "/templates/locales-banner.njk" %} {##}
-  {#% include "templates/locales-banner.njk" %} {##}
-  {#% include "/locales-banner.njk" %} {##}
-  {#% include "locales-banner.njk" %} {##}
-  
-  {% include "components/locales-banner.njk" %}
   {% include "components/sign-out-user-banner.njk" %}
 
   {% block backLink %}{% endblock %}

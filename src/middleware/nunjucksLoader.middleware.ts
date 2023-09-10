@@ -5,11 +5,10 @@ import { inject } from 'inversify'
 import { provide } from 'inversify-binding-decorators'
 import nunjucks from 'nunjucks'
 import * as path from 'path'
-import { LanguageNames } from '@basilest-ch/ch-node-utils'
+import { LocalesService, LanguageNames } from '@basilest-ch/ch-node-utils'
 
 import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from 'app/constants/app.const'
 import PiwikConfig from 'app/models/piwikConfig'
-import LocalesService from "app/services/locales/locales.service"
 import { ROOT_URI } from 'app/paths'
 import TYPES from 'app/types'
 import { addFilters, addGlobals } from 'app/utils/nunjucks.util'
@@ -76,6 +75,6 @@ export default class NunjucksLoader {
     console.log ("======= NM: 1 ==========")
     console.log("----------X2 (NunjucksLoader) ------------")
     app.locals.languageEnabled = LocalesService.getInstance().enabled
-   app.locals.languages = LanguageNames.sourceLocales (LocalesService.getInstance().localesFolder)
-}
+    app.locals.languages = LanguageNames.sourceLocales (LocalesService.getInstance().localesFolder)
+  }
 }

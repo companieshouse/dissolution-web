@@ -12,13 +12,12 @@ import IORedis from 'ioredis'
 import PiwikConfig from './models/piwikConfig'
 
 import * as path from 'path' 
-import LocalesService from "app/services/locales/locales.service"
+import { LocalesMiddleware, LocalesService } from "@basilest-ch/ch-node-utils"
 
 import { APP_NAME } from 'app/constants/app.const'
 import AuthMiddleware from 'app/middleware/auth.middleware'
 import CompanyAuthMiddleware from 'app/middleware/companyAuth.middleware'
 import SaveUserEmailToLocals from 'app/middleware/saveUserEmailToLocals.middleware'
-import ManageLocales from 'app/middleware/manageLocales.middleware'
 import AuthConfig from 'app/models/authConfig'
 import Optional from 'app/models/optional'
 import JwtEncryptionService from 'app/services/encryption/jwtEncryption.service'
@@ -104,7 +103,7 @@ export function initContainer(): Container {
   LocalesService.getInstance(
       path.join(__dirname, getEnvOrThrow('LOCALES_PATH')), 
       Boolean (getEnvOrThrow('LOCALES_ENABLED')))
-  container.bind(TYPES.ManageLocales).toConstantValue(ManageLocales())
+  container.bind(TYPES.LocalesMiddleware).toConstantValue(LocalesMiddleware())
 
 
   container.load(buildProviderModule())
