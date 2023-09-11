@@ -35,8 +35,7 @@ export class WhoToTellController extends BaseController {
         if (errors) {
             return this.renderView(body, errors)
         }
-
-        return this.redirect(SEARCH_COMPANY_URI)
+        return this.redirect(`${SEARCH_COMPANY_URI}?lang=${this.httpContext.request.body.lang}`)
     }
 
     private async renderView (data?: WhoToTellFormModel, errors?: ValidationErrors): Promise<string> {

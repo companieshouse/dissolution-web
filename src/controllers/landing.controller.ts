@@ -13,6 +13,6 @@ export class LandingController extends BaseController {
 
     @httpPost('')
     public post (): void {
-        this.httpContext.response.redirect(WHO_TO_TELL_URI)
+        this.httpContext.response.redirect(`${WHO_TO_TELL_URI}?lang=${this.httpContext.request.body.lang}`)
     }
 }
