@@ -5,7 +5,8 @@ const formSchema = Joi.object({
         .required()
         .messages({
             "any.required": "You must agree to continue"
-        })
+        }),
+   lang: Joi.string()
 })
 
 export default formSchema

@@ -22,9 +22,8 @@ export default function AuthMiddleware (
         if (isWhitelistedUrl(req.url)) {
             return next()
         }
-
         const authOptions: AuthOptions = {
-            returnUrl: uriFactory.createAbsoluteUri(req, SEARCH_COMPANY_URI),
+            returnUrl: uriFactory.createAbsoluteUri(req, `${SEARCH_COMPANY_URI}?lang=${req.lang}`),
             accountWebUrl
         }
 
