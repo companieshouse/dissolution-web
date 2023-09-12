@@ -10,22 +10,22 @@ locals {
   healthcheck_path          = "/close-a-company" #healthcheck path for dissolution web
   healthcheck_matcher       = "200"
 
+  kms_alias                 = "alias/${var.aws_profile}/environment-services-kms"
   service_secrets           = jsondecode(data.vault_generic_secret.service_secrets.data_json)
 
   parameter_store_secrets    = {
-    "vpc_name"                  = local.service_secrets["vpc_name"]
-    "cache_password"            = local.service_secrets["cache_password"]
-    "chs_api_key"               = local.service_secrets["chs_api_key"]
-    "internal_api_url"          = local.service_secrets["internal_api_url"]
-    "oauth2_auth_uri"           = local.service_secrets["oauth2_auth_uri"]
-    "oauth2_redirect_uri"       = local.service_secrets["oauth2_redirect_uri"]
-    "account_test_url"          = local.service_secrets["account_test_url"]
-    "account_url"               = local.service_secrets["account_url"]
-    "cache_server"              = local.service_secrets["cache_server"]
-    "oauth2_client_id"          = local.service_secrets["oauth2_client_id"]
-    "oauth2_client_secret"      = local.service_secrets["oauth2_client_secret"]
-    "payments_api_url"          = local.service_secrets["payments_api_url"]
-    "oauth2_request_key"        = local.service_secrets["oauth2_request_key"]
+    "vpc_name"                  = local.vpc_name
+    "cache_password"            = local.cache_password
+    "chs_api_key"               = local.chs_api_key
+    "internal_api_url"          = local.internal_api_url
+    "oauth2_auth_uri"           = local.oauth2_auth_uri
+    "oauth2_redirect_uri"       = local.oauth2_redirect_uri
+    "account_url"               = local.account_url
+    "cache_server"              = local.cache_server
+    "oauth2_client_id"          = local.oauth2_client_id
+    "oauth2_client_secret"      = local.oauth2_client_secret
+    "payments_api_url"          = local.payments_api_url
+    "oauth2_request_key"        = local.oauth2_request_key
   }
 
   vpc_name                  = local.service_secrets["vpc_name"]
@@ -34,7 +34,6 @@ locals {
   internal_api_url          = local.service_secrets["internal_api_url"]
   oauth2_auth_uri           = local.service_secrets["oauth2_auth_uri"]
   oauth2_redirect_uri       = local.service_secrets["oauth2_redirect_uri"]
-  account_test_url          = local.service_secrets["account_test_url"]
   account_url               = local.service_secrets["account_url"]
   cache_server              = local.service_secrets["cache_server"]
   oauth2_client_id          = local.service_secrets["oauth2_client_id"]
