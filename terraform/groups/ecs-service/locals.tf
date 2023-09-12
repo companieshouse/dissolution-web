@@ -7,7 +7,7 @@ locals {
   docker_repo               = "dissolution-web"
   lb_listener_rule_priority = 21
   lb_listener_paths         = ["/close-a-company","/close-a-company/.*"]
-  healthcheck_path          = "/close-a-company" #healthcheck path for dissolution web
+  healthcheck_path          = "/close-a-company/" #healthcheck path for dissolution web
   healthcheck_matcher       = "200"
 
   kms_alias                 = "alias/${var.aws_profile}/environment-services-kms"
