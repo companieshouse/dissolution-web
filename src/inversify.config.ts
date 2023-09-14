@@ -29,6 +29,13 @@ import UriFactory from "app/utils/uri.factory"
 export function initContainer(): Container {
   const container: Container = new Container()
 
+  // Locales
+    console.log("----------X1------------ inversify")
+    LocalesService.getInstance(
+        path.join(__dirname, getEnvOrThrow("LOCALES_PATH")),
+        Boolean (getEnvOrThrow("LOCALES_ENABLED")))
+    container.bind(TYPES.LocalesMiddleware).toConstantValue(LocalesMiddleware())
+
   // Env
   container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow("CDN_HOST"))
   container.bind<string>(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue(getEnvOrThrow("CHIPS_PRESENTER_AUTH_URL"))
@@ -97,14 +104,6 @@ export function initContainer(): Container {
   container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(
     SaveUserEmailToLocals(sessionService)
   )
-
-  // Locales
-  console.log("----------X1------------ inversify")
-  LocalesService.getInstance(
-      path.join(__dirname, getEnvOrThrow("LOCALES_PATH")),
-      Boolean (getEnvOrThrow("LOCALES_ENABLED")))
-  container.bind(TYPES.LocalesMiddleware).toConstantValue(LocalesMiddleware())
-
 
   container.load(buildProviderModule())
 

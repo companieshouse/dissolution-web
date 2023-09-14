@@ -4,6 +4,8 @@ import { assert } from "chai"
 import WhoToTellFormModel from "app/models/form/whoToTell.model"
 import formSchema from "app/schemas/whoToTell.schema"
 
+const FormSchema = formSchema("en")
+
 describe("Who To Tell Schema", () => {
 
     it("should return no errors when data is valid", () => {
@@ -11,7 +13,7 @@ describe("Who To Tell Schema", () => {
             confirmation: "understdood"
         }
 
-        const errors: ValidationResult = formSchema.validate(validForm)
+        const errors: ValidationResult = FormSchema.validate(validForm)
 
         assert.isUndefined(errors.error)
     })
@@ -20,7 +22,7 @@ describe("Who To Tell Schema", () => {
         const validForm: WhoToTellFormModel = {
         }
 
-        const errors: ValidationResult = formSchema.validate(validForm)
+        const errors: ValidationResult = FormSchema.validate(validForm)
 
         assert.deepEqual(errors.value, {})
         assert.equal(errors.error!.details.length, 1)

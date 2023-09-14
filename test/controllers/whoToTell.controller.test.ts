@@ -13,6 +13,8 @@ import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from "app/paths"
 import formSchema from "app/schemas/whoToTell.schema"
 import FormValidator from "app/utils/formValidator.util"
 
+const FormSchema = formSchema("en")
+
 describe("WhoToTellController", () => {
     describe("GET - ensure that page loads correctly", () => {
         it("should render the who to tell page", async () => {
@@ -29,7 +31,7 @@ describe("WhoToTellController", () => {
             const testObject: WhoToTellFormModel = { confirmation: "understood" }
 
             const mockedFormValidator = mock(FormValidator)
-            when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(null)
+            when(mockedFormValidator.validate(deepEqual(testObject), FormSchema)).thenReturn(null)
 
             const app = createApp(container => {
                 container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
@@ -49,7 +51,7 @@ describe("WhoToTellController", () => {
         }
 
         const mockedFormValidator = mock(FormValidator)
-        when(mockedFormValidator.validate(deepEqual(testObject), formSchema)).thenReturn(mockError)
+        when(mockedFormValidator.validate(deepEqual(testObject), FormSchema)).thenReturn(mockError)
         const app = createApp(container => {
             container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
         })

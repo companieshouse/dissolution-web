@@ -21,7 +21,7 @@
     "analyse-code": "sonar-scanner"
   },
   "dependencies": {
-    "@basilest-ch/ch-locale-dissolution-web": "^1.2.4",
+    "@basilest-ch/ch-locale-dissolution-web": "^1.2.6",
     "@basilest-ch/ch-node-utils": "^1.5.25",
     "@companieshouse/api-sdk-node": "^2.0.100",
     "@companieshouse/node-session-handler": "^4.1.9",

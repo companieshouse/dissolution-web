@@ -40,8 +40,9 @@ export class SearchCompanyController extends BaseController {
 
     @httpPost('')
     public async post (@requestBody() body: SearchCompanyFormModel): Promise<string | RedirectResult> {
+        const lang = this.httpContext.request.body.lang
         body.companyNumber = this.companyNumberSanitizer.sanitizeCompany(body.companyNumber!)
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema(lang))
         if (errors) {
             return this.renderView(body, errors)
         }

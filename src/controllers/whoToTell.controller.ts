@@ -31,11 +31,12 @@ export class WhoToTellController extends BaseController {
 
     @httpPost('')
     public async post (@requestBody() body: WhoToTellFormModel): Promise<string | RedirectResult> {
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
+        const lang = this.httpContext.request.body.lang
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema(lang))
         if (errors) {
             return this.renderView(body, errors)
         }
-        return this.redirect(`${SEARCH_COMPANY_URI}?lang=${this.httpContext.request.body.lang}`)
+        return this.redirect(`${SEARCH_COMPANY_URI}?lang=${lang}`)
     }
 
     private async renderView (data?: WhoToTellFormModel, errors?: ValidationErrors): Promise<string> {
