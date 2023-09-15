@@ -74,7 +74,7 @@ locals {
     { "name": "PIWIK_URL", "value": "${var.piwik_url}" },
     { "name": "PIWIK_SITE_ID", "value": "${var.piwik_site_id}" },
     { "name": "CACHE_DB", "value": "${var.cache_db}" },
-    { "name": "CDN_HOST", "value": "//${var.cdn_host}" },
+    { "name": "CDN_HOST", "value": "${var.cdn_host}" },
     { "name": "CHIPS_PRESENTER_AUTH_URL", "value": "${var.chips_presenter_auth_url}" },
     { "name": "CHS_COMPANY_PROFILE_API_LOCAL_URL", "value": "${var.chs_company_profile_api_local_url}" },
     { "name": "COOKIE_DOMAIN", "value": "${var.cookie_domain}" },
