@@ -1,7 +1,6 @@
 *
 !dist
 !docker_start.sh
-!routes.yaml
 !src
 !gulpfile.js
 !package-lock.json
