@@ -61,14 +61,14 @@ export function generatePayment (): Payment {
 export function generatePaymentSummary (): PaymentSummary {
     return {
         payments: [generatePaymentDetails(), generatePaymentDetails()],
-        total_cost: "£16.00"
+        total_cost: "£58.00"
     }
 }
 
 function generatePaymentDetails (): PaymentDetails {
     return {
         description: "Some payment description",
-        cost: "£8.00"
+        cost: "£29.00"
     }
 }
 

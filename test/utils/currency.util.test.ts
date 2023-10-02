@@ -5,15 +5,15 @@ import { assert } from "chai"
 import convertToCurrency from "app/utils/currencyConverter.util"
 
 describe("CurrencyConverter", () => {
-    it("should return the correct currency value if the value is 8", () => {
-        const currency: string = convertToCurrency(8)
+    it("should return the correct currency value if the value is 29", () => {
+        const currency: string = convertToCurrency(29)
 
-        assert.equal("£8.00", currency)
+        assert.equal("£29.00", currency)
     })
 
-    it("should return the correct currency value if the value is 8.00", () => {
-        const currency: string = convertToCurrency(8.00)
+    it("should return the correct currency value if the value is 29.00", () => {
+        const currency: string = convertToCurrency(29.00)
 
-        assert.equal("£8.00", currency)
+        assert.equal("£29.00", currency)
     })
 })
