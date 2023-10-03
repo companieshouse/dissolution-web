@@ -1,0 +1,8 @@
+{
+    "srch_company": "会社を探す",
+    "srch_what" : "会社番号は何ですか?",
+    "srch_8char" : "これは、会社設立時に Companies House によって発行された 8 文字のリファレンスです。",
+    "srch_help" : "会社番号に関するヘルプ",
+    "srch_find" : "次を使用して見つけることができます。",
+    "srch_ch_service" : "企業向けサービス (新しいタブで開きます)"
+}

@@ -1,0 +1,11 @@
+{
+    "vci_view" : "Féach ar fhaisnéis cuideachta",
+    "vci_cannot" : "Ní féidir leat an tseirbhís seo a úsáid",
+    "vci_co_num" : "Uimhir cuideachta",
+    "vci_status" : "Stádas",
+    "vci_inc_date" : "Dáta corpraithe",
+    "vci_co_type" : "Cineál cuideachta",
+    "vci_reg_addr" : "Seoladh oifige cláraithe",
+    "vci_diff" : "Roghnaigh cuideachta eile",
+    "vci_new" : "Gné fionnuar nua anseo"
+}

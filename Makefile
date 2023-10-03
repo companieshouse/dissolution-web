@@ -43,6 +43,7 @@ endif
 	cp -r ./dist $(tmpdir)
 	cp -r ./package.json $(tmpdir)
 	cp -r ./package-lock.json $(tmpdir)
+	cp -r ./locales $(tmpdir)
 	cp ./start.sh $(tmpdir)
 	cp ./routes.yaml $(tmpdir)
 	cd $(tmpdir) && npm install --production

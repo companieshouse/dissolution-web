@@ -1,0 +1,10 @@
+{
+  "err_summary": "Mae yna broblem gyda'r manylion a roesoch i ni",
+  "err_agree_continue": "Rhaid i chi gytuno i barhau",
+  "err_empty_presenter_id": "Rhaid i chi roi ID Cyflwynydd",
+  "err_empty_presenter_authcode": "Rhaid i chi roi cod dilysu Cyflwynydd",
+  "err_understood": "Dewiswch i gadarnhau eich bod wedi darllen a deall y datganiadau.",
+  "err_payment_select": "Dewiswch sut bydd y taliad yn cael ei wneud",
+  "err_company_num": "Rhaid i chi nodi Rhif Cwmni",
+  "err_company_incorrect": "Nid yw rhif y cwmni yn bodoli neu mae'n anghywir"
+}

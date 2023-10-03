@@ -1,0 +1,16 @@
+{
+    "lnd_serviceName" : "Gwneud cais i ddileu cwmni a'i ddiddymu",
+    "lnd_use" : "Defnyddiwch y gwasanaeth hwn i wneud cais i gau cwmni cyfyngedig cyhoeddus, cwmni cyfyngedig preifat, neu bartneriaeth atebolrwydd cyfyngedig (LLP).",
+    "lnd_multi_dir" : "Ar gyfer cwmnïau sydd â chyfarwyddwyr lluosog, mae angen i fwy na hanner y cyfarwyddwyr lofnodi'r cais cyn y gellir ei gyflwyno.",
+    "lnd_cost" : "Mae'n costio £8 a bydd angen:",
+    "lnd_req1" : "i fewngofnodi i neu greu cyfrif Tŷ'r Cwmnïau, sy'n wahanol i gyfrif WebFiling",
+    "lnd_req2" : "rhif y cwmni",
+    "lnd_req3" : "cod dilysu'r cwmni",
+    "lnd_req4" : "cyfeiriad e-bost ar gyfer pob person sy'n llofnodi'r cais",
+    "lnd_pay_cc_ch" : "talu gan ddefnyddio cerdyn credyd neu ddebyd, neu gyfrif Tŷ'r Cwmnïau",
+    "lnd_pay_cc" : "talu gan ddefnyddio cerdyn credyd neu ddebyd",
+    "lnd_download" : "Gallwch hefyd fewngofnodi i'r gwasanaeth hwn i lawrlwytho copi o'ch cais ar ôl iddo gael ei gyflwyno.",
+    "lnd_before" : "Cyn i chi ddechrau",
+    "lnd_lnk_guidance" : "https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration",
+    "lnd_guidance" : "canllaw ar gyfer dileu a diddymu cwmni (yn agor mewn tab newydd)"
+}

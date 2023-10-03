@@ -1,0 +1,11 @@
+{
+    "vci_view": "Unternehmensinformationen anzeigen",
+    "vci_cannot": "Sie können diesen Dienst nicht nutzen",
+    "vci_co_num": "Firmennummer",
+    "vci_status": "Status",
+    "vci_inc_date": "Gründungsdatum",
+    "vci_co_type": "Firmentyp",
+    "vci_reg_addr": "Eingetragene Firmenadresse",
+    "vci_diff": "Wählen Sie ein anderes Unternehmen",
+    "vci_new" : "Eine neue coole Funktion hier"
+}

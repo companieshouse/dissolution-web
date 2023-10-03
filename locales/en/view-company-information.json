@@ -1,0 +1,11 @@
+{
+    "vci_view" : "View company information",
+    "vci_cannot" : "You cannot use this service",
+    "vci_co_num" : "Company number",
+    "vci_status" : "Status",
+    "vci_inc_date" : "Incorporation date",
+    "vci_co_type" : "Company type",
+    "vci_reg_addr" : "Registered office address",
+    "vci_diff" : "Choose a different company",
+    "vci_new" : "A new cool feature here."
+}

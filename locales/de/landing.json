@@ -1,0 +1,16 @@
+{
+    "lnd_serviceName": "Antrag auf Streichung und Auflösung eines Unternehmens",
+    "lnd_use": "Verwenden Sie diesen Service, um die Schließung einer Aktiengesellschaft, einer Gesellschaft mit beschränkter Haftung oder einer Partnerschaft mit beschränkter Haftung (Limited Liability Partnership, LLP) zu beantragen.",
+    "lnd_multi_dir": "Bei Unternehmen mit mehreren Geschäftsführern muss mehr als die Hälfte der Geschäftsführer den Antrag unterzeichnen, bevor er eingereicht werden kann.",
+    "lnd_cost": "Es kostet 8 £ und Sie benötigen:",
+    "lnd_req1": "zum Anmelden oder Erstellen eines Companies House-Kontos, das sich von einem WebFiling-Konto unterscheidet",
+    "lnd_req2": "die Firmennummer",
+    "lnd_req3": "Der Authentifizierungscode des Unternehmens",
+    "lnd_req4": "eine E-Mail-Adresse für jede Person, die den Antrag unterzeichnet",
+    "lnd_pay_cc_ch": "zum Bezahlen mit einer Kredit- oder Debitkarte oder einem Companies House-Konto",
+    "lnd_pay_cc": "zum Bezahlen mit einer Kredit- oder Debitkarte",
+    "lnd_download": "Sie können sich auch bei diesem Dienst anmelden, um eine Kopie Ihrer Bewerbung herunterzuladen, nachdem diese eingereicht wurde.",
+    "lnd_before": "Bevor Sie beginnen",
+    "lnd_lnk_guidance": "https://www.gov.uk/ Government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration",
+    "lnd_guidance": "Anleitung für die Streichung und Auflösung eines Unternehmens (öffnet sich in einem neuen Tab)"
+}

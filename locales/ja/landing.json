@@ -1,0 +1,16 @@
+{
+    "lnd_serviceName" : "会社の取り消しおよび解散を申請する",
+    "lnd_use" : "公開有限会社、非公開有限会社、または有限責任事業組合 (LLP) の閉鎖を申請するには、このサービスを使用します。",
+    "lnd_multi_dir" : "複数の取締役がいる会社の場合、申請書を提出する前に取締役の半数以上が署名する必要があります。",
+    "lnd_cost" : "価格は £8 で、次のものが必要です。",
+    "lnd_req1" : "WebFiling アカウントとは異なる Companies House アカウントにサインインまたは作成します。",
+    "lnd_req2" : "会社番号",
+    "lnd_req3" : "企業認証コード",
+    "lnd_req4" : "アプリケーションに署名する各人の電子メール アドレス",
+    "lnd_pay_cc_ch" : "クレジット カード、デビット カード、または会社の口座を使用して支払う",
+    "lnd_pay_cc" : "クレジット カードまたはデビット カードを使用して支払う",
+    "lnd_download" : "申請書の送信後に、このサービスにサインインして申請書のコピーをダウンロードすることもできます。",
+    "lnd_before" : "始める前に",
+    "lnd_lnk_guidance" : "https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration",
+    "lnd_guidance" : "会社の解散・解散に関するガイダンス（新しいタブで開きます）"
+}

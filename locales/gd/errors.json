@@ -1,0 +1,10 @@
+{
+    "err_summary": "Tá fadhb ann leis na sonraí a thug tú dúinn",
+    "err_agree_continue": "Caithfidh tú aontú le leanúint ar aghaidh",
+    "err_empty_presenter_id": "Caithfidh tú ID an Láithreora a chur isteach",
+    "err_empty_presenter_authcode": "Caithfidh tú cód fíordheimhnithe Láithreoir a chur isteach",
+    "err_understood": "Roghnaigh chun a dhearbhú gur léigh tú agus gur thuig tú na ráitis.",
+    "err_payment_select": "Roghnaigh conas a dhéanfar an íocaíocht",
+    "err_company_num": "Caithfidh tú Uimhir Chuideachta a chur isteach",
+    "err_company_incorrect": "Níl uimhir na cuideachta ann nó tá sé mícheart"
+}

@@ -1,0 +1,8 @@
+{
+    "srch_company": "Search company",
+    "srch_what" : "What is the company number?",
+    "srch_8char" : "This is the 8 character reference issued by Companies House when the company was set up",
+    "srch_help" : "Help with company number",
+    "srch_find" : "You can find it using the",
+    "srch_ch_service" : "Companies House Service (opens in a new tab)"
+}

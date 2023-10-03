@@ -13,7 +13,8 @@ const paths = {
     sassDest: ['src/public/css'],
     src: ['src'],
     nodeModules: ['node_modules'],
-    govukfrontend: ['node_modules/govuk-frontend']
+    govukfrontend: ['node_modules/govuk-frontend'],
+    locales: ['locales'],
 };
 
 gulp.task('clean:build', async function () {
@@ -36,6 +37,10 @@ gulp.task('copy-govukfrontend', function () {
     return gulp.src(paths.govukfrontend + '/**/*').pipe(gulp.dest(paths.build + '/' + paths.govukfrontend));
 });
 
+gulp.task('copy-locales', function () {
+   return gulp.src(paths.locales + '/**/*').pipe(gulp.dest(paths.build + '/' + paths.locales));
+});
+
 gulp.task('compile-project', function () {
     return tsProject.src()
         .pipe(tsProject())
@@ -46,7 +51,7 @@ gulp.task('copy-descriptors', function () {
     return gulp.src('tsconfig.json').pipe(gulp.dest(paths.build));
 });
 
-gulp.task('build', gulp.series('compile-project', gulp.parallel('copy-views', 'copy-govukfrontend', 'copy-descriptors')));
+gulp.task('build', gulp.series('compile-project', gulp.parallel('copy-views', 'copy-govukfrontend', 'copy-descriptors', 'copy-locales')));
 
 gulp.task('build:clean', gulp.series('clean:build', 'build'));
 

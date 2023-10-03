@@ -1,0 +1,16 @@
+{
+    "lnd_serviceName" : "Déan iarratas chun cuideachta a bhaint den chlár agus é a dhíscaoileadh",
+    "lnd_use" : "Bain úsáid as an tseirbhís seo chun cuideachta phoiblí theoranta, cuideachta phríobháideach theoranta, nó comhpháirtíocht dliteanais theoranta (LLP) a dhúnadh.",
+    "lnd_multi_dir" : "I gcás cuideachtaí a bhfuil ilstiúrthóirí acu, caithfidh níos mó ná leath de na stiúrthóirí an t-iarratas a shíniú sular féidir é a chur isteach.",
+    "lnd_cost" : "Cosnaíonn sé £8 agus beidh ort:",
+    "lnd_req1" : "chun síniú isteach nó chun cuntas de chuid Theach na gCuideachtaí a chruthú, atá difriúil ó chuntas WebFiling",
+    "lnd_req2" : "an uimhir chuideachta",
+    "lnd_req3" : "cód fíordheimhnithe na cuideachta",
+    "lnd_req4" : "seoladh ríomhphoist do gach duine a shíníonn an feidhmchlár",
+    "lnd_pay_cc_ch" : "íoc le cárta creidmheasa nó dochair, nó le cuntas Theach na gCuideachtaí",
+    "lnd_pay_cc" : "íoc le cárta creidmheasa nó dochair",
+    "lnd_download" : "Is féidir leat síniú isteach freisin ar an tseirbhís seo chun cóip de d'iarratas a íosluchtú tar éis é a bheith curtha isteach.",
+    "lnd_before" : "Sula dtosaíonn tú",
+    "lnd_lnk_guidance" : "https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration",
+    "lnd_guidance" : "treoir chun cuideachta a bhaint agus a dhíscaoileadh (osclaítear é i gcluaisín nua)"
+}

@@ -1,0 +1,10 @@
+{
+    "err_summary": "There is a problem with the details you gave us",
+    "err_agree_continue": "You must agree to continue",
+    "err_empty_presenter_id": "You must enter a Presenter ID",
+    "err_empty_presenter_authcode": "You must enter a Presenter authentication code",
+    "err_understood": "Select to confirm that you have read and understood the statements.",
+    "err_payment_select": "Select how the payment will be made",
+    "err_company_num": "You must enter a Company Number",
+    "err_company_incorrect": "Company number does not exist or is incorrect"
+}

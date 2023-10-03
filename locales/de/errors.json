@@ -1,0 +1,10 @@
+{
+    "err_summary": "Es gibt ein Problem mit den Daten, die Sie uns gegeben haben",
+    "err_agree_continue": "Sie müssen zustimmen, fortzufahren",
+    "err_empty_presenter_id": "Sie müssen eine Moderator-ID eingeben",
+    "err_empty_presenter_authcode": "Sie müssen einen Moderator-Authentifizierungscode eingeben",
+    "err_understood": "Wählen Sie diese Option, um zu bestätigen, dass Sie die Aussagen gelesen und verstanden haben.",
+    "err_payment_select": "Wählen Sie aus, wie die Zahlung erfolgen soll",
+    "err_company_num": "Sie müssen eine Firmennummer eingeben",
+    "err_company_incorrect": "Firmennummer existiert nicht oder ist falsch"
+}

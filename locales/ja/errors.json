@@ -1,0 +1,10 @@
+{
+    "err_summary": "あなたが提供した詳細には問題があります。",
+    "err_agree_continue": "続行するには同意する必要があります",
+    "err_empty_presenter_id": "プレゼンター ID を入力する必要があります",
+    "err_empty_presenter_authcode": "プレゼンターの認証コードを入力する必要があります",
+    "err_understood": "ステートメントを読んで理解したことを確認するために選択してください。",
+    "err_payment_select": "お支払い方法を選択してください",
+    "err_company_num": "会社番号を入力する必要があります",
+    "err_company_incorrect": "会社番号が存在しないか、間違っています"
+}
