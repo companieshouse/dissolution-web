@@ -6,7 +6,7 @@ RUN dnf install -y tar
 
 WORKDIR /opt
 COPY dist ./dist
-COPY ./package.json ./package-lock.json docker_start.sh routes.yaml ./
+COPY ./package.json ./package-lock.json docker_start.sh ./
 
 CMD ["./docker_start.sh"]
 
