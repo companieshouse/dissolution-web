@@ -2,9 +2,9 @@
 locals {
   stack_name                = "filing-close" # this must match the stack name the service deploys into
   name_prefix               = "${local.stack_name}-${var.environment}"
-  service_name              = "dissolution-web"
+  service_name              = "dissolution-web-poc"
   container_port            = "3000" # default node port required here until prod docker container is built allowing port change via env var
-  docker_repo               = "dissolution-web"
+  docker_repo               = "dissolution-web-poc"
   lb_listener_rule_priority = 21
   lb_listener_paths         = ["/close-a-company","/close-a-company/","/close-a-company/*"]
   healthcheck_path          = "/close-a-company/" #healthcheck path for dissolution web
