@@ -144,3 +144,9 @@ variable "human_log" {
 variable "pay_by_account_feature_enabled" {
   type        = string
 }
+variable "locales_enabled" {
+  type        = string
+}
+variable "locales_path" {
+  type        = string
+}

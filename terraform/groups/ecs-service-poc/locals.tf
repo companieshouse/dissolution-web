@@ -94,5 +94,7 @@ locals {
     { "name": "PIWIK_LIMITED_COMPANY_CONFIRMATION_GOAL_ID", "value": "${var.piwik_limited_company_confirmation_goal_id}" },
     { "name": "PIWIK_PARTNERSHIP_CONFIRMATION_GOAL_ID", "value": "${var.piwik_partnership_confirmation_goal_id}" },
     { "name": "API_URL", "value": "${var.api_url}" }
+    { "name": "LOCALES_ENABLED", "value": "${var.locales_enabled}" }
+    { "name": "LOCALES_PATH", "value": "${var.locales_path}" }
   ]
 }
