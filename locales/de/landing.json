@@ -1,5 +1,5 @@
 {
-    "lnd_serviceName": "Antrag auf Streichung und Auflösung eines Unternehmens 2",
+    "lnd_serviceName": "Antrag auf Streichung und Auflösung eines Unternehmens",
     "lnd_use": "Verwenden Sie diesen Service, um die Schließung einer Aktiengesellschaft, einer Gesellschaft mit beschränkter Haftung oder einer Partnerschaft mit beschränkter Haftung (Limited Liability Partnership, LLP) zu beantragen.",
     "lnd_multi_dir": "Bei Unternehmen mit mehreren Geschäftsführern muss mehr als die Hälfte der Geschäftsführer den Antrag unterzeichnen, bevor er eingereicht werden kann.",
     "lnd_cost": "Es kostet 8 £ und Sie benötigen:",
