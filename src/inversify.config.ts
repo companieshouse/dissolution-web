@@ -12,7 +12,7 @@ import IORedis from "ioredis"
 import PiwikConfig from "./models/piwikConfig"
 
 import * as path from "path"
-import { LocalesMiddleware, LocalesService } from "@basilest-ch/ch-node-utils"
+import { LocalesMiddleware, LocalesService } from "@companieshouse/ch-node-utils"
 
 import { APP_NAME } from "app/constants/app.const"
 import AuthMiddleware from "app/middleware/auth.middleware"
@@ -31,6 +31,9 @@ export function initContainer (): Container {
 
     // Locales
     console.log("----------X1------------ inversify")
+    const chNodeLog = getEnvOrDefault("CH_NODE_UTILS_LOG_LVL", "")
+    process.env.CH_NODE_UTILS_LOG_LVL = chNodeLog
+
     LocalesService.getInstance(path.join(__dirname, getEnvOrThrow("LOCALES_PATH")),
         Boolean(getEnvOrThrow("LOCALES_ENABLED")))
     container.bind(TYPES.LocalesMiddleware).toConstantValue(LocalesMiddleware())

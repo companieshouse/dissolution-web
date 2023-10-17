@@ -1,5 +1,5 @@
 import * as Joi from "@hapi/joi"
-import { LocalesService } from "@basilest-ch/ch-node-utils"
+import { LocalesService } from "@companieshouse/ch-node-utils"
 
 function formSchema (lang: string) {
 

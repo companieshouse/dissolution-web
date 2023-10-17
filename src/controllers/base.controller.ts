@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes"
 import { BaseHttpController } from "inversify-express-utils"
-import { LocalesService, QUERY_PAR_LANG } from "@basilest-ch/ch-node-utils"
+import { LocalesService, QUERY_PAR_LANG } from "@companieshouse/ch-node-utils"
 
 export default abstract class BaseController<T extends object = {}> extends BaseHttpController {
 

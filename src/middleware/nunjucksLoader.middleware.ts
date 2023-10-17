@@ -5,7 +5,7 @@ import { inject } from "inversify"
 import { provide } from "inversify-binding-decorators"
 import nunjucks from "nunjucks"
 import * as path from "path"
-import { LocalesService, LanguageNames } from "@basilest-ch/ch-node-utils"
+import { LocalesService, LanguageNames } from "@companieshouse/ch-node-utils"
 
 import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from "app/constants/app.const"
 import PiwikConfig from "app/models/piwikConfig"
@@ -35,7 +35,7 @@ export default class NunjucksLoader {
                 "dist/views",
                 "node_modules/govuk-frontend",
                 "node_modules/govuk-frontend/components",
-                "node_modules/@basilest-ch/ch-node-utils/templates"
+                "node_modules/@companieshouse/ch-node-utils/templates"
             ],
             {
                 autoescape: true,
