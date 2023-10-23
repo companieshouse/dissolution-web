@@ -14,8 +14,7 @@ export default abstract class BaseController<T extends object = {}> extends Base
         ),
         {
             lang: lang,
-            langInSession: this.httpContext.request.session?.getExtraData<string>(QUERY_PAR_LANG),
-            checkTilt: "1"
+            langInSession: this.httpContext.request.session?.getExtraData<string>(QUERY_PAR_LANG)
         }
         )
         return new Promise<string>((resolve, reject) =>
