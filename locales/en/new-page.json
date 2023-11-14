@@ -1,0 +1,16 @@
+{
+    "tok2_serviceName" : "This is a new form",
+    "tok2_use" : "Use this service to apply to close a public limited company, a private limited company, or a limited liability partnership (LLP).",
+    "tok2_multi_dir" : "For companies with multiple directors, more than half of the directors need to sign the application before it can be submitted.",
+    "tok2_cost" : "It costs £8 and you'll need:",
+    "tok2_req1" : "to sign in to or create a Companies House account, which is different from a WebFiling account",
+    "tok2_req2" : "the company number",
+    "tok2_req3" : "the company authentication code",
+    "tok2_req4" : "an email address for each person signing the application",
+    "tok2_pay_cc_ch" : "to pay using a credit or debit card, or a Companies House account",
+    "tok2_pay_cc" : "to pay using a credit or debit card",
+    "tok2_download" : "You can also sign in to this service to download a copy of your application after it has been submitted.",
+    "tok2_before" : "Before you start",
+    "tok2_lnk_guidance" : "https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration",
+    "tok2_guidance" : "guidance for striking off and dissolving a company (opens in a new tab)"
+}
