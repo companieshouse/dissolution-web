@@ -1,0 +1,16 @@
+{
+    "tok2_serviceName" : "Dyma ffurflen newydd",
+    "tok2_use" : "Defnyddiwch y gwasanaeth hwn i wneud cais i gau cwmni cyfyngedig cyhoeddus, cwmni cyfyngedig preifat, neu bartneriaeth atebolrwydd cyfyngedig (LLP).",
+    "tok2_multi_dir" : "Ar gyfer cwmnïau sydd â chyfarwyddwyr lluosog, mae angen i fwy na hanner y cyfarwyddwyr lofnodi'r cais cyn y gellir ei gyflwyno.",
+    "tok2_cost" : "Mae'n costio £8 a bydd angen:",
+    "tok2_req1" : "i fewngofnodi i neu greu cyfrif Tŷ'r Cwmnïau, sy'n wahanol i gyfrif WebFiling",
+    "tok2_req2" : "rhif y cwmni",
+    "tok2_req3" : "cod dilysu'r cwmni",
+    "tok2_req4" : "cyfeiriad e-bost ar gyfer pob person sy'n llofnodi'r cais",
+    "tok2_pay_cc_ch" : "talu gan ddefnyddio cerdyn credyd neu ddebyd, neu gyfrif Tŷ'r Cwmnïau",
+    "tok2_pay_cc" : "talu gan ddefnyddio cerdyn credyd neu ddebyd",
+    "tok2_download" : "Gallwch hefyd fewngofnodi i'r gwasanaeth hwn i lawrlwytho copi o'ch cais ar ôl iddo gael ei gyflwyno.",
+    "tok2_before" : "Cyn i chi ddechrau",
+    "tok2_lnk_guidance" : "https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration",
+    "tok2_guidance" : "canllaw ar gyfer dileu a diddymu cwmni (yn agor mewn tab newydd)"
+}
