@@ -18,7 +18,8 @@ describe("AuthMiddleware", () => {
     let commonAuthStub: sinon.SinonStub
     let authCallbackStub: sinon.SinonStub
 
-    const accountWebUrl = "some-account-url"
+    // const accountWebUrl = "some-account-url"
+    const chsWebUrl = "some-chs-url"
 
     beforeEach(() => {
         uriFactory = mock(UriFactory)
@@ -26,7 +27,7 @@ describe("AuthMiddleware", () => {
         commonAuthStub = sinon.stub().returns(authCallbackStub)
 
         middleware = AuthMiddleware(
-            accountWebUrl,
+            chsWebUrl,
             instance(uriFactory),
             commonAuthStub
         )
@@ -38,7 +39,7 @@ describe("AuthMiddleware", () => {
         const next = {} as NextFunction
 
         const expectedAuthOptions: AuthOptions = {
-            accountWebUrl,
+            chsWebUrl,
             returnUrl: "some-uri"
         }
 

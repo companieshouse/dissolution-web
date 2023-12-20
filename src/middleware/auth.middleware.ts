@@ -25,7 +25,7 @@ export default function AuthMiddleware (
 
         const authOptions: AuthOptions = {
             returnUrl: uriFactory.createAbsoluteUri(req, SEARCH_COMPANY_URI),
-            accountWebUrl
+            chsWebUrl: accountWebUrl
         }
 
         return commonAuthMiddleware(authOptions)(req, res, next)
