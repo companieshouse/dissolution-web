@@ -29,11 +29,16 @@ custom_build(
   live_update = [
     sync(
       local_path = './dist',
-      remote_path = '/app/dist'
+      remote_path = '/opt/dist'
+    ),
+    sync(
+      local_path = './node_modules',
+      remote_path = '/opt/node_modules'
     ),
     restart_container()
   ],
   deps = [
-    './dist'
+    './dist',
+    './node_modules'
   ]
 )

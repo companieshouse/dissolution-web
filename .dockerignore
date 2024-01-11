@@ -1,5 +1,6 @@
 *
 !dist
+!node_modules
 !docker_start.sh
 !src
 !gulpfile.js
