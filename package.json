@@ -18,8 +18,7 @@
     "lint:scss": "sass-lint './src/public/sass/**/*.scss' --verbose --ignore 'node_modules/**/*.scss'",
     "test": "mocha 'test/**/*.test.ts'",
     "test:coverage": "nyc npm test",
-    "analyse-code": "sonar-scanner",
-    "preinstall": "npx npm-force-resolutions"
+    "analyse-code": "sonar-scanner"
   },
   "dependencies": {
     "@companieshouse/api-sdk-node": "^2.0.137",
