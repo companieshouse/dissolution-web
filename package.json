@@ -27,7 +27,7 @@
     "@companieshouse/web-security-node": "2.0.5",
     "@hapi/joi": "^17.1.1",
     "aws-sdk": "^2.792.0",
-    "axios": "^0.21.1",
+    "axios": "^1.6.5",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.5",
     "crypto": "^1.0.1",
