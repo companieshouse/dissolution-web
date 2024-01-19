@@ -65,6 +65,9 @@ locals {
     { "name" : "DEVELOPER_OAUTH2_REQUEST_KEY", "valueFrom" : local.global_secrets_arn_map.oauth2_request_key }
   ])
 
-  task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[])
+  task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
+    { "name" : "PORT", "value" : local.container_port },
+    { "name" : "LOGLEVEL", "value" : var.log_level }
+  ])
 
 }
