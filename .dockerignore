@@ -7,3 +7,4 @@
 !package.json
 !tsconfig.json
 !tsconfig.prod.json
+!node_modules

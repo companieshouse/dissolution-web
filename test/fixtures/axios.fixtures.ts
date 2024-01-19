@@ -10,13 +10,21 @@ export function generateAxiosResponse<T> (data: T): AxiosResponse<T> {
             "content-type": "application/octet-stream",
             "content-disposition": "some content disposition"
         },
-        config: {}
+        config: {
+            headers: {
+                "content-type": "application/json"
+            } as any
+        }
     }
 }
 
 export function generateAxiosError<T> (data: T): AxiosError {
     return {
-        config: {},
+        config: {
+            headers: {
+                "content-type": "application/json"
+            } as any
+        },
         isAxiosError: true,
         message: "",
         name: "",
