@@ -29,7 +29,7 @@ export class PayByAccountDetailsController extends BaseController {
 
     private readonly ERROR_INCORRECT_CREDENTIALS: string = "Your Presenter ID or Presenter authentication code is incorrect"
 
-    public constructor(
+    public constructor (
         @inject(SessionService) private sessionService: SessionService,
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(FormValidator) private validator: FormValidator,
@@ -40,7 +40,7 @@ export class PayByAccountDetailsController extends BaseController {
     }
 
     @httpGet('')
-    public async get(): Promise<string | RedirectResult> {
+    public async get (): Promise<string | RedirectResult> {
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
             return Promise.reject(new NotFoundError("Feature toggle not enabled"))
         }
@@ -53,7 +53,7 @@ export class PayByAccountDetailsController extends BaseController {
     }
 
     @httpPost('')
-    public async post(@requestBody() form: PayByAccountDetailsFormModel): Promise<string | RedirectResult> {
+    public async post (@requestBody() form: PayByAccountDetailsFormModel): Promise<string | RedirectResult> {
         const errors: Optional<ValidationErrors> = this.validator.validate(form, payByAccountDetailsSchema)
         if (errors) {
             return this.renderView(form, errors)
@@ -73,7 +73,7 @@ export class PayByAccountDetailsController extends BaseController {
         return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
     }
 
-    private async renderView(data?: PayByAccountDetailsFormModel, errors?: ValidationErrors): Promise<string> {
+    private async renderView (data?: PayByAccountDetailsFormModel, errors?: ValidationErrors): Promise<string> {
         const viewModel: ViewModel = {
             data,
             errors
@@ -82,7 +82,7 @@ export class PayByAccountDetailsController extends BaseController {
         return super.render("pay-by-account-details", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
     }
 
-    private updateSession(dissolutionSession: DissolutionSession): void {
+    private updateSession (dissolutionSession: DissolutionSession): void {
         const updatedSession: DissolutionSession = {
             ...dissolutionSession
         }
@@ -90,7 +90,7 @@ export class PayByAccountDetailsController extends BaseController {
         this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
     }
 
-    private async isAlreadyPaid(): Promise<boolean> {
+    private async isAlreadyPaid (): Promise<boolean> {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
