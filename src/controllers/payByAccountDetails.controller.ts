@@ -43,6 +43,7 @@ export class PayByAccountDetailsController extends BaseController {
 
     @httpGet('')
     public async get (): Promise<string | RedirectResult> {
+
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
             return Promise.reject(new NotFoundError("Feature toggle not enabled"))
         }
@@ -69,10 +70,8 @@ export class PayByAccountDetailsController extends BaseController {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
         await this.dissolutionService.addPayByAccountPaymentData(dissolutionSession, accountNumber)
-
         const dissolution: DissolutionGetResponse = (await this.getDissolution(dissolutionSession))!
         dissolutionSession.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
-
         this.updateSession(dissolutionSession)
 
         return this.redirect(VIEW_FINAL_CONFIRMATION_URI)

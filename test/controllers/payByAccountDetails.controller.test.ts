@@ -14,9 +14,11 @@ import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/payByAccountDetails.controller"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
+import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
+import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
 import { PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI } from "app/paths"
 import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
@@ -25,6 +27,7 @@ import PayByAccountService from "app/services/payment/payByAccount.service"
 import SessionService from "app/services/session/session.service"
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
+import { generateDissolutionConfirmation } from "test/fixtures/session.fixtures"
 
 describe("PayByAccountDetailsController", () => {
 
@@ -34,6 +37,8 @@ describe("PayByAccountDetailsController", () => {
     let dissolutionService: DissolutionService
     let validator: FormValidator
     let payByAccountService: PayByAccountService
+    let mapper: DissolutionSessionMapper
+    let dissolutionSession: DissolutionSession = generateDissolutionSession()
 
     function initApp (): Application {
         return createApp(container => {
@@ -41,6 +46,7 @@ describe("PayByAccountDetailsController", () => {
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
             container.rebind(FormValidator).toConstantValue(instance(validator))
             container.rebind(PayByAccountService).toConstantValue(instance(payByAccountService))
+            container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper))
         })
     }
 
@@ -49,6 +55,9 @@ describe("PayByAccountDetailsController", () => {
         dissolutionService = mock(DissolutionService)
         validator = mock(FormValidator)
         payByAccountService = mock(PayByAccountService)
+        mapper = mock(DissolutionSessionMapper)
+        dissolutionSession = generateDissolutionSession()
+        when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
     })
 
     describe("GET request", () => {
@@ -111,6 +120,8 @@ describe("PayByAccountDetailsController", () => {
     describe("POST request", () => {
         const form: PayByAccountDetailsFormModel = generatePayByAccountDetailsForm()
 
+        const dissolutionSession: DissolutionSession = generateDissolutionSession()
+
         it("should re-render the view with an error if validation fails", async () => {
             const error: ValidationErrors = generateValidationError("presenterId", "Some presenter ID error")
 
@@ -149,16 +160,28 @@ describe("PayByAccountDetailsController", () => {
         })
 
         it("should redirect to confirmation screen if validation passes and account exists", async () => {
-            when(validator.validate(deepEqual(form), payByAccountDetailsSchema)).thenReturn(null)
-            when(payByAccountService.getAccountNumber(deepEqual(form))).thenResolve("1234567890")
+            try {
 
-            const app: Application = initApp()
+                const dissolution: DissolutionGetResponse = generateDissolutionGetResponse()
+                const confirmation: DissolutionConfirmation = generateDissolutionConfirmation()
 
-            await request(app)
-                .post(PAY_BY_ACCOUNT_DETAILS_URI)
-                .send(form)
-                .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", VIEW_FINAL_CONFIRMATION_URI)
+                when(validator.validate(deepEqual(form), payByAccountDetailsSchema)).thenReturn(null)
+                when(payByAccountService.getAccountNumber(deepEqual(form))).thenResolve("1234567890")
+                when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
+                when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation)
+
+                const app: Application = initApp()
+
+                await request(app)
+                    .post(PAY_BY_ACCOUNT_DETAILS_URI)
+                    .send(form)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", VIEW_FINAL_CONFIRMATION_URI)
+
+            } catch (error) {
+                console.error(error)
+                throw error // Rethrow the error to make the test fail
+            }
         })
     })
 })
