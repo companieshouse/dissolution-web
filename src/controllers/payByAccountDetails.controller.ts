@@ -16,6 +16,7 @@ import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
 import SessionService from "app/services/session/session.service"
+import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
 
@@ -33,6 +34,7 @@ export class PayByAccountDetailsController extends BaseController {
         @inject(SessionService) private sessionService: SessionService,
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(FormValidator) private validator: FormValidator,
+        @inject(DissolutionSessionMapper) private mapper: DissolutionSessionMapper,
         @inject(PayByAccountService) private payByAccountService: PayByAccountService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
     ) {
@@ -41,6 +43,7 @@ export class PayByAccountDetailsController extends BaseController {
 
     @httpGet('')
     public async get (): Promise<string | RedirectResult> {
+
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
             return Promise.reject(new NotFoundError("Feature toggle not enabled"))
         }
@@ -67,7 +70,8 @@ export class PayByAccountDetailsController extends BaseController {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
         await this.dissolutionService.addPayByAccountPaymentData(dissolutionSession, accountNumber)
-
+        const dissolution: DissolutionGetResponse = (await this.getDissolution(dissolutionSession))!
+        dissolutionSession.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
         this.updateSession(dissolutionSession)
 
         return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
@@ -80,6 +84,11 @@ export class PayByAccountDetailsController extends BaseController {
         }
 
         return super.render("pay-by-account-details", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
+    }
+
+    private async getDissolution (session: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
+        return this.dissolutionService.getDissolution(token, session)
     }
 
     private updateSession (dissolutionSession: DissolutionSession): void {
