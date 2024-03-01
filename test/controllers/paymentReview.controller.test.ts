@@ -86,8 +86,8 @@ describe("PaymentReviewController", () => {
 
             assert.isTrue(htmlAssertHelper.hasText("h1", "Review your payment"))
             assert.isTrue(htmlAssertHelper.hasText("#item-0", "Some payment description"))
-            assert.isTrue(htmlAssertHelper.hasText("#amount-to-pay-0", "£8.00"))
-            assert.isTrue(htmlAssertHelper.hasText("#total_cost", "£16.00"))
+            assert.isTrue(htmlAssertHelper.hasText("#amount-to-pay-0", "£33.00"))
+            assert.isTrue(htmlAssertHelper.hasText("#total_cost", "£66.00"))
         })
     })
 
