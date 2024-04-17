@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@companieshouse/api-sdk-node": "^2.0.137",
-    "@companieshouse/node-session-handler": "^5.0.1",
+    "@companieshouse/node-session-handler": "^5.0.2",
     "@companieshouse/structured-logging-node": "^2.0.1",
     "@companieshouse/web-security-node": "2.0.5",
     "@hapi/joi": "^17.1.1",
