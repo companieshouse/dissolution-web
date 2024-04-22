@@ -140,7 +140,7 @@ function generatePaymentItem (): PaymentItem {
         description_identifier: "Some payment description identifier",
         description_values: {},
         product_type: ApplicationType.DS01,
-        amount: "8",
+        amount: "33",
         available_payment_methods: ["credit-card"],
         class_of_payment: ["data-maintenance"],
         kind: "dissolution-request#payment-details",
