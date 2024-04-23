@@ -28,6 +28,7 @@ export function initContainer (): Container {
 
     // Env
     container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow("CDN_HOST"))
+    container.bind<boolean>(TYPES.CDN_HOST_LONG_PREFIX).toConstantValue(Boolean(getEnvOrThrow("CDN_HOST_LONG_PREFIX")))
     container.bind<string>(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue(getEnvOrThrow("CHIPS_PRESENTER_AUTH_URL"))
     container.bind<string>(TYPES.CHS_API_KEY).toConstantValue((getEnvOrThrow("CHS_API_KEY")))
     container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow("CHS_COMPANY_PROFILE_API_LOCAL_URL"))
