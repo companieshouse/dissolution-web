@@ -23,8 +23,7 @@ import TYPES from "app/types"
 export default class ServerMiddlewareLoader {
 
     public constructor (
-    @inject(TYPES.CDN_HOST) private CDN_HOST: string,
-    @inject(TYPES.CDN_HOST_LONG_PREFIX) private CDN_HOST_LONG_PREFIX: boolean,
+    @inject(TYPES.CSP_CDN_HOST) private CSP_CDN_HOST: string,
     @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
     @inject(NunjucksLoader) private nunjucks: NunjucksLoader,
     @inject(ApplicationLogger) private logger: ApplicationLogger,
@@ -75,22 +74,17 @@ export default class ServerMiddlewareLoader {
 
     private prepareCSPConfig (nonce: string): ContentSecurityPolicyOptions {
         const piwikConfig = ServerMiddlewareLoader.extractPiwikHost(this.PIWIK_CONFIG)
-        let cdnHostPrefix: string = this.CDN_HOST
-        if ( this.CDN_HOST_LONG_PREFIX &&
-             ! cdnHostPrefix.endsWith('/')) {
-               cdnHostPrefix += '/'
-        }
         return {
             directives: {
                 defaultSrc: [`'self'`, piwikConfig],
-                scriptSrc: [`'self'`, "code.jquery.com", cdnHostPrefix, `'nonce-${nonce}'`,
+                scriptSrc: [`'self'`, "code.jquery.com", this.CSP_CDN_HOST, `'nonce-${nonce}'`,
                     piwikConfig,
                     `'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='`],
                 connectSrc: [`'self'`, piwikConfig],
                 objectSrc: [`'none'`],
-                fontSrc: [`'self'`, cdnHostPrefix],
-                styleSrc: [`'self'`, cdnHostPrefix],
-                imgSrc: [`'self'`, cdnHostPrefix, piwikConfig]
+                fontSrc: [`'self'`, this.CSP_CDN_HOST],
+                styleSrc: [`'self'`, this.CSP_CDN_HOST],
+                imgSrc: [`'self'`, this.CSP_CDN_HOST, piwikConfig]
             }
         }
     }

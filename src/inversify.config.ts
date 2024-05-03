@@ -1,4 +1,5 @@
 import "reflect-metadata"
+import { URL } from "url"
 
 import { CookieConfig, SessionMiddleware, SessionStore } from "@companieshouse/node-session-handler"
 import { createLogger } from "@companieshouse/structured-logging-node"
@@ -23,12 +24,30 @@ import TYPES from "app/types"
 import { getEnv, getEnvOrDefault, getEnvOrThrow } from "app/utils/env.util"
 import UriFactory from "app/utils/uri.factory"
 
+function initCSP (): string {
+      let cdn = <string> getEnv("CDN_HOST")
+      let csp_cdn = cdn
+      // Check if the cdn starts with a valid protocol, if not add one to have a valid URL
+      if (!/^https?:\/\//i.test(cdn)) {
+          cdn = 'https://' + cdn
+      }
+
+      const parsedUrl = new URL(cdn)
+      if ( !!parsedUrl.pathname &&
+             parsedUrl.pathname !== '/' &&
+           ! cdn.endsWith('/')) {
+
+         csp_cdn += '/'
+      }
+      return csp_cdn
+  }
+
 export function initContainer (): Container {
     const container: Container = new Container()
 
     // Env
     container.bind<string>(TYPES.CDN_HOST).toConstantValue(getEnvOrThrow("CDN_HOST"))
-    container.bind<boolean>(TYPES.CDN_HOST_LONG_PREFIX).toConstantValue(Boolean(getEnvOrThrow("CDN_HOST_LONG_PREFIX")))
+    container.bind<string>(TYPES.CSP_CDN_HOST).toConstantValue(getEnvOrDefault("CSP_CDN_HOST", initCSP()))
     container.bind<string>(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue(getEnvOrThrow("CHIPS_PRESENTER_AUTH_URL"))
     container.bind<string>(TYPES.CHS_API_KEY).toConstantValue((getEnvOrThrow("CHS_API_KEY")))
     container.bind<string>(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue(getEnvOrThrow("CHS_COMPANY_PROFILE_API_LOCAL_URL"))

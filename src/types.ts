@@ -3,7 +3,7 @@ const TYPES = {
     AxiosInstance: "AxiosInstance",
     CompanyAuthMiddleware: "CompanyAuthMiddleware",
     CDN_HOST: "CDN_HOST",
-    CDN_HOST_LONG_PREFIX: "CDN_HOST_LONG_PREFIX",
+    CSP_CDN_HOST: "CSP_CDN_HOST",
     CHIPS_PRESENTER_AUTH_URL: "CHIPS_PRESENTER_AUTH_URL",
     CHS_API_KEY: "CHS_API_KEY",
     CHS_URL: "CHS_URL",
