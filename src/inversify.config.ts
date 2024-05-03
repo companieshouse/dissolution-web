@@ -25,22 +25,22 @@ import { getEnv, getEnvOrDefault, getEnvOrThrow } from "app/utils/env.util"
 import UriFactory from "app/utils/uri.factory"
 
 function initCSP (): string {
-   let cdn = <string> getEnv("CDN_HOST")
-   let csp_cdn = cdn
-   // Check if the cdn starts with a valid protocol, if not add one to have a valid URL
-   if (!/^https?:\/\//i.test(cdn)) {
-         cdn = 'https://' + cdn
-   }
+    let cdn = <string> getEnv("CDN_HOST")
+    let csp_cdn = cdn
+    // Check if the cdn starts with a valid protocol, if not add one to have a valid URL
+    if (!/^https?:\/\//i.test(cdn)) {
+        cdn = "https://" + cdn
+    }
 
-   const parsedUrl = new URL(cdn)
-   if (!!parsedUrl.pathname &&
+    const parsedUrl = new URL(cdn)
+    if (!!parsedUrl.pathname &&
          parsedUrl.pathname !== "/" &&
          !cdn.endsWith("/")) {
 
       csp_cdn += "/"
-   }
-   return csp_cdn
-  }
+    }
+    return csp_cdn
+}
 
 export function initContainer (): Container {
     const container: Container = new Container()
