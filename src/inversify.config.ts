@@ -37,7 +37,7 @@ function initCSP (): string {
          parsedUrl.pathname !== "/" &&
          !cdn.endsWith("/")) {
 
-      csp_cdn += "/"
+        csp_cdn += "/"
     }
     return csp_cdn
 }
