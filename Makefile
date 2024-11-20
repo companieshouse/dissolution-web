@@ -49,6 +49,6 @@ endif
 	rm -rf $(tmpdir)
 
 .PHONY: sonar
-sonar:
+sonar: test
 	npm run analyse-code
 
