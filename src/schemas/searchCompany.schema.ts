@@ -9,6 +9,11 @@ const formSchema = Joi.object({
             "string.empty": emptyCompanyNumberError,
             "string.max": "Company number does not exist or is incorrect",
             "any.required": emptyCompanyNumberError
+        }),
+    _csrf: Joi.string()
+        .optional()
+        .messages({
+            "any.required": "There was a problem submitting your form"
         })
 })
 

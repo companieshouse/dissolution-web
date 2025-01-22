@@ -4,6 +4,7 @@
 {% from 'govuk/components/footer/macro.njk'         import govukFooter %}
 {% from 'govuk/components/header/macro.njk'         import govukHeader %}
 {% from 'govuk/components/phase-banner/macro.njk'   import govukPhaseBanner %}
+{% from "web-security-node/components/csrf-token-input/macro.njk" import csrfTokenInput %}
 
 {% block head %}
   <!--[if !IE 8]><!-->
@@ -15,7 +16,7 @@
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"
           integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
           crossorigin="anonymous"></script>
-  
+
   <script nonce={{ nonce | dump | safe }} type="application/javascript">
     window.SERVICE_NAME = 'dissolutions'
     window.PIWIK_URL = '{{ piwik.url }}'
@@ -51,6 +52,7 @@
 {% set mainClasses = mainClasses | default('govuk-main-wrapper--auto-spacing') %}
 
 {% block beforeContent %}
+
   <div id="templateName" data-id="{{ title }}" hidden></div>
 
   {{

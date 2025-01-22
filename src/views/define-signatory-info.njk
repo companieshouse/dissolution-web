@@ -28,6 +28,9 @@
       }) }}
 
       <form method="post" novalidate>
+
+        {% include "components/csrf_token.njk" %}
+
         {% for signatory in signatories %}
           {% set formSuffix = "_" + (signatory.id | lower) %}
           {% set signatoryName = signatory.name %}

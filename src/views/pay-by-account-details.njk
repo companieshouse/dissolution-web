@@ -22,6 +22,9 @@
       <h1 class="govuk-heading-xl">Enter your details to pay by account</h1>
 
       <form method="post">
+
+        {% include "components/csrf_token.njk" %}
+
         {{
           govukInput({
             id: "presenter-id",

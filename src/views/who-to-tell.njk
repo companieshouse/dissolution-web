@@ -35,7 +35,10 @@
       }}
 
       <form method="post">
-        {{ 
+
+        {% include "components/csrf_token.njk" %}
+
+        {{
           govukCheckboxes({
             idPrefix: "confirmation",
             name: "confirmation",

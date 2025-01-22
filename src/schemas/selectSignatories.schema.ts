@@ -12,6 +12,11 @@ export default function selectSignatoriesSchema (officerType: OfficerType, minSi
             .messages({
                 "any.required": `Select the ${officerType}s who will be signing the application.`,
                 "array.min": `Select more than half of the ${officerType}s to sign the application.`
+            }),
+        _csrf: Joi.string()
+            .optional()
+            .messages({
+                "any.required": "There was a problem submitting your form"
             })
     })
 }

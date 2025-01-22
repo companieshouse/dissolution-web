@@ -1,16 +1,20 @@
 import "reflect-metadata"
-
 import * as express from "express"
 import { inject } from "inversify"
 import { provide } from "inversify-binding-decorators"
 import nunjucks from "nunjucks"
 import * as path from "path"
-
-import { BANNER_FEEDBACK_LINK, CONFIRMATION_FEEDBACK_LINK, PAGE_TITLE_SUFFIX, SERVICE_NAME } from "app/constants/app.const"
 import PiwikConfig from "app/models/piwikConfig"
 import { ROOT_URI } from "app/paths"
 import TYPES from "app/types"
 import { addFilters, addGlobals } from "app/utils/nunjucks.util"
+
+import {
+    BANNER_FEEDBACK_LINK,
+    CONFIRMATION_FEEDBACK_LINK,
+    PAGE_TITLE_SUFFIX,
+    SERVICE_NAME
+} from "app/constants/app.const"
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
@@ -33,7 +37,8 @@ export default class NunjucksLoader {
             [
                 "dist/views",
                 "node_modules/govuk-frontend",
-                "node_modules/govuk-frontend/components"
+                "node_modules/govuk-frontend/components",
+                "node_modules/@companieshouse"
             ],
             {
                 autoescape: true,
@@ -57,17 +62,11 @@ export default class NunjucksLoader {
         }
 
         app.locals.piwik = this.PIWIK_CONFIG
-
         app.locals.serviceName = SERVICE_NAME
-
         app.locals.pageTitleSuffix = PAGE_TITLE_SUFFIX
-
         app.locals.nonce = nonce
-
         app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED
-
         app.locals.bannerFeedbackLink = BANNER_FEEDBACK_LINK
-
         app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
     }
 }

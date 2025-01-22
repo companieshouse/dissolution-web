@@ -8,7 +8,9 @@ export class LandingController extends BaseController {
 
     @httpGet('')
     public async get (): Promise<string> {
-        return super.render("landing")
+        return super.render("landing", {
+            redirectUrl: `${WHO_TO_TELL_URI}`
+        })
     }
 
     @httpPost('')
