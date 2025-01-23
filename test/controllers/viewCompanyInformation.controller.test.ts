@@ -18,6 +18,9 @@ import SessionService from "app/services/session/session.service"
 
 import { generateCompanyDetails } from "test/fixtures/companyProfile.fixtures"
 import { generateDissolutionSession } from "test/fixtures/session.fixtures"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 describe("ViewCompanyInformationController", () => {
 

@@ -7,7 +7,7 @@ import * as sinon from "sinon"
 import { instance, mock, when } from "ts-mockito"
 
 import AuthMiddleware from "app/middleware/auth.middleware"
-import { SEARCH_COMPANY_URI } from "app/paths"
+import { WHO_TO_TELL_URI } from "app/paths"
 import UriFactory from "app/utils/uri.factory"
 
 describe("AuthMiddleware", () => {
@@ -43,7 +43,7 @@ describe("AuthMiddleware", () => {
             returnUrl: "some-uri"
         }
 
-        when(uriFactory.createAbsoluteUri(req, SEARCH_COMPANY_URI)).thenReturn("some-uri")
+        when(uriFactory.createAbsoluteUri(req, WHO_TO_TELL_URI)).thenReturn("some-uri")
 
         middleware(req, res, next)
 

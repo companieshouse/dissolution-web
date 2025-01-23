@@ -8,9 +8,7 @@ import searchCompanySchema from "app/schemas/searchCompany.schema"
 describe("Search Company Schema", () => {
     it("should return no errors when data is valid", () => {
         const validForm: SearchCompanyFormModel = generateSearchCompanyForm("123")
-
         const errors: ValidationResult = searchCompanySchema.validate(validForm)
-
         assert.isUndefined(errors.error)
     })
 

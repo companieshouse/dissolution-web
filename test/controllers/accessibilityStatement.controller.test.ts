@@ -1,16 +1,16 @@
 import "reflect-metadata"
-
 import { expect } from "chai"
 import request from "supertest"
 import { createApp } from "./helpers/application.factory"
-
 import "app/controllers/accessibilityStatement.controller"
 import { ACCESSIBILITY_STATEMENT_URI } from "app/paths"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 const pageHeading = "Accessibility statement for the Apply to strike off and dissolve a company service"
 
 describe("AccessibilityStatementController", () => {
-
     describe("GET request", () => {
         it("should match the heading when trying to access the page", async () => {
             const app = createApp()

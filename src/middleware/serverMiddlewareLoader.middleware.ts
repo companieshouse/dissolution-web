@@ -36,14 +36,15 @@ export default class ServerMiddlewareLoader {
     }
 
     public loadServerMiddleware (app: Application, directory: string): void {
+
         const nonce: string = uuidv4()
 
         app.use(bodyParser.json())
         app.use(bodyParser.urlencoded({ extended: true }))
         app.use(cookieParser())
         app.use(createLoggerMiddleware(APP_NAME))
-        this.setHeaders(app, nonce)
 
+        this.setHeaders(app, nonce)
         this.customServerMiddlewareLoader.loadCustomServerMiddleware(app)
         const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow("CACHE_SERVER")}`))
 
@@ -52,6 +53,7 @@ export default class ServerMiddlewareLoader {
             enabled: CSRF_ENABLED,
             sessionCookieName: getEnvOrThrow("COOKIE_NAME")
         })
+
         app.use(csrfProtectionMiddleware)
         this.nunjucks.configureNunjucks(app, directory, nonce)
     }

@@ -23,6 +23,9 @@ import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 
 import { generateDissolutionSession } from "test/fixtures/session.fixtures"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 let session: SessionService
 let dissolutionService: DissolutionService

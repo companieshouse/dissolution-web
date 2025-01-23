@@ -10,9 +10,7 @@ describe("Select Director Schema", () => {
 
     it("should return no errors when data is valid", () => {
         const validForm: SelectDirectorFormModel = generateSelectDirectorFormModel("123")
-
         const errors: ValidationResult = selectDirectorSchema(OfficerType.DIRECTOR).validate(validForm)
-
         assert.isUndefined(errors.error)
     })
 

@@ -26,6 +26,9 @@ import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
 
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 describe("HowDoYouWantToPayController", () => {
 

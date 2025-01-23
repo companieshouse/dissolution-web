@@ -11,9 +11,7 @@ describe("How do you want to pay Schema", () => {
     it("should return no errors when data is valid", () => {
         const validForm: HowDoYouWantToPayForm = generateHowDoYouWantToPayForm()
         validForm.paymentType = PaymentType.ACCOUNT
-
         const errors: ValidationResult = howDoYouWantToPaySchema.validate(validForm)
-
         assert.isUndefined(errors.error)
     })
 

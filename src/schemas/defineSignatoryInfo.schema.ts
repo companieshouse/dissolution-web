@@ -18,7 +18,14 @@ function generateSchemaForSignatories (signatories: DirectorToSign[], officerTyp
 function generateSchemaForSignatory (signatory: DirectorToSign, officerType: OfficerType): Joi.SchemaMap {
     const formSuffix: string = `_${formatSignatoryId(signatory)}`
 
-    return generateSchemaForSignatoryDetails(officerType, formSuffix)
+    return {
+        ...generateSchemaForSignatoryDetails(officerType, formSuffix),
+        _csrf: Joi.string()
+            .optional()
+            .messages({
+                "any.required": "There was a problem submitting your form"
+            })
+    }
 }
 
 function formatSignatoryId (signatory: DirectorToSign): string {

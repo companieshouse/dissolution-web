@@ -41,6 +41,7 @@ describe("Define Signatory Info Schema", () => {
         form[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ""
         form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = "Mr Accountant"
         form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = "accountant@mail.com"
+        form._csrf = "abc123"
 
         const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 

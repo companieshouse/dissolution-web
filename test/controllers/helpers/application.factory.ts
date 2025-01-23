@@ -34,7 +34,8 @@ export const createApp = (configureBindings?: (container: Container) => void): A
               [
                   "src/views",
                   "node_modules/govuk-frontend",
-                  "node_modules/govuk-frontend/components"
+                  "node_modules/govuk-frontend/components",
+                  "node_modules/@companieshouse"
               ],
               {
                   autoescape: true,

@@ -24,6 +24,9 @@ import {
     generateViewApplicationStatusModel,
     generateViewApplicationStatusSignatory
 } from "test/fixtures/viewApplicationStatus.fixtures"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 let session: SessionService
 

@@ -68,7 +68,8 @@ export function generateConfirmationStatement (): ConfirmationStatement {
 
 export function generateSearchCompanyForm (companyNumber: string = "1234"): SearchCompanyFormModel {
     return {
-        companyNumber
+        companyNumber,
+        _csrf: "abc123"
     }
 }
 

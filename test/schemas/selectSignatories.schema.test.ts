@@ -10,9 +10,7 @@ describe("Select Signatories Schema", () => {
 
     it("should return no errors when data is valid", () => {
         const validForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel("123")
-
         const errors: ValidationResult = selectSignatoriesSchema(OfficerType.DIRECTOR, 1).validate(validForm)
-
         assert.isUndefined(errors.error)
     })
 

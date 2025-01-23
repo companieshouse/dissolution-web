@@ -18,6 +18,9 @@ import DissolutionSession from "app/models/session/dissolutionSession.model"
 import { VIEW_FINAL_CONFIRMATION_URI } from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 describe("ViewFinalConfirmationController", () => {
 
