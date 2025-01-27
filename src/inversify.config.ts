@@ -24,6 +24,7 @@ import { getEnv, getEnvOrDefault, getEnvOrThrow } from "app/utils/env.util"
 import UriFactory from "app/utils/uri.factory"
 
 export function initContainer (): Container {
+
     const container: Container = new Container()
 
     // Env
@@ -35,6 +36,7 @@ export function initContainer (): Container {
     container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow("DISSOLUTIONS_API_URL"))
     container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv("NODE_ENV"))
     container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow("PAYMENTS_API_URL"))
+
     const piwikConfig: PiwikConfig = {
         url: getEnvOrThrow("PIWIK_URL"),
         siteId: getEnvOrThrow("PIWIK_SITE_ID"),
@@ -47,6 +49,7 @@ export function initContainer (): Container {
         multiDirectorConfirmationGoalId: Number(getEnvOrThrow("PIWIK_MULTI_DIRECTOR_CONFIRMATION_GOAL_ID")),
         singleDirectorConfirmationGoalId: Number(getEnvOrThrow("PIWIK_SINGLE_DIRECTOR_CONFIRMATION_GOAL_ID"))
     }
+
     container.bind<PiwikConfig>(TYPES.PIWIK_CONFIG).toConstantValue(piwikConfig)
     container.bind<number>(TYPES.PORT).toConstantValue(Number(getEnvOrDefault("PORT", "3000")))
 
@@ -86,6 +89,7 @@ export function initContainer (): Container {
         accountClientId: getEnvOrThrow("OAUTH2_CLIENT_ID"),
         chsUrl: getEnvOrThrow("CHS_URL")
     }
+
     container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
         CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), sessionService, logger)
     )

@@ -20,18 +20,17 @@
         <li>to pay using a credit or debit card{% if payByAccountFeatureEnabled %}, or a Companies House account{% endif %}</li>
       </ul>
       <p class="govuk-body">You can also sign in to this service to download a copy of your application after it has been submitted.</p>
-      <form method="post">
-        {{
-          govukButton({
-            text: 'Start now',
-            isStartButton: true,
-            attributes: {
-              id: 'start-now',
-              'data-event-id': 'start-now-button' if piwik
-            }
-          })
-        }}
-      </form>
+      {{
+        govukButton({
+          text: "Start now",
+          href: redirectUrl,
+          isStartButton: true,
+          attributes: {
+            id: 'start-now',
+            'data-event-id': 'start-now-button' if piwik
+          }
+        })
+      }}
       <h2 class="govuk-heading-m">Before you start</h2>
       <p class="govuk-body-s">Read the <a class="piwik-event" data-event-id="eDS01-landing-page-guidance" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration" target="_blank" class="govuk-link">guidance for striking off and dissolving a company (opens in a new tab)</a>.</p>
     </div>

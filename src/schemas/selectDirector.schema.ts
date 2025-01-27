@@ -10,6 +10,12 @@ export default function selectDirectorSchema (officerType: OfficerType): Joi.Obj
             .messages({
                 "any.required": `Select which of the ${officerType}s you are or if you're not a ${officerType}`,
                 "string.empty": `Select which of the ${officerType}s you are or if you're not a ${officerType}`
+            }),
+        _csrf: Joi.string()
+            .optional()
+            .messages({
+                "any.required": "There was a problem submitting your form"
             })
+
     })
 }

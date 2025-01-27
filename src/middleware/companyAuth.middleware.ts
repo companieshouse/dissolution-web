@@ -1,14 +1,21 @@
+import { NextFunction, Request, RequestHandler, Response } from "express"
 import { SignInInfoKeys } from "@companieshouse/node-session-handler/lib/session/keys/SignInInfoKeys"
 import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import { NextFunction, Request, RequestHandler, Response } from "express"
 
 import AuthConfig from "app/models/authConfig"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ACCESSIBILITY_STATEMENT_URI, HEALTHCHECK_URI, ROOT_URI, SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } from "app/paths"
 import JwtEncryptionService from "app/services/encryption/jwtEncryption.service"
 import SessionService from "app/services/session/session.service"
+
+import {
+    ACCESSIBILITY_STATEMENT_URI,
+    HEALTHCHECK_URI, ROOT_URI,
+    SEARCH_COMPANY_URI,
+    VIEW_COMPANY_INFORMATION_URI,
+    WHO_TO_TELL_URI
+} from "app/paths"
 
 const OAUTH_COMPANY_SCOPE_PREFIX = "https://api.companieshouse.gov.uk/company/"
 const OAUTH_USER_SCOPE = "https://account.companieshouse.gov.uk/user.write-full"

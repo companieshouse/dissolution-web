@@ -29,6 +29,7 @@
 
       <form method="post" novalidate>
 
+        {% include "components/csrf_token.njk" %}
         {% set formSuffix = "" %}
         {% include "components/define-signatory-info/signatory-details.njk" %}
 

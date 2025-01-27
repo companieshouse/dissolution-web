@@ -31,9 +31,8 @@ describe("Change Details Schema", () => {
 
         it("should return no errors when data is valid", () => {
             form.directorEmail = "director@mail.com"
-
+            form._csrf = "abc123"
             const errors: ValidationResult = changeDetailsSchema(OfficerType.DIRECTOR).validate(form, { abortEarly: false })
-
             assert.isUndefined(errors.error)
         })
 

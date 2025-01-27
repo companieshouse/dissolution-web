@@ -91,6 +91,9 @@
         })
       }}
       <form method="post">
+
+        {% include "components/csrf_token.njk" %}
+
         {{
           govukButton({
             text: 'Confirm and continue',

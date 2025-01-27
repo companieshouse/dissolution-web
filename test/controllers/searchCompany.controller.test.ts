@@ -22,6 +22,9 @@ import CompanyService from "app/services/company/company.service"
 import SessionService from "app/services/session/session.service"
 import CompanyNumberSanitizer from "app/utils/companyNumberSanitizer"
 import FormValidator from "app/utils/formValidator.util"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 describe("SearchCompanyController", () => {
 

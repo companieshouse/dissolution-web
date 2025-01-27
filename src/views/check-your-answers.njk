@@ -63,6 +63,9 @@
       {% endfor %}
 
       <form method="post">
+
+        {% include "components/csrf_token.njk" %}
+
         {{
           govukButton({
             text: 'Continue',

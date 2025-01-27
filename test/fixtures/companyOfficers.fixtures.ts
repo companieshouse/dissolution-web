@@ -105,13 +105,15 @@ export function generateDirectorDetails (): DirectorDetails {
 
 export function generateSelectDirectorFormModel (director: string = "123"): SelectDirectorFormModel {
     return {
-        director
+        director,
+        _csrf: "abc123"
     }
 }
 
 export function generateSelectSignatoriesFormModel (...signatories: string[]): SelectSignatoriesFormModel {
     return {
-        signatories: signatories || ["123"]
+        signatories: signatories || ["123"],
+        _csrf: "abc123"
     }
 }
 
@@ -121,14 +123,16 @@ export function generateDefineSignatoryInfoFormModel (): DefineSignatoryInfoForm
         directorEmail_123abc: "director@mail.com",
         isSigning_456def: SignatorySigning.ON_BEHALF,
         onBehalfName_456def: "Mr Accountant",
-        onBehalfEmail_456def: "accountant@mail.com"
+        onBehalfEmail_456def: "accountant@mail.com",
+        _csrf: "abc123"
     }
 }
 
 export function generateWillSignChangeDetailsFormModel (): ChangeDetailsFormModel {
     return {
         isSigning: SignatorySigning.WILL_SIGN,
-        directorEmail: "director@mail.com"
+        directorEmail: "director@mail.com",
+        _csrf: "abc123"
     }
 }
 

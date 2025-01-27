@@ -15,6 +15,11 @@ const payByAccountDetailsSchema = Joi.object({
         .messages({
             "string.empty": emptyPresenterAuthCodeError,
             "any.required": emptyPresenterAuthCodeError
+        }),
+    _csrf: Joi.string()
+        .optional()
+        .messages({
+            "any.required": "There was a problem submitting your form"
         })
 })
 

@@ -21,6 +21,9 @@ import SessionService from "app/services/session/session.service"
 import TYPES from "app/types"
 
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 describe("PaymentReviewController", () => {
 

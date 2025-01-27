@@ -75,7 +75,8 @@ function generatePaymentDetails (): PaymentDetails {
 export function generatePayByAccountDetailsForm (): PayByAccountDetailsFormModel {
     return {
         presenterId: "1234",
-        presenterAuthCode: "ABC123"
+        presenterAuthCode: "ABC123",
+        _csrf: "abc123"
     }
 }
 
@@ -94,6 +95,7 @@ export function generatePresenterAuthResponse (): PresenterAuthResponse {
 
 export function generateHowDoYouWantToPayForm (): HowDoYouWantToPayFormModel {
     return {
-        paymentType: PaymentType.CREDIT_DEBIT_CARD
+        paymentType: PaymentType.CREDIT_DEBIT_CARD,
+        _csrf: "abc123"
     }
 }

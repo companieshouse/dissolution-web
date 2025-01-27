@@ -8,11 +8,10 @@ describe("Endorse Certificate Schema", () => {
 
     it("should return no errors when data is valid", () => {
         const validForm: EndorseCertificateFormModel = {
-            confirmation: "understdood"
+            confirmation: "understdood",
+            _csrf: "abc123"
         }
-
         const errors: ValidationResult = formSchema.validate(validForm)
-
         assert.isUndefined(errors.error)
     })
 

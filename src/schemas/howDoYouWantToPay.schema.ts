@@ -12,5 +12,10 @@ export const howDoYouWantToPaySchema: Joi.ObjectSchema = Joi.object({
             "any.required": ERROR_MESSAGE,
             "any.only": ERROR_MESSAGE,
             "string.empty": ERROR_MESSAGE
+        }),
+    _csrf: Joi.string()
+        .optional()
+        .messages({
+            "any.required": "There was a problem submitting your form"
         })
 })

@@ -1,23 +1,27 @@
 import "reflect-metadata"
 
-import { createLoggerMiddleware } from "@companieshouse/structured-logging-node"
-import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
+import IORedis from "ioredis"
 import bodyParser from "body-parser"
 import cookieParser from "cookie-parser"
 import { Application, NextFunction, Request, Response } from "express"
 import helmet from "helmet"
-import { ContentSecurityPolicyOptions } from "helmet/dist/middlewares/content-security-policy"
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { provide } from "inversify-binding-decorators"
 import nocache from "nocache"
 import { v4 as uuidv4 } from "uuid"
+import { ContentSecurityPolicyOptions } from "helmet/dist/middlewares/content-security-policy"
+
+import { createLoggerMiddleware } from "@companieshouse/structured-logging-node"
+import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
+import { CsrfProtectionMiddleware } from "@companieshouse/web-security-node"
+import { SessionStore } from "@companieshouse/node-session-handler"
 import CustomServerMiddlewareLoader from "./customServerMiddlewareLoader.middleware"
 import NunjucksLoader from "./nunjucksLoader.middleware"
-
-import { APP_NAME } from "app/constants/app.const"
+import { APP_NAME, CSRF_ENABLED } from "app/constants/app.const"
 import PiwikConfig from "app/models/piwikConfig"
 import TYPES from "app/types"
+import { getEnvOrThrow } from "app/utils/env.util"
 
 @provide(ServerMiddlewareLoader)
 export default class ServerMiddlewareLoader {
@@ -32,23 +36,31 @@ export default class ServerMiddlewareLoader {
     }
 
     public loadServerMiddleware (app: Application, directory: string): void {
+
         const nonce: string = uuidv4()
 
         app.use(bodyParser.json())
         app.use(bodyParser.urlencoded({ extended: true }))
         app.use(cookieParser())
         app.use(createLoggerMiddleware(APP_NAME))
+
         this.setHeaders(app, nonce)
-
         this.customServerMiddlewareLoader.loadCustomServerMiddleware(app)
+        const sessionStore = new SessionStore(new IORedis(`${getEnvOrThrow("CACHE_SERVER")}`))
 
+        const csrfProtectionMiddleware = CsrfProtectionMiddleware({
+            sessionStore,
+            enabled: CSRF_ENABLED,
+            sessionCookieName: getEnvOrThrow("COOKIE_NAME")
+        })
+
+        app.use(csrfProtectionMiddleware)
         this.nunjucks.configureNunjucks(app, directory, nonce)
     }
 
     public configureErrorHandling (app: Application): void {
         app.use((err: any, _: Request, res: Response, _2: NextFunction) => {
             this.logger.error(`${err.constructor.name} - ${err.message}`)
-
             return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).render("error")
         })
     }
@@ -59,7 +71,6 @@ export default class ServerMiddlewareLoader {
 
     private setHeaders (app: Application, nonce: string): void {
         const ONE_YEAR_SECONDS = 31536000
-
         app.use(nocache())
         app.use(
             helmet({

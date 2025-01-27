@@ -8,9 +8,7 @@ import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 describe("Pay By Account Schema", () => {
     it("should return no errors when data is valid", () => {
         const validForm: PayByAccountDetailsFormModel = generatePayByAccountDetailsForm()
-
         const errors: ValidationResult = payByAccountDetailsSchema.validate(validForm)
-
         assert.isUndefined(errors.error)
     })
 

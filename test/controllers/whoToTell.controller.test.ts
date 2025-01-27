@@ -12,6 +12,9 @@ import ValidationErrors from "app/models/view/validationErrors.model"
 import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from "app/paths"
 import formSchema from "app/schemas/whoToTell.schema"
 import FormValidator from "app/utils/formValidator.util"
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+
+mockCsrfMiddleware.restore()
 
 describe("WhoToTellController", () => {
     describe("GET - ensure that page loads correctly", () => {

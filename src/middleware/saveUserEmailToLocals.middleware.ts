@@ -7,7 +7,6 @@ export default function SaveUserEmailToLocals (sessionService: SessionService): 
         if (req.session) {
             res.locals.userEmail = sessionService.getUserEmail(req)
         }
-
         return next()
     }
 }
