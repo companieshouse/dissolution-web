@@ -20,6 +20,9 @@
 
       {% include 'components/errors/error-summary.njk' %}
       <form method="post">
+
+        {% include "components/csrf_token.njk" %}
+        
         {{
           govukRadios({
             name: "paymentType",

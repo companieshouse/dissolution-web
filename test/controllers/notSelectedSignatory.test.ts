@@ -23,7 +23,7 @@ import {
     generateViewApplicationStatusModel,
     generateViewApplicationStatusSignatory
 } from "test/fixtures/viewApplicationStatus.fixtures"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 

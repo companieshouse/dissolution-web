@@ -28,7 +28,7 @@ import SessionService from "app/services/session/session.service"
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
 import { generateDissolutionConfirmation } from "test/fixtures/session.fixtures"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 
