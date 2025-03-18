@@ -6,7 +6,7 @@ import request from "supertest"
 import { createApp } from "./helpers/application.factory"
 import "app/controllers/landing.controller"
 import { ROOT_URI, WHO_TO_TELL_URI } from "app/paths"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 

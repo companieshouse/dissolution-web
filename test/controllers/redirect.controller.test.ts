@@ -33,7 +33,7 @@ import SessionService from "app/services/session/session.service"
 
 import { generateApprovalModel, generateDissolutionGetResponse, generateGetDirector } from "test/fixtures/dissolutionApi.fixtures"
 import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 

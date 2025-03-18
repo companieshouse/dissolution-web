@@ -18,7 +18,7 @@ import SessionService from "app/services/session/session.service"
 
 import { createApp } from "test/controllers/helpers/application.factory"
 import { generateDirectorToSign, generateDissolutionSession } from "test/fixtures/session.fixtures"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 

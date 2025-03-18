@@ -23,7 +23,7 @@ import FormValidator from "app/utils/formValidator.util"
 
 import { generateApprovalModel } from "test/fixtures/dissolutionApi.fixtures"
 import { generateDissolutionSession } from "test/fixtures/session.fixtures"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 

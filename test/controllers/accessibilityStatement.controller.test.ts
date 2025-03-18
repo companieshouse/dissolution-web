@@ -4,7 +4,7 @@ import request from "supertest"
 import { createApp } from "./helpers/application.factory"
 import "app/controllers/accessibilityStatement.controller"
 import { ACCESSIBILITY_STATEMENT_URI } from "app/paths"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 
 mockCsrfMiddleware.restore()
 
