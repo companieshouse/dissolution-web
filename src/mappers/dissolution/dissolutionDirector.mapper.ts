@@ -12,7 +12,8 @@ export default class DissolutionDirectorMapper {
 
     public mapToChangeDetailsForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
         return this.isSigningOnBehalf(signatory)
-            ? this.mapToOnBehalfForm(signatory) : this.mapToWillSignForm(signatory)
+            ? this.mapToOnBehalfForm(signatory)
+            : this.mapToWillSignForm(signatory)
     }
 
     private isSigningOnBehalf (signatory: DissolutionGetDirector): boolean {

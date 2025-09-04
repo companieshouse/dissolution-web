@@ -12,7 +12,7 @@ export class HealthcheckController extends BaseHttpController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async healthcheck (): Promise<void> {
         const status: number = await this.isRedisHealthy() ? StatusCodes.OK : StatusCodes.INTERNAL_SERVER_ERROR
 

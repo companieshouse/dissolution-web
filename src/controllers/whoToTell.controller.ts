@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 import BaseController from "./base.controller"
 
 import WhoToTellFormModel from "app/models/form/whoToTell.model"
@@ -24,12 +24,12 @@ export class WhoToTellController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         return this.renderView()
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() body: WhoToTellFormModel): Promise<string | RedirectResult> {
         const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
         if (errors) {

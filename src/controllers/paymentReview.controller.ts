@@ -1,6 +1,6 @@
 import { inject } from "inversify"
 import { controller, httpGet, httpPost } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 import { v4 as uuidv4 } from "uuid"
 import BaseController from "./base.controller"
 
@@ -31,7 +31,7 @@ export class PaymentReviewController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<RedirectResult|string> {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
@@ -45,7 +45,7 @@ export class PaymentReviewController extends BaseController {
         return this.renderView(paymentSummary)
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (): Promise<RedirectResult> {
         if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
             return this.redirect(HOW_DO_YOU_WANT_TO_PAY_URI)

@@ -13,42 +13,6 @@ import { APP_NAME } from "app/constants/app.const"
 import TYPES from "app/types"
 import { addFilters, addGlobals } from "app/utils/nunjucks.util"
 
-export const createApp = (configureBindings?: (container: Container) => void): Application => {
-    const container: Container = new Container()
-
-    mockEnvVars(container)
-    mockMiddlewares(container)
-
-    container.load(buildProviderModule())
-  configureBindings?.(container) // eslint-disable-line
-
-  return new InversifyExpressServer(container)
-      .setConfig(server => {
-
-          server.use(bodyParser.json())
-          server.use(bodyParser.urlencoded({ extended: false }))
-
-          server.set("view engine", "njk")
-
-          const env: nunjucks.Environment = nunjucks.configure(
-              [
-                  "src/views",
-                  "node_modules/govuk-frontend",
-                  "node_modules/govuk-frontend/components",
-                  "node_modules/@companieshouse"
-              ],
-              {
-                  autoescape: true,
-                  express: server
-              }
-          )
-
-          addFilters(env)
-          addGlobals(env)
-      })
-      .build()
-}
-
 const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL")
     container.bind(TYPES.CHS_URL).toConstantValue("CHS_URL")
@@ -68,4 +32,40 @@ const mockMiddlewares = (container: Container): void => {
     container.bind(TYPES.SessionMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
     container.bind(TYPES.AuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
     container.bind(TYPES.CompanyAuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
+}
+
+export const createApp = (configureBindings?: (container: Container) => void): Application => {
+    const container: Container = new Container()
+
+    mockEnvVars(container)
+    mockMiddlewares(container)
+
+    container.load(buildProviderModule())
+  configureBindings?.(container) // eslint-disable-line
+
+    return new InversifyExpressServer(container)
+        .setConfig(server => {
+
+            server.use(bodyParser.json())
+            server.use(bodyParser.urlencoded({ extended: false }))
+
+            server.set("view engine", "njk")
+
+            const env: nunjucks.Environment = nunjucks.configure(
+                [
+                    "src/views",
+                    "node_modules/govuk-frontend",
+                    "node_modules/govuk-frontend/components",
+                    "node_modules/@companieshouse"
+                ],
+                {
+                    autoescape: true,
+                    express: server
+                }
+            )
+
+            addFilters(env)
+            addGlobals(env)
+        })
+        .build()
 }

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import { NotFoundError } from "app/errors/notFoundError.error"
@@ -41,7 +41,7 @@ export class PayByAccountDetailsController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string | RedirectResult> {
 
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
@@ -55,7 +55,7 @@ export class PayByAccountDetailsController extends BaseController {
         return this.renderView()
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() form: PayByAccountDetailsFormModel): Promise<string | RedirectResult> {
         const errors: Optional<ValidationErrors> = this.validator.validate(form, payByAccountDetailsSchema)
         if (errors) {

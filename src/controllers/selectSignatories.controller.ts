@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 import BaseController from "./base.controller"
 
 import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper"
@@ -38,7 +38,7 @@ export class SelectSignatoriesController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const officerType: OfficerType = session.officerType!
@@ -48,7 +48,7 @@ export class SelectSignatoriesController extends BaseController {
         return this.renderView(officerType, signatories, session.selectSignatoriesForm)
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() body: SelectSignatoriesFormModel): Promise<string | RedirectResult> {
         if (typeof body.signatories === "string") {
             body.signatories = [body.signatories]

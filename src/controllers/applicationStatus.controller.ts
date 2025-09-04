@@ -1,6 +1,6 @@
 import { inject } from "inversify"
 import { controller, httpGet, requestParam } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
@@ -22,8 +22,8 @@ export class ApplicationStatusController extends BaseController {
         super()
     }
 
-    @httpGet('/:signatoryId/change')
-    public async change (@requestParam('signatoryId') signatoryId: string): Promise<RedirectResult> {
+    @httpGet("/:signatoryId/change")
+    public async change (@requestParam("signatoryId") signatoryId: string): Promise<RedirectResult> {
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
         dissolutionSession.signatoryIdToEdit = signatoryId
@@ -33,8 +33,8 @@ export class ApplicationStatusController extends BaseController {
         return super.redirect(CHANGE_DETAILS_URI)
     }
 
-    @httpGet('/:signatoryEmail/send-email')
-    public async resend (@requestParam('signatoryEmail') signatoryEmail: string): Promise<RedirectResult> {
+    @httpGet("/:signatoryEmail/send-email")
+    public async resend (@requestParam("signatoryEmail") signatoryEmail: string): Promise<RedirectResult> {
 
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 

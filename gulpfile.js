@@ -3,7 +3,6 @@ const ts = require('gulp-typescript');
 const sass = require('gulp-sass');
 const del = require('del');
 sass.compiler = require('sass');
-nodemon = require('gulp-nodemon');
 const tsProject = ts.createProject('tsconfig.prod.json');
 const paths = {
     build: ['dist'],
@@ -19,14 +18,6 @@ const paths = {
 gulp.task('clean:build', async function () {
     return del.sync(paths.build);
 });
-
-gulp.task('start:watch', async () => nodemon({
-    script: paths.build + '/app.js',
-    watch: paths.src,
-    ext: 'ts, njk',
-    tasks: ['build'],
-    env: { 'DEBUG': 'Application,Request,Response' }
-}));
 
 gulp.task('copy-views', function () {
     return gulp.src(paths.pages + '/**/*').pipe(gulp.dest(paths.build + '/views'));

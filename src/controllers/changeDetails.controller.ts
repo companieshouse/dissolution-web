@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 import BaseController from "./base.controller"
 
 import { NotFoundError } from "app/errors/notFoundError.error"
@@ -36,7 +36,7 @@ export class ChangeDetailsController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
@@ -51,7 +51,7 @@ export class ChangeDetailsController extends BaseController {
         return this.renderView(session.officerType!, signatory.name, form)
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() body: ChangeDetailsFormModel): Promise<string | RedirectResult> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
