@@ -4,8 +4,7 @@ import ApplicationLogger from "@companieshouse/structured-logging-node/lib/Appli
 import { Application } from "express"
 import { inject, Container } from "inversify"
 import { provide } from "inversify-binding-decorators"
-import { InversifyExpressServer } from "inversify-express-utils"
-import ServerMiddlewareLoader from "./middleware/serverMiddlewareLoader.middleware"
+import { createInversifyExpressServer } from "./serverFactory"
 import Optional from "./models/optional"
 
 import TYPES from "app/types"
@@ -14,17 +13,12 @@ import TYPES from "app/types"
 export default class Server {
 
     public constructor (
-    @inject(ServerMiddlewareLoader) private middlewareLoader: ServerMiddlewareLoader,
-    @inject(TYPES.NODE_ENV) private NODE_ENV: Optional<string>,
-    @inject(TYPES.PORT) private PORT: number,
-    @inject(ApplicationLogger) private logger: ApplicationLogger) {}
+        @inject(TYPES.NODE_ENV) private NODE_ENV: Optional<string>,
+        @inject(TYPES.PORT) private PORT: number,
+        @inject(ApplicationLogger) private logger: ApplicationLogger) {}
 
     public start (container: Container): void {
-        const server: Application = new InversifyExpressServer(container)
-            .setConfig((app: Application) => this.middlewareLoader.loadServerMiddleware(app, __dirname))
-            .setErrorConfig((app: Application) => this.middlewareLoader.configureErrorHandling(app))
-            .build()
-
+        const server: Application = createInversifyExpressServer(container)
         server.listen(this.PORT, () => this.logStartMessage())
     }
 
