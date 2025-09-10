@@ -16,7 +16,6 @@ package-install:
 
 .PHONY: build
 build: package-install lint
-	npm i
 	npm run build
 
 .PHONY: lint
