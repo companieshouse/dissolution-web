@@ -18,7 +18,10 @@
     "lint:scss": "sass-lint './src/public/sass/**/*.scss' --verbose --ignore 'node_modules/**/*.scss'",
     "test": "mocha 'test/**/*.test.ts'",
     "test:coverage": "nyc npm test",
-    "analyse-code": "sonar-scanner"
+    "analyse-code": "sonar-scanner",
+    "sonarqube-base-branch": "sonar-scanner",
+    "sonarqube-pull-request": "sonar-scanner -D sonar.pullrequest.base=main",
+    "sonarqube": "branch=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD); if [[ $branch == \"HEAD\" ]]; then echo $branch && npm run sonarqube-base-branch; else echo $branch && npm run sonarqube-pull-request; fi;"
   },
   "dependencies": {
     "@companieshouse/api-sdk-node": "^2.0.222",
