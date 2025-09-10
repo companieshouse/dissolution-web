@@ -15,7 +15,7 @@ package-install:
 	npm install
 
 .PHONY: build
-build:	package-install lint
+build: package-install lint
 	npm run build
 
 .PHONY: lint
@@ -26,7 +26,7 @@ lint:
 test: test-unit
 
 .PHONY: test-unit
-test-unit:
+test-unit: package-install
 	npm run test:coverage
 
 .PHONY: security-check
