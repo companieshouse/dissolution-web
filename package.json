@@ -18,9 +18,9 @@
     "lint:scss": "sass-lint './src/public/sass/**/*.scss' --verbose --ignore 'node_modules/**/*.scss'",
     "test": "mocha 'test/**/*.test.ts'",
     "test:coverage": "nyc npm test",
-    "analyse-code": "branch=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD); if [[ $branch == \"HEAD\" ]]; then echo $branch && npm run sonarqube-base-branch; else echo $branch && npm run sonarqube-pull-request; fi;",
     "sonarqube-base-branch": "sonar-scanner",
-    "sonarqube-pull-request": "sonar-scanner -D sonar.pullrequest.base=main"
+    "sonarqube-pull-request": "sonar-scanner -D sonar.pullrequest.base=main",
+    "sonarqube": "branch=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD); if [[ $branch == \"HEAD\" ]]; then echo $branch && npm run sonarqube-base-branch; else echo $branch && npm run sonarqube-pull-request; fi;"
   },
   "dependencies": {
     "@companieshouse/api-sdk-node": "^2.0.222",
@@ -92,7 +92,7 @@
     "sass": "^1.59.2",
     "sass-lint": "^1.13.1",
     "sinon": "^9.2.1",
-    "sonarqube-scanner": "^2.7.0",
+    "sonarqube-scanner": "^3.3.0",
     "supertest": "^6.0.1",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.0.0",
