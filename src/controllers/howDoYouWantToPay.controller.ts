@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 import { v4 as uuidv4 } from "uuid"
 
 import BaseController from "app/controllers/base.controller"
@@ -39,7 +39,7 @@ export class HowDoYouWantToPayController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string | RedirectResult> {
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
             return Promise.reject(new NotFoundError("Feature toggle not enabled"))
@@ -54,7 +54,7 @@ export class HowDoYouWantToPayController extends BaseController {
         return this.renderView(dissolutionSession.howDoYouWantToPayForm)
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() body: HowDoYouWantToPayFormModel): Promise<string | RedirectResult> {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 

@@ -30,7 +30,7 @@ export class ViewFinalConfirmationController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!

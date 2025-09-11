@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 import BaseController from "./base.controller"
 
 import OfficerType from "app/models/dto/officerType.enum"
@@ -34,7 +34,7 @@ export class DefineSignatoryInfoController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const officerType: OfficerType = session.officerType!
@@ -44,7 +44,7 @@ export class DefineSignatoryInfoController extends BaseController {
         return this.renderView(officerType, signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() body: DefineSignatoryInfoFormModel): Promise<string | RedirectResult> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const officerType: OfficerType = session.officerType!

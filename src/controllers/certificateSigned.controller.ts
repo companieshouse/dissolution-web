@@ -27,7 +27,7 @@ export class CertificateSignedController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!

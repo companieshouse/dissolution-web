@@ -1,6 +1,6 @@
 import { inject } from "inversify"
 import { controller, httpGet, queryParam } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
@@ -33,7 +33,7 @@ export class RedirectController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<RedirectResult> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session)
@@ -57,11 +57,11 @@ export class RedirectController extends BaseController {
         }
     }
 
-    @httpGet('/payment-callback')
+    @httpGet("/payment-callback")
     public async getPaymentCallback (
-    @queryParam('state') state: string,
-    @queryParam('status') status: PaymentStatus,
-    @queryParam('ref') reference: string): Promise<RedirectResult> {
+    @queryParam("state") state: string,
+    @queryParam("status") status: PaymentStatus,
+    @queryParam("ref") reference: string): Promise<RedirectResult> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
         if (session.paymentStateUUID !== state) {

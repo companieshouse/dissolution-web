@@ -9,7 +9,7 @@
     "parser": "@typescript-eslint/parser",
     "overrides": [
          {
-            "files": ["*.spec.ts"],
+            "files": ["*.spec.ts", "*.test.ts"],
             "rules": {
                 "no-unused-expressions": "off"
             }
@@ -24,7 +24,13 @@
         "no-useless-constructor": "off",
         "camelcase": "off",
         "padded-blocks": "off",
-        "prefer-promise-reject-errors": "off"
+        "prefer-promise-reject-errors": "off",
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": ["error", { 
+            "functions": false, 
+            "classes": false, 
+            "variables": true 
+        }]
     },
     "plugins": [
         "@typescript-eslint"
@@ -33,6 +39,7 @@
         "node": true,
         "commonjs": true,
         "mocha": true,
-        "es6": true
+        "es6": true,
+        "browser": true
     }
 }

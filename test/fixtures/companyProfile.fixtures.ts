@@ -24,6 +24,7 @@ export function generateCompanyProfile (): CompanyProfile {
         sicCodes: [],
         hasBeenLiquidated: false,
         type: ClosableCompanyType.PLC,
+        subtype: "public-limited-company",
         hasCharges: false,
         hasInsolvencyHistory: false,
         registeredOfficeAddress: generateRegisteredOfficeAddress(),

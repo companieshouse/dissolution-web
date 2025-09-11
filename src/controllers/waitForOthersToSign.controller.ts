@@ -1,6 +1,6 @@
 import { inject } from "inversify"
 import { controller, httpGet } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
@@ -31,7 +31,7 @@ export class WaitForOthersToSignController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<RedirectResult|string> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!

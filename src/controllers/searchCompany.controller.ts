@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { inject } from "inversify"
 import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import SearchCompanyFormModel from "app/models/form/searchCompany.model"
@@ -33,12 +33,12 @@ export class SearchCompanyController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         return this.renderView()
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (@requestBody() body: SearchCompanyFormModel): Promise<string | RedirectResult> {
         body.companyNumber = this.companyNumberSanitizer.sanitizeCompany(body.companyNumber!)
         const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)

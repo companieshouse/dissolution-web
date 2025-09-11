@@ -25,7 +25,7 @@ export class ViewCompanyInformationController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const token: string = this.session.getAccessToken(this.httpContext.request)
@@ -43,7 +43,7 @@ export class ViewCompanyInformationController extends BaseController {
         return super.render("view-company-information", viewModel)
     }
 
-    @httpPost('')
+    @httpPost("")
     public post (): void {
         this.httpContext.response.redirect(REDIRECT_GATE_URI)
     }

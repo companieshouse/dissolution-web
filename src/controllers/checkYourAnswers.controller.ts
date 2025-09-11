@@ -1,6 +1,6 @@
 import { inject } from "inversify"
 import { controller, httpGet, httpPost } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import CheckYourAnswersDirectorMapper from "app/mappers/check-your-answers/checkYourAnswersDirector.mapper"
@@ -25,7 +25,7 @@ export class CheckYourAnswersController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<string> {
         const viewModel: ViewModel = {
             backUri: this.getBackLink(),
@@ -40,7 +40,7 @@ export class CheckYourAnswersController extends BaseController {
         return session.isApplicantADirector && !session.isMultiDirector ? SELECT_DIRECTOR_URI : DEFINE_SIGNATORY_INFO_URI
     }
 
-    @httpPost('')
+    @httpPost("")
     public async post (): Promise<RedirectResult> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!

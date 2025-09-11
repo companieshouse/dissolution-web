@@ -1,6 +1,6 @@
 import { inject } from "inversify"
 import { controller, httpGet } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/dts/results"
+import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model"
@@ -17,7 +17,7 @@ export class CertificateDownloadController extends BaseController {
         super()
     }
 
-    @httpGet('')
+    @httpGet("")
     public async get (): Promise<RedirectResult> {
         const confirmation: DissolutionConfirmation = this.session.getDissolutionSession(this.httpContext.request)!.confirmation!
 

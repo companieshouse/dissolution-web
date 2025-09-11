@@ -15,17 +15,17 @@ interface SignedUrlParams {
 @provide(S3Service)
 export default class S3Service {
 
-  private readonly SIGNED_URL_EXPIRY_MINS: number = 60 * 2
+    private readonly SIGNED_URL_EXPIRY_MINS: number = 60 * 2
 
-  public constructor (@inject(TYPES.S3) private s3: S3) {}
+    public constructor (@inject(TYPES.S3) private s3: S3) {}
 
-  public async generateSignedUrl (bucket: string, key: string): Promise<string> {
-      const params: SignedUrlParams = {
-          Bucket: bucket,
-          Key: key,
-          Expires: this.SIGNED_URL_EXPIRY_MINS
-      }
+    public async generateSignedUrl (bucket: string, key: string): Promise<string> {
+        const params: SignedUrlParams = {
+            Bucket: bucket,
+            Key: key,
+            Expires: this.SIGNED_URL_EXPIRY_MINS
+        }
 
-      return this.s3.getSignedUrlPromise("getObject", params)
-  }
+        return this.s3.getSignedUrlPromise("getObject", params)
+    }
 }
