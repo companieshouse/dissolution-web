@@ -101,4 +101,3 @@ export class DefineSignatoryInfoController extends BaseController {
         return JSON.stringify(session.defineSignatoryInfoForm) !== JSON.stringify(body)
     }
 }
-
