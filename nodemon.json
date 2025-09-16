@@ -1,6 +1,6 @@
 {
-  "exec": "npm run build && ts-node ./src/bin/nodemon-entry.ts",
-  "ext": "ts,html,njk,js",
+  "exec": "ts-node ./src/bin/nodemon-entry.ts",
+  "ext": "ts,html,njk,js,json",
   "watch": ["./src", "package.json"],
   "events": {
     "restart": "echo '🔄 '  Nodemon Restarting...",
