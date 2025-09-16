@@ -9,6 +9,10 @@ describe("Bootstrap", () => {
 
     afterEach(() => {
         sinon.restore()
+        process.removeAllListeners("uncaughtException")
+        const bootstrapPath = require.resolve("../src/bootstrap")
+        delete require.cache[bootstrapPath]
+
     })
 
     describe("getPaths", () => {
@@ -64,6 +68,54 @@ describe("Bootstrap", () => {
             const mockTsConfig = {
                 compilerOptions: {
                     target: "es6"
+                }
+            }
+            mockModuleLoad(mockTsConfig)
+            const { getPaths } = require("../src/bootstrap")
+            assert.deepEqual(getPaths(), expectedPaths)
+        })
+
+        it("should return default paths when tsconfig.json has paths set to null", () => {
+            const expectedPaths = { "app/*": ["./*"] }
+            const mockTsConfig = {
+                compilerOptions: {
+                    paths: null
+                }
+            }
+            mockModuleLoad(mockTsConfig)
+            const { getPaths } = require("../src/bootstrap")
+            assert.deepEqual(getPaths(), expectedPaths)
+        })
+
+        it("should return default paths when tsconfig.json has paths set to undefined", () => {
+            const expectedPaths = { "app/*": ["./*"] }
+            const mockTsConfig = {
+                compilerOptions: {
+                    paths: undefined
+                }
+            }
+            mockModuleLoad(mockTsConfig)
+            const { getPaths } = require("../src/bootstrap")
+            assert.deepEqual(getPaths(), expectedPaths)
+        })
+
+        it("should return empty paths object when tsconfig.json has empty paths object", () => {
+            const expectedPaths = {}
+            const mockTsConfig = {
+                compilerOptions: {
+                    paths: {}
+                }
+            }
+            mockModuleLoad(mockTsConfig)
+            const { getPaths } = require("../src/bootstrap")
+            assert.deepEqual(getPaths(), expectedPaths)
+        })
+
+        it("should return default paths when tsconfig.json has paths set to false", () => {
+            const expectedPaths = { "app/*": ["./*"] }
+            const mockTsConfig = {
+                compilerOptions: {
+                    paths: false
                 }
             }
             mockModuleLoad(mockTsConfig)
