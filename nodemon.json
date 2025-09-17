@@ -1,6 +1,6 @@
 {
-  "exec": "node -r tsconfig-paths/register -r ts-node/register src/bin/nodemon-entry.ts",
-  "ext": "ts,html,njk,",
+  "exec": "ts-node ./src/bin/nodemon-entry.ts",
+  "ext": "ts,html,njk,js,json",
   "watch": ["./src", "package.json"],
   "events": {
     "restart": "echo '🔄 '  Nodemon Restarting...",

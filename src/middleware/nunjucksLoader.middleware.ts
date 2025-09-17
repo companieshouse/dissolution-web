@@ -35,6 +35,7 @@ export default class NunjucksLoader {
 
         const env: nunjucks.Environment = nunjucks.configure(
             [
+                "src/views", // for development
                 "dist/views",
                 "node_modules/govuk-frontend",
                 "node_modules/govuk-frontend/components",

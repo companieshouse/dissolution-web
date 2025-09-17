@@ -17,6 +17,7 @@
     "lint:scss": "sass-lint './src/public/sass/**/*.scss' --verbose --ignore 'node_modules/**/*.scss'",
     "test": "mocha 'test/**/*.test.ts'",
     "test:coverage": "nyc npm test",
+    "start:watch": "nodemon",
     "chs-dev": "nodemon --legacy-watch",
     "sonarqube-base-branch": "sonar-scanner",
     "sonarqube-pull-request": "sonar-scanner -D sonar.pullrequest.base=main",
@@ -109,5 +110,16 @@
     "merge": "^2.1.1",
     "braces": "^3.0.0",
     "ajv": "^6.12.3"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "./src"
+    ],
+    "ext": "ts,js,json,njk,scss,env",
+    "legacyWatch": true,
+    "ignore": [
+      "**/*.test.ts"
+    ],
+    "exec": "node --inspect=0 -r ts-node/register src/app.ts"
   }
 }
