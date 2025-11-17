@@ -20,7 +20,7 @@ const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.DISSOLUTIONS_API_URL).toConstantValue("DISSOLUTIONS_API_URL")
     container.bind(TYPES.CHS_API_KEY).toConstantValue("some-api-key")
     container.bind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
-    container.bind(TYPES.LLDS01_FEE).toConstantValue("13")
+    container.bind(TYPES.LLDS01_AND_DS01_FEE).toConstantValue("13")
 
     const logger = createLogger(APP_NAME)
     container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)

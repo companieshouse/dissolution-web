@@ -66,7 +66,7 @@ export function initContainer (): Container {
     container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
 
     // Fee
-    container.bind<string>(TYPES.LLDS01_FEE).toConstantValue(getEnvOrThrow("LLDS01_FEE"))
+    container.bind<string>(TYPES.LLDS01_AND_DS01_FEE).toConstantValue(getEnvOrThrow("LLDS01_AND_DS01_FEE"))
 
     // Session
     const cookieConfig: CookieConfig = {

@@ -9,7 +9,7 @@ import { inject } from "inversify"
 export class LandingController extends BaseController {
 
     public constructor (
-    @inject(TYPES.LLDS01_FEE) private readonly llds01Fee: string
+    @inject(TYPES.LLDS01_AND_DS01_FEE) private readonly fee: string
     ) {
         super()
     }
@@ -18,7 +18,7 @@ export class LandingController extends BaseController {
     public async get (): Promise<string> {
         return super.render("landing", {
             redirectUrl: `${WHO_TO_TELL_URI}`,
-            LLDS01_FEE: this.llds01Fee
+            LLDS01_AND_DS01_FEE: this.fee
         })
     }
 }

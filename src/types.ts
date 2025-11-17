@@ -16,7 +16,7 @@ const TYPES = {
     SaveUserEmailToLocals: "SaveUserEmailToLocals",
     SessionMiddleware: "SessionMiddleware",
     S3: "S3",
-    LLDS01_FEE: "LLDS01_FEE"
+    LLDS01_AND_DS01_FEE: "LLDS01_AND_DS01_FEE"
 }
 
 export default TYPES
