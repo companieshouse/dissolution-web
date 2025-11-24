@@ -74,4 +74,16 @@ describe("getPaths", () => {
         const { getPaths } = freshRequire("../src/bootstrap")
         expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
     })
+
+    it("returns DEFAULT_PATHS when tsconfig = null (no throw)", () => {
+        stubTsConfigLoad(null, false)
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
+
+    it("returns DEFAULT_PATHS when compilerOptions is null/undefined", () => {
+        stubTsConfigLoad({ compilerOptions: null })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
 })
