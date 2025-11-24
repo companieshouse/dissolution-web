@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "This is a Node.js frontend application for the Companies House dissolution service.",
   "main": "dist/app.js",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "repository": {
     "url": "https://github.com/companieshouse/dissolution-web"
   },
@@ -24,10 +27,10 @@
     "sonarqube": "branch=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD); if [[ $branch == \"HEAD\" ]]; then echo $branch && npm run sonarqube-base-branch; else echo $branch && npm run sonarqube-pull-request; fi;"
   },
   "dependencies": {
-    "@companieshouse/api-sdk-node": "^2.0.282",
-    "@companieshouse/node-session-handler": "^5.2.5",
-    "@companieshouse/structured-logging-node": "^2.0.3",
-    "@companieshouse/web-security-node": "^4.4.11",
+    "@companieshouse/api-sdk-node": "^2.0.316",
+    "@companieshouse/node-session-handler": "^5.2.8",
+    "@companieshouse/structured-logging-node": "^2.0.4",
+    "@companieshouse/web-security-node": "^4.4.13",
     "@hapi/joi": "^17.1.1",
     "aws-sdk": "^2.792.0",
     "axios": "^1.12.0",
@@ -35,7 +38,7 @@
     "cookie-parser": "^1.4.7",
     "crypto": "^1.0.1",
     "dashify": "^2.0.0",
-    "express": "^4.21.1",
+    "express": "^4.21.2",
     "govuk-frontend": "^3.11.0",
     "helmet": "^4.2.0",
     "http-status-codes": "^2.1.4",
