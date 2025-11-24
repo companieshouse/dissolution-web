@@ -29,8 +29,8 @@ test: test-unit
 test-unit: package-install
 	npm run test:coverage
 
-.PHONY: security-check
-security-check:
+.PHONY: dependency-check
+dependency-check:
 	npm audit
 
 .PHONY: package
