@@ -1,126 +1,89 @@
-import { assert } from "chai"
-import * as sinon from "sinon"
+import { expect } from "chai"
+import sinon from "sinon"
+import { createRequire } from "module"
 
-describe("Bootstrap", () => {
-    beforeEach(() => {
-        const bootstrapPath = require.resolve("../src/bootstrap")
-        delete require.cache[bootstrapPath]
-    })
+// @ts-ignore
+const requireModule = createRequire(import.meta.url)
+const DEFAULT_PATHS = { "app/*": ["./*"] }
 
-    afterEach(() => {
-        sinon.restore()
-        process.removeAllListeners("uncaughtException")
-        const bootstrapPath = require.resolve("../src/bootstrap")
-        delete require.cache[bootstrapPath]
+function freshRequire (path: string) {
+    const resolved = requireModule.resolve(path)
+    delete requireModule.cache[resolved]
+    return requireModule(path)
+}
 
-    })
+const stubTsConfigLoad = (mock: any, throwError = false) => {
+    const Module = requireModule("module")
+    const originalLoad = Module._load
 
-    describe("getPaths", () => {
-        const mockModuleLoad = (mockReturn: any, shouldThrow: boolean = false) => {
-            const Module = require("module")
-            const originalLoad = Module._load
-
-            return sinon.stub(Module, "_load").callsFake((request: string, parent: any) => {
-                if (request.includes("tsconfig.json")) {
-                    if (shouldThrow) {
-                        throw new Error("Cannot find module")
-                    }
-                    return mockReturn
-                }
-                return originalLoad(request, parent)
-            })
+    return sinon.stub(Module, "_load").callsFake((request: string, parent: any) => {
+        if (request.endsWith("tsconfig.json")) {
+            if (throwError) {
+                const err = new Error("Cannot find module")
+                ;(err as any).code = "MODULE_NOT_FOUND"
+                throw err
+            }
+            return mock
         }
+        return originalLoad(request, parent)
+    })
+}
 
-        it("should return paths from tsconfig.json when file exists and has compilerOptions", () => {
-            const expectedPaths = {
-                "app/*": ["./*"],
-                "test/*": ["../test/*"]
-            }
-            const mockTsConfig = {
-                compilerOptions: {
-                    paths: expectedPaths
-                }
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+describe("getPaths", () => {
+    afterEach(() => sinon.restore())
 
-        it("should return default paths when tsconfig.json doesn't exist", () => {
-            const expectedPaths = { "app/*": ["./*"] }
-            mockModuleLoad(null, true)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns paths when tsconfig has valid compilerOptions.paths", () => {
+        const mock = { compilerOptions: { paths: { "app/*": ["./*"], "test/*": ["../test/*"] } } }
+        stubTsConfigLoad(mock)
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(mock.compilerOptions.paths)
+    })
 
-        it("should return default paths when tsconfig.json exists but has no compilerOptions", () => {
-            const expectedPaths = { "app/*": ["./*"] }
-            const mockTsConfig = {
-                include: ["src/**/*"]
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns DEFAULT_PATHS when tsconfig missing", () => {
+        stubTsConfigLoad(null, true)
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
 
-        it("should return default paths when tsconfig.json exists but has no paths", () => {
-            const expectedPaths = { "app/*": ["./*"] }
-            const mockTsConfig = {
-                compilerOptions: {
-                    target: "es6"
-                }
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns DEFAULT_PATHS when paths = null", () => {
+        stubTsConfigLoad({ compilerOptions: { paths: null } })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
 
-        it("should return default paths when tsconfig.json has paths set to null", () => {
-            const expectedPaths = { "app/*": ["./*"] }
-            const mockTsConfig = {
-                compilerOptions: {
-                    paths: null
-                }
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns DEFAULT_PATHS when paths = undefined", () => {
+        stubTsConfigLoad({ compilerOptions: { paths: undefined } })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
 
-        it("should return default paths when tsconfig.json has paths set to undefined", () => {
-            const expectedPaths = { "app/*": ["./*"] }
-            const mockTsConfig = {
-                compilerOptions: {
-                    paths: undefined
-                }
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns DEFAULT_PATHS when paths = false", () => {
+        stubTsConfigLoad({ compilerOptions: { paths: false } })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
 
-        it("should return empty paths object when tsconfig.json has empty paths object", () => {
-            const expectedPaths = {}
-            const mockTsConfig = {
-                compilerOptions: {
-                    paths: {}
-                }
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns empty object when paths = {}", () => {
+        stubTsConfigLoad({ compilerOptions: { paths: {} } })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal({})
+    })
 
-        it("should return default paths when tsconfig.json has paths set to false", () => {
-            const expectedPaths = { "app/*": ["./*"] }
-            const mockTsConfig = {
-                compilerOptions: {
-                    paths: false
-                }
-            }
-            mockModuleLoad(mockTsConfig)
-            const { getPaths } = require("../src/bootstrap")
-            assert.deepEqual(getPaths(), expectedPaths)
-        })
+    it("returns DEFAULT_PATHS when paths is invalid type (string)", () => {
+        stubTsConfigLoad({ compilerOptions: { paths: "invalid" } })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
+
+    it("returns DEFAULT_PATHS when tsconfig = null (no throw)", () => {
+        stubTsConfigLoad(null, false)
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
+    })
+
+    it("returns DEFAULT_PATHS when compilerOptions is null/undefined", () => {
+        stubTsConfigLoad({ compilerOptions: null })
+        const { getPaths } = freshRequire("../src/bootstrap")
+        expect(getPaths()).to.deep.equal(DEFAULT_PATHS)
     })
 })
