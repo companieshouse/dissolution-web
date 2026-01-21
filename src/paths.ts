@@ -14,6 +14,7 @@ export const NOT_SELECTED_SIGNATORY = `${ROOT_URI}/not-selected-signatory`
 // Pages
 export const ACCESSIBILITY_STATEMENT_URI = `${ROOT_URI}/accessibility-statement`
 export const WHO_TO_TELL_URI = `${ROOT_URI}/who-to-tell`
+export const STOP_SCREEN_BANK_ACCOUNT_URI = `${ROOT_URI}/stop-screen-bank-account`
 export const SEARCH_COMPANY_URI = `${ROOT_URI}/search-company`
 export const VIEW_COMPANY_INFORMATION_URI = `${ROOT_URI}/view-company-information`
 export const SELECT_DIRECTOR_URI = `${ROOT_URI}/select-director`

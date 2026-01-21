@@ -1,0 +1,50 @@
+{% extends 'layout.njk' %}
+
+{% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
+{% from 'govuk/components/breadcrumbs/macro.njk' import govukBreadcrumbs %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set title = "Stop Screen Bank Account - " + pageTitleSuffix %}
+
+{% block content %}
+  {{
+    govukBackLink({
+      text: "Back",
+      href: backUri
+    })
+  }}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include 'components/errors/error-summary.njk' %}
+
+      <h1 class="govuk-heading-xl">Company bank account access</h1>
+
+      {{
+        govukWarningText({
+            text: "You will not be able to access money in the company bank account once the company is dissolved.",
+            iconFallbackText: "Warning"
+      })
+            }}
+      <p class="govuk-body">Any money still in the account, and any other assets, will pass to the Crown. You'll have to restore the company to get anything back.</p>
+      <p class="govuk-body">By selecting continue, you are confirming that you have read and understood this information.</p>
+
+      <form method="post">
+
+        {% include "components/csrf_token.njk" %}
+
+        {{
+          govukButton({
+            text: 'Continue',
+            attributes: {
+              id: 'submit'
+            }
+          })
+        }}
+      </form>
+    </div>
+  </div>
+{% endblock %}
