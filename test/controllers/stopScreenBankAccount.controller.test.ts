@@ -23,8 +23,8 @@ describe("StopScreenBankAccountController", () => {
         it("should redirect to Search Company page", async () => {
             const app = createApp()
             const res = await request(app).post(STOP_SCREEN_BANK_ACCOUNT_URI)
-            expect(StatusCodes.MOVED_TEMPORARILY)
-            expect("Location", SEARCH_COMPANY_URI)
+            expect(res.status).to.equal(StatusCodes.MOVED_TEMPORARILY)
+            expect(res.header.location).to.equal(SEARCH_COMPANY_URI)
         })
     })
 })
