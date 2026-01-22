@@ -37,4 +37,3 @@ export class StopScreenBankAccountController extends BaseController {
     }
 }
 
-
