@@ -8,7 +8,7 @@ import SearchCompanyFormModel from "app/models/form/searchCompany.model"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, WHO_TO_TELL_URI } from "app/paths"
+import { SEARCH_COMPANY_URI, VIEW_COMPANY_INFORMATION_URI, STOP_SCREEN_BANK_ACCOUNT_URI } from "app/paths"
 import formSchema from "app/schemas/searchCompany.schema"
 import CompanyService from "app/services/company/company.service"
 import SessionService from "app/services/session/session.service"
@@ -57,7 +57,7 @@ export class SearchCompanyController extends BaseController {
 
     private async renderView (data?: SearchCompanyFormModel, errors?: ValidationErrors): Promise<string> {
         const viewModel: ViewModel = {
-            backUri: WHO_TO_TELL_URI,
+            backUri: STOP_SCREEN_BANK_ACCOUNT_URI,
             data,
             errors
         }
