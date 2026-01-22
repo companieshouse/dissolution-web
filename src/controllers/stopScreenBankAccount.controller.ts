@@ -36,5 +36,3 @@ export class StopScreenBankAccountController extends BaseController {
         return this.redirect(SEARCH_COMPANY_URI)
     }
 }
-
-
