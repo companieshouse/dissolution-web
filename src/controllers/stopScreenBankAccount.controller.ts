@@ -1,11 +1,8 @@
 import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
+import { controller, httpGet, httpPost } from "inversify-express-utils"
 import { RedirectResult } from "inversify-express-utils/lib/results"
 import BaseController from "app/controllers/base.controller"
-import ValidationErrors from "app/models/view/validationErrors.model"
 import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI, STOP_SCREEN_BANK_ACCOUNT_URI } from "app/paths"
-import FormValidator from "app/utils/formValidator.util"
 
 interface ViewModel {
 backUri?: string
