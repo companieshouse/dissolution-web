@@ -7,7 +7,7 @@ import BaseController from "./base.controller"
 import WhoToTellFormModel from "app/models/form/whoToTell.model"
 import Optional from "app/models/optional"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { ROOT_URI, WHO_TO_TELL_URI, STOP_SCREEN_BANK_ACCOUNT_URI } from "app/paths"
+import { ROOT_URI, WHO_TO_TELL_URI, SEARCH_COMPANY_URI } from "app/paths"
 import formSchema from "app/schemas/whoToTell.schema"
 import FormValidator from "app/utils/formValidator.util"
 
@@ -36,7 +36,7 @@ export class WhoToTellController extends BaseController {
             return this.renderView(body, errors)
         }
 
-        return this.redirect(STOP_SCREEN_BANK_ACCOUNT_URI)
+        return this.redirect(SEARCH_COMPANY_URI)
     }
 
     private async renderView (data?: WhoToTellFormModel, errors?: ValidationErrors): Promise<string> {
