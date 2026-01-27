@@ -9,7 +9,7 @@ import { createApp } from "./helpers/application.factory"
 import "app/controllers/whoToTell.controller"
 import WhoToTellFormModel from "app/models/form/whoToTell.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI } from "app/paths"
+import { STOP_SCREEN_BANK_ACCOUNT_URI, WHO_TO_TELL_URI } from "app/paths"
 import formSchema from "app/schemas/whoToTell.schema"
 import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
@@ -41,7 +41,7 @@ describe("WhoToTellController", () => {
             await request(app).post(WHO_TO_TELL_URI)
                 .send(testObject)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", SEARCH_COMPANY_URI)
+                .expect("Location", STOP_SCREEN_BANK_ACCOUNT_URI)
         })
     })
 
