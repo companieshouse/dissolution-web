@@ -11,7 +11,7 @@ export default class S3Service {
 
     private readonly SIGNED_URL_EXPIRY_MINS: number = 60 * 2
 
-    public constructor (@inject(TYPES.S3) private s3: S3Client) {}
+    public constructor (@inject(TYPES.S3) private readonly s3: S3Client) {}
 
     public async generateSignedUrl (bucket: string, key: string): Promise<string> {
         const command = new GetObjectCommand({
