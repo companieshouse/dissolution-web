@@ -23,6 +23,7 @@ describe("S3Service", () => {
     })
 
     it("should generate a Signed S3 URL using the provided bucket and key and return it", async () => {
+
         const signedUrl = "http://some-certificate-url"
         getSignedUrlStub.resolves(signedUrl)
 
