@@ -27,12 +27,13 @@
     "sonarqube": "branch=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD); if [[ $branch == \"HEAD\" ]]; then echo $branch && npm run sonarqube-base-branch; else echo $branch && npm run sonarqube-pull-request; fi;"
   },
   "dependencies": {
-    "@companieshouse/api-sdk-node": "^2.0.316",
+    "@companieshouse/api-sdk-node": "^2.0.324",
     "@companieshouse/node-session-handler": "^5.2.8",
     "@companieshouse/structured-logging-node": "^2.0.4",
-    "@companieshouse/web-security-node": "^4.4.13",
+    "@companieshouse/web-security-node": "^4.4.14",
     "@hapi/joi": "^17.1.1",
-    "aws-sdk": "^2.792.0",
+    "@aws-sdk/client-s3": "^3.974.0",
+    "@aws-sdk/s3-request-presigner": "^3.974.0",
     "axios": "^1.12.0",
     "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.7",
