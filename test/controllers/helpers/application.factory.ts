@@ -1,6 +1,6 @@
 import { createLogger } from "@companieshouse/structured-logging-node"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import S3 from "aws-sdk/clients/s3"
+import { S3Client } from "@aws-sdk/client-s3"
 import axios, { AxiosInstance } from "axios"
 import * as bodyParser from "body-parser"
 import { Application, NextFunction, Request, Response } from "express"
@@ -26,7 +26,7 @@ const mockEnvVars = (container: Container): void => {
     container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
     container.bind(TYPES.PAYMENTS_API_URL).toConstantValue("PAYMENTS_API_URL")
     container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
-    container.bind<S3>(TYPES.S3).toConstantValue(new S3())
+    container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client())
 }
 
 const mockMiddlewares = (container: Container): void => {

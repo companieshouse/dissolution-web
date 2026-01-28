@@ -4,7 +4,7 @@ import { CookieConfig, SessionMiddleware, SessionStore } from "@companieshouse/n
 import { createLogger } from "@companieshouse/structured-logging-node"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
 import { authMiddleware as commonAuthMiddleware } from "@companieshouse/web-security-node"
-import S3 from "aws-sdk/clients/s3"
+import { S3Client } from "@aws-sdk/client-s3"
 import axios, { AxiosInstance } from "axios"
 import { Container } from "inversify"
 import { buildProviderModule } from "inversify-binding-decorators"
@@ -57,7 +57,7 @@ export function initContainer (): Container {
     container.bind<number>(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(Number(getEnvOrThrow("PAY_BY_ACCOUNT_FEATURE_ENABLED")))
 
     // AWS
-    container.bind<S3>(TYPES.S3).toConstantValue(new S3({ region: getEnvOrThrow("ENV_REGION_AWS") }))
+    container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client({ region: getEnvOrThrow("ENV_REGION_AWS") }))
 
     // Utils
     const logger = createLogger(APP_NAME)
