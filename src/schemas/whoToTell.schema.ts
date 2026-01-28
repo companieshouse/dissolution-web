@@ -4,7 +4,7 @@ const formSchema = Joi.object({
     confirmation: Joi.string()
         .required()
         .messages({
-            "any.required": "You must agree to continue"
+            "any.required": "Confirm that the directors or members understand that they are responsible for notifying all interested parties"
         }),
     _csrf: Joi.string()
         .optional()
