@@ -30,6 +30,7 @@ describe("S3Service", () => {
         const result = await service.generateSignedUrl(BUCKET, KEY)
 
         const getObjectCommandInput = getSignedUrlStub.firstCall.args[1].input
+
         assert.strictEqual(getObjectCommandInput.Bucket, BUCKET)
         assert.strictEqual(getObjectCommandInput.Key, KEY)
         assert.strictEqual(getSignedUrlStub.firstCall.args[2].expiresIn, 120)
