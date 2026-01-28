@@ -1,6 +1,6 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { expect } from "chai"
+import { assert } from "chai"
 import sinon from "sinon"
 import S3Service from "app/services/aws/s3.service"
 
@@ -28,9 +28,15 @@ describe("S3Service", () => {
         getSignedUrlStub.resolves(signedUrl)
 
         const result = await service.generateSignedUrl(BUCKET, KEY)
-        expect(result).to.equal(signedUrl)
-        expect(getSignedUrlStub.calledOnce).to.be.true
-        expect(getSignedUrlStub.firstCall.args[1]).to.be.instanceOf(GetObjectCommand)
+
+        const getObjectCommandInput = getSignedUrlStub.firstCall.args[1].input
+        assert.strictEqual(getObjectCommandInput.Bucket, BUCKET)
+        assert.strictEqual(getObjectCommandInput.Key, KEY)
+        assert.strictEqual(getSignedUrlStub.firstCall.args[2].expiresIn, 120)
+
+        assert.strictEqual(result, signedUrl)
+        assert.isTrue(getSignedUrlStub.calledOnce)
+        assert.instanceOf(getSignedUrlStub.firstCall.args[1], GetObjectCommand)
     })
 
 })
