@@ -69,10 +69,12 @@ describe("SelectSignatoriesController", () => {
                 { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
                 { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
             ])
+            when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
 
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+                container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
             })
 
             const res = await request(app)
@@ -83,6 +85,8 @@ describe("SelectSignatoriesController", () => {
 
             assert.equal(htmlAssertHelper.getValue("#signatories"), DIRECTOR_1_ID)
             assert.equal(htmlAssertHelper.getValue("#signatories-2"), DIRECTOR_2_ID)
+            assert.equal(htmlAssertHelper.getText("#signatories-hint"), "More than half of the directors must sign, so you must select 2 or more of these directors.")
+            assert.isTrue(htmlAssertHelper.containsRawText("If a director cannot sign the application themselves"))
         })
 
         it("should render the select signatories page with directors for DS01", async () => {
@@ -105,7 +109,7 @@ describe("SelectSignatoriesController", () => {
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", "Which directors will be signing the application?"))
+            assert.isTrue(htmlAssertHelper.hasText("h1", "Which directors will sign the application?"))
         })
 
         it("should render the select signatories page with members for LLDS01", async () => {
@@ -128,7 +132,7 @@ describe("SelectSignatoriesController", () => {
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", "Which members will be signing the application?"))
+            assert.isTrue(htmlAssertHelper.hasText("h1", "Which members will sign the application?"))
         })
 
         it("should prepopulate the select signatories page with the selected signatories from session", async () => {
