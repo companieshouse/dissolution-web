@@ -14,14 +14,13 @@ function freshRequire (path: string) {
 
 const stubTsConfigLoad = (mock: any, throwError = false) => {
     const Module = requireModule("module")
-    
     const originalLoad = Module._load
 
     return sinon.stub(Module, "_load").callsFake((request: string, parent: any) => {
         if (request.endsWith("tsconfig.json")) {
             if (throwError) {
                 const err = new Error("Cannot find module")
-                ;(err as any).code = "MODULE_NOT_FOUND"
+                ;(err as any).code = "MODULE_NOT_FOUN"
                 throw err
             }
             return mock
