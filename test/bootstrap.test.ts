@@ -14,6 +14,7 @@ function freshRequire (path: string) {
 
 const stubTsConfigLoad = (mock: any, throwError = false) => {
     const Module = requireModule("module")
+    
     const originalLoad = Module._load
 
     return sinon.stub(Module, "_load").callsFake((request: string, parent: any) => {
