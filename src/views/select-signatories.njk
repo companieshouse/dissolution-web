@@ -6,7 +6,7 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 
-{% set title = "Which directors will be signing the application? - " + pageTitleSuffix %}
+{% set title = "Which " + officerType + "s will sign the application? - " + pageTitleSuffix %}
 
 {% block content %}
   {{
@@ -48,10 +48,10 @@
 
         {{
           govukDetails({
-            summaryHtml: '<div class="piwik-event" data-event-id="if-a-director-cannot-sign-link">If a director cannot sign the application themselves</div>',
-            html: '<p>Directors must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a director cannot sign. For example,
-            because they no longer have mental capacity. If there are not enough directors who are able to sign, you\'ll need to <a href="https://www.gov.uk/file-changes-to-a-company-with-companies-house"
-            class="govuk-link piwik-event" data-event-id="file-change-to-company-link" rel="noreferrer noopener" target="_blank">make changes to the company directors (opens in new tab)</a> before continuing
+            summaryHtml: '<div class="piwik-event" data-event-id="if-a-officer-cannot-sign-link">If a ' + officerType + ' cannot sign the application themselves</div>',
+            html: '<p>' + (officerType | capitalize) + 's must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a ' + officerType + ' cannot sign. For example,
+            because they no longer have mental capacity. If there are not enough ' + officerType + 's who are able to sign, you\'ll need to <a href="https://www.gov.uk/file-changes-to-a-company-with-companies-house"
+            class="govuk-link piwik-event" data-event-id="file-change-to-company-link" rel="noreferrer noopener" target="_blank">make changes to the company ' + officerType + 's (opens in new tab)</a> before continuing
             with this application.</p>'
           })
         }}
