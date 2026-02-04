@@ -10,8 +10,8 @@ export default function selectSignatoriesSchema (officerType: OfficerType, minSi
             .min(minSignatories)
             .items(Joi.string().required())
             .messages({
-                "any.required": `Select the ${officerType}s who will be signing the application.`,
-                "array.min": `Select more than half of the ${officerType}s to sign the application.`
+                "any.required": `Select the ${officerType}s who will sign the application.`,
+                "array.min": `Select ${minSignatories} or more ${officerType}s who will sign the application.`
             }),
         _csrf: Joi.string()
             .optional()

@@ -24,7 +24,7 @@ describe("Select Signatories Schema", () => {
         assert.equal(errors.error!.details.length, 1)
         assert.equal(errors.error!.details[0].context!.key, "signatories")
         assert.equal(errors.error!.details[0].type, `any.required`)
-        assert.equal(errors.error!.details[0].message, "Select the directors who will be signing the application.")
+        assert.equal(errors.error!.details[0].message, "Select the directors who will sign the application.")
     })
 
     it("should return an error when no signatories are provided for LLDS01", () => {
@@ -37,7 +37,7 @@ describe("Select Signatories Schema", () => {
         assert.equal(errors.error!.details.length, 1)
         assert.equal(errors.error!.details[0].context!.key, "signatories")
         assert.equal(errors.error!.details[0].type, `any.required`)
-        assert.equal(errors.error!.details[0].message, "Select the members who will be signing the application.")
+        assert.equal(errors.error!.details[0].message, "Select the members who will sign the application.")
     })
 
     it("should return an error when the minimum number of signatories is not provided for DS01", () => {
@@ -49,7 +49,7 @@ describe("Select Signatories Schema", () => {
         assert.equal(errors.error!.details.length, 1)
         assert.equal(errors.error!.details[0].context!.key, "signatories")
         assert.equal(errors.error!.details[0].type, `array.min`)
-        assert.equal(errors.error!.details[0].message, "Select more than half of the directors to sign the application.")
+        assert.equal(errors.error!.details[0].message, "Select 3 or more directors who will sign the application.")
     })
 
     it("should return an error when the minimum number of signatories is not provided for LLDS01", () => {
@@ -61,6 +61,6 @@ describe("Select Signatories Schema", () => {
         assert.equal(errors.error!.details.length, 1)
         assert.equal(errors.error!.details[0].context!.key, "signatories")
         assert.equal(errors.error!.details[0].type, `array.min`)
-        assert.equal(errors.error!.details[0].message, "Select more than half of the members to sign the application.")
+        assert.equal(errors.error!.details[0].message, "Select 3 or more members who will sign the application.")
     })
 })

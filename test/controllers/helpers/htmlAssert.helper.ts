@@ -41,7 +41,11 @@ export default class HtmlAssertHelper {
         return this.dom.window.document.querySelector(selector)
     }
 
-    private getText (selector: string): Optional<string> {
+    public getText (selector: string): Optional<string> {
         return this.getElement(selector)?.textContent?.trim()
+    }
+
+    public containsRawText (text: string): boolean {
+        return this.dom.window.document.documentElement.textContent?.includes(text) || false
     }
 }
