@@ -25,6 +25,7 @@ interface ViewModel {
     minSignatories: number
     data?: Optional<SelectSignatoriesFormModel>
     errors?: Optional<ValidationErrors>
+    isApplicantADirector?: boolean
 }
 
 @controller(SELECT_SIGNATORIES_URI)
@@ -43,11 +44,11 @@ export class SelectSignatoriesController extends BaseController {
     public async get (): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const officerType: OfficerType = session.officerType!
-
+        const isApplicantADirector: boolean = session.isApplicantADirector!
         const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
         const minSignatories: number = this.signatoryService.getMinimumNumberOfSignatories(signatories.length, session.selectDirectorForm!.director!)
 
-        return this.renderView(officerType, signatories, minSignatories, session.selectSignatoriesForm)
+        return this.renderView(officerType, signatories, minSignatories, isApplicantADirector, session.selectSignatoriesForm)
     }
 
     @httpPost("")
@@ -58,12 +59,13 @@ export class SelectSignatoriesController extends BaseController {
 
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const officerType: OfficerType = session.officerType!
+        const isApplicantADirector: boolean = session.isApplicantADirector!
         const signatories: DirectorDetails[] = await this.getSignatories(session.selectDirectorForm!.director!)
         const minSignatories: number = this.signatoryService.getMinimumNumberOfSignatories(signatories.length, session.selectDirectorForm!.director!)
 
-        const errors: Optional<ValidationErrors> = this.validate(body, officerType, minSignatories)
+        const errors: Optional<ValidationErrors> = this.validate(body, officerType, minSignatories, isApplicantADirector)
         if (errors) {
-            return this.renderView(officerType, signatories, minSignatories, body, errors)
+            return this.renderView(officerType, signatories, minSignatories, isApplicantADirector, body, errors)
         }
 
         this.updateSession(session, body, signatories)
@@ -86,6 +88,7 @@ export class SelectSignatoriesController extends BaseController {
         officerType: OfficerType,
         signatories: DirectorDetails[],
         minSignatories: number,
+        isApplicantADirector: boolean,
         data?: Optional<SelectSignatoriesFormModel>,
         errors?: Optional<ValidationErrors>
     ): Promise<string> {
@@ -93,6 +96,7 @@ export class SelectSignatoriesController extends BaseController {
             officerType,
             signatories,
             minSignatories,
+            isApplicantADirector,
             data,
             errors
         }
@@ -100,8 +104,8 @@ export class SelectSignatoriesController extends BaseController {
         return super.render("select-signatories", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
     }
 
-    private validate (body: SelectSignatoriesFormModel, officerType: OfficerType, minSignatories: number): Optional<ValidationErrors> {
-        return this.validator.validate(body, selectSignatoriesSchema(officerType, minSignatories))
+    private validate (body: SelectSignatoriesFormModel, officerType: OfficerType, minSignatories: number, isApplicantADirector: boolean): Optional<ValidationErrors> {
+        return this.validator.validate(body, selectSignatoriesSchema(officerType, minSignatories, !!isApplicantADirector))
     }
 
     private updateSession (session: DissolutionSession, body: SelectSignatoriesFormModel, signatories: DirectorDetails[]): void {
