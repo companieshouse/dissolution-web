@@ -67,7 +67,7 @@ export default function CompanyAuthMiddleware (
     }
 }
 
-function getCompanyNumber(session: Optional<DissolutionSession>, req: Request): string | undefined {
+function getCompanyNumber (session: Optional<DissolutionSession>, req: Request): string | undefined {
     return (req.query.companyNumber as string | undefined) ?? session?.companyNumber
 }
 
