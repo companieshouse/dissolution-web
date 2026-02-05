@@ -85,53 +85,75 @@ describe("SelectSignatoriesController", () => {
             assert.equal(htmlAssertHelper.getValue("#signatories-2"), DIRECTOR_2_ID)
         })
 
-        const pageCases = [
-            { officerType: OfficerType.DIRECTOR, label: "directors" },
-            { officerType: OfficerType.MEMBER, label: "members" }
+        const expectedContentCases = [
+            {
+                description: "DS01 journey (applicant is not a director)",
+                officerType: OfficerType.DIRECTOR,
+                isApplicantADirector: false,
+                expectedPageHeading: "Which directors will sign the application?",
+                hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
+                explanatory1: "If a director cannot sign the application themselves",
+                explanatory2: "Directors must sign the application themselves. Nobody can sign on their behalf."
+            },
+            {
+                description: "DS01 journey (applicant is a director)",
+                officerType: OfficerType.DIRECTOR,
+                isApplicantADirector: true,
+                expectedPageHeading: "Which other directors will sign the application?",
+                hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
+                explanatory1: "If a director cannot sign the application themselves",
+                explanatory2: "Directors must sign the application themselves. Nobody can sign on their behalf."
+            },
+            {
+                description: "LLDS01 journey (applicant is not a member)",
+                officerType: OfficerType.MEMBER,
+                isApplicantADirector: false,
+                expectedPageHeading: "Which members will sign the application?",
+                hint: "More than half of the members must sign, so you must select 2 or more of these members.",
+                explanatory1: "If a member cannot sign the application themselves",
+                explanatory2: "Members must sign the application themselves. Nobody can sign on their behalf."
+            },
+            {
+                description: "LLDS01 journey (applicant is a member)",
+                officerType: OfficerType.MEMBER,
+                isApplicantADirector: true,
+                expectedPageHeading: "Which other members will sign the application?",
+                hint: "More than half of the members must sign, so you must select 2 or more of these members.",
+                explanatory1: "If a member cannot sign the application themselves",
+                explanatory2: "Members must sign the application themselves. Nobody can sign on their behalf."
+            }
         ]
 
-        async function runPageTest (officerType: OfficerType, isApplicantADirector: boolean) {
-            dissolutionSession.officerType = officerType
-            dissolutionSession.isApplicantADirector = isApplicantADirector
+        expectedContentCases.forEach(testCase => {
+            it(`should render the select signatories page with correct static content for ${testCase.description}`, async () => {
+                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2 } = testCase
+                dissolutionSession.officerType = officerType
+                dissolutionSession.isApplicantADirector = isApplicantADirector
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-            ])
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
+                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+                ])
+                when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
 
-            when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
-
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-                container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
-            })
-
-            const res = await request(app)
-                .get(SELECT_SIGNATORIES_URI)
-                .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            const label = officerType === OfficerType.DIRECTOR ? "directors" : "members"
-            const singular = label.slice(0, -1)
-            const capitalised = label.charAt(0).toUpperCase() + label.slice(1)
-            const expectedHeading = isApplicantADirector ? `Which other ${label} will sign the application?` : `Which ${label} will sign the application?`
-            const expectedTitle = expectedHeading
-
-            assert.isTrue(htmlAssertHelper.containsText("title", expectedTitle))
-            assert.isTrue(htmlAssertHelper.hasText("h1", expectedHeading))
-            assert.equal(htmlAssertHelper.getText("#signatories-hint"), `More than half of the ${label} must sign, so you must select 2 or more of these ${label}.`)
-            assert.isTrue(htmlAssertHelper.containsRawText(`If a ${singular} cannot sign the application themselves`))
-            assert.isTrue(htmlAssertHelper.containsRawText(`${capitalised} must sign the application themselves. Nobody can sign on their behalf.`))
-        }
-
-        pageCases.forEach(({ officerType }) => {
-            [false, true].forEach(isApplicantADirector => {
-                it(`should render the select signatories page for ${officerType} (isApplicantADirector=${isApplicantADirector})`, async () => {
-                    await runPageTest(officerType, isApplicantADirector)
+                const app = createApp(container => {
+                    container.rebind(SessionService).toConstantValue(instance(session))
+                    container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+                    container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
                 })
+
+                const res = await request(app)
+                    .get(SELECT_SIGNATORIES_URI)
+                    .expect(StatusCodes.OK)
+
+                const htmlAssertHelper = new HtmlAssertHelper(res.text)
+
+                assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading))
+                assert.isTrue(htmlAssertHelper.hasText("h1", expectedPageHeading))
+                assert.equal(htmlAssertHelper.getText("#signatories-hint"), hint)
+                assert.isTrue(htmlAssertHelper.containsRawText(explanatory1))
+                assert.isTrue(htmlAssertHelper.containsRawText(explanatory2))
             })
         })
 
@@ -292,4 +314,4 @@ describe("SelectSignatoriesController", () => {
                 .expect("Location", DEFINE_SIGNATORY_INFO_URI)
         })
     })
-});
+})

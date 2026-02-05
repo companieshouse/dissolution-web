@@ -105,7 +105,7 @@ export class SelectSignatoriesController extends BaseController {
     }
 
     private validate (body: SelectSignatoriesFormModel, officerType: OfficerType, minSignatories: number, isApplicantADirector: boolean): Optional<ValidationErrors> {
-        return this.validator.validate(body, selectSignatoriesSchema(officerType, minSignatories, !!isApplicantADirector))
+        return this.validator.validate(body, selectSignatoriesSchema(officerType, minSignatories, isApplicantADirector))
     }
 
     private updateSession (session: DissolutionSession, body: SelectSignatoriesFormModel, signatories: DirectorDetails[]): void {

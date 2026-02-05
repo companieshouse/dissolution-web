@@ -2,8 +2,8 @@ import * as Joi from "@hapi/joi"
 
 import OfficerType from "app/models/dto/officerType.enum"
 
-export default function selectSignatoriesSchema (officerType: OfficerType, minSignatories: number, isApplicantADirector = false): Joi.ObjectSchema {
-    const prefix = isApplicantADirector ? 'other ' : ''
+export default function selectSignatoriesSchema (officerType: OfficerType, minSignatories: number, isApplicantADirector: boolean): Joi.ObjectSchema {
+    const prefix = isApplicantADirector ? "other " : ""
 
     return Joi.object({
         signatories: Joi
