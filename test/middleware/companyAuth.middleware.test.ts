@@ -49,13 +49,14 @@ describe("AuthMiddleware", () => {
 
     it("should throw an error if no company number is present", () => {
         const req = generateRequest()
+        req.query = {}
         const res = {} as Response
         const next = sinon.stub()
 
         middleware(req, res, next)
 
         const nextError = next.args[0][0]
-
+        assert.isTrue(next.calledOnce)
         assert.equal(nextError.message, "No Company Number in session")
 
     })
@@ -67,7 +68,7 @@ describe("AuthMiddleware", () => {
         const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
         const req = generateRequest()
-
+        req.query = {}
         const res = {} as Response
         const next = sinon.stub().withArgs()
 
@@ -79,6 +80,26 @@ describe("AuthMiddleware", () => {
         assert.isTrue(next.calledOnce)
     })
 
+    it("should invoke next() function if company number is not present in the dissolutionSession but is present in the query param and user is authenticated for that company number", async () => {
+        const signInInfo: ISignInInfo = {
+            company_number: "12345678"
+        }
+        const dissolutionSession: DissolutionSession = { remindDirectorList: [] } as DissolutionSession
+
+        const req = generateRequest()
+        req.query = { companyNumber: "12345678" }
+
+        const res = {} as Response
+        const next = sinon.stub()
+
+        when(sessionService.getDissolutionSession(req)).thenReturn(dissolutionSession)
+        when(sessionService.getSignInInfo(req)).thenReturn(signInInfo)
+
+        await middleware(req, res, next)
+
+        assert.isTrue(next.calledOnce, "next should be called once for authenticated user")
+    })
+
     it("should redirect if user is not authenticated for company number", async () => {
         const signInInfo: ISignInInfo = {
             company_number: "false_number"
@@ -86,6 +107,7 @@ describe("AuthMiddleware", () => {
         const dissolutionSession: DissolutionSession = generateDissolutionSession()
 
         const req = generateRequest()
+        req.query = {}
 
         const res = {} as Response
         const redirectStub: sinon.SinonStub = sinon.stub()
