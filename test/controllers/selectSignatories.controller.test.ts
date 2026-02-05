@@ -85,78 +85,55 @@ describe("SelectSignatoriesController", () => {
             assert.equal(htmlAssertHelper.getValue("#signatories-2"), DIRECTOR_2_ID)
         })
 
-        ;[
-            // The content of the select signatories page should change depending on whether the applicant is a director or not, so we need to test both scenarios
-            { isApplicantADirector: false, expectedHeading: "Which directors will sign the application?", expectedTitle: "Which directors will sign the application?" },
-            { isApplicantADirector: true, expectedHeading: "Which other directors will sign the application?", expectedTitle: "Which other directors will sign the application?" }
-        ].forEach(({ isApplicantADirector, expectedHeading, expectedTitle }) => {
-            it(`should render the select signatories page with directors for DS01 (isApplicantADirector=${isApplicantADirector})`, async () => {
-                dissolutionSession.officerType = OfficerType.DIRECTOR
-                dissolutionSession.isApplicantADirector = isApplicantADirector
+        const pageCases = [
+            { officerType: OfficerType.DIRECTOR, label: "directors" },
+            { officerType: OfficerType.MEMBER, label: "members" }
+        ]
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-                ])
+        async function runPageTest (officerType: OfficerType, isApplicantADirector: boolean) {
+            dissolutionSession.officerType = officerType
+            dissolutionSession.isApplicantADirector = isApplicantADirector
 
-                when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
+                { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+            ])
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-                    container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
-                })
+            when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
 
-                const res = await request(app)
-                    .get(SELECT_SIGNATORIES_URI)
-                    .expect(StatusCodes.OK)
-
-                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-                
-                assert.isTrue(htmlAssertHelper.containsText("title", expectedTitle))
-                assert.isTrue(htmlAssertHelper.hasText("h1", expectedHeading))
-                assert.equal(htmlAssertHelper.getText("#signatories-hint"), "More than half of the directors must sign, so you must select 2 or more of these directors.")
-                assert.isTrue(htmlAssertHelper.containsRawText("If a director cannot sign the application themselves"))
-                assert.isTrue(htmlAssertHelper.containsRawText("Directors must sign the application themselves. Nobody can sign on their behalf."))
+            const app = createApp(container => {
+                container.rebind(SessionService).toConstantValue(instance(session))
+                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
+                container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
             })
-        })
-        ;[
-            // The content of the select signatories page should change depending on whether the applicant is a members or not, so we need to test both scenarios
-            { isApplicantADirector: false, expectedHeading: "Which members will sign the application?", expectedTitle: "Which members will sign the application?" },
-            { isApplicantADirector: true, expectedHeading: "Which other members will sign the application?", expectedTitle: "Which other members will sign the application?" }
-        ].forEach(({ isApplicantADirector, expectedHeading, expectedTitle }) => {
-        it("should render the select signatories page with members for LLDS01", async () => {
-            dissolutionSession.officerType = OfficerType.MEMBER
-                dissolutionSession.isApplicantADirector = isApplicantADirector
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-                ])
+            const res = await request(app)
+                .get(SELECT_SIGNATORIES_URI)
+                .expect(StatusCodes.OK)
 
-                when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-                    container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
-                })
-
-                const res = await request(app)
-                    .get(SELECT_SIGNATORIES_URI)
-                    .expect(StatusCodes.OK)
-
-                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+            const label = officerType === OfficerType.DIRECTOR ? "directors" : "members"
+            const singular = label.slice(0, -1)
+            const capitalised = label.charAt(0).toUpperCase() + label.slice(1)
+            const expectedHeading = isApplicantADirector ? `Which other ${label} will sign the application?` : `Which ${label} will sign the application?`
+            const expectedTitle = expectedHeading
 
             assert.isTrue(htmlAssertHelper.containsText("title", expectedTitle))
             assert.isTrue(htmlAssertHelper.hasText("h1", expectedHeading))
-            assert.equal(htmlAssertHelper.getText("#signatories-hint"), "More than half of the members must sign, so you must select 2 or more of these members.")
-            assert.isTrue(htmlAssertHelper.containsRawText("If a member cannot sign the application themselves"))
-            assert.isTrue(htmlAssertHelper.containsRawText("Members must sign the application themselves. Nobody can sign on their behalf."))
+            assert.equal(htmlAssertHelper.getText("#signatories-hint"), `More than half of the ${label} must sign, so you must select 2 or more of these ${label}.`)
+            assert.isTrue(htmlAssertHelper.containsRawText(`If a ${singular} cannot sign the application themselves`))
+            assert.isTrue(htmlAssertHelper.containsRawText(`${capitalised} must sign the application themselves. Nobody can sign on their behalf.`))
+        }
+
+        pageCases.forEach(({ officerType }) => {
+            [false, true].forEach(isApplicantADirector => {
+                it(`should render the select signatories page for ${officerType} (isApplicantADirector=${isApplicantADirector})`, async () => {
+                    await runPageTest(officerType, isApplicantADirector)
+                })
+            })
         })
-    })
 
         it("should prepopulate the select signatories page with the selected signatories from session", async () => {
             dissolutionSession.selectSignatoriesForm = generateSelectSignatoriesFormModel(DIRECTOR_2_ID)
