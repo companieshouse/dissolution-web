@@ -23,9 +23,9 @@ interface ViewModel {
     officerType: OfficerType
     signatories: DirectorDetails[]
     minSignatories: number
+    isApplicantADirector: boolean
     data?: Optional<SelectSignatoriesFormModel>
     errors?: Optional<ValidationErrors>
-    isApplicantADirector?: boolean
 }
 
 @controller(SELECT_SIGNATORIES_URI)
