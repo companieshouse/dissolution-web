@@ -45,23 +45,30 @@ export default function CompanyAuthMiddleware (
             return next()
         }
 
-        const dissolutionSession: Optional<DissolutionSession> = sessionService.getDissolutionSession(req)
-
-        if (!dissolutionSession?.companyNumber) {
+        const dissolutionSession = sessionService.getDissolutionSession(req)
+        const companyNumber = getCompanyNumber(dissolutionSession, req)
+        if (!companyNumber) {
             return next(new Error("No Company Number in session"))
         }
-
-        const companyNumber = dissolutionSession.companyNumber
-        const signInInfo: ISignInInfo = sessionService.getSignInInfo(req)
-
+        if (!dissolutionSession?.companyNumber) {
+            sessionService.setDissolutionSession(req, {
+                ...(dissolutionSession || {}),
+                companyNumber,
+                remindDirectorList: []
+            })
+        }
+        const signInInfo = sessionService.getSignInInfo(req)
         if (isAuthorisedForCompany(signInInfo, companyNumber)) {
             logger.info(`User is authenticated for ${companyNumber}`)
             return next()
         }
-
         logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
         return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
     }
+}
+
+function getCompanyNumber (session: Optional<DissolutionSession>, req: Request): string | undefined {
+    return (req.query.companyNumber as string | undefined) ?? session?.companyNumber
 }
 
 function isWhitelistedUrl (url: string): boolean {
