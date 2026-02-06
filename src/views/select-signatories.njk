@@ -6,7 +6,11 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
 
-{% set title = "Which " + officerType + "s will sign the application? - " + pageTitleSuffix %}
+{% if isApplicantADirector %}
+  {% set title = "Which other " + officerType + "s will sign the application? - " + pageTitleSuffix %}
+{% else %}
+  {% set title = "Which " + officerType + "s will sign the application? - " + pageTitleSuffix %}
+{% endif %}
 
 {% block content %}
   {{
@@ -31,7 +35,7 @@
             name: "signatories",
             fieldset: {
               legend: {
-                text: "Which " + officerType + "s will sign the application?",
+                text: ("Which other " + officerType + "s will sign the application?" if isApplicantADirector else "Which " + officerType + "s will sign the application?"),
                 isPageHeading: true,
                 classes: "govuk-fieldset__legend--l"
               }

@@ -7,60 +7,52 @@ import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
 import selectSignatoriesSchema from "app/schemas/selectSignatories.schema"
 
 describe("Select Signatories Schema", () => {
-
-    it("should return no errors when data is valid", () => {
-        const validForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel("123")
-        const errors: ValidationResult = selectSignatoriesSchema(OfficerType.DIRECTOR, 1).validate(validForm)
-        assert.isUndefined(errors.error)
+    describe("No errors (valid input)", () => {
+        it("should pass validation when signatories are valid", () => {
+            const validForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel("123")
+            const errors: ValidationResult = selectSignatoriesSchema(OfficerType.DIRECTOR, 1, true).validate(validForm)
+            assert.isUndefined(errors.error)
+        })
     })
 
-    it("should return an error when no signatories are provided for DS01", () => {
-        const invalidForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel()
-        invalidForm.signatories = undefined
+    describe("Signatories required errors", () => {
+        const requiredCases = [
+            { officerType: OfficerType.DIRECTOR, isApplicantADirector: false, expected: "Select the directors who will sign the application." },
+            { officerType: OfficerType.MEMBER, isApplicantADirector: false, expected: "Select the members who will sign the application." },
+            { officerType: OfficerType.DIRECTOR, isApplicantADirector: true, expected: "Select the other directors who will sign the application." },
+            { officerType: OfficerType.MEMBER, isApplicantADirector: true, expected: "Select the other members who will sign the application." }
+        ]
 
-        const errors: ValidationResult = selectSignatoriesSchema(OfficerType.DIRECTOR, 3).validate(invalidForm)
-
-        assert.isDefined(errors.error)
-        assert.equal(errors.error!.details.length, 1)
-        assert.equal(errors.error!.details[0].context!.key, "signatories")
-        assert.equal(errors.error!.details[0].type, `any.required`)
-        assert.equal(errors.error!.details[0].message, "Select the directors who will sign the application.")
+        requiredCases.forEach(c => {
+            it(`should show required error for signatories (${c.officerType}, isApplicantADirector=${c.isApplicantADirector})`, () => {
+                const invalidForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel()
+                invalidForm.signatories = undefined
+                const errors: ValidationResult = selectSignatoriesSchema(c.officerType, 3, c.isApplicantADirector).validate(invalidForm)
+                assert.isDefined(errors.error)
+                assert.equal(errors.error!.details.length, 1)
+                assert.equal(errors.error!.details[0].context!.key, "signatories")
+                assert.equal(errors.error!.details[0].type, `any.required`)
+                assert.equal(errors.error!.details[0].message, c.expected)
+            })
+        })
     })
 
-    it("should return an error when no signatories are provided for LLDS01", () => {
-        const invalidForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel()
-        invalidForm.signatories = undefined
+    describe("Minimum number of signatories required errors", () => {
+        const minSignatoryCases = [
+            { officerType: OfficerType.DIRECTOR, expected: "Select 3 or more directors who will sign the application." },
+            { officerType: OfficerType.MEMBER, expected: "Select 3 or more members who will sign the application." }
+        ]
 
-        const errors: ValidationResult = selectSignatoriesSchema(OfficerType.MEMBER, 3).validate(invalidForm)
-
-        assert.isDefined(errors.error)
-        assert.equal(errors.error!.details.length, 1)
-        assert.equal(errors.error!.details[0].context!.key, "signatories")
-        assert.equal(errors.error!.details[0].type, `any.required`)
-        assert.equal(errors.error!.details[0].message, "Select the members who will sign the application.")
-    })
-
-    it("should return an error when the minimum number of signatories is not provided for DS01", () => {
-        const invalidForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel("123", "456")
-
-        const errors: ValidationResult = selectSignatoriesSchema(OfficerType.DIRECTOR, 3).validate(invalidForm)
-
-        assert.isDefined(errors.error)
-        assert.equal(errors.error!.details.length, 1)
-        assert.equal(errors.error!.details[0].context!.key, "signatories")
-        assert.equal(errors.error!.details[0].type, `array.min`)
-        assert.equal(errors.error!.details[0].message, "Select 3 or more directors who will sign the application.")
-    })
-
-    it("should return an error when the minimum number of signatories is not provided for LLDS01", () => {
-        const invalidForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel("123", "456")
-
-        const errors: ValidationResult = selectSignatoriesSchema(OfficerType.MEMBER, 3).validate(invalidForm)
-
-        assert.isDefined(errors.error)
-        assert.equal(errors.error!.details.length, 1)
-        assert.equal(errors.error!.details[0].context!.key, "signatories")
-        assert.equal(errors.error!.details[0].type, `array.min`)
-        assert.equal(errors.error!.details[0].message, "Select 3 or more members who will sign the application.")
+        minSignatoryCases.forEach(c => {
+            it(`should show minimum signatories error for ${c.officerType}`, () => {
+                const invalidForm: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel("123", "456")
+                const errors: ValidationResult = selectSignatoriesSchema(c.officerType, 3, false).validate(invalidForm)
+                assert.isDefined(errors.error)
+                assert.equal(errors.error!.details.length, 1)
+                assert.equal(errors.error!.details[0].context!.key, "signatories")
+                assert.equal(errors.error!.details[0].type, `array.min`)
+                assert.equal(errors.error!.details[0].message, c.expected)
+            })
+        })
     })
 })

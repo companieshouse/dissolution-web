@@ -2,7 +2,9 @@ import * as Joi from "@hapi/joi"
 
 import OfficerType from "app/models/dto/officerType.enum"
 
-export default function selectSignatoriesSchema (officerType: OfficerType, minSignatories: number): Joi.ObjectSchema {
+export default function selectSignatoriesSchema (officerType: OfficerType, minSignatories: number, isApplicantADirector: boolean): Joi.ObjectSchema {
+    const prefix = isApplicantADirector ? "other " : ""
+
     return Joi.object({
         signatories: Joi
             .array()
@@ -10,7 +12,7 @@ export default function selectSignatoriesSchema (officerType: OfficerType, minSi
             .min(minSignatories)
             .items(Joi.string().required())
             .messages({
-                "any.required": `Select the ${officerType}s who will sign the application.`,
+                "any.required": `Select the ${prefix}${officerType}s who will sign the application.`,
                 "array.min": `Select ${minSignatories} or more ${officerType}s who will sign the application.`
             }),
         _csrf: Joi.string()
