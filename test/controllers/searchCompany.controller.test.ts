@@ -3,6 +3,7 @@ import request from "supertest"
 import { createApp } from "./helpers/application.factory"
 import "app/controllers/searchCompany.controller"
 import { SEARCH_COMPANY_URI } from "app/paths"
+import { StatusCodes } from "http-status-codes"
 
 describe("SearchCompanyController", () => {
 
@@ -13,7 +14,7 @@ describe("SearchCompanyController", () => {
 
             const res = await request(app)
                 .get(SEARCH_COMPANY_URI)
-                .expect(302)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
 
             expect(res.headers.location).to.equal(expectedRedirect)
         })
