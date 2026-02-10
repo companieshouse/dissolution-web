@@ -4,6 +4,7 @@ import { CompanyOfficer } from "@companieshouse/api-sdk-node/dist/services/compa
 import { provide } from "inversify-binding-decorators"
 
 import DirectorDetails from "app/models/view/directorDetails.model"
+import OfficerRole from "app/models/dto/officerRole.enum"
 
 @provide(DirectorDetailsMapper)
 export default class DirectorDetailsMapper {
@@ -11,7 +12,8 @@ export default class DirectorDetailsMapper {
     public mapToDirectorDetails (director: CompanyOfficer): DirectorDetails {
         return {
             id: this.extractDirectorId(director),
-            name: director.name
+            name: director.name,
+            officerRole: director.officerRole as OfficerRole
         }
     }
 

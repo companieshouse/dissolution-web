@@ -8,6 +8,7 @@ import SelectDirectorFormModel from "app/models/form/selectDirector.model"
 import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
 import SignatorySigning from "app/models/form/signatorySigning.enum"
 import DirectorDetails from "app/models/view/directorDetails.model"
+import OfficerRole from "app/models/dto/officerRole.enum"
 
 export function generateCompanyOfficersResource (): Resource<CompanyOfficers> {
     return {
@@ -96,10 +97,11 @@ export function generateIdentification (): Identification {
     }
 }
 
-export function generateDirectorDetails (): DirectorDetails {
+export function generateDirectorDetails (id: string = "123", name: string = "Some Director", officerRole: OfficerRole = OfficerRole.DIRECTOR): DirectorDetails {
     return {
-        id: "123",
-        name: "Some Director"
+        id,
+        name,
+        officerRole
     }
 }
 

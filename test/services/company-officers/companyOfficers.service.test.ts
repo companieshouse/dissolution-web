@@ -158,15 +158,15 @@ describe("CompanyOfficersService", () => {
             response.httpStatusCode = StatusCodes.OK
 
             const director1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
-            const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+            const director2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.CORPORATE_DIRECTOR }
 
             response.resource = {
                 ...generateCompanyOfficers(),
                 items: [director1, director2]
             }
 
-            const director1Details: DirectorDetails = generateDirectorDetails()
-            const director2Details: DirectorDetails = generateDirectorDetails()
+            const director1Details: DirectorDetails = generateDirectorDetails("123", "Director 1", OfficerRole.DIRECTOR)
+            const director2Details: DirectorDetails = generateDirectorDetails("456", "Director 2", OfficerRole.CORPORATE_DIRECTOR)
 
             when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
             when(directorMapper.mapToDirectorDetails(director1)).thenReturn(director1Details)
@@ -184,15 +184,15 @@ describe("CompanyOfficersService", () => {
             response.httpStatusCode = StatusCodes.OK
 
             const member1: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
-            const member2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+            const member2: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_DESIGNATED_MEMBER }
 
             response.resource = {
                 ...generateCompanyOfficers(),
                 items: [member1, member2]
             }
 
-            const member1Details: DirectorDetails = generateDirectorDetails()
-            const member2Details: DirectorDetails = generateDirectorDetails()
+            const member1Details: DirectorDetails = generateDirectorDetails("789", "Member 1", OfficerRole.LLP_MEMBER)
+            const member2Details: DirectorDetails = generateDirectorDetails("101", "Member 2", OfficerRole.LLP_DESIGNATED_MEMBER)
 
             when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
             when(directorMapper.mapToDirectorDetails(member1)).thenReturn(member1Details)
