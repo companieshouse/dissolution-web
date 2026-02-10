@@ -6,7 +6,7 @@ import BaseController from "./base.controller"
 
 import { NotFoundError } from "app/errors/notFoundError.error"
 import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper"
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
+import DissolutionGetDirector, { isCorporateOfficer } from "app/models/dto/dissolutionGetDirector"
 import OfficerType from "app/models/dto/officerType.enum"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
 import Optional from "app/models/optional"
@@ -19,20 +19,25 @@ import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
 
 interface ViewModel {
-  officerType: OfficerType
-  signatoryName: string
-  data?: Optional<ChangeDetailsFormModel>
-  errors?: Optional<ValidationErrors>
+    officerType: OfficerType
+    signatory: SignatoryViewModel
+    data?: Optional<ChangeDetailsFormModel>
+    errors?: Optional<ValidationErrors>
+}
+
+interface SignatoryViewModel {
+    name: string
+    isCorporateOfficer: boolean
 }
 
 @controller(CHANGE_DETAILS_URI)
 export class ChangeDetailsController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private session: SessionService,
-    @inject(DissolutionDirectorService) private directorService: DissolutionDirectorService,
-    @inject(DissolutionDirectorMapper) private directorMapper: DissolutionDirectorMapper,
-    @inject(FormValidator) private validator: FormValidator) {
+        @inject(SessionService) private session: SessionService,
+        @inject(DissolutionDirectorService) private directorService: DissolutionDirectorService,
+        @inject(DissolutionDirectorMapper) private directorMapper: DissolutionDirectorMapper,
+        @inject(FormValidator) private validator: FormValidator) {
         super()
     }
 
@@ -46,36 +51,60 @@ export class ChangeDetailsController extends BaseController {
 
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const signatory: DissolutionGetDirector = await this.directorService.getSignatoryToEdit(token, session)
+        this.updateSession(session, signatory)
+
         const form: ChangeDetailsFormModel = this.directorMapper.mapToChangeDetailsForm(signatory)
 
-        return this.renderView(session.officerType!, signatory.name, form)
+        return this.renderView(session.officerType!, signatory, form)
+    }
+
+    private updateSession (session: DissolutionSession, signatory: DissolutionGetDirector) {
+        session.signatoryToEdit = signatory
+        this.session.setDissolutionSession(this.httpContext.request, session)
     }
 
     @httpPost("")
     public async post (@requestBody() body: ChangeDetailsFormModel): Promise<string | RedirectResult> {
-        const token: string = this.session.getAccessToken(this.httpContext.request)
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const officerType: OfficerType = session.officerType!
 
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(officerType))
+        if (!session.signatoryIdToEdit) {
+            return Promise.reject(new NotFoundError("Signatory not in session"))
+        }
+
+        const token: string = this.session.getAccessToken(this.httpContext.request)
+        const signatory: DissolutionGetDirector = session.signatoryToEdit!
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(signatory))
+
         if (errors) {
             const signatory: DissolutionGetDirector = await this.directorService.getSignatoryToEdit(token, session)
-            return this.renderView(officerType, signatory.name, body, errors)
+            return this.renderView(session.officerType!, signatory, body, errors)
         }
 
         await this.directorService.updateSignatory(token, session, body)
+        this.cleanUpSession(session)
 
         return this.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
     }
 
+    private cleanUpSession (session: DissolutionSession) {
+        delete session.signatoryToEdit
+        this.session.setDissolutionSession(this.httpContext.request, session)
+    }
+
     private async renderView (
         officerType: OfficerType,
-        signatoryName: string,
+        signatory: DissolutionGetDirector,
         data?: Optional<ChangeDetailsFormModel>,
         errors?: Optional<ValidationErrors>): Promise<string> {
+
+        const signatoryViewModel = {
+            name: signatory.name,
+            isCorporateOfficer: isCorporateOfficer(signatory)
+        }
+
         const viewModel: ViewModel = {
             officerType,
-            signatoryName,
+            signatory: signatoryViewModel,
             data,
             errors
         }

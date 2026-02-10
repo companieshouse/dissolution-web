@@ -6,8 +6,8 @@ import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
 import SelectDirectorFormModel from "app/models/form/selectDirector.model"
 import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
 import DirectorDetails from "app/models/view/directorDetails.model"
+import OfficerRole from "app/models/dto/officerRole.enum"
 
 export function generateCompanyOfficersResource (): Resource<CompanyOfficers> {
     return {
@@ -96,10 +96,11 @@ export function generateIdentification (): Identification {
     }
 }
 
-export function generateDirectorDetails (): DirectorDetails {
+export function generateDirectorDetails (id: string = "123", name: string = "Some Director", officerRole: OfficerRole = OfficerRole.DIRECTOR): DirectorDetails {
     return {
-        id: "123",
-        name: "Some Director"
+        id,
+        name,
+        officerRole
     }
 }
 
@@ -119,9 +120,7 @@ export function generateSelectSignatoriesFormModel (...signatories: string[]): S
 
 export function generateDefineSignatoryInfoFormModel (): DefineSignatoryInfoFormModel {
     return {
-        isSigning_123abc: SignatorySigning.WILL_SIGN,
         directorEmail_123abc: "director@mail.com",
-        isSigning_456def: SignatorySigning.ON_BEHALF,
         onBehalfName_456def: "Mr Accountant",
         onBehalfEmail_456def: "accountant@mail.com",
         _csrf: "abc123"
@@ -130,7 +129,6 @@ export function generateDefineSignatoryInfoFormModel (): DefineSignatoryInfoForm
 
 export function generateWillSignChangeDetailsFormModel (): ChangeDetailsFormModel {
     return {
-        isSigning: SignatorySigning.WILL_SIGN,
         directorEmail: "director@mail.com",
         _csrf: "abc123"
     }
@@ -138,7 +136,6 @@ export function generateWillSignChangeDetailsFormModel (): ChangeDetailsFormMode
 
 export function generateOnBehalfChangeDetailsFormModel (): ChangeDetailsFormModel {
     return {
-        isSigning: SignatorySigning.ON_BEHALF,
         onBehalfName: "Mr Accountant",
         onBehalfEmail: "accountant@mail.com"
     }

@@ -12,17 +12,16 @@ import {
     generateSelectSignatoriesFormModel
 } from "../fixtures/companyOfficers.fixtures"
 import { generateValidationError } from "../fixtures/error.fixtures"
-import { generateDirectorToSign, generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures"
+import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures"
 import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/selectSignatories.controller"
 import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper"
 import OfficerType from "app/models/dto/officerType.enum"
+import OfficerRole from "app/models/dto/officerRole.enum"
 import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import DirectorDetails from "app/models/view/directorDetails.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
 import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from "app/paths"
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
@@ -30,6 +29,7 @@ import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import { aDirectorDetails } from "../fixtures/directorDetails.builder"
 
 mockCsrfMiddleware.restore()
 
@@ -39,7 +39,7 @@ describe("SelectSignatoriesController", () => {
     let officerService: CompanyOfficersService
     let signatoryService: SignatoryService
     let validator: FormValidator
-    let mapper: DirectorToSignMapper
+    let directorToSignmapper: DirectorToSignMapper
 
     const COMPANY_NUMBER = "01777777"
 
@@ -54,7 +54,7 @@ describe("SelectSignatoriesController", () => {
         officerService = mock(CompanyOfficersService)
         signatoryService = mock(SignatoryService)
         validator = mock(FormValidator)
-        mapper = mock(DirectorToSignMapper)
+        directorToSignmapper = new DirectorToSignMapper()
 
         when(session.getAccessToken(anything())).thenReturn(TOKEN)
 
@@ -93,7 +93,8 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
                 explanatory1: "If a director cannot sign the application themselves",
-                explanatory2: "Directors must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
+                linkText: "make changes to the company directors (opens in new tab)"
             },
             {
                 description: "DS01 journey (applicant is a director)",
@@ -102,7 +103,8 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which other directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
                 explanatory1: "If a director cannot sign the application themselves",
-                explanatory2: "Directors must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
+                linkText: "make changes to the company directors (opens in new tab)"
             },
             {
                 description: "LLDS01 journey (applicant is not a member)",
@@ -111,7 +113,8 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
                 explanatory1: "If a member cannot sign the application themselves",
-                explanatory2: "Members must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
+                linkText: "make changes to the LLP's members using our WebFiling service (opens in new tab)"
             },
             {
                 description: "LLDS01 journey (applicant is a member)",
@@ -120,13 +123,14 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which other members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
                 explanatory1: "If a member cannot sign the application themselves",
-                explanatory2: "Members must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
+                linkText: "make changes to the LLP's members using our WebFiling service (opens in new tab)"
             }
         ]
 
         expectedContentCases.forEach(testCase => {
             it(`should render the select signatories page with correct static content for ${testCase.description}`, async () => {
-                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2 } = testCase
+                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2, linkText } = testCase
                 dissolutionSession.officerType = officerType
                 dissolutionSession.isApplicantADirector = isApplicantADirector
 
@@ -154,6 +158,7 @@ describe("SelectSignatoriesController", () => {
                 assert.equal(htmlAssertHelper.getText("#signatories-hint"), hint)
                 assert.isTrue(htmlAssertHelper.containsRawText(explanatory1))
                 assert.isTrue(htmlAssertHelper.containsRawText(explanatory2))
+                assert.isTrue(htmlAssertHelper.containsRawText(linkText))
             })
         })
 
@@ -188,7 +193,7 @@ describe("SelectSignatoriesController", () => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
                 container.rebind(FormValidator).toConstantValue(instance(validator))
-                container.rebind(DirectorToSignMapper).toConstantValue(instance(mapper))
+                container.rebind(DirectorToSignMapper).toConstantValue(directorToSignmapper)
             })
         }
 
@@ -246,8 +251,8 @@ describe("SelectSignatoriesController", () => {
                 const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
                 when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+                    aDirectorDetails().withId(DIRECTOR_1_ID).withOfficerRole(OfficerRole.DIRECTOR).build(),
+                    aDirectorDetails().withId(DIRECTOR_2_ID).withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
                 ])
                 when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 
@@ -264,19 +269,17 @@ describe("SelectSignatoriesController", () => {
                 const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
                 assert.deepEqual(updatedSession.selectSignatoriesForm, form)
+                assert.isArray(updatedSession.directorsToSign, "directorsToSign should be an array")
             })
 
             it("should clear the existing signatories and save the new selection", async () => {
                 const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
-                const director1: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_1_ID, name: "Signatory 1" }
-                const director2: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_2_ID, name: "Signatory 2" }
-
-                const signatory: DirectorToSign = generateDirectorToSign()
+                const director1 = aDirectorDetails().withId(DIRECTOR_1_ID).withName("Signatory 1").withOfficerRole(OfficerRole.DIRECTOR).build()
+                const director2 = aDirectorDetails().withId(DIRECTOR_2_ID).withName("Signatory 2").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
 
                 when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([director1, director2])
                 when(validator.validate(deepEqual(form), anything())).thenReturn(null)
-                when(mapper.mapAsSignatory(director1)).thenReturn(signatory)
 
                 const app = initApp()
 
@@ -285,14 +288,16 @@ describe("SelectSignatoriesController", () => {
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
 
-                verify(mapper.mapAsSignatory(director1)).once()
                 verify(session.setDissolutionSession(anything(), anything())).once()
 
                 const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
                 const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
                 assert.equal(updatedSession.directorsToSign!.length, 1)
-                assert.equal(updatedSession.directorsToSign![0], signatory)
+                const directorToSign = updatedSession.directorsToSign![0]
+                assert.equal(directorToSign.id, director1.id)
+                assert.equal(directorToSign.name, director1.name)
+                assert.equal(directorToSign.officerRole, director1.officerRole)
             })
         })
 
@@ -300,8 +305,8 @@ describe("SelectSignatoriesController", () => {
             const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
             when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+                aDirectorDetails().withId(DIRECTOR_1_ID).build(),
+                aDirectorDetails().withId(DIRECTOR_2_ID).build()
             ])
             when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 

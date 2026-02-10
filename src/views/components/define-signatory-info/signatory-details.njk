@@ -1,10 +1,7 @@
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/input/macro.njk"  import govukInput %}
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
 
 {% set fieldsetId = "signatory" + formSuffix %}
-
-{% set isSigningName = "isSigning" + formSuffix %}
-{% set isSigningId = "is-signing" + formSuffix %}
 
 {% set directorEmailName = "directorEmail" + formSuffix %}
 {% set directorEmailId = "director-email" + formSuffix %}
@@ -15,39 +12,30 @@
 {% set onBehalfEmailName = "onBehalfEmail" + formSuffix %}
 {% set onBehalfEmailId = "on-behalf-email" + formSuffix %}
 
-{% set willSignSection %}
-  {{
-    govukInput({
-      id: directorEmailId,
-      name: directorEmailName,
-      type: "email",
-      autocomplete: "email",
-      classes: "govuk-!-width-full",
-      label: {
-        text: "What is the email address for " + signatoryName + "?"
-      },
-      hint: {
-        text: "We will use this email to ask them to sign the application."
-      },
-      errorMessage: {
-        text: errors[directorEmailName]
-      } if errors[directorEmailName],
-      attributes: {
-        spellcheck: "false"
-      },
-      value: data[directorEmailName] if data
-    })
-  }}
-{% endset -%}
+{% if signatory.isCorporateOfficer %}
 
-{% set onBehalfSection %}
+{% call govukFieldset({
+  legend: {
+    text: signatory.name,
+    classes: "govuk-label--m",
+    isPageHeading: false
+  }
+}) %}
+  <p class="govuk-body govuk-!-margin-bottom-2">
+    Provide the details of a person who is authorised by {{ signatory.name | escape }} to sign the application on its behalf.
+  </p>
+
   {{
     govukInput({
       id: onBehalfNameId,
       name: onBehalfNameName,
       classes: "govuk-!-width-full",
       label: {
-        text: "What is the name of the person signing for " + signatoryName + "?"
+          text: "Name of authorised person",
+          classes: "govuk-visually-hidden"
+      },
+      hint: {
+        text: "What is the name of the authorised person who will sign on behalf of " + (signatory.name | escape) + "?"
       },
       errorMessage: {
         text: errors[onBehalfNameName]
@@ -67,10 +55,11 @@
       autocomplete: "email",
       classes: "govuk-!-width-full",
       label: {
-        text: "What is the email address of the person signing for " + signatoryName + "?"
+        text: "Email address of authorised person",
+        classes: "govuk-visually-hidden"
       },
       hint: {
-        text: "We will use this email to ask them to sign the application."
+        text: "What is the email address for the authorised person who will sign on behalf of " + signatory.name + "?"
       },
       errorMessage: {
         text: errors[onBehalfEmailName]
@@ -81,41 +70,31 @@
       value: data[onBehalfEmailName] if data
     })
   }}
-{% endset -%}
+{% endcall %}
+{% else %}
 
-{{
-  govukRadios({
-    idPrefix: isSigningId,
-    name: isSigningName,
-    fieldset: {
+  {{
+    govukInput({
+      id: directorEmailId,
+      name: directorEmailName,
+      type: "email",
+      autocomplete: "email",
+      classes: "govuk-!-width-full",
+      label: {
+        text: signatory.name,
+        classes: "govuk-label--m"
+      },
+      hint: {
+        text: "What is the email address for " + signatory.name + "?"
+      },
+      errorMessage: {
+        text: errors[directorEmailName]
+      } if errors[directorEmailName],
       attributes: {
-        id: fieldsetId
+        spellcheck: "false"
       },
-      legend: {
-        text: signatoryName,
-        classes: "govuk-fieldset__legend--m"
-      }
-    },
-    errorMessage: {
-      text: errors[isSigningName]
-    } if errors[isSigningName],
-    items: [
-      {
-        value: SignatorySigning.WILL_SIGN,
-        text: "Will sign",
-        conditional: {
-          html: willSignSection
-        },
-        checked: data[isSigningName] === SignatorySigning.WILL_SIGN if data
-      },
-      {
-        value: SignatorySigning.ON_BEHALF,
-        text: "Someone will sign for them",
-        conditional: {
-          html: onBehalfSection
-        },
-        checked: data[isSigningName] === SignatorySigning.ON_BEHALF if data
-      }
-    ]
-  })
-}}
+      value: data[directorEmailName] if data
+    })
+  }}
+
+{% endif %}

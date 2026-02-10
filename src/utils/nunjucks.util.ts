@@ -12,7 +12,6 @@ import { asGovUKErrorList } from "app/filters/asGovUKErrorList.filter"
 import { asSelectDirectorList } from "app/filters/asSelectDirectorList.filter"
 import { asSelectSignatoriesList } from "app/filters/asSelectSignatoriesList.filter"
 import PaymentType from "app/models/dto/paymentType.enum"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
 import * as Paths from "app/paths"
 
 export const addFilters = (env: Environment): void => {
@@ -31,6 +30,5 @@ export const addFilters = (env: Environment): void => {
 
 export const addGlobals = (env: Environment): void => {
     env.addGlobal("Paths", Paths)
-    env.addGlobal("SignatorySigning", SignatorySigning)
     env.addGlobal("PaymentType", PaymentType)
 }
