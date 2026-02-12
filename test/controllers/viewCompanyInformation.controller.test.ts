@@ -157,6 +157,34 @@ describe("ViewCompanyInformationController", () => {
             assert.isTrue(htmlAssertHelper.selectorExists("#cannot-close-error"))
             assert.isTrue(htmlAssertHelper.containsText("#cannot-close-error-message", "error message"))
         })
+
+        it("should render address with multiline formatting", async () => {
+            const company: CompanyDetails = generateCompanyDetails()
+            company.companyNumber = COMPANY_NUMBER
+            company.companyName = "Some company name"
+            company.companyStatus = "active"
+            company.companyType = ClosableCompanyType.LTD
+            // Construct addrress in the format produced by CompanyDetailsMapper.getCompanyAddress
+            company.companyRegOffice = "Line1, Line2, Line3"
+
+            when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
+            when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
+
+            const app = createApp(container => {
+                container.rebind(SessionService).toConstantValue(instance(session))
+                container.rebind(CompanyService).toConstantValue(instance(companyService))
+            })
+
+            const res = await request(app)
+                .get(VIEW_COMPANY_INFORMATION_URI)
+                .expect(StatusCodes.OK)
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+            // Check that the address value contains <br> tags
+            const addressHtml = htmlAssertHelper.getInnerHTML("#company-address-value")
+            assert.include(addressHtml, "Line1,<br>Line2,<br>Line3")
+        })
     })
 
     describe("POST request", () => {
