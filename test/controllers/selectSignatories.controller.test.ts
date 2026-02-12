@@ -12,17 +12,16 @@ import {
     generateSelectSignatoriesFormModel
 } from "../fixtures/companyOfficers.fixtures"
 import { generateValidationError } from "../fixtures/error.fixtures"
-import { generateDirectorToSign, generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures"
+import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures"
 import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/selectSignatories.controller"
 import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper"
 import OfficerType from "app/models/dto/officerType.enum"
+import OfficerRole from "app/models/dto/officerRole.enum"
 import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import DirectorDetails from "app/models/view/directorDetails.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
 import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from "app/paths"
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
@@ -30,6 +29,7 @@ import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import { aDirectorDetails } from "../fixtures/directorDetails.builder"
 
 mockCsrfMiddleware.restore()
 
@@ -39,7 +39,7 @@ describe("SelectSignatoriesController", () => {
     let officerService: CompanyOfficersService
     let signatoryService: SignatoryService
     let validator: FormValidator
-    let mapper: DirectorToSignMapper
+    let directorToSignmapper: DirectorToSignMapper
 
     const COMPANY_NUMBER = "01777777"
 
@@ -54,7 +54,7 @@ describe("SelectSignatoriesController", () => {
         officerService = mock(CompanyOfficersService)
         signatoryService = mock(SignatoryService)
         validator = mock(FormValidator)
-        mapper = mock(DirectorToSignMapper)
+        directorToSignmapper = new DirectorToSignMapper()
 
         when(session.getAccessToken(anything())).thenReturn(TOKEN)
 
@@ -188,7 +188,7 @@ describe("SelectSignatoriesController", () => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
                 container.rebind(FormValidator).toConstantValue(instance(validator))
-                container.rebind(DirectorToSignMapper).toConstantValue(instance(mapper))
+                container.rebind(DirectorToSignMapper).toConstantValue(directorToSignmapper)
             })
         }
 
@@ -246,8 +246,8 @@ describe("SelectSignatoriesController", () => {
                 const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
                 when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+                    aDirectorDetails().withId(DIRECTOR_1_ID).withOfficerRole(OfficerRole.DIRECTOR).build(),
+                    aDirectorDetails().withId(DIRECTOR_2_ID).withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
                 ])
                 when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 
@@ -264,19 +264,17 @@ describe("SelectSignatoriesController", () => {
                 const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
                 assert.deepEqual(updatedSession.selectSignatoriesForm, form)
+                assert.isArray(updatedSession.directorsToSign, "directorsToSign should be an array")
             })
 
             it("should clear the existing signatories and save the new selection", async () => {
                 const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
-                const director1: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_1_ID, name: "Signatory 1" }
-                const director2: DirectorDetails = { ...generateDirectorDetails(), id: DIRECTOR_2_ID, name: "Signatory 2" }
-
-                const signatory: DirectorToSign = generateDirectorToSign()
+                const director1 = aDirectorDetails().withId(DIRECTOR_1_ID).withName("Signatory 1").withOfficerRole(OfficerRole.DIRECTOR).build()
+                const director2 = aDirectorDetails().withId(DIRECTOR_2_ID).withName("Signatory 2").build()
 
                 when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([director1, director2])
                 when(validator.validate(deepEqual(form), anything())).thenReturn(null)
-                when(mapper.mapAsSignatory(director1)).thenReturn(signatory)
 
                 const app = initApp()
 
@@ -285,14 +283,16 @@ describe("SelectSignatoriesController", () => {
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
 
-                verify(mapper.mapAsSignatory(director1)).once()
                 verify(session.setDissolutionSession(anything(), anything())).once()
 
                 const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
                 const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
                 assert.equal(updatedSession.directorsToSign!.length, 1)
-                assert.equal(updatedSession.directorsToSign![0], signatory)
+                const directorToSign = updatedSession.directorsToSign![0]
+                assert.equal(directorToSign.id, director1.id)
+                assert.equal(directorToSign.name, director1.name)
+                assert.equal(directorToSign.officerRole, director1.officerRole)
             })
         })
 
@@ -300,8 +300,8 @@ describe("SelectSignatoriesController", () => {
             const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
             when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
+                aDirectorDetails().withId(DIRECTOR_1_ID).build(),
+                aDirectorDetails().withId(DIRECTOR_2_ID).build()
             ])
             when(validator.validate(deepEqual(form), anything())).thenReturn(null)
 
