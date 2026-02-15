@@ -3,9 +3,9 @@ import { generateSchemaForSignatoryDetails } from "./signatoryDetails.schema"
 
 import OfficerType from "app/models/dto/officerType.enum"
 
-export default function defineSignatoryInfoSchema (officerType: OfficerType): Joi.ObjectSchema {
+export default function defineSignatoryInfoSchema (isCorporateOfficer: boolean, companyOfficerType: OfficerType): Joi.ObjectSchema {
     return Joi.object({
-        ...generateSchemaForSignatoryDetails(officerType),
+        ...generateSchemaForSignatoryDetails(isCorporateOfficer, companyOfficerType),
         _csrf: Joi.string()
             .optional()
             .messages({

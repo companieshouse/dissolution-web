@@ -3,15 +3,16 @@ import { generateSchemaForSignatoryDetails } from "./signatoryDetails.schema"
 
 import OfficerType from "app/models/dto/officerType.enum"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
+import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
 
 export default function defineSignatoryInfoSchema (signatories: DirectorToSign[], officerType: OfficerType): Joi.ObjectSchema {
     return Joi.object(generateSchemaForSignatories(signatories, officerType))
 }
 
 function generateSchemaForSignatories (signatories: DirectorToSign[], officerType: OfficerType): Joi.SchemaMap {
-    return signatories.reduce((schema: Joi.SchemaMap, signatory: DirectorToSign) => ({
+    return signatories.reduce((schema: Joi.SchemaMap, isCorporateOfficer: DirectorToSign) => ({
         ...schema,
-        ...generateSchemaForSignatory(signatory, officerType)
+        ...generateSchemaForSignatory(isCorporateOfficer, officerType)
     }), {})
 }
 
@@ -19,7 +20,7 @@ function generateSchemaForSignatory (signatory: DirectorToSign, officerType: Off
     const formSuffix: string = `_${formatSignatoryId(signatory)}`
 
     return {
-        ...generateSchemaForSignatoryDetails(officerType, formSuffix),
+        ...generateSchemaForSignatoryDetails(isCorporateOfficer(signatory.officerRole), officerType, formSuffix),
         _csrf: Joi.string()
             .optional()
             .messages({

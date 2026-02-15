@@ -1,6 +1,6 @@
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
-import { DirectorToSignBuilder, aDirectorToSign } from "./directorToSign.builder"
+import { DirectorToSignBuilder } from "./directorToSign.builder"
 import OfficerType from "app/models/dto/officerType.enum"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
 
@@ -8,7 +8,7 @@ export class DissolutionSessionBuilder {
     officerType?: OfficerType
     directorsToSign: DirectorToSign[] = []
     defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
-    // Add other fields as needed, e.g. applicant, companyNumber, etc.
+    private _isMultiDirector?: boolean
 
     withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {
         this.directorsToSign = directors
@@ -20,16 +20,6 @@ export class DissolutionSessionBuilder {
         return this
     }
 
-    // Add more fluent setters for other fields as needed
-
-    build (): DissolutionSession {
-        return {
-            officerType: this.officerType,
-            directorsToSign: this.directorsToSign,
-            defineSignatoryInfoForm: this.defineSignatoryInfoForm
-        } as DissolutionSession
-    }
-
     withOfficerType (officerType: OfficerType) {
         this.officerType = officerType
         return this
@@ -39,9 +29,22 @@ export class DissolutionSessionBuilder {
         this.defineSignatoryInfoForm = defineSignatoryInfoForm
         return this
     }
+
+    public withIsMultiDirector (isMultiDirector: boolean): this {
+        this._isMultiDirector = isMultiDirector
+        return this
+    }
+
+    public build (): DissolutionSession {
+        return {
+            officerType: this.officerType,
+            directorsToSign: this.directorsToSign,
+            defineSignatoryInfoForm: this.defineSignatoryInfoForm,
+            isMultiDirector: this._isMultiDirector
+        } as DissolutionSession
+    }
 }
 
-// Factory helper functions (Nat Pryce-style fluent factories) to make test setup concise
 export function aDissolutionSession (): DissolutionSessionBuilder {
     return new DissolutionSessionBuilder()
 }

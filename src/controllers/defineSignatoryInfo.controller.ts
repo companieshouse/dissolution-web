@@ -8,7 +8,6 @@ import OfficerType from "app/models/dto/officerType.enum"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
 import Optional from "app/models/optional"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
-import { isCorporateOfficer } from "app/utils/officer.utils"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from "app/paths"
@@ -16,6 +15,7 @@ import defineSignatoryInfoSchema from "app/schemas/defineSignatoryInfo.schema"
 import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
+import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
 
 interface ViewModel {
   officerType: OfficerType

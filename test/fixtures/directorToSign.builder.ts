@@ -54,4 +54,3 @@ export class DirectorToSignBuilder {
 export function aDirectorToSign (): DirectorToSignBuilder {
     return new DirectorToSignBuilder()
 }
-

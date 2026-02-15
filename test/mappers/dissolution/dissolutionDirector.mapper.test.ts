@@ -1,12 +1,14 @@
 import { assert } from "chai"
-import { generateOnBehalfChangeDetailsFormModel, generateWillSignChangeDetailsFormModel } from "../../fixtures/companyOfficers.fixtures"
+import {
+    generateOnBehalfChangeDetailsFormModel,
+    generateWillSignChangeDetailsFormModel
+} from "../../fixtures/companyOfficers.fixtures"
 import { generateGetDirector } from "../../fixtures/dissolutionApi.fixtures"
 
 import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper"
 import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest"
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
 
 describe("DissolutionDirectorMapper", () => {
 
@@ -23,7 +25,6 @@ describe("DissolutionDirectorMapper", () => {
 
             const result: ChangeDetailsFormModel = mapper.mapToChangeDetailsForm(signatory)
 
-            assert.equal(result.isSigning, SignatorySigning.WILL_SIGN)
             assert.equal(result.directorEmail, "director@mail.com")
             assert.isUndefined(result.onBehalfName)
             assert.isUndefined(result.onBehalfEmail)
@@ -35,7 +36,6 @@ describe("DissolutionDirectorMapper", () => {
 
             const result: ChangeDetailsFormModel = mapper.mapToChangeDetailsForm(signatory)
 
-            assert.equal(result.isSigning, SignatorySigning.ON_BEHALF)
             assert.equal(result.onBehalfEmail, "accountant@mail.com")
             assert.equal(result.onBehalfName, "Some On Behalf Name")
             assert.isUndefined(result.directorEmail)
@@ -45,10 +45,8 @@ describe("DissolutionDirectorMapper", () => {
     describe("mapToDissolutionDirectorPatchRequest", () => {
         it("should map the director name only if signatory is a director signing themselves", () => {
             const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
-            form.isSigning = SignatorySigning.WILL_SIGN
+            form.onBehalfName = undefined
             form.directorEmail = "director@mail.com"
-            form.onBehalfEmail = "ignore@mail.com"
-            form.onBehalfName = "This should be ignored"
 
             const result: DissolutionDirectorPatchRequest = mapper.mapToDissolutionDirectorPatchRequest(form)
 
@@ -58,7 +56,6 @@ describe("DissolutionDirectorMapper", () => {
 
         it("should map the on behalf name and on behalf email if signatory is signing on behalf of a director", () => {
             const form: ChangeDetailsFormModel = generateOnBehalfChangeDetailsFormModel()
-            form.isSigning = SignatorySigning.ON_BEHALF
             form.directorEmail = "ignore@mail.com"
             form.onBehalfEmail = "accountant@mail.com"
             form.onBehalfName = "Mr Accountant"
