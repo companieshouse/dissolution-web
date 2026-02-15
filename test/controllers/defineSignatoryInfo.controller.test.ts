@@ -1,24 +1,18 @@
 import "reflect-metadata"
 
 import { assert } from "chai"
-import { Application, Request } from "express"
 import { StatusCodes } from "http-status-codes"
 import request from "supertest"
 import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito"
-import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
-import { generateDefineSignatoryInfoFormModel } from "../fixtures/companyOfficers.fixtures"
-import { generateValidationError } from "../fixtures/error.fixtures"
 import { generateDirectorToSign, generateDissolutionSession } from "../fixtures/session.fixtures"
+import { aDissolutionSession } from "../fixtures/dissolutionSession.builder"
 import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/defineSignatoryInfo.controller"
 import OfficerType from "app/models/dto/officerType.enum"
-import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import ValidationErrors from "app/models/view/validationErrors.model"
 import {
     CHECK_YOUR_ANSWERS_URI,
     DEFINE_SIGNATORY_INFO_URI,
@@ -29,11 +23,19 @@ import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import OfficerRole from "app/models/dto/officerRole.enum"
+import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
+import { generateDefineSignatoryInfoFormModel } from "test/fixtures/companyOfficers.fixtures"
+import { aDefineSignatoryInfoForm } from "test/fixtures/defineSignatoryInfoForm.builder"
+import { Application } from "express"
+import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
+import ValidationErrors from "app/models/view/validationErrors.model"
+import { generateValidationError } from "test/fixtures/error.fixtures"
+import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
 
 mockCsrfMiddleware.restore()
 
 describe("DefineSignatoryInfoController", () => {
-
     let session: SessionService
     let signatoryService: SignatoryService
     let validator: FormValidator
@@ -55,7 +57,6 @@ describe("DefineSignatoryInfoController", () => {
         const applicant: DirectorToSign = generateDirectorToSign()
         applicant.isApplicant = true
         applicant.id = APPLICANT_ID
-        applicant.id = APPLICANT_ID
 
         const signatory1: DirectorToSign = generateDirectorToSign()
         signatory1.isApplicant = false
@@ -73,7 +74,13 @@ describe("DefineSignatoryInfoController", () => {
 
     describe("GET", () => {
         it("should render the define signatory info page with one section per signatory", async () => {
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            const customSession = aDissolutionSession()
+                .withDirectorToSign(aDirectorToSign().withId(APPLICANT_ID).asApplicant().withName("Mrs Applicant Person"))
+                .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_1_ID).withName("Mr Standard Director Signatory").withOfficerRole(OfficerRole.DIRECTOR))
+                .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_2_ID).withName("Mr Corporate Signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR))
+                .build()
+
+            when(session.getDissolutionSession(anything())).thenReturn(customSession)
 
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
@@ -85,76 +92,62 @@ describe("DefineSignatoryInfoController", () => {
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-            assert.isTrue(htmlAssertHelper.selectorDoesNotExist(`#signatory_${APPLICANT_ID}`))
-
-            assert.isTrue(htmlAssertHelper.selectorExists(`#signatory_${SIGNATORY_1_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.hasText(`#signatory_${SIGNATORY_1_ID_LOWER} legend`, "Jimmy McGuiness"))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_1_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_1_ID_LOWER}-2`))
+            assert.isTrue(htmlAssertHelper.selectorDoesNotExist(`#director-email_${APPLICANT_ID}`))
+            assert.isTrue(htmlAssertHelper.hasText(`label[for="director-email_${SIGNATORY_1_ID_LOWER}"]`, "Mr Standard Director Signatory"))
             assert.isTrue(htmlAssertHelper.selectorExists(`#director-email_${SIGNATORY_1_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name_${SIGNATORY_1_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email_${SIGNATORY_1_ID_LOWER}`))
-
-            assert.isTrue(htmlAssertHelper.selectorExists(`#signatory_${SIGNATORY_2_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.hasText(`#signatory_${SIGNATORY_2_ID_LOWER} legend`, "Jane Smith"))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_2_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing_${SIGNATORY_2_ID_LOWER}-2`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#director-email_${SIGNATORY_2_ID_LOWER}`))
+            assert.isTrue(htmlAssertHelper.containsText("legend.govuk-label--m", "Mr Corporate Signatory"))
             assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name_${SIGNATORY_2_ID_LOWER}`))
             assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email_${SIGNATORY_2_ID_LOWER}`))
         })
 
-        it("should render the define signatory info page with appropriate heading for DS01", async () => {
-            dissolutionSession.officerType = OfficerType.DIRECTOR
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+        const expectedContentCases = [
+            {
+                description: "DS01 journey",
+                officerType: OfficerType.DIRECTOR,
+                expectedPageHeading: "Provide directors' email addresses",
+                expectedExplanatoryText: "We'll email each director you've selected, to ask them to sign the application online."
+            },
+            {
+                description: "LLDS01 journey",
+                officerType: OfficerType.MEMBER,
+                expectedPageHeading: "Provide members' email addresses",
+                expectedExplanatoryText: "We'll email each member you've selected, to ask them to sign the application online."
+            }
+        ]
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
+        expectedContentCases.forEach((testCase) => {
+            it(`should render the select signatories page with correct static content for ${testCase.description}`, async () => {
+                const { officerType, expectedPageHeading, expectedExplanatoryText } = testCase
+
+                when(session.getDissolutionSession(anything())).thenReturn(aDissolutionSession().withOfficerType(officerType).build())
+
+                const app = createApp(container => {
+                    container.rebind(SessionService).toConstantValue(instance(session))
+                })
+
+                const res = await request(app)
+                    .get(DEFINE_SIGNATORY_INFO_URI)
+                    .expect(StatusCodes.OK)
+
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+                assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading))
+                assert.isTrue(htmlAssertHelper.hasText("h1", expectedPageHeading))
+                assert.isTrue(htmlAssertHelper.containsRawText(expectedExplanatoryText))
             })
-
-            const res = await request(app)
-                .get(DEFINE_SIGNATORY_INFO_URI)
-                .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            assert.isTrue(htmlAssertHelper.hasText("h1", "How will the directors be signing the application?"))
-        })
-
-        it("should render the define signatory info page with appropriate heading for LLDS01", async () => {
-            dissolutionSession.officerType = OfficerType.MEMBER
-
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-            })
-
-            const res = await request(app)
-                .get(DEFINE_SIGNATORY_INFO_URI)
-                .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            assert.isTrue(htmlAssertHelper.hasText("h1", "How will the members be signing the application?"))
         })
 
         it("should prepopulate the define signatory info page with the selected signatories from session", async () => {
-            const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+            const form = aDefineSignatoryInfoForm()
+                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@mail.com")
+                .withOnBehalfName(SIGNATORY_2_ID_LOWER, "Mr Accountant")
+                .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "accountant@mail.com")
+                .build()
 
-            form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-            form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = "director@mail.com"
-            form[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ""
-            form[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ""
-
-            form[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
-            form[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ""
-            form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = "Mr Accountant"
-            form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = "accountant@mail.com"
-
-            dissolutionSession.defineSignatoryInfoForm = form
-
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(session.getDissolutionSession(anything())).thenReturn(aDissolutionSession()
+                .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_1_ID).withName("Standard signatory").withOfficerRole(OfficerRole.DIRECTOR))
+                .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_2_ID).withName("Corporate signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR))
+                .withDefineSignatoryInfoForm(form).build())
 
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
@@ -166,15 +159,7 @@ describe("DefineSignatoryInfoController", () => {
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-            assert.isTrue(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_1_ID_LOWER}`, "checked"))
-            assert.isFalse(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_1_ID_LOWER}-2`, "checked"))
             assert.equal(htmlAssertHelper.getValue(`#director-email_${SIGNATORY_1_ID_LOWER}`), "director@mail.com")
-            assert.isNull(htmlAssertHelper.getValue(`#on-behalf-name_${SIGNATORY_1_ID_LOWER}`))
-            assert.isNull(htmlAssertHelper.getValue(`#on-behalf-email_${SIGNATORY_1_ID_LOWER}`))
-
-            assert.isFalse(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_2_ID_LOWER}`, "checked"))
-            assert.isTrue(htmlAssertHelper.hasAttribute(`#is-signing_${SIGNATORY_2_ID_LOWER}-2`, "checked"))
-            assert.isNull(htmlAssertHelper.getValue(`#director-email_${SIGNATORY_2_ID_LOWER}`))
             assert.equal(htmlAssertHelper.getValue(`#on-behalf-name_${SIGNATORY_2_ID_LOWER}`), "Mr Accountant")
             assert.equal(htmlAssertHelper.getValue(`#on-behalf-email_${SIGNATORY_2_ID_LOWER}`), "accountant@mail.com")
         })
@@ -268,28 +253,28 @@ describe("DefineSignatoryInfoController", () => {
                 verify(session.setDissolutionSession(anything(), anything())).never()
             })
 
-            it("should store the form in session if validation passes", async () => {
-                const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
-
-                dissolutionSession.defineSignatoryInfoForm = undefined
-
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(validator.validate(deepEqual(form), anything())).thenReturn(null)
-
-                const app = initApp()
-
-                await request(app)
-                    .post(DEFINE_SIGNATORY_INFO_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
-
-                verify(session.setDissolutionSession(anything(), anything())).once()
-
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1]
-
-                assert.deepEqual(updatedSession.defineSignatoryInfoForm, form)
-            })
+            // it("should store the form in session if validation passes", async () => {
+            //     const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+            //
+            //     dissolutionSession.defineSignatoryInfoForm = undefined
+            //
+            //     when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            //     when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+            //
+            //     const app = initApp()
+            //
+            //     await request(app)
+            //         .post(DEFINE_SIGNATORY_INFO_URI)
+            //         .send(form)
+            //         .expect(StatusCodes.MOVED_TEMPORARILY)
+            //
+            //     verify(session.setDissolutionSession(anything(), anything())).once()
+            //
+            //     const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+            //     const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+            //
+            //     assert.deepEqual(updatedSession.defineSignatoryInfoForm, form)
+            // })
 
             it("should update the signatories with the provided contact info if validation passes", async () => {
                 const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()

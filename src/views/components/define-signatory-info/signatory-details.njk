@@ -1,10 +1,7 @@
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/input/macro.njk"  import govukInput %}
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
 
 {% set fieldsetId = "signatory" + formSuffix %}
-
-{% set isSigningName = "isSigning" + formSuffix %}
-{% set isSigningId = "is-signing" + formSuffix %}
 
 {% set directorEmailName = "directorEmail" + formSuffix %}
 {% set directorEmailId = "director-email" + formSuffix %}
@@ -15,39 +12,23 @@
 {% set onBehalfEmailName = "onBehalfEmail" + formSuffix %}
 {% set onBehalfEmailId = "on-behalf-email" + formSuffix %}
 
-{% set willSignSection %}
-  {{
-    govukInput({
-      id: directorEmailId,
-      name: directorEmailName,
-      type: "email",
-      autocomplete: "email",
-      classes: "govuk-!-width-full",
-      label: {
-        text: "What is the email address for " + signatoryName + "?"
-      },
-      hint: {
-        text: "We will use this email to ask them to sign the application."
-      },
-      errorMessage: {
-        text: errors[directorEmailName]
-      } if errors[directorEmailName],
-      attributes: {
-        spellcheck: "false"
-      },
-      value: data[directorEmailName] if data
-    })
-  }}
-{% endset -%}
+{% if signatory.isCorporateOfficer %}
 
-{% set onBehalfSection %}
+{% call govukFieldset({
+  legend: {
+    html: signatoryName + '<br><span class="govuk-body">Provide the details of a person who is authorised by ' + signatoryName + ' to sign the application on its behalf.</span>',
+    classes: "govuk-label--m",
+    isPageHeading: false
+  }
+}) %}
+
   {{
     govukInput({
       id: onBehalfNameId,
       name: onBehalfNameName,
       classes: "govuk-!-width-full",
-      label: {
-        text: "What is the name of the person signing for " + signatoryName + "?"
+      hint: {
+        text: "What is the name of the authorised person who will sign on behalf of " + signatoryName + "?"
       },
       errorMessage: {
         text: errors[onBehalfNameName]
@@ -66,11 +47,8 @@
       type: "email",
       autocomplete: "email",
       classes: "govuk-!-width-full",
-      label: {
-        text: "What is the email address of the person signing for " + signatoryName + "?"
-      },
       hint: {
-        text: "We will use this email to ask them to sign the application."
+        text: "What is the email address for the authorised person who will sign on behalf of " + signatoryName + "?"
       },
       errorMessage: {
         text: errors[onBehalfEmailName]
@@ -81,41 +59,30 @@
       value: data[onBehalfEmailName] if data
     })
   }}
-{% endset -%}
+{% endcall %}
+{% else %}
 
-{{
-  govukRadios({
-    idPrefix: isSigningId,
-    name: isSigningName,
-    fieldset: {
-      attributes: {
-        id: fieldsetId
-      },
-      legend: {
+  {{
+    govukInput({
+      id: directorEmailId,
+      name: directorEmailName,
+      type: "email",
+      autocomplete: "email",
+      classes: "govuk-!-width-full",
+      label: {
         text: signatoryName,
-        classes: "govuk-fieldset__legend--m"
-      }
-    },
-    errorMessage: {
-      text: errors[isSigningName]
-    } if errors[isSigningName],
-    items: [
-      {
-        value: SignatorySigning.WILL_SIGN,
-        text: "Will sign",
-        conditional: {
-          html: willSignSection
-        },
-        checked: data[isSigningName] === SignatorySigning.WILL_SIGN if data
+        classes: "govuk-label--m"
       },
-      {
-        value: SignatorySigning.ON_BEHALF,
-        text: "Someone will sign for them",
-        conditional: {
-          html: onBehalfSection
-        },
-        checked: data[isSigningName] === SignatorySigning.ON_BEHALF if data
-      }
-    ]
-  })
-}}
+      hint: {
+        text: "What is the email address for " + signatoryName + "?"
+      },
+      errorMessage: {
+        text: errors[directorEmailName]
+      } if errors[directorEmailName],
+      attributes: {
+        spellcheck: "false"
+      },
+      value: data[directorEmailName] if data
+    })
+  }}
+{% endif %}

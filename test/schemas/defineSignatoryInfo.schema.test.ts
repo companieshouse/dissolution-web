@@ -8,6 +8,9 @@ import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInf
 import SignatorySigning from "app/models/form/signatorySigning.enum"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import defineSignatoryInfoSchema from "app/schemas/defineSignatoryInfo.schema"
+import { aDefineSignatoryInfoForm } from "test/fixtures/defineSignatoryInfoForm.builder"
+import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
+import OfficerRole from "app/models/dto/officerRole.enum"
 
 describe("Define Signatory Info Schema", () => {
 
@@ -32,12 +35,10 @@ describe("Define Signatory Info Schema", () => {
         const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
         const officerType: OfficerType = OfficerType.DIRECTOR
 
-        form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
         form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = "director@mail.com"
         form[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ""
         form[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ""
 
-        form[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
         form[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ""
         form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = "Mr Accountant"
         form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = "accountant@mail.com"
@@ -48,47 +49,18 @@ describe("Define Signatory Info Schema", () => {
         assert.isUndefined(errors.error)
     })
 
-    it("should return an error when it has not been provided how a signatory will be signing", () => {
-        const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
-        const officerType: OfficerType = OfficerType.DIRECTOR
-
-        form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = ""
-        form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = "director@mail.com"
-        form[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ""
-        form[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ""
-
-        form[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
-        form[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ""
-        form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = "Mr Accountant"
-        form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = "accountant@mail.com"
-
-        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
-
-        assert.isDefined(errors.error)
-        assert.equal(errors.error!.details.length, 2)
-
-        assert.equal(errors.error!.details[0].context!.key, `isSigning_${SIGNATORY_1_ID_LOWER}`)
-        assert.equal(errors.error!.details[0].type, `any.only`)
-        assert.equal(errors.error!.details[0].message, `Select how the ${officerType} will be signing the application`)
-
-        assert.equal(errors.error!.details[1].context!.key, `isSigning_${SIGNATORY_1_ID_LOWER}`)
-        assert.equal(errors.error!.details[1].type, `string.empty`)
-        assert.equal(errors.error!.details[1].message, `Select how the ${officerType} will be signing the application`)
-    })
-
     it("should return an error if mandatory text fields have not been provided", () => {
-        const form: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+
+        const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID).withName("Mr Standard Director Signatory").withOfficerRole(OfficerRole.DIRECTOR).build()
+        const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID).withName("Mr Corporate Signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
+
+        const form: DefineSignatoryInfoFormModel = aDefineSignatoryInfoForm()
+            .withDirectorEmail(SIGNATORY_1_ID_LOWER, "")
+            .withOnBehalfName(SIGNATORY_2_ID_LOWER, "")
+            .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "")
+            .build()
+
         const officerType: OfficerType = OfficerType.DIRECTOR
-
-        form[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-        form[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ""
-        form[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ""
-        form[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ""
-
-        form[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
-        form[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ""
-        form[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ""
-        form[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ""
 
         const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
 

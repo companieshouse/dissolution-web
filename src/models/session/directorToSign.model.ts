@@ -1,10 +1,8 @@
-import OfficerRole from "app/models/dto/officerRole.enum"
-
 export interface DirectorToSign {
   id: string
   name: string
   isApplicant: boolean
-  officerRole: OfficerRole
+  officerRole: string
   email?: string
   onBehalfName?: string
 }

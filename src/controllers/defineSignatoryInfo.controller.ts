@@ -8,6 +8,7 @@ import OfficerType from "app/models/dto/officerType.enum"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
 import Optional from "app/models/optional"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
+import { isCorporateOfficer } from "app/utils/officer.utils"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from "app/paths"
@@ -62,7 +63,12 @@ export class DefineSignatoryInfoController extends BaseController {
     }
 
     private getSignatories (session: DissolutionSession): DirectorToSign[] {
-        return session.directorsToSign!.filter(director => !director.isApplicant)
+        return (session.directorsToSign || [])
+            .filter(director => !director.isApplicant)
+            .map(director => ({
+                ...director,
+                isCorporateOfficer: isCorporateOfficer(director.officerRole)
+            }))
     }
 
     private async renderView (

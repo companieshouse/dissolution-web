@@ -271,7 +271,7 @@ describe("SelectSignatoriesController", () => {
                 const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
 
                 const director1 = aDirectorDetails().withId(DIRECTOR_1_ID).withName("Signatory 1").withOfficerRole(OfficerRole.DIRECTOR).build()
-                const director2 = aDirectorDetails().withId(DIRECTOR_2_ID).withName("Signatory 2").build()
+                const director2 = aDirectorDetails().withId(DIRECTOR_2_ID).withName("Signatory 2").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
 
                 when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([director1, director2])
                 when(validator.validate(deepEqual(form), anything())).thenReturn(null)
