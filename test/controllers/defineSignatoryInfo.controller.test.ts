@@ -187,7 +187,7 @@ describe("DefineSignatoryInfoController", () => {
         it("should re-render the view with an error if validation fails", async () => {
 
             const form = aDefineSignatoryInfoForm()
-                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "not-an-email") // invalid email
+                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "not-an-email")
                 .build()
 
             when(session.getDissolutionSession(anything())).thenReturn(aDissolutionSession()
@@ -203,7 +203,7 @@ describe("DefineSignatoryInfoController", () => {
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-            assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter a valid email address"))
+            assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
         })
 
         describe("session", () => {

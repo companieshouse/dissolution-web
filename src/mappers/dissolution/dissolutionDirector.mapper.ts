@@ -11,18 +11,18 @@ export default class DissolutionDirectorMapper {
 
     public mapToChangeDetailsForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
         return signatory.on_behalf_name
-            ? this.mapToOnBehalfForm(signatory)
-            : this.mapToWillSignForm(signatory)
+            ? this.mapToCorporateOfficerForm(signatory)
+            : this.mapToStandardOfficerForm(signatory)
     }
 
-    private mapToOnBehalfForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
+    private mapToCorporateOfficerForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
         return {
             onBehalfEmail: signatory.email,
             onBehalfName: signatory.on_behalf_name
         }
     }
 
-    private mapToWillSignForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
+    private mapToStandardOfficerForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
         return {
             directorEmail: signatory.email
         }

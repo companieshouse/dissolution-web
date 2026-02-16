@@ -1,26 +1,25 @@
 import * as Joi from "@hapi/joi"
 import { generateSchemaForSignatoryDetails } from "./signatoryDetails.schema"
-
-import OfficerType from "app/models/dto/officerType.enum"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
 
-export default function defineSignatoryInfoSchema (signatories: DirectorToSign[], officerType: OfficerType): Joi.ObjectSchema {
-    return Joi.object(generateSchemaForSignatories(signatories, officerType))
+export default function defineSignatoryInfoSchema (signatories: DirectorToSign[]): Joi.ObjectSchema {
+    return Joi.object(generateSchemaForSignatories(signatories))
 }
 
-function generateSchemaForSignatories (signatories: DirectorToSign[], officerType: OfficerType): Joi.SchemaMap {
-    return signatories.reduce((schema: Joi.SchemaMap, isCorporateOfficer: DirectorToSign) => ({
+function generateSchemaForSignatories (signatories: DirectorToSign[]): Joi.SchemaMap {
+    return signatories.reduce((schema: Joi.SchemaMap, signatory: DirectorToSign) => ({
         ...schema,
-        ...generateSchemaForSignatory(isCorporateOfficer, officerType)
+        ...generateSchemaForSignatory(signatory)
     }), {})
 }
 
-function generateSchemaForSignatory (signatory: DirectorToSign, officerType: OfficerType): Joi.SchemaMap {
+function generateSchemaForSignatory (signatory: DirectorToSign): Joi.SchemaMap {
+    const signatoryName: string = signatory.name
     const formSuffix: string = `_${formatSignatoryId(signatory)}`
 
     return {
-        ...generateSchemaForSignatoryDetails(isCorporateOfficer(signatory.officerRole), officerType, formSuffix),
+        ...generateSchemaForSignatoryDetails(isCorporateOfficer(signatory.officerRole), signatoryName, formSuffix),
         _csrf: Joi.string()
             .optional()
             .messages({

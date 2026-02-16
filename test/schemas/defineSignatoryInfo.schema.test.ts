@@ -1,7 +1,5 @@
 import { ValidationResult } from "@hapi/joi"
 import { assert } from "chai"
-
-import OfficerType from "app/models/dto/officerType.enum"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import defineSignatoryInfoSchema from "app/schemas/defineSignatoryInfo.schema"
@@ -17,13 +15,8 @@ describe("Define Signatory Info Schema", () => {
     const SIGNATORY_1_ID_LOWER = SIGNATORY_1_ID.toLowerCase()
     const SIGNATORY_2_ID_LOWER = SIGNATORY_2_ID.toLowerCase()
 
-    beforeEach(() => {
-
-    })
-
     it("should return no errors when data is valid", () => {
 
-        const officerType: OfficerType = OfficerType.DIRECTOR
         const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID).withName("Standard Signatory").withOfficerRole(OfficerRole.DIRECTOR).build()
         const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID).withName("Corporate Signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
 
@@ -33,7 +26,7 @@ describe("Define Signatory Info Schema", () => {
             .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "accountant@mail.com")
             .build()
 
-        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
+        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
 
         assert.isUndefined(errors.error)
     })
@@ -49,29 +42,25 @@ describe("Define Signatory Info Schema", () => {
             .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "")
             .build()
 
-        const officerType: OfficerType = OfficerType.DIRECTOR
-
-        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
+        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
 
         assert.isDefined(errors.error)
         assert.equal(errors.error!.details.length, 3)
 
         assert.equal(errors.error!.details[0].context!.key, `directorEmail_${SIGNATORY_1_ID_LOWER}`)
         assert.equal(errors.error!.details[0].type, `string.empty`)
-        assert.equal(errors.error!.details[0].message, `Enter the email address for the ${officerType}`)
+        assert.equal(errors.error!.details[0].message, `Enter the email address for Mr Standard Director Signatory`)
 
         assert.equal(errors.error!.details[1].context!.key, `onBehalfName_${SIGNATORY_2_ID_LOWER}`)
         assert.equal(errors.error!.details[1].type, `string.empty`)
-        assert.equal(errors.error!.details[1].message, `Enter the name for the person signing on behalf of the ${officerType}`)
+        assert.equal(errors.error!.details[1].message, `Enter the name of the authorised person who will sign for Mr Corporate Signatory`)
 
         assert.equal(errors.error!.details[2].context!.key, `onBehalfEmail_${SIGNATORY_2_ID_LOWER}`)
         assert.equal(errors.error!.details[2].type, `string.empty`)
-        assert.equal(errors.error!.details[2].message, `Enter the email address for the person signing on behalf of the ${officerType}`)
+        assert.equal(errors.error!.details[2].message, `Enter the email address for the authorised person who will sign for Mr Corporate Signatory`)
     })
 
     it("should return an error if email fields do not contain valid email values", () => {
-        const officerType: OfficerType = OfficerType.DIRECTOR
-
         const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID).withName("Mr Standard Director Signatory").withOfficerRole(OfficerRole.DIRECTOR).build()
         const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID).withName("Mr Corporate Signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
 
@@ -81,23 +70,21 @@ describe("Define Signatory Info Schema", () => {
             .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "also not an email")
             .build()
 
-        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
+        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
 
         assert.isDefined(errors.error)
         assert.equal(errors.error!.details.length, 2)
 
         assert.equal(errors.error!.details[0].context!.key, `directorEmail_${SIGNATORY_1_ID_LOWER}`)
         assert.equal(errors.error!.details[0].type, `string.email`)
-        assert.equal(errors.error!.details[0].message, `Enter a valid email address for the ${officerType}`)
+        assert.equal(errors.error!.details[0].message, `Enter an email address in the correct format, like name@example.com`)
 
         assert.equal(errors.error!.details[1].context!.key, `onBehalfEmail_${SIGNATORY_2_ID_LOWER}`)
         assert.equal(errors.error!.details[1].type, `string.email`)
-        assert.equal(errors.error!.details[1].message, `Enter a valid email address for the person signing on behalf of the ${officerType}`)
+        assert.equal(errors.error!.details[1].message, `Enter an email address in the correct format, like name@example.com`)
     })
 
     it("should return an error if a name is provided that is above the maximum length", () => {
-
-        const officerType: OfficerType = OfficerType.DIRECTOR
 
         const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID).withName("Mr Standard Director Signatory").withOfficerRole(OfficerRole.DIRECTOR).build()
         const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID).withName("Mr Corporate Signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
@@ -108,13 +95,13 @@ describe("Define Signatory Info Schema", () => {
             .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "accountant@mail.com")
             .build()
 
-        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2], officerType).validate(form, { abortEarly: false })
+        const errors: ValidationResult = defineSignatoryInfoSchema([signatory1, signatory2]).validate(form, { abortEarly: false })
 
         assert.isDefined(errors.error)
         assert.equal(errors.error!.details.length, 1)
 
         assert.equal(errors.error!.details[0].context!.key, `onBehalfName_${SIGNATORY_2_ID_LOWER}`)
         assert.equal(errors.error!.details[0].type, `string.max`)
-        assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the person signing on behalf of the ${officerType}`)
+        assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the authorised person who will sign for Mr Corporate Signatory`)
     })
 })

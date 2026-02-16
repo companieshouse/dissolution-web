@@ -52,7 +52,7 @@ export class DefineSignatoryInfoController extends BaseController {
 
         const signatories: DirectorToSign[] = this.getSignatories(session)
 
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(signatories, officerType))
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(signatories))
         if (errors) {
             return this.renderView(officerType, signatories, session.isMultiDirector!, body, errors)
         }
