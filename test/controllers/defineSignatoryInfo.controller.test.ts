@@ -286,7 +286,7 @@ describe("DefineSignatoryInfoController", () => {
         it("should redirect to the check your answers screen if validation passes", async () => {
 
             const form = aDefineSignatoryInfoForm()
-                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@email.com") // invalid email
+                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@email.com")
                 .build()
 
             when(session.getDissolutionSession(anything())).thenReturn(
