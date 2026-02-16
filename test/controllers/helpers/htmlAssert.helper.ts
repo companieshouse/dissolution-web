@@ -45,6 +45,10 @@ export default class HtmlAssertHelper {
         return this.getElement(selector)?.textContent?.trim()
     }
 
+    public getInnerHTML (selector: string): Optional<string> {
+        return this.getElement(selector)?.innerHTML || null
+    }
+
     public containsRawText (text: string): boolean {
         return this.dom.window.document.documentElement.textContent?.includes(text) || false
     }
