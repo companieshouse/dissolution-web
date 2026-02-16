@@ -124,9 +124,6 @@
     "ignore": [
       "**/*.test.ts"
     ],
-    "exec": "node --inspect=0.0.0.0:9229 -r ts-node/register src/app.ts",
-    "nodeArgs": [
-      "--inspect=0.0.0.0:9229"
-    ]
+    "exec": "node --inspect=0 -r ts-node/register src/app.ts"
   }
 }
