@@ -22,7 +22,7 @@
       <form method="post">
 
         {% include "components/csrf_token.njk" %}
-        
+
         {{
           govukRadios({
             name: "paymentType",
@@ -53,7 +53,7 @@
                 id: 'account-radio-button',
                 attributes: {
                   'data-event-id': 'payment-ch-account-type-link' if piwik
-                } 
+                }
               }
             ]
           })

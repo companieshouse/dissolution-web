@@ -21,7 +21,7 @@
 
       <h1 class="govuk-heading-xl">Enter your details to pay by account</h1>
 
-      <form method="post">
+      <form method="post" id="close-a-company-payment-pay-by-account-form">
 
         {% include "components/csrf_token.njk" %}
 
@@ -32,6 +32,9 @@
             classes: "govuk-!-width-full",
             label: {
               text: "Presenter ID"
+            },
+            hint: {
+                text: "This is 11 numbers. For example, 00012345678"
             },
             errorMessage: {
               text: errors.presenterId
@@ -49,13 +52,18 @@
             label: {
               text: "Presenter authentication code"
             },
+            hint: {
+                text: "This is 11 characters and may include letters and numbers. For example, A1B2C3D4E5F"
+            },
             errorMessage: {
               text: errors.presenterAuthCode
             } if errors.presenterAuthCode,
             value: data.presenterAuthCode if data
           })
         }}
-
+        <p class="govuk-body">
+            If you do not have details for an existing payment account, you’ll need to <a href={{ Paths.PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI }} class="govuk-link">pay by credit or debit card instead</a>.
+        </p>
         {{
           govukButton({
             text: 'Confirm payment',

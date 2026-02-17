@@ -16,9 +16,12 @@ import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
 import SessionService from "app/services/session/session.service"
+import PaymentService from "app/services/payment/payment.service"
 import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
+import PaymentType from "app/models/dto/paymentType.enum"
+import { v4 as uuidv4 } from "uuid"
 
 interface ViewModel {
     data?: PayByAccountDetailsFormModel
@@ -36,6 +39,7 @@ export class PayByAccountDetailsController extends BaseController {
         @inject(FormValidator) private validator: FormValidator,
         @inject(DissolutionSessionMapper) private mapper: DissolutionSessionMapper,
         @inject(PayByAccountService) private payByAccountService: PayByAccountService,
+        @inject(PaymentService) private paymentService: PaymentService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
     ) {
         super()
@@ -53,6 +57,35 @@ export class PayByAccountDetailsController extends BaseController {
         }
 
         return this.renderView()
+    }
+
+    @httpGet("/change-payment-type")
+    public async changePaymentType (): Promise<string | RedirectResult> {
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
+        const paymentType: PaymentType = PaymentType.CREDIT_DEBIT_CARD
+        const redirectUrl = await this.getCreditCardPaymentUrl(dissolutionSession)
+        this.updateSessionWithPaymentType(dissolutionSession, paymentType)
+
+        return this.redirect(redirectUrl)
+    }
+
+    private async getCreditCardPaymentUrl (dissolutionSession: DissolutionSession): Promise<string> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
+        dissolutionSession.paymentStateUUID = uuidv4()
+
+        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID)
+    }
+
+    private updateSessionWithPaymentType (
+        dissolutionSession: DissolutionSession,
+        paymentType: PaymentType
+    ): void {
+        const updatedSession: DissolutionSession = {
+            ...dissolutionSession,
+            paymentType
+        }
+
+        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
     }
 
     @httpPost("")

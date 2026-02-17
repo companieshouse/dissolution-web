@@ -74,8 +74,8 @@ function generatePaymentDetails (): PaymentDetails {
 
 export function generatePayByAccountDetailsForm (): PayByAccountDetailsFormModel {
     return {
-        presenterId: "1234",
-        presenterAuthCode: "ABC123",
+        presenterId: "12345678901",
+        presenterAuthCode: "ABC12345678",
         _csrf: "abc123"
     }
 }

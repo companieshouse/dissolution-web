@@ -30,6 +30,7 @@ export const CERTIFICATE_DOWNLOAD_URI = `${ROOT_URI}/certificate-download`
 const PAYMENT_URI = `${ROOT_URI}/payment`
 export const PAYMENT_REVIEW_URI = `${PAYMENT_URI}/payment-review`
 export const PAY_BY_ACCOUNT_DETAILS_URI = `${PAYMENT_URI}/pay-by-account`
+export const PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI = `${PAYMENT_URI}/pay-by-account/change-payment-type`
 export const VIEW_FINAL_CONFIRMATION_URI = `${ROOT_URI}/view-final-confirmation`
 export const HOW_DO_YOU_WANT_TO_PAY_URI = `${PAYMENT_URI}/how-do-you-want-to-pay`
 export const PAY_BY_ACCOUNT_URI = `${PAYMENT_URI}/pay-by-account`
