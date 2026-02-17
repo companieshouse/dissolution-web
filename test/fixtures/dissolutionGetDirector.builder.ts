@@ -27,8 +27,8 @@ export class DissolutionGetDirectorBuilder {
         return this
     }
 
-    withOnBehalfName (onBehalfName: string): this {
-        this.on_behalf_name = onBehalfName
+    public withOnBehalfName (name?: string | null): this {
+        this.on_behalf_name = name ?? undefined
         return this
     }
 
@@ -39,7 +39,7 @@ export class DissolutionGetDirectorBuilder {
             email: this.email,
             approved_at: this.approved_at,
             on_behalf_name: this.on_behalf_name
-        }
+        } as DissolutionGetDirector
     }
 }
 

@@ -6,7 +6,7 @@ import BaseController from "./base.controller"
 
 import { NotFoundError } from "app/errors/notFoundError.error"
 import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper"
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
+import DissolutionGetDirector, { isCorporateOfficer } from "app/models/dto/dissolutionGetDirector"
 import OfficerType from "app/models/dto/officerType.enum"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
 import Optional from "app/models/optional"
@@ -20,9 +20,14 @@ import FormValidator from "app/utils/formValidator.util"
 
 interface ViewModel {
     officerType: OfficerType
-    signatoryName: string
+    signatory: SignatoryViewModel
     data?: Optional<ChangeDetailsFormModel>
     errors?: Optional<ValidationErrors>
+}
+
+interface SignatoryViewModel {
+    name: string
+    isCorporateOfficer: boolean
 }
 
 @controller(CHANGE_DETAILS_URI)
@@ -50,7 +55,7 @@ export class ChangeDetailsController extends BaseController {
 
         const form: ChangeDetailsFormModel = this.directorMapper.mapToChangeDetailsForm(signatory)
 
-        return this.renderView(session.officerType!, signatory.name, form)
+        return this.renderView(session.officerType!, signatory, form)
     }
 
     private updateSession (session: DissolutionSession, signatory: DissolutionGetDirector) {
@@ -69,7 +74,7 @@ export class ChangeDetailsController extends BaseController {
 
         if (errors) {
             const signatory: DissolutionGetDirector = await this.directorService.getSignatoryToEdit(token, session)
-            return this.renderView(officerType, signatory.name, body, errors)
+            return this.renderView(officerType, signatory, body, errors)
         }
 
         await this.directorService.updateSignatory(token, session, body)
@@ -85,12 +90,18 @@ export class ChangeDetailsController extends BaseController {
 
     private async renderView (
         officerType: OfficerType,
-        signatoryName: string,
+        signatory: DissolutionGetDirector,
         data?: Optional<ChangeDetailsFormModel>,
         errors?: Optional<ValidationErrors>): Promise<string> {
+
+        const signatoryViewModel = {
+            name: signatory.name,
+            isCorporateOfficer: isCorporateOfficer(signatory)
+        }
+
         const viewModel: ViewModel = {
             officerType,
-            signatoryName,
+            signatory: signatoryViewModel,
             data,
             errors
         }

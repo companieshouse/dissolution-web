@@ -27,12 +27,11 @@ export class ChangeDetailsFormModelBuilder {
     }
 
     build (): ChangeDetailsFormModel {
-        return {
-            directorEmail: this.directorEmail,
-            onBehalfName: this.onBehalfName,
-            onBehalfEmail: this.onBehalfEmail,
-            _csrf: this._csrf
-        }
+        const result: any = { _csrf: this._csrf }
+        if (this.directorEmail !== undefined) result.directorEmail = this.directorEmail
+        if (this.onBehalfName !== undefined) result.onBehalfName = this.onBehalfName
+        if (this.onBehalfEmail !== undefined) result.onBehalfEmail = this.onBehalfEmail
+        return result as ChangeDetailsFormModel
     }
 }
 

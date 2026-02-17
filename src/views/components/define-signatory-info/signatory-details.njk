@@ -16,7 +16,7 @@
 
 {% call govukFieldset({
   legend: {
-    html: signatoryName + '<br><span class="govuk-body">Provide the details of a person who is authorised by ' + signatoryName + ' to sign the application on its behalf.</span>',
+    html: signatory.name + '<br><span class="govuk-body">Provide the details of a person who is authorised by ' + signatory.name + ' to sign the application on its behalf.</span>',
     classes: "govuk-label--m",
     isPageHeading: false
   }
@@ -28,7 +28,7 @@
       name: onBehalfNameName,
       classes: "govuk-!-width-full",
       hint: {
-        text: "What is the name of the authorised person who will sign on behalf of " + signatoryName + "?"
+        text: "What is the name of the authorised person who will sign on behalf of " + signatory.name + "?"
       },
       errorMessage: {
         text: errors[onBehalfNameName]
@@ -48,7 +48,7 @@
       autocomplete: "email",
       classes: "govuk-!-width-full",
       hint: {
-        text: "What is the email address for the authorised person who will sign on behalf of " + signatoryName + "?"
+        text: "What is the email address for the authorised person who will sign on behalf of " + signatory.name + "?"
       },
       errorMessage: {
         text: errors[onBehalfEmailName]
@@ -61,7 +61,6 @@
   }}
 {% endcall %}
 {% else %}
-
   {{
     govukInput({
       id: directorEmailId,
@@ -70,11 +69,11 @@
       autocomplete: "email",
       classes: "govuk-!-width-full",
       label: {
-        text: signatoryName,
+        text: signatory.name,
         classes: "govuk-label--m"
       },
       hint: {
-        text: "What is the email address for " + signatoryName + "?"
+        text: "What is the email address for " + signatory.name + "?"
       },
       errorMessage: {
         text: errors[directorEmailName]

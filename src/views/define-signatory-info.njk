@@ -30,7 +30,6 @@
 
         {% for signatory in signatories %}
           {% set formSuffix = "_" + (signatory.id | lower) %}
-          {% set signatoryName = signatory.name %}
           {% include "components/define-signatory-info/signatory-details.njk" %}
 
           {% if signatories | length !== loop.index %}

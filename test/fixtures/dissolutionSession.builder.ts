@@ -3,12 +3,15 @@ import { DirectorToSign } from "app/models/session/directorToSign.model"
 import { DirectorToSignBuilder } from "./directorToSign.builder"
 import OfficerType from "app/models/dto/officerType.enum"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
+import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 
 export class DissolutionSessionBuilder {
     officerType?: OfficerType
     directorsToSign: DirectorToSign[] = []
     defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
     private _isMultiDirector?: boolean
+    signatoryIdToEdit?: string
+    signatoryToEdit?: DissolutionGetDirector
 
     withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {
         this.directorsToSign = directors
@@ -35,12 +38,24 @@ export class DissolutionSessionBuilder {
         return this
     }
 
+    public withSignatoryIdToEdit (signatoryId?: string): this {
+        this.signatoryIdToEdit = signatoryId
+        return this
+    }
+
+    public withSignatoryToEdit (signatoryBuilder: DissolutionGetDirector): this {
+        this.signatoryToEdit = signatoryBuilder
+        return this
+    }
+
     public build (): DissolutionSession {
         return {
             officerType: this.officerType,
             directorsToSign: this.directorsToSign,
             defineSignatoryInfoForm: this.defineSignatoryInfoForm,
-            isMultiDirector: this._isMultiDirector
+            isMultiDirector: this._isMultiDirector,
+            signatoryIdToEdit: this.signatoryIdToEdit,
+            signatoryToEdit: this.signatoryToEdit
         } as DissolutionSession
     }
 }

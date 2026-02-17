@@ -3,14 +3,14 @@ import "reflect-metadata"
 import { provide } from "inversify-binding-decorators"
 
 import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest"
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
+import DissolutionGetDirector, { isCorporateOfficer } from "app/models/dto/dissolutionGetDirector"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
 
 @provide(DissolutionDirectorMapper)
 export default class DissolutionDirectorMapper {
 
     public mapToChangeDetailsForm (signatory: DissolutionGetDirector): ChangeDetailsFormModel {
-        return signatory.on_behalf_name
+        return isCorporateOfficer(signatory)
             ? this.mapToCorporateOfficerForm(signatory)
             : this.mapToStandardOfficerForm(signatory)
     }
