@@ -61,6 +61,14 @@
   }}
 {% endcall %}
 {% else %}
+
+{% call govukFieldset({
+  legend: {
+    html: signatory.name,
+    classes: "govuk-label--m",
+    isPageHeading: false
+  }
+}) %}
   {{
     govukInput({
       id: directorEmailId,
@@ -69,7 +77,6 @@
       autocomplete: "email",
       classes: "govuk-!-width-full",
       label: {
-        text: signatory.name,
         classes: "govuk-label--m"
       },
       hint: {
@@ -84,4 +91,5 @@
       value: data[directorEmailName] if data
     })
   }}
+{% endcall %}
 {% endif %}

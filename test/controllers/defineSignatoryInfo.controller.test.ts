@@ -6,7 +6,7 @@ import request from "supertest"
 import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito"
 import { aDissolutionSession } from "../fixtures/dissolutionSession.builder"
 import { createApp } from "./helpers/application.factory"
-import HtmlAssertHelper from "./helpers/htmlAssert.helper"
+import HtmlAssertHelper, { arrayContainsSubstrings } from "./helpers/htmlAssert.helper"
 
 import "app/controllers/defineSignatoryInfo.controller"
 import OfficerType from "app/models/dto/officerType.enum"
@@ -72,9 +72,9 @@ describe("DefineSignatoryInfoController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
             assert.isTrue(htmlAssertHelper.selectorDoesNotExist(`#director-email_${APPLICANT_ID}`))
-            assert.isTrue(htmlAssertHelper.hasText(`label[for="director-email_${SIGNATORY_1_ID_LOWER}"]`, "Mr Standard Director Signatory"))
+            const legends = htmlAssertHelper.getAllTexts("legend.govuk-label--m")
+            assert.isTrue(arrayContainsSubstrings(legends, ["Mr Standard Director Signatory", "Mr Corporate Signatory"]))
             assert.isTrue(htmlAssertHelper.selectorExists(`#director-email_${SIGNATORY_1_ID_LOWER}`))
-            assert.isTrue(htmlAssertHelper.containsText("legend.govuk-label--m", "Mr Corporate Signatory"))
             assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name_${SIGNATORY_2_ID_LOWER}`))
             assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email_${SIGNATORY_2_ID_LOWER}`))
         })

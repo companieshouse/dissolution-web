@@ -1,5 +1,5 @@
 import * as Joi from "@hapi/joi"
-import { generateSchemaForSignatoryDetails } from "./signatoryDetails.schema"
+import { generateSchemaForCorporateSignatoryDetails, generateSchemaForIndividualSignatoryDetails } from "./signatoryDetails.schema"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
 
@@ -17,9 +17,12 @@ function generateSchemaForSignatories (signatories: DirectorToSign[]): Joi.Schem
 function generateSchemaForSignatory (signatory: DirectorToSign): Joi.SchemaMap {
     const signatoryName: string = signatory.name
     const formSuffix: string = `_${formatSignatoryId(signatory)}`
+    const schema = isCorporateOfficer(signatory.officerRole)
+        ? generateSchemaForCorporateSignatoryDetails(signatoryName, formSuffix)
+        : generateSchemaForIndividualSignatoryDetails(signatoryName, formSuffix)
 
     return {
-        ...generateSchemaForSignatoryDetails(isCorporateOfficer(signatory.officerRole), signatoryName, formSuffix),
+        ...schema,
         _csrf: Joi.string()
             .optional()
             .messages({

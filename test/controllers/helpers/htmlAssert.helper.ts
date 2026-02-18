@@ -45,7 +45,20 @@ export default class HtmlAssertHelper {
         return this.getElement(selector)?.textContent?.trim()
     }
 
+    public getAllTexts (selector: string): string[] {
+        return Array.from(this.dom.window.document.querySelectorAll(selector))
+            .map(el => el.textContent?.trim() || "")
+    }
+
     public containsRawText (text: string): boolean {
         return this.dom.window.document.documentElement.textContent?.includes(text) || false
     }
+}
+
+/**
+ * Returns true if for each expected string, at least one element in the actual array contains it as a substring.
+ * This is more flexible than includeMembers, which requires exact matches.
+ */
+export function arrayContainsSubstrings (actual: string[], expected: string[]): boolean {
+    return expected.every(exp => actual.some(act => act.includes(exp)))
 }

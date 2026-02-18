@@ -13,7 +13,7 @@ export default class DirectorToSignMapper {
         return {
             id: selectedDirector.id,
             name: selectedDirector.name,
-            officerRole: selectedDirector.officerRole as OfficerRole,
+            officerRole: selectedDirector.officerRole,
             email,
             isApplicant: true
         }
@@ -23,7 +23,7 @@ export default class DirectorToSignMapper {
         return {
             id: director.id,
             name: director.name,
-            officerRole: director.officerRole as OfficerRole,
+            officerRole: director.officerRole,
             isApplicant: false
         }
     }

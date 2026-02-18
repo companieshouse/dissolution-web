@@ -31,13 +31,13 @@ export default class DissolutionDirectorMapper {
     public mapToDissolutionDirectorPatchRequest (form: ChangeDetailsFormModel): DissolutionDirectorPatchRequest {
         if (form.onBehalfName) {
             return {
-                email: form.onBehalfEmail || "",
+                email: form.onBehalfEmail ?? "",
                 on_behalf_name: form.onBehalfName
             }
         }
 
         return {
-            email: form.directorEmail || ""
+            email: form.directorEmail ?? ""
         }
     }
 }
