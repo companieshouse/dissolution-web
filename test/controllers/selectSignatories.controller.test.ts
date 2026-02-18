@@ -93,7 +93,7 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
                 explanatory1: "If a director cannot sign the application themselves",
-                explanatory2: "Directors must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Directors who are people must sign the application themselves. Nobody can sign on their behalf."
             },
             {
                 description: "DS01 journey (applicant is a director)",
@@ -102,7 +102,7 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which other directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
                 explanatory1: "If a director cannot sign the application themselves",
-                explanatory2: "Directors must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Directors who are people must sign the application themselves. Nobody can sign on their behalf."
             },
             {
                 description: "LLDS01 journey (applicant is not a member)",
@@ -111,7 +111,7 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
                 explanatory1: "If a member cannot sign the application themselves",
-                explanatory2: "Members must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Members who are people must sign the application themselves. Nobody can sign on their behalf."
             },
             {
                 description: "LLDS01 journey (applicant is a member)",
@@ -120,7 +120,7 @@ describe("SelectSignatoriesController", () => {
                 expectedPageHeading: "Which other members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
                 explanatory1: "If a member cannot sign the application themselves",
-                explanatory2: "Members must sign the application themselves. Nobody can sign on their behalf."
+                explanatory2: "Members who are people must sign the application themselves. Nobody can sign on their behalf."
             }
         ]
 
@@ -154,6 +154,12 @@ describe("SelectSignatoriesController", () => {
                 assert.equal(htmlAssertHelper.getText("#signatories-hint"), hint)
                 assert.isTrue(htmlAssertHelper.containsRawText(explanatory1))
                 assert.isTrue(htmlAssertHelper.containsRawText(explanatory2))
+
+                if (officerType === OfficerType.MEMBER) {
+                    assert.isTrue(htmlAssertHelper.containsRawText("make changes to the LLP's members using our WebFiling service"))
+                } else if (officerType === OfficerType.DIRECTOR) {
+                    assert.isTrue(htmlAssertHelper.containsRawText("make changes to the company directors (opens in new tab)"))
+                }
             })
         })
 

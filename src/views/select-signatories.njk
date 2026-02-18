@@ -50,13 +50,18 @@
           })
         }}
 
+        {% if officerType == 'member' %}
+          {% set changesLink = '<a href="https://ewf.companieshouse.gov.uk/runpage?page=oauthSignIn" class="govuk-link piwik-event" data-event-id="webfiling-link" rel="noreferrer noopener" target="_blank">make changes to the LLP\'s members using our WebFiling service (opens in new tab)</a>' %}
+        {% else %}
+          {% set changesLink = '<a href="https://www.gov.uk/file-changes-to-a-company-with-companies-house" class="govuk-link piwik-event" data-event-id="file-change-to-company-link" rel="noreferrer noopener" target="_blank">make changes to the company ' + officerType + 's (opens in new tab)</a>' %}
+        {% endif %}
+
+        {% set detailsHtml = '<p>' + (officerType | capitalize) + 's who are people must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a ' + officerType + ' cannot sign. For example, because they no longer have mental capacity. If there are not enough ' + officerType + 's who are able to sign, you\'ll need to ' + changesLink + ' before continuing with this application.</p>' %}
+
         {{
           govukDetails({
             summaryHtml: '<div class="piwik-event">If a ' + officerType + ' cannot sign the application themselves</div>',
-            html: '<p>' + (officerType | capitalize) + 's must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a ' + officerType + ' cannot sign. For example,
-            because they no longer have mental capacity. If there are not enough ' + officerType + 's who are able to sign, you\'ll need to <a href="https://www.gov.uk/file-changes-to-a-company-with-companies-house"
-            class="govuk-link piwik-event" data-event-id="file-change-to-company-link" rel="noreferrer noopener" target="_blank">make changes to the company ' + officerType + 's (opens in new tab)</a> before continuing
-            with this application.</p>'
+            html: detailsHtml
           })
         }}
 
