@@ -9,7 +9,7 @@ export function generateSchemaForCorporateSignatoryDetails (
         [`onBehalfName${formSuffix}`]: Joi.string().required().max(250).messages({
             "any.required": `Enter the name of the authorised person who will sign for ${signatoryName}`,
             "string.empty": `Enter the name of the authorised person who will sign for ${signatoryName}`,
-            "string.max": `Enter a name that is less than 250 characters for the authorised person who will sign for ${signatoryName}`
+            "string.max": `Name of authorised person signing for ${signatoryName} must be 250 characters or less`
         }),
         [`onBehalfEmail${formSuffix}`]: Joi.string().required().email().messages({
             "any.required": `Enter the email address for the authorised person who will sign for ${signatoryName}`,

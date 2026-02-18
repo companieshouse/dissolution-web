@@ -107,7 +107,7 @@ describe("Change Details Schema", () => {
 
         it("should return an error if a name is provided that is above the maximum length", () => {
 
-            const signatory: DissolutionGetDirector = aDissolutionGetDirector().withName("Mr Corporate Director Signatory").withOnBehalfName("Mr Old Accountant").build()
+            const signatory: DissolutionGetDirector = aDissolutionGetDirector().withName("Mr Corporate Signatory").withOnBehalfName("Mr Old Accountant").build()
             const form: ChangeDetailsFormModel = aChangeDetailsFormModel()
                 .withDirectorEmail(undefined)
                 .withOnBehalfName("x".repeat(251))
@@ -120,7 +120,7 @@ describe("Change Details Schema", () => {
 
             assert.equal(errors.error!.details[0].context!.key, `onBehalfName`)
             assert.equal(errors.error!.details[0].type, `string.max`)
-            assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the authorised person who will sign for Mr Corporate Director Signatory`)
+            assert.equal(errors.error!.details[0].message, `Name of authorised person signing for Mr Corporate Signatory must be 250 characters or less`)
         })
     })
 })

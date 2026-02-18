@@ -102,6 +102,6 @@ describe("Define Signatory Info Schema", () => {
 
         assert.equal(errors.error!.details[0].context!.key, `onBehalfName_${SIGNATORY_2_ID_LOWER}`)
         assert.equal(errors.error!.details[0].type, `string.max`)
-        assert.equal(errors.error!.details[0].message, `Enter a name that is less than 250 characters for the authorised person who will sign for Mr Corporate Signatory`)
+        assert.equal(errors.error!.details[0].message, `Name of authorised person signing for Mr Corporate Signatory must be 250 characters or less`)
     })
 })
