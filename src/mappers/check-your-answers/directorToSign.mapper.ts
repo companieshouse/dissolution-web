@@ -4,7 +4,6 @@ import { provide } from "inversify-binding-decorators"
 
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import DirectorDetails from "app/models/view/directorDetails.model"
-import OfficerRole from "app/models/dto/officerRole.enum"
 
 @provide(DirectorToSignMapper)
 export default class DirectorToSignMapper {

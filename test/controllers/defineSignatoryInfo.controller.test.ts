@@ -69,8 +69,8 @@ describe("DefineSignatoryInfoController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
             assert.isTrue(htmlAssertHelper.selectorDoesNotExist(`#director-email_${APPLICANT_ID}`))
-            const legends = htmlAssertHelper.getAllTexts("legend.govuk-label--m")
-            assert.isTrue(arrayContainsSubstrings(legends, ["Mr Standard Director Signatory", "Mr Corporate Signatory"]))
+            assert.equal(htmlAssertHelper.getText(`legend.govuk-label--m`), "Mr Corporate Signatory")
+            assert.equal(htmlAssertHelper.getText(`label[for="director-email_${SIGNATORY_1_ID_LOWER}"]`), "Mr Standard Director Signatory")
             assert.isTrue(htmlAssertHelper.selectorExists(`#director-email_${SIGNATORY_1_ID_LOWER}`))
             assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name_${SIGNATORY_2_ID_LOWER}`))
             assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email_${SIGNATORY_2_ID_LOWER}`))

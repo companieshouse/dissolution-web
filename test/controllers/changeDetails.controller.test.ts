@@ -100,7 +100,7 @@ describe("ChangeDetailsController", () => {
 
                 assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading))
                 assert.equal(htmlAssertHelper.getText("h1"), expectedPageHeading)
-                assert.isTrue(htmlAssertHelper.hasText("legend.govuk-label--m", "Mr Standard Director Signatory"))
+                assert.equal(htmlAssertHelper.getText(`label[for="director-email"]`), "Mr Standard Director Signatory")
                 assert.equal(htmlAssertHelper.getValue(`#director-email`), "director@mail.com")
                 assert.isUndefined(htmlAssertHelper.getValue(`#on-behalf-name`))
                 assert.isUndefined(htmlAssertHelper.getValue(`#on-behalf-email`))
@@ -156,6 +156,17 @@ describe("ChangeDetailsController", () => {
     })
 
     describe("POST", () => {
+        it("should reject with a 404 if no signatory is in session to update", async () => {
+            const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(undefined).build()
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build()
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            const app: Application = initApp()
+            await request(app)
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
+                .expect(StatusCodes.NOT_FOUND)
+        })
+
         it("should re-render the view with an error if validation fails for a standard director", async () => {
 
             const signatoryToEdit = aDissolutionGetDirector().withName("Mr Standard Director").withOnBehalfName(null).build()
@@ -218,13 +229,15 @@ describe("ChangeDetailsController", () => {
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
-            await request(initApp())
+            const res = await request(initApp())
                 .post(CHANGE_DETAILS_URI)
                 .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
             verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(updatedDetails))).once()
+            assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
+            assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
         })
 
         it("should update the signatory and redirect to the wait for others to sign screen if validation passes for a corporate director", async () => {
@@ -240,13 +253,15 @@ describe("ChangeDetailsController", () => {
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
-            await request(initApp())
+            const res = await request(initApp())
                 .post(CHANGE_DETAILS_URI)
                 .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
             verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(updatedDetails))).once()
+            assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
+            assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
         })
     })
 })

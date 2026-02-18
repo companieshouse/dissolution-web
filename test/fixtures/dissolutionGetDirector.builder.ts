@@ -2,7 +2,7 @@ import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 
 export class DissolutionGetDirectorBuilder {
     private officer_id: string = "director-id-1"
-    private name: string = "Singatory Name"
+    private name: string = "Signatory Name"
     private email: string = "director@mail.com"
     private approved_at?: string
     private on_behalf_name?: string

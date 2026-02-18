@@ -65,16 +65,19 @@ export class ChangeDetailsController extends BaseController {
 
     @httpPost("")
     public async post (@requestBody() body: ChangeDetailsFormModel): Promise<string | RedirectResult> {
-        const token: string = this.session.getAccessToken(this.httpContext.request)
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const officerType: OfficerType = session.officerType!
 
+        if (!session.signatoryIdToEdit) {
+            return Promise.reject(new NotFoundError("Signatory not in session"))
+        }
+
+        const token: string = this.session.getAccessToken(this.httpContext.request)
         const signatory: DissolutionGetDirector = session.signatoryToEdit!
         const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(signatory))
 
         if (errors) {
             const signatory: DissolutionGetDirector = await this.directorService.getSignatoryToEdit(token, session)
-            return this.renderView(officerType, signatory, body, errors)
+            return this.renderView(session.officerType!, signatory, body, errors)
         }
 
         await this.directorService.updateSignatory(token, session, body)
