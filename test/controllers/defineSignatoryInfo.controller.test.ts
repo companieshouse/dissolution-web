@@ -3,14 +3,13 @@ import "reflect-metadata"
 import { assert } from "chai"
 import { StatusCodes } from "http-status-codes"
 import request from "supertest"
-import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito"
+import { anything, capture, instance, mock, verify, when } from "ts-mockito"
 import { aDissolutionSession } from "../fixtures/dissolutionSession.builder"
 import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper, { arrayContainsSubstrings } from "./helpers/htmlAssert.helper"
 
 import "app/controllers/defineSignatoryInfo.controller"
 import OfficerType from "app/models/dto/officerType.enum"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import {
     CHECK_YOUR_ANSWERS_URI,
@@ -31,7 +30,6 @@ mockCsrfMiddleware.restore()
 
 describe("DefineSignatoryInfoController", () => {
     let session: SessionService
-    let signatoryService: SignatoryService
 
     const APPLICANT_ID = "123"
     const SIGNATORY_1_ID = "456AbC"
@@ -43,14 +41,13 @@ describe("DefineSignatoryInfoController", () => {
     function initApp (): Application {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session))
-            container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
+            container.rebind(SignatoryService).toConstantValue(new SignatoryService())
             container.rebind(FormValidator).toConstantValue(new FormValidator())
         })
     }
 
     beforeEach(() => {
         session = mock(SessionService)
-        signatoryService = mock(SignatoryService)
     })
 
     describe("GET", () => {
@@ -253,7 +250,6 @@ describe("DefineSignatoryInfoController", () => {
             })
 
             it("should update the signatories with the provided contact info if validation passes", async () => {
-
                 const form = aDefineSignatoryInfoForm()
                     .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@mail.com")
                     .withOnBehalfName(SIGNATORY_2_ID_LOWER, "Mr Accountant")
@@ -265,21 +261,22 @@ describe("DefineSignatoryInfoController", () => {
                     .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_2_ID).withName("Corporate signatory").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR))
                     .build())
 
-                const app = initApp()
-
-                await request(app)
+                await request(initApp())
                     .post(DEFINE_SIGNATORY_INFO_URI)
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
 
-                verify(signatoryService.updateSignatoriesWithContactInfo(anything(), deepEqual(form))).once()
-
-                const signatoryCaptor = capture(signatoryService.updateSignatoriesWithContactInfo)
-                const signatories: DirectorToSign[] = signatoryCaptor.last()[0]
-
-                assert.equal(signatories.length, 2)
-                assert.equal(signatories[0].id, SIGNATORY_1_ID)
-                assert.equal(signatories[1].id, SIGNATORY_2_ID)
+                verify(session.setDissolutionSession(anything(), anything())).once()
+                const sessionCaptor = capture(session.setDissolutionSession)
+                const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+                const updatedSignatories = updatedSession.directorsToSign || []
+                assert.equal(updatedSignatories.length, 2)
+                assert.equal(updatedSignatories[0].id, SIGNATORY_1_ID)
+                assert.equal(updatedSignatories[0].email, "director@mail.com")
+                assert.isUndefined(updatedSignatories[0].onBehalfName)
+                assert.equal(updatedSignatories[1].id, SIGNATORY_2_ID)
+                assert.equal(updatedSignatories[1].email, "accountant@mail.com")
+                assert.equal(updatedSignatories[1].onBehalfName, "Mr Accountant")
             })
         })
 
