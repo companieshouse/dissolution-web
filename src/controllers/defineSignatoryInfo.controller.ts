@@ -93,12 +93,13 @@ export class DefineSignatoryInfoController extends BaseController {
             return
         }
 
+        const updatedSignatories = this.signatoryService.updateSignatoriesWithContactInfo(signatories, body)
+
         const updatedSession: DissolutionSession = {
             ...session,
-            defineSignatoryInfoForm: body
+            defineSignatoryInfoForm: body,
+            directorsToSign: updatedSignatories
         }
-
-        this.signatoryService.updateSignatoriesWithContactInfo(signatories, body)
 
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
     }

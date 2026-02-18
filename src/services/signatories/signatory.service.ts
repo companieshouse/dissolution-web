@@ -17,19 +17,30 @@ export default class SignatoryService {
         return isApplicantADirector ? majority - 1 : majority
     }
 
-    public updateSignatoriesWithContactInfo (signatories: DirectorToSign[], contactForm: DefineSignatoryInfoFormModel): void {
-        signatories.forEach(signatory => this.updateSignatoryWithContactInfo(signatory, contactForm))
+    public updateSignatoriesWithContactInfo (
+        signatories: DirectorToSign[],
+        contactForm: DefineSignatoryInfoFormModel
+    ): DirectorToSign[] {
+        return signatories.map(signatory => this.getUpdatedSignatoryWithContactInfo(signatory, contactForm))
     }
 
-    private updateSignatoryWithContactInfo (signatory: DirectorToSign, contactForm: DefineSignatoryInfoFormModel): void {
+    private getUpdatedSignatoryWithContactInfo (
+        signatory: DirectorToSign,
+        contactForm: DefineSignatoryInfoFormModel
+    ): DirectorToSign {
         const signatoryId: string = signatory.id.toLowerCase()
-
         if (contactForm[`onBehalfName_${signatoryId}`]) {
-            signatory.onBehalfName = contactForm[`onBehalfName_${signatoryId}`]
-            signatory.email = contactForm[`onBehalfEmail_${signatoryId}`].toLowerCase()
+            return {
+                ...signatory,
+                onBehalfName: contactForm[`onBehalfName_${signatoryId}`],
+                email: contactForm[`onBehalfEmail_${signatoryId}`].toLowerCase()
+            }
         } else {
-            signatory.email = contactForm[`directorEmail_${signatoryId}`].toLowerCase()
-            signatory.onBehalfName = undefined
+            return {
+                ...signatory,
+                email: contactForm[`directorEmail_${signatoryId}`].toLowerCase(),
+                onBehalfName: undefined
+            }
         }
     }
 }
