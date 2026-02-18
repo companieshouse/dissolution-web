@@ -57,9 +57,11 @@ describe("ChangeDetailsController", () => {
 
             const app: Application = initApp()
 
-            await request(app)
+            const res = await request(app)
                 .get(CHANGE_DETAILS_URI)
                 .expect(StatusCodes.NOT_FOUND)
+
+            assert.equal(res.status, StatusCodes.NOT_FOUND)
         })
 
         const expectedContentCasesStandardDirector = [
@@ -161,10 +163,12 @@ describe("ChangeDetailsController", () => {
             const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build()
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
             const app: Application = initApp()
-            await request(app)
+            const res = await request(app)
                 .post(CHANGE_DETAILS_URI)
                 .send(updatedDetails)
                 .expect(StatusCodes.NOT_FOUND)
+
+            assert.equal(res.status, StatusCodes.NOT_FOUND)
         })
 
         it("should re-render the view with an error if validation fails for a standard director", async () => {
