@@ -48,6 +48,9 @@ export default class HtmlAssertHelper {
     public getAllTexts (selector: string): string[] {
         return Array.from(this.dom.window.document.querySelectorAll(selector))
             .map(el => el.textContent?.trim() || "")
+      
+    public getInnerHTML (selector: string): Optional<string> {
+        return this.getElement(selector)?.innerHTML || null
     }
 
     public containsRawText (text: string): boolean {

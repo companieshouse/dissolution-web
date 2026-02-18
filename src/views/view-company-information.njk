@@ -83,7 +83,7 @@
                 attributes: { id: 'company-address-header' }
               },
               {
-                text: company.companyRegOffice,
+                html: (company.companyRegOffice | default("") | replace(", ", ",<br>") | safe),
                 attributes: { id: 'company-address-value' }
               }
             ]
