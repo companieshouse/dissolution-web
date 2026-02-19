@@ -10,7 +10,7 @@ const invalidLengthPresenterAuthCodeError: string = "Presenter authentication co
 const payByAccountDetailsSchema = Joi.object({
     presenterId: Joi.string()
         .required()
-        .pattern(/^[0-9]+$/)
+        .pattern(/^\d+$/)
         .length(11)
         .messages({
             "string.empty": emptyPresenterIdError,

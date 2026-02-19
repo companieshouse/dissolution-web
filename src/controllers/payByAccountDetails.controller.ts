@@ -34,13 +34,13 @@ export class PayByAccountDetailsController extends BaseController {
     private readonly ERROR_INCORRECT_CREDENTIALS: string = "Your Presenter ID or Presenter authentication code is incorrect"
 
     public constructor (
-        @inject(SessionService) private sessionService: SessionService,
-        @inject(DissolutionService) private dissolutionService: DissolutionService,
-        @inject(FormValidator) private validator: FormValidator,
-        @inject(DissolutionSessionMapper) private mapper: DissolutionSessionMapper,
-        @inject(PayByAccountService) private payByAccountService: PayByAccountService,
-        @inject(PaymentService) private paymentService: PaymentService,
-        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+        @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+        @inject(FormValidator) private readonly validator: FormValidator,
+        @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
+        @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
+        @inject(PaymentService) private readonly paymentService: PaymentService,
+        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number
     ) {
         super()
     }
@@ -49,7 +49,7 @@ export class PayByAccountDetailsController extends BaseController {
     public async get (): Promise<string | RedirectResult> {
 
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-            return Promise.reject(new NotFoundError("Feature toggle not enabled"))
+            throw new NotFoundError("Feature toggle not enabled")
         }
 
         if (await this.isAlreadyPaid()) {
