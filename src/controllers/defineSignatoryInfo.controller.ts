@@ -15,33 +15,43 @@ import defineSignatoryInfoSchema from "app/schemas/defineSignatoryInfo.schema"
 import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
+import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
 
 interface ViewModel {
-  officerType: OfficerType
-  signatories: DirectorToSign[]
-  isMultiDirector: boolean
-  data?: Optional<DefineSignatoryInfoFormModel>
-  errors?: Optional<ValidationErrors>
+    officerType: OfficerType
+    signatories: SignatoryViewModel[]
+    isMultiDirector: boolean
+    data?: Optional<DefineSignatoryInfoFormModel>
+    errors?: Optional<ValidationErrors>
+}
+
+interface SignatoryViewModel {
+    id: string
+    name: string
+    officerRole: string
+    isApplicant: boolean
+    isCorporateOfficer: boolean
 }
 
 @controller(DEFINE_SIGNATORY_INFO_URI)
 export class DefineSignatoryInfoController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private session: SessionService,
-    @inject(SignatoryService) private signatoryService: SignatoryService,
-    @inject(FormValidator) private validator: FormValidator) {
+        @inject(SessionService) private session: SessionService,
+        @inject(SignatoryService) private signatoryService: SignatoryService,
+        @inject(FormValidator) private validator: FormValidator) {
         super()
+    }
+
+    private getViewableSignatories (session: DissolutionSession): DirectorToSign[] {
+        return (session.directorsToSign || []).filter(director => !director.isApplicant)
     }
 
     @httpGet("")
     public async get (): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const officerType: OfficerType = session.officerType!
-
-        const signatories: DirectorToSign[] = this.getSignatories(session)
-
-        return this.renderView(officerType, signatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
+        const viewableSignatories = this.getViewableSignatories(session)
+        return this.renderView(session.officerType!, viewableSignatories, session.isMultiDirector!, session.defineSignatoryInfoForm)
     }
 
     @httpPost("")
@@ -49,20 +59,16 @@ export class DefineSignatoryInfoController extends BaseController {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const officerType: OfficerType = session.officerType!
 
-        const signatories: DirectorToSign[] = this.getSignatories(session)
+        const viewableSignatories: DirectorToSign[] = this.getViewableSignatories(session)
 
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(signatories, officerType))
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, defineSignatoryInfoSchema(viewableSignatories))
         if (errors) {
-            return this.renderView(officerType, signatories, session.isMultiDirector!, body, errors)
+            return this.renderView(officerType, viewableSignatories, session.isMultiDirector!, body, errors)
         }
 
-        this.updateSession(session, signatories, body)
+        this.updateSession(session, body)
 
         return this.redirect(CHECK_YOUR_ANSWERS_URI)
-    }
-
-    private getSignatories (session: DissolutionSession): DirectorToSign[] {
-        return session.directorsToSign!.filter(director => !director.isApplicant)
     }
 
     private async renderView (
@@ -73,7 +79,7 @@ export class DefineSignatoryInfoController extends BaseController {
         errors?: Optional<ValidationErrors>): Promise<string> {
         const viewModel: ViewModel = {
             officerType,
-            signatories,
+            signatories: this.mapToSignatoryViewModels(signatories),
             isMultiDirector,
             data,
             errors
@@ -82,17 +88,28 @@ export class DefineSignatoryInfoController extends BaseController {
         return super.render("define-signatory-info", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
     }
 
-    private updateSession (session: DissolutionSession, signatories: DirectorToSign[], body: DefineSignatoryInfoFormModel): void {
+    private mapToSignatoryViewModels (signatories: DirectorToSign[]): SignatoryViewModel[] {
+        return (signatories || []).map(director => ({
+            id: director.id,
+            name: director.name,
+            officerRole: director.officerRole,
+            isApplicant: director.isApplicant,
+            isCorporateOfficer: isCorporateOfficer(director.officerRole)
+        }))
+    }
+
+    private updateSession (session: DissolutionSession, body: DefineSignatoryInfoFormModel): void {
         if (!this.hasFormChanged(session, body)) {
             return
         }
 
+        const updatedSignatories = this.signatoryService.updateSignatoriesWithContactInfo(session.directorsToSign || [], body)
+
         const updatedSession: DissolutionSession = {
             ...session,
-            defineSignatoryInfoForm: body
+            defineSignatoryInfoForm: body,
+            directorsToSign: updatedSignatories
         }
-
-        this.signatoryService.updateSignatoriesWithContactInfo(signatories, body)
 
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
     }

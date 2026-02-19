@@ -3,7 +3,6 @@ import "reflect-metadata"
 import { provide } from "inversify-binding-decorators"
 
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 
 @provide(SignatoryService)
@@ -18,19 +17,36 @@ export default class SignatoryService {
         return isApplicantADirector ? majority - 1 : majority
     }
 
-    public updateSignatoriesWithContactInfo (signatories: DirectorToSign[], contactForm: DefineSignatoryInfoFormModel): void {
-        signatories.forEach(signatory => this.updateSignatoryWithContactInfo(signatory, contactForm))
+    public updateSignatoriesWithContactInfo (
+        signatories: DirectorToSign[],
+        contactForm: DefineSignatoryInfoFormModel
+    ): DirectorToSign[] {
+        return signatories.map(signatory => this.getUpdatedSignatoryWithContactInfo(signatory, contactForm))
     }
 
-    private updateSignatoryWithContactInfo (signatory: DirectorToSign, contactForm: DefineSignatoryInfoFormModel): void {
+    private getUpdatedSignatoryWithContactInfo (
+        signatory: DirectorToSign,
+        contactForm: DefineSignatoryInfoFormModel
+    ): DirectorToSign {
         const signatoryId: string = signatory.id.toLowerCase()
+        const onBehalfName = contactForm[`onBehalfName_${signatoryId}`]
+        const onBehalfEmail = contactForm[`onBehalfEmail_${signatoryId}`]
+        const directorEmail = contactForm[`directorEmail_${signatoryId}`]
 
-        if (contactForm[`isSigning_${signatoryId}`] === SignatorySigning.WILL_SIGN) {
-            signatory.email = contactForm[`directorEmail_${signatoryId}`].toLowerCase()
-            signatory.onBehalfName = undefined
-        } else {
-            signatory.onBehalfName = contactForm[`onBehalfName_${signatoryId}`]
-            signatory.email = contactForm[`onBehalfEmail_${signatoryId}`].toLowerCase()
+        if (onBehalfName) {
+            return {
+                ...signatory,
+                onBehalfName,
+                email: onBehalfEmail ? onBehalfEmail.toLowerCase() : undefined
+            }
         }
+        if (directorEmail) {
+            return {
+                ...signatory,
+                email: directorEmail.toLowerCase(),
+                onBehalfName: undefined
+            }
+        }
+        return signatory
     }
 }

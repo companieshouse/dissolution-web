@@ -6,7 +6,7 @@
 {% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
-{% set title = "How will the directors be signing the application? - " + pageTitleSuffix %}
+{% set title = "Provide " + officerType + "s' email addresses - " + pageTitleSuffix %}
 
 {% block content %}
   {{
@@ -20,12 +20,9 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">How will the {{ officerType }}s be signing the application?</h1>
+      <h1 class="govuk-heading-xl">Provide {{ officerType }}s' email addresses</h1>
 
-      {{ govukWarningText({
-        text: "Anyone who signs for a " + officerType + " or member must have power of attorney for them. If this is not the case, the application may be rejected.",
-        iconFallbackText: "Warning"
-      }) }}
+      <p class="govuk-body">We'll email each {{ officerType }} you've selected, to ask them to sign the application online.</p>
 
       <form method="post" novalidate>
 
@@ -33,7 +30,6 @@
 
         {% for signatory in signatories %}
           {% set formSuffix = "_" + (signatory.id | lower) %}
-          {% set signatoryName = signatory.name %}
           {% include "components/define-signatory-info/signatory-details.njk" %}
 
           {% if signatories | length !== loop.index %}

@@ -3,6 +3,7 @@ import { SessionKey } from "@companieshouse/node-session-handler/lib/session/key
 import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces"
 import sinon from "sinon"
 
+import OfficerRole from "app/models/dto/officerRole.enum"
 import OfficerType from "app/models/dto/officerType.enum"
 import PaymentType from "app/models/dto/paymentType.enum"
 import { DirectorToRemind, DirectorToSign } from "app/models/session/directorToSign.model"
@@ -57,7 +58,8 @@ export function generateDirectorToSign (): DirectorToSign {
         id: "123",
         name: "Bob Smith",
         email: "test@mail.com",
-        isApplicant: false
+        isApplicant: false,
+        officerRole: OfficerRole.DIRECTOR
     }
 }
 

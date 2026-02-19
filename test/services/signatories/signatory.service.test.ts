@@ -1,11 +1,11 @@
 import { assert } from "chai"
-import { generateDefineSignatoryInfoFormModel } from "../../fixtures/companyOfficers.fixtures"
-import { generateDirectorToSign } from "../../fixtures/session.fixtures"
 
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import SignatoryService from "app/services/signatories/signatory.service"
+import { aDefineSignatoryInfoForm } from "test/fixtures/defineSignatoryInfoForm.builder"
+import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
+import OfficerRole from "app/models/dto/officerRole.enum"
 
 describe("SignatoryService", () => {
 
@@ -60,81 +60,68 @@ describe("SignatoryService", () => {
         const SIGNATORY_1_ID_LOWER = SIGNATORY_1_ID.toLowerCase()
         const SIGNATORY_2_ID_LOWER = SIGNATORY_2_ID.toLowerCase()
 
-        let signatory1: DirectorToSign
-        let signatory2: DirectorToSign
+        it("should update signatories with their contact info for a standard officer", () => {
+            const contactForm: DefineSignatoryInfoFormModel = aDefineSignatoryInfoForm()
+                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@mail.com")
+                .withDirectorEmail(SIGNATORY_2_ID_LOWER, "otherdirector@mail.com").build()
 
-        beforeEach(() => {
-            signatory1 = generateDirectorToSign()
-            signatory1.id = SIGNATORY_1_ID
+            const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID_LOWER).withName("Mr Standard Director 1").build()
+            const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID_LOWER).withName("Mr Standard Director 2").build()
 
-            signatory2 = generateDirectorToSign()
-            signatory2.id = SIGNATORY_2_ID
+            const updated = service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
+
+            assert.equal(updated[0].email, "director@mail.com")
+            assert.isUndefined(updated[0].onBehalfName)
+
+            assert.equal(updated[1].email, "otherdirector@mail.com")
+            assert.isUndefined(updated[1].onBehalfName)
         })
 
-        it("should update signatories with their contact info if they will sign the application themselves", () => {
-            const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+        it("should update signatories with their contact info for corporate officer", () => {
+            const contactForm: DefineSignatoryInfoFormModel = aDefineSignatoryInfoForm()
+                .withOnBehalfName(SIGNATORY_1_ID_LOWER, "Mr Accountant")
+                .withOnBehalfEmail(SIGNATORY_1_ID_LOWER, "accountant@mail.com")
+                .withOnBehalfName(SIGNATORY_2_ID_LOWER, "Miss Solicitor")
+                .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "solicitor@mail.com").build()
 
-            contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-            contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = "DIRECTOR@mail.com"
-            contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = ""
-            contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = ""
+            const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID_LOWER).withName("Corporate Director 1").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
+            const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID_LOWER).withName("Corporate Director 2").withOfficerRole(OfficerRole.CORPORATE_NOMINEE_DIRECTOR).build()
 
-            contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-            contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = "otherdirector@mail.com"
-            contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ""
-            contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ""
+            const updated = service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
 
-            service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
+            assert.equal(updated[0].email, "accountant@mail.com")
+            assert.equal(updated[0].onBehalfName, "Mr Accountant")
 
-            assert.equal(signatory1.email, "director@mail.com")
-            assert.isUndefined(signatory1.onBehalfName)
-
-            assert.equal(signatory2.email, "otherdirector@mail.com")
-            assert.isUndefined(signatory2.onBehalfName)
-        })
-
-        it("should update signatories with their contact info if someone will sign the application on behalf of them", () => {
-            const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
-
-            contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.ON_BEHALF
-            contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ""
-            contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = "Mr Accountant"
-            contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = "ACCOUNTANT@mail.com"
-
-            contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.ON_BEHALF
-            contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = ""
-            contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = "Miss Solicitor"
-            contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = "solicitor@mail.com"
-
-            service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
-
-            assert.equal(signatory1.email, "accountant@mail.com")
-            assert.equal(signatory1.onBehalfName, "Mr Accountant")
-
-            assert.equal(signatory2.email, "solicitor@mail.com")
-            assert.equal(signatory2.onBehalfName, "Miss Solicitor")
+            assert.equal(updated[1].email, "solicitor@mail.com")
+            assert.equal(updated[1].onBehalfName, "Miss Solicitor")
         })
 
         it("should handle multiple signatories selecting different options for signing preference", () => {
-            const contactForm: DefineSignatoryInfoFormModel = generateDefineSignatoryInfoFormModel()
+            const contactForm: DefineSignatoryInfoFormModel = aDefineSignatoryInfoForm()
+                .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@mail.com")
+                .withOnBehalfName(SIGNATORY_2_ID_LOWER, "Mr Accountant")
+                .withOnBehalfEmail(SIGNATORY_2_ID_LOWER, "accountant@mail.com").build()
 
-            contactForm[`isSigning_${SIGNATORY_1_ID_LOWER}`] = SignatorySigning.ON_BEHALF
-            contactForm[`directorEmail_${SIGNATORY_1_ID_LOWER}`] = ""
-            contactForm[`onBehalfName_${SIGNATORY_1_ID_LOWER}`] = "Mr Accountant"
-            contactForm[`onBehalfEmail_${SIGNATORY_1_ID_LOWER}`] = "ACCOUNTANT@mail.com"
+            const signatory1: DirectorToSign = aDirectorToSign().withId(SIGNATORY_1_ID_LOWER).withName("Standard Director").withOfficerRole(OfficerRole.DIRECTOR).build()
+            const signatory2: DirectorToSign = aDirectorToSign().withId(SIGNATORY_2_ID_LOWER).withName("Corporate Director").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
 
-            contactForm[`isSigning_${SIGNATORY_2_ID_LOWER}`] = SignatorySigning.WILL_SIGN
-            contactForm[`directorEmail_${SIGNATORY_2_ID_LOWER}`] = "director@mail.com"
-            contactForm[`onBehalfName_${SIGNATORY_2_ID_LOWER}`] = ""
-            contactForm[`onBehalfEmail_${SIGNATORY_2_ID_LOWER}`] = ""
+            const updated = service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
 
-            service.updateSignatoriesWithContactInfo([signatory1, signatory2], contactForm)
+            assert.equal(updated[0].email, "director@mail.com")
+            assert.isUndefined(updated[0].onBehalfName)
 
-            assert.equal(signatory1.email, "accountant@mail.com")
-            assert.equal(signatory1.onBehalfName, "Mr Accountant")
+            assert.equal(updated[1].email, "accountant@mail.com")
+            assert.equal(updated[1].onBehalfName, "Mr Accountant")
+        })
 
-            assert.equal(signatory2.email, "director@mail.com")
-            assert.isUndefined(signatory2.onBehalfName)
+        it("should return the original signatory unchanged if no contact info is present", () => {
+            const contactForm: DefineSignatoryInfoFormModel = aDefineSignatoryInfoForm().build()
+
+            const signatory: DirectorToSign = aDirectorToSign().withId("789").withName("Applicant Director").build()
+
+            const updated = service.updateSignatoriesWithContactInfo([signatory], contactForm)
+
+            assert.deepEqual(updated[0], signatory)
         })
     })
 })

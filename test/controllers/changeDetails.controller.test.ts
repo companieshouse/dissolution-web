@@ -5,10 +5,7 @@ import { Application } from "express"
 import { StatusCodes } from "http-status-codes"
 import request from "supertest"
 import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito"
-import { generateOnBehalfChangeDetailsFormModel, generateWillSignChangeDetailsFormModel } from "../fixtures/companyOfficers.fixtures"
-import { generateGetDirector } from "../fixtures/dissolutionApi.fixtures"
-import { generateValidationError } from "../fixtures/error.fixtures"
-import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures"
+import { TOKEN } from "../fixtures/session.fixtures"
 import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
@@ -17,14 +14,14 @@ import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirect
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 import OfficerType from "app/models/dto/officerType.enum"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
-import SignatorySigning from "app/models/form/signatorySigning.enum"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import ValidationErrors from "app/models/view/validationErrors.model"
 import { CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
 import DissolutionDirectorService from "app/services/dissolution/dissolutionDirector.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import { aChangeDetailsFormModel } from "test/fixtures/changeDetailsFormModel.builder"
+import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.builder"
+import { aDissolutionSession } from "test/fixtures/dissolutionSession.builder"
 
 mockCsrfMiddleware.restore()
 
@@ -32,22 +29,12 @@ describe("ChangeDetailsController", () => {
 
     let session: SessionService
     let directorService: DissolutionDirectorService
-    let directorMapper: DissolutionDirectorMapper
-    let validator: FormValidator
-
-    let dissolutionSession: DissolutionSession
-    let signatoryToEdit: DissolutionGetDirector
 
     const SIGNATORY_ID = "abc123"
 
     beforeEach(() => {
         session = mock(SessionService)
         directorService = mock(DissolutionDirectorService)
-        directorMapper = mock(DissolutionDirectorMapper)
-        validator = mock(FormValidator)
-
-        dissolutionSession = generateDissolutionSession()
-        signatoryToEdit = generateGetDirector()
 
         when(session.getAccessToken(anything())).thenReturn(TOKEN)
     })
@@ -56,191 +43,229 @@ describe("ChangeDetailsController", () => {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session))
             container.rebind(DissolutionDirectorService).toConstantValue(instance(directorService))
-            container.rebind(DissolutionDirectorMapper).toConstantValue(instance(directorMapper))
-            container.rebind(FormValidator).toConstantValue(instance(validator))
+            container.rebind(DissolutionDirectorMapper).toConstantValue(new DissolutionDirectorMapper())
+            container.rebind(FormValidator).toConstantValue(new FormValidator())
         })
     }
 
     describe("GET", () => {
         it("should reject with a 404 if no signatory is in session to update", async () => {
-            dissolutionSession.signatoryIdToEdit = undefined
+
+            const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(undefined).build()
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
             const app: Application = initApp()
 
-            await request(app)
+            const res = await request(app)
                 .get(CHANGE_DETAILS_URI)
                 .expect(StatusCodes.NOT_FOUND)
+
+            assert.equal(res.status, StatusCodes.NOT_FOUND)
         })
 
-        it("should render the change details page for the signatory", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
+        const expectedContentCasesStandardDirector = [
+            {
+                description: "DS01 journey",
+                officerType: OfficerType.DIRECTOR,
+                expectedPageHeading: "Change director's details"
+            },
+            {
+                description: "LLDS01 journey",
+                officerType: OfficerType.MEMBER,
+                expectedPageHeading: "Change member's details"
+            }
+        ]
 
-            dissolutionSession.signatoryIdToEdit = SIGNATORY_ID
-            signatoryToEdit.name = "Jimmy McGuiness"
+        expectedContentCasesStandardDirector.forEach((testCase) => {
+            it(`should render the change details page with correct content for a standard director ${testCase.description}`, async () => {
+                const {
+                    officerType,
+                    expectedPageHeading
+                } = testCase
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
-            when(directorMapper.mapToChangeDetailsForm(signatoryToEdit)).thenReturn(form)
+                const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(SIGNATORY_ID).withOfficerType(officerType).build()
+                const signatoryToEdit: DissolutionGetDirector = aDissolutionGetDirector()
+                    .withName("Mr Standard Director Signatory")
+                    .withEmail("director@mail.com").build()
 
-            const app: Application = initApp()
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+                when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
 
-            const res = await request(app)
-                .get(CHANGE_DETAILS_URI)
-                .expect(StatusCodes.OK)
+                const app: Application = initApp()
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                const res = await request(app)
+                    .get(CHANGE_DETAILS_URI)
+                    .expect(StatusCodes.OK)
 
-            assert.isTrue(htmlAssertHelper.selectorExists(`#signatory`))
-            assert.isTrue(htmlAssertHelper.hasText(`#signatory legend`, "Jimmy McGuiness"))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#is-signing-2`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#director-email`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-name`))
-            assert.isTrue(htmlAssertHelper.selectorExists(`#on-behalf-email`))
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+                assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading))
+                assert.equal(htmlAssertHelper.getText("h1"), expectedPageHeading)
+                assert.equal(htmlAssertHelper.getText(`label[for="director-email"]`), "Mr Standard Director Signatory")
+                assert.equal(htmlAssertHelper.getValue(`#director-email`), "director@mail.com")
+                assert.isUndefined(htmlAssertHelper.getValue(`#on-behalf-name`))
+                assert.isUndefined(htmlAssertHelper.getValue(`#on-behalf-email`))
+            })
         })
 
-        it("should render the change details page with appropriate heading for DS01", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
+        const expectedContentCasesCorporateDirector = [
+            {
+                description: "DS01 journey",
+                officerType: OfficerType.DIRECTOR,
+                expectedPageHeading: "Change director's details"
+            },
+            {
+                description: "LLDS01 journey",
+                officerType: OfficerType.MEMBER,
+                expectedPageHeading: "Change member's details"
+            }
+        ]
 
-            dissolutionSession.signatoryIdToEdit = SIGNATORY_ID
-            dissolutionSession.officerType = OfficerType.DIRECTOR
+        expectedContentCasesCorporateDirector.forEach((testCase) => {
+            it(`should render the change details page with correct content for a corporate director ${testCase.description}`, async () => {
+                const {
+                    officerType,
+                    expectedPageHeading
+                } = testCase
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
-            when(directorMapper.mapToChangeDetailsForm(signatoryToEdit)).thenReturn(form)
+                const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(SIGNATORY_ID).withOfficerType(officerType).build()
+                // when onBehalfName is specified it's a corporate director
+                const signatoryToEdit: DissolutionGetDirector = aDissolutionGetDirector()
+                    .withName("Corporate Director Signatory")
+                    .withOnBehalfName("Mr Accountant")
+                    .withEmail("accountant@mail.com").build()
 
-            const app: Application = initApp()
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+                when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
 
-            const res = await request(app)
-                .get(CHANGE_DETAILS_URI)
-                .expect(StatusCodes.OK)
+                const app: Application = initApp()
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                const res = await request(app)
+                    .get(CHANGE_DETAILS_URI)
+                    .expect(StatusCodes.OK)
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", `Change director's details`))
-        })
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-        it("should render the change details page with appropriate heading for LLDS01", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
-
-            dissolutionSession.signatoryIdToEdit = SIGNATORY_ID
-            dissolutionSession.officerType = OfficerType.MEMBER
-
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
-            when(directorMapper.mapToChangeDetailsForm(signatoryToEdit)).thenReturn(form)
-
-            const app: Application = initApp()
-
-            const res = await request(app)
-                .get(CHANGE_DETAILS_URI)
-                .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            assert.isTrue(htmlAssertHelper.hasText("h1", `Change member's details`))
-        })
-
-        it("should prepopulate the change details page for a signatory signing themselves", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
-
-            form.isSigning = SignatorySigning.WILL_SIGN
-            form.directorEmail = "director@mail.com"
-            form.onBehalfName = ""
-            form.onBehalfEmail = ""
-
-            dissolutionSession.signatoryIdToEdit = SIGNATORY_ID
-
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
-            when(directorMapper.mapToChangeDetailsForm(signatoryToEdit)).thenReturn(form)
-
-            const app: Application = initApp()
-
-            const res = await request(app)
-                .get(CHANGE_DETAILS_URI)
-                .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            assert.isTrue(htmlAssertHelper.hasAttribute(`#is-signing`, "checked"))
-            assert.isFalse(htmlAssertHelper.hasAttribute(`#is-signing-2`, "checked"))
-            assert.equal(htmlAssertHelper.getValue(`#director-email`), "director@mail.com")
-            assert.isNull(htmlAssertHelper.getValue(`#on-behalf-name`))
-            assert.isNull(htmlAssertHelper.getValue(`#on-behalf-email`))
-        })
-
-        it("should prepopulate the change details page for a signatory where someone is signing on behalf of them", async () => {
-            const form: ChangeDetailsFormModel = generateOnBehalfChangeDetailsFormModel()
-
-            form.isSigning = SignatorySigning.ON_BEHALF
-            form.directorEmail = ""
-            form.onBehalfName = "Mr Accountant"
-            form.onBehalfEmail = "accountant@mail.com"
-
-            dissolutionSession.signatoryIdToEdit = SIGNATORY_ID
-
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
-            when(directorMapper.mapToChangeDetailsForm(signatoryToEdit)).thenReturn(form)
-
-            const app: Application = initApp()
-
-            const res = await request(app)
-                .get(CHANGE_DETAILS_URI)
-                .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            assert.isFalse(htmlAssertHelper.hasAttribute(`#is-signing`, "checked"))
-            assert.isTrue(htmlAssertHelper.hasAttribute(`#is-signing-2`, "checked"))
-            assert.isNull(htmlAssertHelper.getValue(`#director-email`))
-            assert.equal(htmlAssertHelper.getValue(`#on-behalf-name`), "Mr Accountant")
-            assert.equal(htmlAssertHelper.getValue(`#on-behalf-email`), "accountant@mail.com")
+                assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading))
+                assert.equal(htmlAssertHelper.getText("h1"), expectedPageHeading)
+                assert.isTrue(htmlAssertHelper.containsText("legend.govuk-label--m", "Corporate Director Signatory"))
+                assert.equal(htmlAssertHelper.getValue(`#on-behalf-name`), "Mr Accountant")
+                assert.equal(htmlAssertHelper.getValue(`#on-behalf-email`), "accountant@mail.com")
+                assert.isUndefined(htmlAssertHelper.getValue(`#director-email`))
+            })
         })
     })
 
     describe("POST", () => {
-        it("should re-render the view with an error if validation fails", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
-            const error: ValidationErrors = generateValidationError(`isSigning`, "some is signing error")
+        it("should reject with a 404 if no signatory is in session to update", async () => {
+            const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(undefined).build()
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build()
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            const app: Application = initApp()
+            const res = await request(app)
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
+                .expect(StatusCodes.NOT_FOUND)
+
+            assert.equal(res.status, StatusCodes.NOT_FOUND)
+        })
+
+        it("should re-render the view with an error if validation fails for a standard director", async () => {
+
+            const signatoryToEdit = aDissolutionGetDirector().withName("Mr Standard Director").withOnBehalfName(null).build()
+
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(signatoryToEdit)
+                .build()
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("an invalid email").build()
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(validator.validate(deepEqual(form), anything())).thenReturn(error)
             when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
 
             const app = initApp()
 
             const res = await request(app)
                 .post(CHANGE_DETAILS_URI)
-                .send(form)
+                .send(updatedDetails)
                 .expect(StatusCodes.BAD_REQUEST)
-
-            verify(validator.validate(deepEqual(form), anything())).once()
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-            assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"))
-            assert.isTrue(htmlAssertHelper.containsText(`#is-signing-error`, "some is signing error"))
+            assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
         })
 
-        it("should update the signatory and redirect to the wait for others to sign screen if validation passes", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
+        it("should re-render the view with an error if validation fails for a corporate director", async () => {
+
+            const signatoryToEdit = aDissolutionGetDirector().withOnBehalfName("Mr Accountant").build()
+
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(signatoryToEdit)
+                .build()
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withOnBehalfEmail("an invalid email").build()
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+            when(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).thenResolve(signatoryToEdit)
 
             const app = initApp()
 
-            await request(app)
+            const res = await request(app)
                 .post(CHANGE_DETAILS_URI)
-                .send(form)
+                .send(updatedDetails)
+                .expect(StatusCodes.BAD_REQUEST)
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+            assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
+        })
+
+        it("should update the signatory and redirect to the wait for others to sign screen if validation passes for a standard director", async () => {
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(aDissolutionGetDirector().withName("Mr Standard Director").withOnBehalfName(null).build())
+                .build()
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build()
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+            const res = await request(initApp())
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
-            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(form))).once()
+            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(updatedDetails))).once()
+            assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
+            assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
+        })
+
+        it("should update the signatory and redirect to the wait for others to sign screen if validation passes for a corporate director", async () => {
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(aDissolutionGetDirector().withOnBehalfName("Mr Accountant").build())
+                .build()
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel()
+                .withDirectorEmail(undefined)
+                .withOnBehalfName("Mr Accountant Updated")
+                .withOnBehalfEmail("updated.accountant@mail.com").build()
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+            const res = await request(initApp())
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
+
+            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(updatedDetails))).once()
+            assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
+            assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
         })
     })
 })

@@ -7,6 +7,7 @@ import SelectDirectorFormModel from "app/models/form/selectDirector.model"
 import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
 import { DirectorToRemind, DirectorToSign } from "app/models/session/directorToSign.model"
 import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model"
+import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 
 export default interface DissolutionSession {
   companyNumber?: string
@@ -16,6 +17,7 @@ export default interface DissolutionSession {
   defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
   howDoYouWantToPayForm?: HowDoYouWantToPayModel
   signatoryIdToEdit?: string
+  signatoryToEdit?: DissolutionGetDirector
   directorsToSign?: DirectorToSign[]
   applicationReferenceNumber?: string
   approval?: DissolutionApprovalModel
