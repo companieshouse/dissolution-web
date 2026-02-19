@@ -16,9 +16,12 @@ import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
 import SessionService from "app/services/session/session.service"
+import PaymentService from "app/services/payment/payment.service"
 import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
+import PaymentType from "app/models/dto/paymentType.enum"
+import { v4 as uuidv4 } from "uuid"
 
 interface ViewModel {
     data?: PayByAccountDetailsFormModel
@@ -31,12 +34,13 @@ export class PayByAccountDetailsController extends BaseController {
     private readonly ERROR_INCORRECT_CREDENTIALS: string = "Your Presenter ID or Presenter authentication code is incorrect"
 
     public constructor (
-        @inject(SessionService) private sessionService: SessionService,
-        @inject(DissolutionService) private dissolutionService: DissolutionService,
-        @inject(FormValidator) private validator: FormValidator,
-        @inject(DissolutionSessionMapper) private mapper: DissolutionSessionMapper,
-        @inject(PayByAccountService) private payByAccountService: PayByAccountService,
-        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+        @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+        @inject(FormValidator) private readonly validator: FormValidator,
+        @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
+        @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
+        @inject(PaymentService) private readonly paymentService: PaymentService,
+        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number
     ) {
         super()
     }
@@ -45,7 +49,7 @@ export class PayByAccountDetailsController extends BaseController {
     public async get (): Promise<string | RedirectResult> {
 
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-            return Promise.reject(new NotFoundError("Feature toggle not enabled"))
+            throw new NotFoundError("Feature toggle not enabled")
         }
 
         if (await this.isAlreadyPaid()) {
@@ -53,6 +57,35 @@ export class PayByAccountDetailsController extends BaseController {
         }
 
         return this.renderView()
+    }
+
+    @httpGet("/change-payment-type")
+    public async changePaymentType (): Promise<string | RedirectResult> {
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
+        const paymentType: PaymentType = PaymentType.CREDIT_DEBIT_CARD
+        const redirectUrl = await this.getCreditCardPaymentUrl(dissolutionSession)
+        this.updateSessionWithPaymentType(dissolutionSession, paymentType)
+
+        return this.redirect(redirectUrl)
+    }
+
+    private async getCreditCardPaymentUrl (dissolutionSession: DissolutionSession): Promise<string> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
+        dissolutionSession.paymentStateUUID = uuidv4()
+
+        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID)
+    }
+
+    private updateSessionWithPaymentType (
+        dissolutionSession: DissolutionSession,
+        paymentType: PaymentType
+    ): void {
+        const updatedSession: DissolutionSession = {
+            ...dissolutionSession,
+            paymentType
+        }
+
+        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
     }
 
     @httpPost("")

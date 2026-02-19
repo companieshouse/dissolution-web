@@ -1,10 +1,10 @@
 import "reflect-metadata"
 
 import { assert } from "chai"
-import { Application } from "express"
+import { Application, Request } from "express"
 import { StatusCodes } from "http-status-codes"
 import request from "supertest"
-import { anything, deepEqual, instance, mock, when } from "ts-mockito"
+import { anything, capture, deepEqual, instance, mock, when } from "ts-mockito"
 import { generateDissolutionGetResponse } from "../fixtures/dissolutionApi.fixtures"
 import { generateValidationError } from "../fixtures/error.fixtures"
 import { generatePayByAccountDetailsForm } from "../fixtures/payment.fixtures"
@@ -20,7 +20,10 @@ import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.mo
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI } from "app/paths"
+import {
+    PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI,
+    PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI
+} from "app/paths"
 import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
@@ -29,6 +32,9 @@ import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
 import { generateDissolutionConfirmation } from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import PaymentService from "app/services/payment/payment.service"
+import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
+import PaymentType from "app/models/dto/paymentType.enum"
 
 mockCsrfMiddleware.restore()
 
@@ -40,6 +46,7 @@ describe("PayByAccountDetailsController", () => {
     let dissolutionService: DissolutionService
     let validator: FormValidator
     let payByAccountService: PayByAccountService
+    let paymentService: PaymentService
     let mapper: DissolutionSessionMapper
     let dissolutionSession: DissolutionSession = generateDissolutionSession()
 
@@ -50,6 +57,7 @@ describe("PayByAccountDetailsController", () => {
             container.rebind(FormValidator).toConstantValue(instance(validator))
             container.rebind(PayByAccountService).toConstantValue(instance(payByAccountService))
             container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper))
+            container.rebind(PaymentService).toConstantValue(instance(paymentService))
         })
     }
 
@@ -58,6 +66,7 @@ describe("PayByAccountDetailsController", () => {
         dissolutionService = mock(DissolutionService)
         validator = mock(FormValidator)
         payByAccountService = mock(PayByAccountService)
+        paymentService = mock(PaymentService)
         mapper = mock(DissolutionSessionMapper)
         dissolutionSession = generateDissolutionSession()
         when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
@@ -118,6 +127,25 @@ describe("PayByAccountDetailsController", () => {
 
             assert.isTrue(htmlAssertHelper.hasText("h1", "Enter your details to pay by account"))
         })
+
+        it("should redirect to pay by card", async () => {
+            const app: Application = initApp()
+            const REDIRECT_CARD_URL = "http://card-payment-ui-url"
+            when(paymentService.generatePaymentURL(TOKEN, anything(), anything())).thenResolve(REDIRECT_CARD_URL)
+
+            await request(app)
+                .get(PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", REDIRECT_CARD_URL)
+
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> =
+                capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
+            const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+            assert.equal(updatedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD)
+            assert.isDefined(updatedSession.paymentStateUUID)
+        })
+
     })
 
     describe("POST request", () => {
