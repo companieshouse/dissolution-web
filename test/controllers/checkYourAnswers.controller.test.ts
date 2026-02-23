@@ -68,8 +68,8 @@ describe("CheckYourAnswersController", () => {
 
             assert.isTrue(htmlAssertHelper.hasText("h1", "Check your answers"))
             assert.isTrue(htmlAssertHelper.hasText("h2.director-name-header", DIRECTOR_1_NAME))
+            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-name dd", DIRECTOR_1_NAME))
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
-            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-signing dd", "Yes"))
             assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#director-details-0 .director-on-behalf-name dd"))
 
         })
@@ -100,7 +100,6 @@ describe("CheckYourAnswersController", () => {
             assert.isTrue(htmlAssertHelper.hasText("h2.director-name-header", DIRECTOR_1_NAME))
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-on-behalf-name dd", "Thor, God of Thunder"))
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
-            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-signing dd", "No"))
         })
 
         describe("back link", () => {
