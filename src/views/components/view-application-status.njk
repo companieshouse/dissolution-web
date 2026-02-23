@@ -4,7 +4,7 @@
 <div class="govuk-grid-row govuk-!-margin-top-4">
   <div class="govuk-grid-column-two-thirds">
     <h2 class="govuk-heading-l">Application status</h2>
-    <p class="govuk-body">Refresh the page to see updated information. If you exit this page, you can return to it by signing in to <a href="{{ Paths.ROOT_URI }}">the Apply to strike off and dissolve a company service</a>.</p>
+    <p class="govuk-body">Refresh the page to see updated information. If you exit this page, you can return to it by signing in to the <a class="govuk-link" href="{{ Paths.ROOT_URI }}">Apply to strike off and dissolve a company service</a>.</p>
   </div>
 
   {% set signatoryRows = [] %}
@@ -24,21 +24,16 @@
               attributes: { id: "name-" + loop.index0 }
             },
             {
-              text: signatory.email,
-              attributes: { id: "email-" + loop.index0 }
+              html:  signatory.email + '<p><a class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change" data-event-id="change-email-link">Change email</a></p>' if signatory.canChange else signatory.email,
+              attributes: {
+                id: "email-" + loop.index0
+              }
             },
             {
-              html: '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Change</a>',
-              attributes: { 
-                id: "change-" + loop.index0,
-                'data-event-id': 'change-email-link' if piwik 
-              }
-            } if signatory.canChange,
-            {
-              html: '<a>Email sent </a>' if isReminded else '<a href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
-              attributes: { 
+              html: '<a>Email sent </a>' if isReminded else '<a class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
+              attributes: {
                 id: "resend-" + loop.index0 ,
-                'data-event-id': 'resend-email-link' if piwik 
+                'data-event-id': 'resend-email-link' if piwik
                 }
             } if not signatory.hasApproved,
             {
@@ -64,10 +59,6 @@
         {
           text: "Email"
         },
-        {
-          text: "Change",
-          attributes: { id: "change-col" }
-        } if viewApplicationStatus.showChangeColumn,
         {
           text: "Resend"
         },
