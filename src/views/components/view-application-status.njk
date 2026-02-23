@@ -24,7 +24,7 @@
               attributes: { id: "name-" + loop.index0 }
             },
             {
-              html:  signatory.email + '<p><a class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change" data-event-id="change-email-link">Change email</a></p>' if signatory.canChange else signatory.email,
+              html:  signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change" data-event-id="change-email-link">Change email</a></p>' if signatory.canChange else signatory.email,
               attributes: {
                 id: "email-" + loop.index0
               }
