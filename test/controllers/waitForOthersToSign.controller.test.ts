@@ -153,17 +153,6 @@ describe("WaitForOthersToSignController", () => {
             })
 
             describe("change", () => {
-                it("should display the change column", async () => {
-                    viewApplicationStatus.showChangeColumn = true
-
-                    const res = await request(app)
-                        .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
-                        .expect(StatusCodes.OK)
-
-                    const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-                    assert.isTrue(htmlAssertHelper.selectorExists("#change-col"))
-                })
 
                 it("should display the change link beside each editable signatory", async () => {
                     viewApplicationStatus.showChangeColumn = true
@@ -178,9 +167,9 @@ describe("WaitForOthersToSignController", () => {
 
                     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-                    assert.isTrue(htmlAssertHelper.selectorExists("#change-0"))
-                    assert.equal(htmlAssertHelper.getAttributeValue("#change-0 a", "href"), `${APPLICATION_STATUS_URI}/abc123/change`)
-                    assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#change-1"))
+                    assert.isTrue(htmlAssertHelper.selectorExists("#change-email-0"))
+                    assert.equal(htmlAssertHelper.getAttributeValue("#change-email-0", "href"), `${APPLICATION_STATUS_URI}/abc123/change`)
+                    assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#change-email-1"))
                 })
             })
         })
