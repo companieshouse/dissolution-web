@@ -1,12 +1,73 @@
-/*
- * eslint.config.js
- * Minimal migration shim that re-exports the existing legacy .eslintrc JSON
- * so you can adopt the new filename while keeping the original file for review.
- *
- * Note: this does not transform the old legacy format into the new "flat"
- * config format — it simply delegates to the existing configuration. This is
- * the safest, lowest-risk change and keeps linting behavior identical.
- */
+function tryRequire (name) {
+    try {
+        return require(name)
+    } catch (e) {
+        return null
+    }
+}
 
-module.exports = require("./.eslintrc")
+const tsParser = tryRequire("@typescript-eslint/parser")
+const tsPlugin = tryRequire("@typescript-eslint/eslint-plugin")
 
+// Map legacy ecmaVersion 8 -> 2017
+const ECMA_VERSION = 2017
+
+module.exports = [
+    // Base configuration
+    {
+        ignores: ["views/", "node_modules/"],
+        languageOptions: {
+            parser: tsParser || undefined,
+            parserOptions: {
+                ecmaVersion: ECMA_VERSION,
+                sourceType: "module"
+            },
+            globals: {
+                // node
+                process: "readonly",
+                module: "readonly",
+                __dirname: "readonly",
+                __filename: "readonly",
+                require: "readonly",
+                // browser
+                window: "readonly",
+                document: "readonly",
+                // mocha
+                describe: "readonly",
+                it: "readonly",
+                before: "readonly",
+                after: "readonly",
+                beforeEach: "readonly",
+                afterEach: "readonly"
+            }
+        },
+        plugins: {
+            "@typescript-eslint": tsPlugin || undefined
+        },
+        rules: {
+            indent: ["error", 4],
+            quotes: ["error", "double", { allowTemplateLiterals: true }],
+            semi: [1, "never"],
+            "no-unused-vars": "off",
+            "no-return-assign": "off",
+            "no-useless-constructor": "off",
+            camelcase: "off",
+            "padded-blocks": "off",
+            "prefer-promise-reject-errors": "off",
+            "no-use-before-define": "off",
+            "@typescript-eslint/no-use-before-define": ["error", {
+                functions: false,
+                classes: false,
+                variables: true
+            }]
+        },
+        files: ["**/*.ts"]
+    },
+    // Overrides for tests
+    {
+        files: ["**/*.spec.ts", "**/*.test.ts"],
+        rules: {
+            "no-unused-expressions": "off"
+        }
+    }
+]
