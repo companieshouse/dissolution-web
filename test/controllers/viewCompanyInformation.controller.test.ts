@@ -58,7 +58,7 @@ describe("ViewCompanyInformationController", () => {
             })
 
             const res = await request(app)
-                .get(VIEW_COMPANY_INFORMATION_URI)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
@@ -84,7 +84,7 @@ describe("ViewCompanyInformationController", () => {
             })
 
             const res = await request(app)
-                .get(VIEW_COMPANY_INFORMATION_URI)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
@@ -123,7 +123,7 @@ describe("ViewCompanyInformationController", () => {
             })
 
             const res = await request(app)
-                .get(VIEW_COMPANY_INFORMATION_URI)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
@@ -148,7 +148,7 @@ describe("ViewCompanyInformationController", () => {
             })
 
             const res = await request(app)
-                .get(VIEW_COMPANY_INFORMATION_URI)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
@@ -176,7 +176,7 @@ describe("ViewCompanyInformationController", () => {
             })
 
             const res = await request(app)
-                .get(VIEW_COMPANY_INFORMATION_URI)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
