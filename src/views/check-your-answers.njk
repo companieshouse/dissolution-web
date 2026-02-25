@@ -28,19 +28,10 @@
                   text: "Name"
                 },
                 value: {
-                  text: director.onBehalfName
+                  text: director.onBehalfName or director.name
                 },
-                classes: "director-on-behalf-name"
-              } if director.isDirectorSigning === 'No',
-              {
-                key: {
-                  text: "Name"
-                },
-                value: {
-                  text: director.name
-                },
-                classes: "director-name"
-              } if director.isDirectorSigning !== 'No',
+                classes: ('director-on-behalf-name' if director.onBehalfName else 'director-name')
+              },
               {
                 key: {
                   text: "Email address"
