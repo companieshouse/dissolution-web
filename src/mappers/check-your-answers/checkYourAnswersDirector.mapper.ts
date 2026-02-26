@@ -12,7 +12,6 @@ export default class CheckYourAnswersDirectorMapper {
         return {
             name: director.name,
             email: director.email!,
-            isDirectorSigning: director.onBehalfName ? "No" : "Yes",
             onBehalfName: director.onBehalfName
         }
     }
