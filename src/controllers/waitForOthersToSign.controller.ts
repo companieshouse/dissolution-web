@@ -24,9 +24,9 @@ interface ViewModel {
 export class WaitForOthersToSignController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private session: SessionService,
-    @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private viewApplicationStatusMapper: ViewApplicationStatusMapper
+    @inject(SessionService) private readonly session: SessionService,
+    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper
     ) {
         super()
     }
@@ -42,7 +42,7 @@ export class WaitForOthersToSignController extends BaseController {
             return this.redirect(PAYMENT_REVIEW_URI)
         }
 
-        return this.renderView(dissolutionSession.officerType!, dissolution!)
+        return this.renderView(dissolutionSession.officerType!,  dissolution!)
     }
 
     private async renderView (officerType: OfficerType, dissolution: DissolutionGetResponse): Promise<string> {

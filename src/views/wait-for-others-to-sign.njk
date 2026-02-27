@@ -9,15 +9,20 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <div class="interruption-card">
-        <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-1">The {{ officerType }}s must sign the application before you can submit it</h1>
+        <h1 id="blue-interruption-card" class="govuk-heading-xl govuk-!-margin-bottom-1">The {{ officerType }}{% if dissolutionSession.isMultiDirector %}s{% endif %} must sign the application before you can submit it</h1>
       </div>
     </div>
   </div>
 
   <div class="govuk-grid-row govuk-!-margin-top-4">
     <div class="govuk-grid-column-two-thirds">
-      <p id="email" class="govuk-body">We have emailed the {{ officerType }}s, or those signing on their behalf, asking them to sign the application. It may take some time for them to do this.</p>
-
+      <p id="email" class="govuk-body">
+      {% if dissolutionSession.isMultiDirector %}
+      We have emailed the {{ officerType }}s, or those signing on their behalf, asking them to sign the application. It may take some time for them to do this.
+      {% else %}
+      We have emailed the {{ officerType }}, or someone signing on their behalf, asking them to sign the application. It may take some time for them to do this.
+      {% endif %}
+      </p>
       <p class="govuk-body">If they have not yet received the email, we recommend that they check their junk folders. You can also check their details and resend the email below.</p>
 
       <p class="govuk-body">Alternatively, they can sign the application by signing in to the <a class="govuk-link" href="{{ Paths.ROOT_URI }}">Apply to strike off and dissolve a company service</a>.</p>
@@ -29,7 +34,13 @@
         <li>the company authentication code</li>
       </ul>
 
-      <p id="signed" class="govuk-body">When all {{ officerType }}s have signed, we will email you with instructions to pay for and submit the application.</p>
+      <p id="signed" class="govuk-body">
+      {% if dissolutionSession.isMultiDirector %}
+      When all {{ officerType }}s have signed, we will email you with instructions to pay for and submit the application.
+      {% else %}
+      When the {{ officerType }} has signed, we will email you with instructions to pay for and submit the application.
+      {% endif %}
+      </p>
     </div>
   </div>
 
