@@ -48,9 +48,12 @@
               },
               {
                 value: PaymentType.ACCOUNT,
-                text: "Companies House account",
+                text: "Companies House credit account",
                 checked: data.paymentType === PaymentType.ACCOUNT if data,
                 id: 'account-radio-button',
+                hint: {
+                    text: "Only select this option if you usually pay by account. You'll need your presenter ID and presenter authentication code."
+                },
                 attributes: {
                   'data-event-id': 'payment-ch-account-type-link' if piwik
                 }
