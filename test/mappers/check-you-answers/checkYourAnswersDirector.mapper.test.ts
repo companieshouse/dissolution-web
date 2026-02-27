@@ -26,23 +26,5 @@ describe("CheckYourAnswersDirectorMapper", () => {
             assert.equal(result.email, EMAIL)
             assert.equal(result.onBehalfName, ON_BEHALF_NAME)
         })
-
-        it("should set isDirectorSigning to \"Yes\" when onBehalfName is not present", () => {
-            const director: DirectorToSign = generateDirectorToSign()
-            director.onBehalfName = ""
-
-            const result: CheckYourAnswersDirector = mapper.mapToCheckYourAnswersDirector(director)
-
-            assert.equal(result.isDirectorSigning, "Yes")
-        })
-
-        it("should set isDirectorSigning to \"No\" when onBehalfName is present", () => {
-            const director: DirectorToSign = generateDirectorToSign()
-            director.onBehalfName = "Bob Smith"
-
-            const result: CheckYourAnswersDirector = mapper.mapToCheckYourAnswersDirector(director)
-
-            assert.equal(result.isDirectorSigning, "No")
-        })
     })
 })

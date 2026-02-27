@@ -25,25 +25,16 @@
             rows: [
               {
                 key: {
-                  text: "Will sign"
+                  text: "Name"
                 },
                 value: {
-                  text: director.isDirectorSigning
+                  text: director.onBehalfName or director.name
                 },
-                classes: "director-signing"
+                classes: ('director-on-behalf-name' if director.onBehalfName else 'director-name')
               },
               {
                 key: {
-                  text: "Name of a person signing"
-                },
-                value: {
-                  text: director.onBehalfName
-                },
-                classes: "director-on-behalf-name"
-              } if director.isDirectorSigning === 'No',
-              {
-                key: {
-                  text: director.isDirectorSigning | asEmailLabel
+                  text: "Email address"
                 },
                 value: {
                   text: director.email

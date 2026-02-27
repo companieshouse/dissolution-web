@@ -3,7 +3,6 @@ import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.m
 export function generateCheckYourAnswersDirector (): CheckYourAnswersDirector {
     return {
         name: "Bob Smith",
-        email: "test@mail.com",
-        isDirectorSigning: "Yes"
+        email: "test@mail.com"
     }
 }
