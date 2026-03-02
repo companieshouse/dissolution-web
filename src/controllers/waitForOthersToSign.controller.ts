@@ -42,7 +42,7 @@ export class WaitForOthersToSignController extends BaseController {
             return this.redirect(PAYMENT_REVIEW_URI)
         }
 
-        return this.renderView(dissolutionSession.officerType!,  dissolution!)
+        return this.renderView(dissolutionSession.officerType!, dissolution!)
     }
 
     private async renderView (officerType: OfficerType, dissolution: DissolutionGetResponse): Promise<string> {
