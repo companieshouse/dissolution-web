@@ -64,6 +64,7 @@ describe("WaitForOthersToSignController", () => {
     describe("GET request", () => {
         it("should render the WaitForOthers page with director text when company is plc", async () => {
             dissolutionSession.officerType = OfficerType.DIRECTOR
+            dissolutionSession.isMultiDirector = true
 
             const res = await request(app)
                 .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
@@ -76,8 +77,24 @@ describe("WaitForOthersToSignController", () => {
             assert.isTrue(htmlAssertHelper.hasText("#signed", "When all directors have signed, we will email you with instructions to pay for and submit the application."))
         })
 
+        it("should render the WaitForOthers page with director text when company is single director plc", async () => {
+            dissolutionSession.officerType = OfficerType.DIRECTOR
+            dissolutionSession.isMultiDirector = false
+
+            const res = await request(app)
+                .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+                .expect(StatusCodes.OK)
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+            assert.isTrue(htmlAssertHelper.hasText("h1", "The director must sign the application before you can submit it"))
+            assert.isTrue(htmlAssertHelper.hasText("#email", "We have emailed the director, or someone signing on their behalf, asking them to sign the application. It may take some time for them to do this."))
+            assert.isTrue(htmlAssertHelper.hasText("#signed", "When the director has signed, we will email you with instructions to pay for and submit the application."))
+        })
+
         it("should render the WaitForOthers page with member text when company is llp", async () => {
             dissolutionSession.officerType = OfficerType.MEMBER
+            dissolutionSession.isMultiDirector = true
 
             const res = await request(app)
                 .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
@@ -88,6 +105,21 @@ describe("WaitForOthersToSignController", () => {
             assert.isTrue(htmlAssertHelper.hasText("h1", "The members must sign the application before you can submit it"))
             assert.isTrue(htmlAssertHelper.hasText("#email", "We have emailed the members, or those signing on their behalf, asking them to sign the application. It may take some time for them to do this."))
             assert.isTrue(htmlAssertHelper.hasText("#signed", "When all members have signed, we will email you with instructions to pay for and submit the application."))
+        })
+
+        it("should render the WaitForOthers page with member text when company is single member llp", async () => {
+            dissolutionSession.officerType = OfficerType.MEMBER
+            dissolutionSession.isMultiDirector = false
+
+            const res = await request(app)
+                .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+                .expect(StatusCodes.OK)
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+            assert.isTrue(htmlAssertHelper.hasText("h1", "The member must sign the application before you can submit it"))
+            assert.isTrue(htmlAssertHelper.hasText("#email", "We have emailed the member, or someone signing on their behalf, asking them to sign the application. It may take some time for them to do this."))
+            assert.isTrue(htmlAssertHelper.hasText("#signed", "When the member has signed, we will email you with instructions to pay for and submit the application."))
         })
 
         it("should redirect applicant to the Payment Review page if all the signatories have signed", async () => {
