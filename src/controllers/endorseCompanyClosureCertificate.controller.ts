@@ -9,7 +9,7 @@ import generateEndorseCertificateFormModel from "app/models/form/endorseCertific
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from "app/paths"
+import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
 import formSchema from "app/schemas/endorseCertificate.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
@@ -19,6 +19,7 @@ import FormValidator from "app/utils/formValidator.util"
 interface ViewModel {
   approvalModel: DissolutionApprovalModel
   errors?: ValidationErrors
+  backUri?: string
 }
 
 @controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
@@ -58,10 +59,12 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
     private async renderView (errors?: ValidationErrors): Promise<string> {
         const approvalModel: DissolutionApprovalModel = this.session.getDissolutionSession(this.httpContext.request)!.approval!
+        const backUri: string = VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + approvalModel.companyNumber
 
         const viewModel: ViewModel = {
             approvalModel,
-            errors
+            errors,
+            backUri
         }
         return super.render("endorse-company-closure-certificate", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
     }

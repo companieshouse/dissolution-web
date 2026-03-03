@@ -14,7 +14,7 @@ import "app/controllers/endorseCompanyClosureCertificate.controller"
 import OfficerType from "app/models/dto/officerType.enum"
 import EndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from "app/paths"
+import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
 import formSchema from "app/schemas/endorseCertificate.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
@@ -37,6 +37,14 @@ describe("EndorseCompanyClosureCertificateController", () => {
     const EMAIL = "some-email.com"
     const COMPANY_NUMBER = "01777777"
     const IP_ADDRESS = "127.0.0.1"
+    const SIGN_HEADING = "Sign the application"
+    const COMPANY_NAME_LABEL = "Company name"
+    const COMPANY_NUMBER_LABEL = "Company number"
+    const COMPANY_NAME_VALUE = "Company 1"
+    const COMPANY_NUMBER_VALUE = "123456789"
+    const CONFIRMATION_PREFIX = "I confirm I have read and understood the statements - signed "
+    const APPLICANT_NAME = "John Smith"
+    const ON_BEHALF_NAME = "Jesse Smith"
 
     let dissolutionSession: DissolutionSession
 
@@ -48,9 +56,9 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
         dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
         dissolutionSession.approval = generateApprovalModel()
-        dissolutionSession.approval.companyName = "Company 1"
-        dissolutionSession.approval.companyNumber = "123456789"
-        dissolutionSession.approval.applicant = "John Smith"
+        dissolutionSession.approval.companyName = COMPANY_NAME_VALUE
+        dissolutionSession.approval.companyNumber = COMPANY_NUMBER_VALUE
+        dissolutionSession.approval.applicant = APPLICANT_NAME
 
         when(session.getAccessToken(anything())).thenReturn(TOKEN)
         when(session.getUserEmail(anything())).thenReturn(EMAIL)
@@ -70,20 +78,23 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             const dateString = new Date().toDateString()
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", "Sign the application"))
-            assert.isTrue(htmlAssertHelper.hasText("div#companyName", "Company name: Company 1"))
-            assert.isTrue(htmlAssertHelper.hasText("div#companyNumber", "Company number: 123456789"))
-            assert.isTrue(htmlAssertHelper.hasText("span#applicantName", "John Smith"))
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", "I confirm I have read and understood the statements - signed John Smith on " + dateString))
+            assert.isTrue(htmlAssertHelper.hasText("h1", SIGN_HEADING))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_LABEL))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_VALUE))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_LABEL))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_VALUE))
+            assert.isTrue(htmlAssertHelper.hasText("span#applicantName", APPLICANT_NAME))
+            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_PREFIX + APPLICANT_NAME + " on " + dateString))
+            assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), `${VIEW_COMPANY_INFORMATION_URI}?companyNumber=${dissolutionSession.approval!.companyNumber}`)
         })
 
         it("should render endorse certificate page with an on behalf statement if director has a signatory", async () => {
             dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
             dissolutionSession.approval = generateApprovalModel()
-            dissolutionSession.approval.companyName = "Company 1"
-            dissolutionSession.approval.companyNumber = "123456789"
-            dissolutionSession.approval.applicant = "John Smith"
-            dissolutionSession.approval.onBehalfName = "Jesse Smith"
+            dissolutionSession.approval.companyName = COMPANY_NAME_VALUE
+            dissolutionSession.approval.companyNumber = COMPANY_NUMBER_VALUE
+            dissolutionSession.approval.applicant = APPLICANT_NAME
+            dissolutionSession.approval.onBehalfName = ON_BEHALF_NAME
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
@@ -98,11 +109,14 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             const dateString = new Date().toDateString()
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", "Sign the application"))
-            assert.isTrue(htmlAssertHelper.hasText("div#companyName", "Company name: Company 1"))
-            assert.isTrue(htmlAssertHelper.hasText("div#companyNumber", "Company number: 123456789"))
-            assert.isTrue(htmlAssertHelper.hasText("span#applicantName", "Jesse Smith"))
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", "I confirm I have read and understood the statements - signed Jesse Smith on " + dateString + " on behalf of John Smith"))
+            assert.isTrue(htmlAssertHelper.hasText("h1", SIGN_HEADING))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_LABEL))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_VALUE))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_LABEL))
+            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_VALUE))
+            assert.isTrue(htmlAssertHelper.hasText("span#applicantName", ON_BEHALF_NAME))
+            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_PREFIX + ON_BEHALF_NAME + " on " + dateString + " on behalf of " + APPLICANT_NAME))
+            assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), `${VIEW_COMPANY_INFORMATION_URI}?companyNumber=${dissolutionSession.approval!.companyNumber}`)
         })
 
         it("should render endorse certificate page with directors for DS01", async () => {

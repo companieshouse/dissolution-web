@@ -2,7 +2,9 @@
 
 {% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from 'govuk/components/back-link/macro.njk' import govukBackLink %}
 {% from 'govuk/components/button/macro.njk' import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
@@ -10,16 +12,31 @@
 {% set title = "Endorse company closure certificate - " + pageTitleSuffix %}
 
 {% block content %}
+  {{
+    govukBackLink({
+      text: 'Back',
+      href: backUri
+    })
+  }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">Sign the application</h1>
-      <h2 class="govuk-heading-m">Apply to strike off and dissolve a company</h2>
-      <h2 class="govuk-heading-m govuk-!-margin-bottom-9">
-        <div id="companyName">{{ approvalModel.officerType | asCompanyDisplayName(true)}} name: {{ approvalModel.companyName }}</div>
-        <div id="companyNumber">{{ approvalModel.officerType | asCompanyDisplayName(true)}} number: {{ approvalModel.companyNumber }}</div>
-      </h2>
+      <h1 class="govuk-heading-l">Sign the application</h1>
+      {{
+        govukSummaryList({
+          rows: [
+            {
+              key: { text: approvalModel.officerType | asCompanyDisplayName(true) + ' name' },
+              value: { text: approvalModel.companyName }
+            },
+            {
+              key: { text: approvalModel.officerType | asCompanyDisplayName(true) + ' number' },
+              value: { text: approvalModel.companyNumber }
+            }
+          ]
+        })
+      }}
       {{
         govukWarningText({
           text: "You must read the following statements.",
@@ -38,14 +55,18 @@
            rel="noreferrer noopener" target="_blank">
           Guidance is available on the grounds for objection (opens in a new tab)</a>. If in doubt, seek professional advice.</p>
 
-      <h2 id="declaration-heading" class="govuk-heading-m">Declaration of {{ approvalModel.officerType }}s</h2>
+      <h2 id="declaration-heading" class="govuk-heading-m">Declaration</h2>
 
-      <p id="declaration-paragraph" class="govuk-body">I/We as {{ approvalModel.officerType }}s / the majority of
-        {{ approvalModel.officerType }}s apply for this {{ approvalModel.officerType | asCompanyDisplayName }} to be
-        struck off the Register and declare that none of the circumstances described in
-          <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1004" target="_blank" class="govuk-link piwik-event" data-event-id="section-1004-companies-act-2006-link">section 1004 of the Companies Act 2006 (opens in a new tab)</a>
-          or  <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1005" target="_blank" class="govuk-link piwik-event" data-event-id="section-1005-companies-act-2006-link">section 1005 of the Companies Act 2006 (opens in a new tab)</a>
-           (being circumstances in which the {{ approvalModel.officerType }}s would otherwise be prohibited under those sections.)</p>
+      <p id="declaration-paragraph" class="govuk-body">As a {{ approvalModel.officerType }} of {{ approvalModel.companyName }}, I apply for this {{ approvalModel.officerType | asCompanyDisplayName }} to be struck off the register. 
+        I declare that none of the circumstances described in section 1004 or 1005 of the Companies Act 2006 exists in relation to the {{ approvalModel.officerType | asCompanyDisplayName }} which would prevent this application from being made.</p>
+
+      <p class="govuk-body">
+        <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1004" rel="noreferrer noopener" target="_blank" class="govuk-link piwik-event" data-event-id="section-1004-companies-act-2006-link">Section 1004 of the Companies Act 2006 (opens in new tab)</a>
+      </p>
+
+      <p class="govuk-body">
+        <a href="https://www.legislation.gov.uk/ukpga/2006/46/section/1005" rel="noreferrer noopener" target="_blank" class="govuk-link piwik-event" data-event-id="section-1005-companies-act-2006-link">Section 1005 of the Companies Act 2006 (opens in new tab)</a>
+      </p>
 
       {% set confirmationLabel %}
         {% if not approvalModel.onBehalfName %}
