@@ -21,7 +21,7 @@ export default class FormValidator {
         return this.mapJoiErrorsToValidationErrors(result.error.details)
     }
 
-    private mapJoiErrorsToValidationErrors (errors: ValidationErrorItem[]): ValidationErrors {
+    protected mapJoiErrorsToValidationErrors (errors: ValidationErrorItem[]): ValidationErrors {
         return errors.reduce((totalErrors: ValidationErrors, error: ValidationErrorItem) => ({
             ...totalErrors,
             [error.path.join(".")]: error.message

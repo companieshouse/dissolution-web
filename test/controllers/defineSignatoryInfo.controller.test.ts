@@ -201,6 +201,8 @@ describe("DefineSignatoryInfoController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
             assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
+            const altErrorText = htmlAssertHelper.getAttributeValue(".govuk-error-summary__list li a", "data-alt-text")
+            assert.equal(altErrorText, "invalid-email")
         })
 
         describe("session", () => {

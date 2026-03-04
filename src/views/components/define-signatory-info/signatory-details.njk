@@ -38,7 +38,7 @@
         text: "What is the name of the authorised person who will sign on behalf of " + (signatory.name | escape) + "?"
       },
       errorMessage: {
-        text: errors[onBehalfNameName]
+        text: errors[onBehalfNameName].message
       } if errors[onBehalfNameName],
       attributes: {
         spellcheck: "false"
@@ -62,7 +62,7 @@
         text: "What is the email address for the authorised person who will sign on behalf of " + signatory.name + "?"
       },
       errorMessage: {
-        text: errors[onBehalfEmailName]
+        text: errors[onBehalfEmailName].message
       } if errors[onBehalfEmailName],
       attributes: {
         spellcheck: "false"
@@ -88,7 +88,7 @@
         text: "What is the email address for " + signatory.name + "?"
       },
       errorMessage: {
-        text: errors[directorEmailName]
+        text: errors[directorEmailName].message
       } if errors[directorEmailName],
       attributes: {
         spellcheck: "false"
