@@ -16,10 +16,9 @@ function getErrorText(value: string | ValidationError): string {
 export function asGovUKErrorList(errors: ValidationErrors): GovUKError[] {
     return Object.entries(errors).map(([key, value]) => {
         const text: string = getErrorText(value)
-        let attributes: Record<string, string> | undefined = undefined
-        if (typeof value === "object" && value !== null && "alt_message" in value && value.alt_message !== undefined) {
-            attributes = { "data-alt-text": value.alt_message }
-        }
+        const attributes = (typeof value === "object" && value?.alt_message)
+            ? { "data-alt-text": value.alt_message }
+            : undefined
         return {
             href: `#${dashify(key)}`,
             text,
