@@ -30,7 +30,7 @@
               }
             },
             {
-              html: '<a>Email sent </a>' if isReminded else '<a class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email" data-event-id="resend-email-link">Resend email</a>',
+              html: '<a>Email sent </a>' if isReminded else '<a class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
               attributes: {
                 id: "resend-" + loop.index0 ,
                 'data-event-id': 'resend-email-link' if piwik

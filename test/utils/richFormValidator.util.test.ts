@@ -8,13 +8,13 @@ import ValidationErrors, { ValidationError} from "app/models/view/validationErro
 import FormValidator from "app/utils/formValidator.util"
 import RichFormValidator from "app/utils/richFormValidator.util"
 
-describe("FormValidator", () => {
+describe("RichFormValidator", () => {
 
     const validator: FormValidator = new RichFormValidator()
 
     const textFieldEmptyMsg = "You must enter a value for text"
     const textFieldMinMsg = "Min 2 characters"
-    const textFieldMaxMsg = "Max 5 characters"
+    const textFieldMaxMsg = "Max 15 characters"
 
     const emailFieldEmptyMsg = "You must enter a value for email"
     const emailFieldEmailMsg = "You must enter a valid email address"
