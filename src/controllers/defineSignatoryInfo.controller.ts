@@ -9,13 +9,14 @@ import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInf
 import Optional from "app/models/optional"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
+import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
+import ValidationErrors from "app/models/view/validationErrors.model"
 import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from "app/paths"
 import defineSignatoryInfoSchema from "app/schemas/defineSignatoryInfo.schema"
 import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import RichFormValidator from "app/utils/richFormValidator.util"
-import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
-import ValidationErrors from "app/models/view/validationErrors.model"
+import FormValidator from "app/utils/formValidator.util"
 
 interface ViewModel {
     officerType: OfficerType
@@ -39,7 +40,7 @@ export class DefineSignatoryInfoController extends BaseController {
     public constructor (
         @inject(SessionService) private session: SessionService,
         @inject(SignatoryService) private signatoryService: SignatoryService,
-        @inject(RichFormValidator) private readonly validator: RichFormValidator) {
+        @inject(RichFormValidator) private readonly validator: FormValidator) {
         super()
     }
 
