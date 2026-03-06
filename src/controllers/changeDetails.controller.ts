@@ -17,6 +17,7 @@ import changeDetailsSchema from "app/schemas/changeDetails.schema"
 import DissolutionDirectorService from "app/services/dissolution/dissolutionDirector.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
+import RichFormValidator from "app/utils/richFormValidator.util"
 
 interface ViewModel {
     officerType: OfficerType
@@ -37,7 +38,7 @@ export class ChangeDetailsController extends BaseController {
         @inject(SessionService) private session: SessionService,
         @inject(DissolutionDirectorService) private directorService: DissolutionDirectorService,
         @inject(DissolutionDirectorMapper) private directorMapper: DissolutionDirectorMapper,
-        @inject(FormValidator) private validator: FormValidator) {
+        @inject(RichFormValidator) private readonly validator: FormValidator) {
         super()
     }
 

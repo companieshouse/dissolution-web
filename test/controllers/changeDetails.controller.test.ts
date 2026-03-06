@@ -17,7 +17,6 @@ import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
 import { CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
 import DissolutionDirectorService from "app/services/dissolution/dissolutionDirector.service"
 import SessionService from "app/services/session/session.service"
-import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 import { aChangeDetailsFormModel } from "test/fixtures/changeDetailsFormModel.builder"
 import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.builder"
@@ -44,7 +43,6 @@ describe("ChangeDetailsController", () => {
             container.rebind(SessionService).toConstantValue(instance(session))
             container.rebind(DissolutionDirectorService).toConstantValue(instance(directorService))
             container.rebind(DissolutionDirectorMapper).toConstantValue(new DissolutionDirectorMapper())
-            container.rebind(FormValidator).toConstantValue(new FormValidator())
         })
     }
 
@@ -195,6 +193,8 @@ describe("ChangeDetailsController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
             assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
+            const altErrorText = htmlAssertHelper.getAttributeValue(".govuk-error-summary__list li a", "data-alt-text")
+            assert.equal(altErrorText, "invalid-email")
         })
 
         it("should re-render the view with an error if validation fails for a corporate director", async () => {
