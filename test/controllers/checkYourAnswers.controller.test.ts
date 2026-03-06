@@ -81,6 +81,7 @@ describe("CheckYourAnswersController", () => {
             director.email = DIRECTOR_1_EMAIL
             director.onBehalfName = "Thor, God of Thunder"
             dissolutionSession.directorsToSign = [generateDirectorToSign()]
+            dissolutionSession.isMultiDirector = true
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
             when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director)
@@ -101,7 +102,8 @@ describe("CheckYourAnswersController", () => {
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-on-behalf-name dd", "Thor, God of Thunder"))
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
             const actionHtml = htmlAssertHelper.getInnerHTML("#director-details-0 .director-email .govuk-summary-list__actions a")
-            assert.isTrue(typeof actionHtml === 'string' && actionHtml.includes("email address for " + DIRECTOR_1_NAME))
+            assert.isTrue(typeof actionHtml === 'string' && actionHtml.includes("email address for " + director.onBehalfName))
+            assert.equal(htmlAssertHelper.getAttributeValue("#change-signatories", "href"), SELECT_SIGNATORIES_URI)
         })
 
         describe("back link", () => {

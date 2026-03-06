@@ -53,6 +53,12 @@
         }}
       {% endfor %}
 
+      {% if isMultiDirector %}
+        <p class="govuk-body govuk-!-margin-top-4">
+          <a id="change-signatories" class="govuk-link" href="{{ Paths.SELECT_SIGNATORIES_URI }}">Change which director will sign</a>
+        </p>
+      {% endif %}
+
       <form method="post">
 
         {% include "components/csrf_token.njk" %}
