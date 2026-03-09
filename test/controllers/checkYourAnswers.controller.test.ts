@@ -12,7 +12,7 @@ import "app/controllers/checkYourAnswers.controller"
 import CheckYourAnswersDirectorMapper from "app/mappers/check-your-answers/checkYourAnswersDirector.mapper"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model"
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI } from "app/paths"
+import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 
@@ -71,7 +71,7 @@ describe("CheckYourAnswersController", () => {
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
             assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#director-details-0 .director-on-behalf-name dd"))
             const actionHtml = htmlAssertHelper.getInnerHTML("#director-details-0 .director-email .govuk-summary-list__actions a")
-            assert.isTrue(typeof actionHtml === 'string' && actionHtml.includes("email address for " + director.onBehalfName))
+            assert.isTrue(typeof actionHtml === 'string' && actionHtml.includes("email address for " + (director.onBehalfName || director.name)))
 
         })
 
