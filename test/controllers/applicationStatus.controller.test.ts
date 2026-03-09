@@ -32,6 +32,7 @@ describe("ApplicationStatusController", () => {
     let viewApplicationStatus: ViewApplicationStatus
     let dissolutionGetResponse: DissolutionGetResponse
     let viewApplicationStatusMapper: ViewApplicationStatusMapper
+    let app: Application
 
     beforeEach(() => {
         session = mock(SessionService)
@@ -39,6 +40,11 @@ describe("ApplicationStatusController", () => {
         viewApplicationStatusMapper = mock(ViewApplicationStatusMapper)
         dissolutionGetResponse = generateDissolutionGetResponse()
         dissolutionSession = generateDissolutionSession()
+        app = createApp(container => {
+            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
+            container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
+        })
     })
 
     describe("Change", () => {
@@ -48,10 +54,6 @@ describe("ApplicationStatusController", () => {
             dissolutionSession.signatoryIdToEdit = undefined
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-            const app: Application = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-            })
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change`)
@@ -74,10 +76,6 @@ describe("ApplicationStatusController", () => {
             dissolutionSession.isFromCheckAnswers = undefined
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-            const app: Application = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-            })
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change?check_answers=true`)
@@ -103,12 +101,6 @@ describe("ApplicationStatusController", () => {
                 { ...generateViewApplicationStatusSignatory(), name: "Jane Smith", email: "jane@mail.com" },
                 { ...generateViewApplicationStatusSignatory(), name: "Test One", email: "test@mail.com" }
             ]
-
-            const app: Application = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
-                container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
-            })
 
             when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, EMAIL)).thenResolve(true)
             when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionGetResponse)
