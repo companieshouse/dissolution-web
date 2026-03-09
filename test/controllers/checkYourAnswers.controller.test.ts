@@ -71,7 +71,7 @@ describe("CheckYourAnswersController", () => {
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
             assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#director-details-0 .director-on-behalf-name dd"))
             const actionHtml = htmlAssertHelper.getInnerHTML("#director-details-0 .director-email .govuk-summary-list__actions a")
-            assert.isTrue(typeof actionHtml === 'string' && actionHtml.includes("email address for " + (director.onBehalfName || director.name)))
+            assert.isTrue(typeof actionHtml === "string" && actionHtml.includes("email address for " + (director.onBehalfName || director.name)))
 
         })
 
@@ -102,7 +102,7 @@ describe("CheckYourAnswersController", () => {
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-on-behalf-name dd", "Thor, God of Thunder"))
             assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
             const actionHtml = htmlAssertHelper.getInnerHTML("#director-details-0 .director-email .govuk-summary-list__actions a")
-            assert.isTrue(typeof actionHtml === 'string' && actionHtml.includes("email address for " + director.onBehalfName))
+            assert.isTrue(typeof actionHtml === "string" && actionHtml.includes("email address for " + director.onBehalfName))
             assert.equal(htmlAssertHelper.getAttributeValue("#change-signatories", "href"), SELECT_SIGNATORIES_URI)
         })
 
