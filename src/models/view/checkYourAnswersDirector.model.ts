@@ -1,5 +1,5 @@
 export default interface CheckYourAnswersDirector {
-  id: string,
+  id: string
   name: string
   email: string
   onBehalfName?: string

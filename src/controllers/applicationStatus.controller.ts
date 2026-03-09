@@ -23,10 +23,10 @@ export class ApplicationStatusController extends BaseController {
     }
 
     @httpGet("/:signatoryId/change")
-    public async change (@requestParam("signatoryId") signatoryId: string, @queryParam("check_answers") isFromCheckAnswers: boolean): Promise<RedirectResult> {
+    public async change (@requestParam("signatoryId") signatoryId: string, @queryParam("check_answers") isFromCheckAnswers: string): Promise<RedirectResult> {
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         dissolutionSession.signatoryIdToEdit = signatoryId
-        dissolutionSession.isFromCheckAnswers = Boolean(isFromCheckAnswers)
+        dissolutionSession.isFromCheckAnswers = isFromCheckAnswers === "true"
 
         this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
 

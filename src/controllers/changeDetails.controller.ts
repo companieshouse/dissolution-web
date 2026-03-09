@@ -53,11 +53,15 @@ export class ChangeDetailsController extends BaseController {
         }
 
         let signatory: DissolutionGetDirector
-        if(session.isFromCheckAnswers) {
-            signatory = this.getSignatoryFromSession(session)!
-            if(!signatory) {
-                Promise.reject(new Error("Signatories not in session"))
+        if (session.isFromCheckAnswers) {
+            if (!session.directorsToSign || session.directorsToSign.length === 0) {
+                return Promise.reject(new NotFoundError("Signatories not in session"))
             }
+            const signatoryFromSession: Optional<DissolutionGetDirector> = this.getSignatoryFromSession(session)
+            if (!signatoryFromSession) {
+                return Promise.reject(new NotFoundError("Signatory not in session"))
+            }
+            signatory = signatoryFromSession
         } else {
             const token: string = this.session.getAccessToken(this.httpContext.request)
             signatory = await this.directorService.getSignatoryToEdit(token, session)
@@ -83,11 +87,15 @@ export class ChangeDetailsController extends BaseController {
         }
 
         const token: string = this.session.getAccessToken(this.httpContext.request)
-        const signatory: DissolutionGetDirector = session.signatoryToEdit!
+        let signatory: DissolutionGetDirector = session.signatoryToEdit!
         const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(signatory))
 
         if (errors) {
-            const signatory: DissolutionGetDirector = await this.directorService.getSignatoryToEdit(token, session)
+            if (session.isFromCheckAnswers) {
+                signatory = this.getSignatoryFromSession(session)
+            } else{
+                signatory = await this.directorService.getSignatoryToEdit(token, session)
+            }
             return this.renderView(session.officerType!, this.getBackLink(session), signatory, body, errors)
         }
 
@@ -144,21 +152,28 @@ export class ChangeDetailsController extends BaseController {
     }
 
     private updateSignatoryInSession(session: DissolutionSession, body: ChangeDetailsFormModel, directorsToSign: DirectorToSign[]) {
-        let updateIndex = directorsToSign?.findIndex((director) => director.id === session.signatoryIdToEdit)
-        if (updateIndex != null){
-            if(directorsToSign[updateIndex].onBehalfName) {
-                directorsToSign[updateIndex].email = body.onBehalfEmail
-                directorsToSign[updateIndex].onBehalfName = body.onBehalfName
-            } else {
-                directorsToSign[updateIndex].email = body.directorEmail
-            }
-            session.directorsToSign = directorsToSign
+        const updateIndex = directorsToSign?.findIndex((director) => director.id === session.signatoryIdToEdit)
+        if (updateIndex === undefined || updateIndex === null || updateIndex < 0) {
+            throw new NotFoundError("Signatory ID not found in session")
         }
+        if (directorsToSign[updateIndex].onBehalfName) {
+            directorsToSign[updateIndex].email = body.onBehalfEmail
+            directorsToSign[updateIndex].onBehalfName = body.onBehalfName
+        } else {
+            directorsToSign[updateIndex].email = body.directorEmail
+        }
+        session.directorsToSign = directorsToSign
     }
 
     private getSignatoryFromSession(session: DissolutionSession) {
         const directorsToSign = session.directorsToSign
-        const directorToEdit: DirectorToSign = directorsToSign?.find((director) => director.id === session.signatoryIdToEdit)!
+        if (!directorsToSign) {
+            throw new NotFoundError("Signatories not found in session")
+        }
+        const directorToEdit: DirectorToSign | undefined = directorsToSign.find((director) => director.id === session.signatoryIdToEdit)
+        if (!directorToEdit) {
+            throw new NotFoundError("Signatory to edit not found in session")
+        }
         return this.directorMapper.mapToDissolutionDirector(directorToEdit)
     }
 }

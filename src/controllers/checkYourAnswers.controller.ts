@@ -45,6 +45,7 @@ export class CheckYourAnswersController extends BaseController {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         delete dissolutionSession.isFromCheckAnswers
+        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
         await this.dissolutionService.createDissolution(token, dissolutionSession)
 
         return this.redirect(REDIRECT_GATE_URI)
