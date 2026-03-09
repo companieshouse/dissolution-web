@@ -21,7 +21,7 @@
 
         <h2 class="govuk-heading-s">What to do next</h2>
 
-        <p class="govuk-body">Once the application has been submitted, you will be able to download a signed PDF copy by signing back in to the Apply to strike off and dissolve a company service.<a href="{{ Paths.SEARCH_COMPANY_URI }}">https://find-and-update.company-information.service.gov.uk/close-a-company/search-company</a></p>
+        <p class="govuk-body">Once the application has been submitted, you will be able to download a signed PDF copy by signing back in to the Apply to strike off and dissolve a company service.<a href="{{ Paths.SEARCH_COMPANY_URI }}" data-event-id="search-company-link">https://find-and-update.company-information.service.gov.uk/close-a-company/search-company</a></p>
         <p id="parties" class="govuk-body">The {{ officerType }}s must send this to all interested parties within 7 days of the application being submitted.</p>
 
         {{ govukWarningText({
@@ -29,7 +29,7 @@
           iconFallbackText: "Warning"
         }) }}
 
-        <p class="govuk-body">Read the <a class="govuk-link piwik-event" data-event-id="who-to-tell-read-guidance" target="_blank" href="{{ documentationUrl }}">full list of interested parties you must tell about the company closing (opens in a new tab)</a>.</p>
+        <p class="govuk-body">Read the <a class="govuk-link piwik-event" data-event-id="who-to-tell-guidance-link" target="_blank" href="{{ documentationUrl }}">full list of interested parties you must tell about the company closing (opens in a new tab)</a>.</p>
 
       </div>
   </div>

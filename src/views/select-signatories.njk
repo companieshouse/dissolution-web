@@ -59,7 +59,10 @@
         {{
           govukDetails({
             summaryHtml: '<div class="piwik-event">If a ' + officerType + ' cannot sign the application themselves</div>',
-            html: '<p>' + (officerType | capitalize) + 's who are people must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a ' + officerType + ' cannot sign. For example, because they no longer have mental capacity. If there are not enough ' + officerType + 's who are able to sign, you\'ll need to ' + infoLink + ' before continuing with this application.</p>'
+            html: '<p>' + (officerType | capitalize) + 's who are people must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a ' + officerType + ' cannot sign. For example, because they no longer have mental capacity. If there are not enough ' + officerType + 's who are able to sign, you\'ll need to ' + infoLink + ' before continuing with this application.</p>',
+            attributes: {
+                'data-event-id': 'director-cannot-sign-details-reveal'
+            }
           })
         }}
 

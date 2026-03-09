@@ -19,7 +19,6 @@ import {
 } from "app/paths"
 import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
-import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 import OfficerRole from "app/models/dto/officerRole.enum"
 import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
@@ -42,7 +41,6 @@ describe("DefineSignatoryInfoController", () => {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session))
             container.rebind(SignatoryService).toConstantValue(new SignatoryService())
-            container.rebind(FormValidator).toConstantValue(new FormValidator())
         })
     }
 
@@ -201,6 +199,8 @@ describe("DefineSignatoryInfoController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
             assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
+            const altErrorText = htmlAssertHelper.getAttributeValue(".govuk-error-summary__list li a", "data-alt-text")
+            assert.equal(altErrorText, "invalid-email")
         })
 
         describe("session", () => {

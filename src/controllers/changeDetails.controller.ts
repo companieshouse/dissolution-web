@@ -18,6 +18,7 @@ import DissolutionDirectorService from "app/services/dissolution/dissolutionDire
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
+import RichFormValidator from "app/utils/richFormValidator.util"
 
 interface ViewModel {
     officerType: OfficerType
@@ -39,7 +40,7 @@ export class ChangeDetailsController extends BaseController {
         @inject(SessionService) private readonly session: SessionService,
         @inject(DissolutionDirectorService) private readonly directorService: DissolutionDirectorService,
         @inject(DissolutionDirectorMapper) private readonly directorMapper: DissolutionDirectorMapper,
-        @inject(FormValidator) private readonly validator: FormValidator) {
+        @inject(RichFormValidator) private readonly validator: FormValidator) {
         super()
     }
 
