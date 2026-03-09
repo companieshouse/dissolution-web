@@ -43,16 +43,34 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
     @httpPost("")
     public async post (@requestBody() body: generateEndorseCertificateFormModel): Promise<string | RedirectResult> {
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
+        const approvalModel = await this.prepareApprovalModel()
+        const backUri = this.getBackUri(approvalModel.companyNumber)
+
+        const validationSchema = this.getValidationSchema(approvalModel)
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, validationSchema)
+        
         if (errors) {
-            const approvalModel = await this.prepareApprovalModel()
-            const backUri = this.getBackUri(approvalModel.companyNumber)
             return this.renderView(approvalModel, backUri, errors)
         }
 
         await this.approveDissolution()
 
         return this.redirect(REDIRECT_GATE_URI)
+    }
+
+    private getConfirmationErrorMessage(approvalModel: DissolutionApprovalModel): string {
+        return approvalModel.isCorporateOfficer
+            ? "Confirm that you are the named person and you are authorised to sign on the corporate director's behalf"
+            : "Confirm that you are the named director of this company"
+    }
+
+    private getValidationSchema(approvalModel: DissolutionApprovalModel) {
+        const confirmationErrorMsg = this.getConfirmationErrorMessage(approvalModel)
+        return formSchema.keys({
+            confirmation: formSchema.extract('confirmation').messages({
+                "any.required": confirmationErrorMsg
+            })
+        })
     }
 
     private async approveDissolution (): Promise<void> {

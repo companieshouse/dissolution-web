@@ -69,10 +69,18 @@
       </p>
 
       {% set confirmationLabel %}
-        {% if not approvalModel.onBehalfName %}
-          I confirm I have read and understood the statements - signed <strong><span id="applicantName">{{ approvalModel.applicant }}</span></strong> on <strong>{{ approvalModel.date }}</strong>
+        {% if approvalModel.isCorporateOfficer %}
+          I confirm that I am  <span id="applicantName">{{ approvalModel.onBehalfName }}</span> and that I am authorised by {{ approvalModel.companyName }} to sign this application on its behalf</strong>
         {% else %}
-          I confirm I have read and understood the statements - signed <strong><span id="applicantName">{{ approvalModel.onBehalfName }}</span></strong> on <strong>{{ approvalModel.date }}</strong> on behalf of <strong>{{ approvalModel.applicant }}</strong>
+          I confirm that I am <span id="applicantName">{{ approvalModel.applicant }}</span> and I am a {{ approvalModel.officerType }} of {{ approvalModel.companyName }}
+        {% endif %}
+      {% endset %}
+
+      {% set declarationLabel %}
+        {% if approvalModel.isCorporateOfficer %}
+          I am making the declaration given on this page on behalf of {{ approvalModel.companyName }}
+        {% else %}
+          I am making the declaration given on this page
         {% endif %}
       {% endset %}
 
@@ -89,10 +97,28 @@
             errorMessage: {
               text: errors.confirmation
             } if errors.confirmation,
+            hint: { 
+              text: "For directors that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application." 
+            } if approvalModel.isCorporateOfficer,
             items: [
               {
                 value: "understood",
                 html: "<span id=confirmationLabel>" + confirmationLabel + "</span>"
+              }
+            ]
+          })
+        }}
+        {{
+          govukCheckboxes({
+            idPrefix: "declaration",
+            name: "declaration",
+            errorMessage: {
+              text: errors.declaration
+            } if errors.declaration,
+            items: [
+              {
+                value: "declared",
+                html: "<span id=declarationLabel>" + declarationLabel + "</span>"
               }
             ]
           })

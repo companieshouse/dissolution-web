@@ -1,10 +1,13 @@
 import * as Joi from "@hapi/joi"
 
 const formSchema = Joi.object({
+    // Error message for confirmation is set dynamically in the controller
     confirmation: Joi.string()
+        .required(),
+    declaration: Joi.string()
         .required()
         .messages({
-            "any.required": "Select to confirm that you have read and understood the statements."
+            "any.required": "Confirm that you are making the declaration"
         }),
     _csrf: Joi.string()
         .optional()
