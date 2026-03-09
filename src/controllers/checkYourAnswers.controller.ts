@@ -19,9 +19,9 @@ interface ViewModel {
 export class CheckYourAnswersController extends BaseController {
 
     public constructor (
-    @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(SessionService) private session: SessionService,
-    @inject(CheckYourAnswersDirectorMapper) private mapper: CheckYourAnswersDirectorMapper) {
+    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+    @inject(SessionService) private readonly session: SessionService,
+    @inject(CheckYourAnswersDirectorMapper) private readonly mapper: CheckYourAnswersDirectorMapper) {
         super()
     }
 
@@ -44,7 +44,7 @@ export class CheckYourAnswersController extends BaseController {
     public async post (): Promise<RedirectResult> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-
+        delete dissolutionSession.isFromCheckAnswers
         await this.dissolutionService.createDissolution(token, dissolutionSession)
 
         return this.redirect(REDIRECT_GATE_URI)

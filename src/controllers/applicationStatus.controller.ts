@@ -1,5 +1,5 @@
 import { inject } from "inversify"
-import { controller, httpGet, requestParam } from "inversify-express-utils"
+import { controller, httpGet, requestParam, queryParam } from "inversify-express-utils"
 import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
@@ -15,18 +15,18 @@ import SessionService from "app/services/session/session.service"
 export class ApplicationStatusController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private session: SessionService,
-    @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private viewApplicationStatusMapper: ViewApplicationStatusMapper
+    @inject(SessionService) private readonly session: SessionService,
+    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper
     ) {
         super()
     }
 
     @httpGet("/:signatoryId/change")
-    public async change (@requestParam("signatoryId") signatoryId: string): Promise<RedirectResult> {
+    public async change (@requestParam("signatoryId") signatoryId: string, @queryParam("check_answers") isFromCheckAnswers: boolean): Promise<RedirectResult> {
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-
         dissolutionSession.signatoryIdToEdit = signatoryId
+        dissolutionSession.isFromCheckAnswers = Boolean(isFromCheckAnswers)
 
         this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
 

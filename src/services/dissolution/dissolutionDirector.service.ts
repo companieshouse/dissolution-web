@@ -17,9 +17,9 @@ import DissolutionSession from "app/models/session/dissolutionSession.model"
 export default class DissolutionDirectorService {
 
     public constructor (
-    @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(DissolutionDirectorMapper) private mapper: DissolutionDirectorMapper,
-    @inject(DissolutionApiClient) private client: DissolutionApiClient
+    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+    @inject(DissolutionDirectorMapper) private readonly mapper: DissolutionDirectorMapper,
+    @inject(DissolutionApiClient) private readonly client: DissolutionApiClient
     ) {}
 
     public async getSignatoryToEdit (token: string, session: DissolutionSession): Promise<DissolutionGetDirector> {
@@ -28,7 +28,7 @@ export default class DissolutionDirectorService {
         const signatoryToEdit: Optional<DissolutionGetDirector> = this.getSignatoryById(dissolution, session)
 
         if (!signatoryToEdit) {
-            return Promise.reject("Signatory in session not present on dissolution")
+            return Promise.reject(new Error("Signatory in session not present on dissolution"))
         }
 
         return signatoryToEdit
