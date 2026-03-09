@@ -52,21 +52,9 @@ export class ChangeDetailsController extends BaseController {
             return Promise.reject(new NotFoundError("Signatory not in session"))
         }
 
-        let signatory: DissolutionGetDirector
-        if (session.isFromCheckAnswers) {
-            if (!session.directorsToSign || session.directorsToSign.length === 0) {
-                return Promise.reject(new NotFoundError("Signatories not in session"))
-            }
-            const signatoryFromSession: Optional<DissolutionGetDirector> = this.getSignatoryFromSession(session)
-            if (!signatoryFromSession) {
-                return Promise.reject(new NotFoundError("Signatory not in session"))
-            }
-            signatory = signatoryFromSession
-        } else {
-            const token: string = this.session.getAccessToken(this.httpContext.request)
-            signatory = await this.directorService.getSignatoryToEdit(token, session)
-        }
-       
+        const signatory = session.isFromCheckAnswers ? this.getSignatoryFromSession(session) 
+            : await this.getSignatoryFromDissolution(session)
+
         this.updateSession(session, signatory)
 
         const form: ChangeDetailsFormModel = this.directorMapper.mapToChangeDetailsForm(signatory)
@@ -91,9 +79,7 @@ export class ChangeDetailsController extends BaseController {
         const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(signatory))
 
         if (errors) {
-            if (session.isFromCheckAnswers) {
-                signatory = this.getSignatoryFromSession(session)
-            } else{
+            if (!session.isFromCheckAnswers) {
                 signatory = await this.directorService.getSignatoryToEdit(token, session)
             }
             return this.renderView(session.officerType!, this.getBackLink(session), signatory, body, errors)
@@ -175,5 +161,14 @@ export class ChangeDetailsController extends BaseController {
             throw new NotFoundError("Signatory to edit not found in session")
         }
         return this.directorMapper.mapToDissolutionDirector(directorToEdit)
+    }
+
+    private async getSignatoryFromDissolution(session: DissolutionSession) {
+        const token: string = this.session.getAccessToken(this.httpContext.request)
+        const signatory = await this.directorService.getSignatoryToEdit(token, session)
+        if(!signatory) {
+            throw new NotFoundError("Signatory to edit not found in session")
+        }
+        return signatory
     }
 }

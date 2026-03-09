@@ -43,7 +43,6 @@ describe("ChangeDetailsController", () => {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session))
             container.rebind(DissolutionDirectorService).toConstantValue(instance(directorService))
-            container.rebind(DissolutionDirectorMapper).toConstantValue(new DissolutionDirectorMapper())
         })
     }
 
@@ -406,6 +405,91 @@ describe("ChangeDetailsController", () => {
             assert.equal(updatedDirectorsToSign[0].email, updatedEmail)
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, CHECK_YOUR_ANSWERS_URI)
+        })
+
+        it("should return a 404 if isFromCheckAnswers is true and no signatories in session", async () => {
+            const isFromCheckAnswers = true
+            const updatedEmail = "updated.accountant@mail.com"
+
+            const signatoryToEdit = aDissolutionGetDirector().withName("Mr Standard Director").withEmail("email@email.com").build()
+
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(signatoryToEdit)
+                .withIsFromCheckAnswers(isFromCheckAnswers)
+                .build()
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel()
+                .withDirectorEmail(updatedEmail)
+                .build()
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+            const res = await request(initApp())
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
+                .expect(StatusCodes.NOT_FOUND)
+
+            assert.equal(res.status, StatusCodes.NOT_FOUND)
+        })
+
+        it("should return a 404 if isFromCheckAnswers is true and signatory to edit not found in signatories array", async () => {
+            const isFromCheckAnswers = true
+            const updatedEmail = "updated.accountant@mail.com"
+
+            const signatoryToEdit = aDissolutionGetDirector().withName("Mr Standard Director").withEmail("email@email.com").build()
+
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(signatoryToEdit)
+                .withIsFromCheckAnswers(isFromCheckAnswers)
+                .build()
+
+            const directorToSign = aDirectorToSign().withId("def456").withEmail("director@mail.com").withName("Mr Accountant").build()
+            dissolutionSession.directorsToSign = [directorToSign]
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel()
+                .withDirectorEmail(updatedEmail)
+                .build()
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+            const res = await request(initApp())
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
+                .expect(StatusCodes.NOT_FOUND)
+
+            assert.equal(res.status, StatusCodes.NOT_FOUND)
+        })
+
+        it("should re-render the view with an error and the signatory in session if validation fails and isFromCheckAnswers is true", async () => {
+
+            const isFromCheckAnswers = true
+            const signatoryToEdit = aDissolutionGetDirector().withName("Mr Standard Director").withOnBehalfName(null).build()
+
+            const dissolutionSession = aDissolutionSession()
+                .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withSignatoryToEdit(signatoryToEdit)
+                .withIsFromCheckAnswers(isFromCheckAnswers)
+                .build()
+
+            const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("an invalid email").build()
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+            const app = initApp()
+
+            const res = await request(app)
+                .post(CHANGE_DETAILS_URI)
+                .send(updatedDetails)
+                .expect(StatusCodes.BAD_REQUEST)
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+            verify(directorService.getSignatoryToEdit(TOKEN, dissolutionSession)).never()
+            assert.isTrue(htmlAssertHelper.containsText(`.govuk-error-summary`, "Enter an email address in the correct format, like name@example.com"))
+            const altErrorText = htmlAssertHelper.getAttributeValue(".govuk-error-summary__list li a", "data-alt-text")
+            assert.equal(altErrorText, "invalid-email")
         })
     })
 })
