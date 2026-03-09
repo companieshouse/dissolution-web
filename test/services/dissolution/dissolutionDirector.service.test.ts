@@ -61,7 +61,7 @@ describe("DissolutionDirectorService", () => {
                 await service.getSignatoryToEdit(TOKEN, dissolutionSession)
                 assert.fail()
             } catch (err) {
-                assert.equal(err, "Signatory in session not present on dissolution")
+                assert.equal(err, "Error: Signatory in session not present on dissolution")
             }
         })
 

@@ -9,6 +9,7 @@ import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirect
 import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest"
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
+import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
 
 describe("DissolutionDirectorMapper", () => {
 
@@ -65,5 +66,21 @@ describe("DissolutionDirectorMapper", () => {
             assert.equal(result.email, "accountant@mail.com")
             assert.equal(result.on_behalf_name, "Mr Accountant")
         })
+    })
+
+    it("should map the on behalf name and email if signatory is signing on behalf of a director for director to sign object", () => {
+        const directorToSign = aDirectorToSign().withEmail("accountant@mail.com").withOnBehalfName("Mr Accountant").build()
+        const result: DissolutionGetDirector = mapper.mapToDissolutionDirector(directorToSign)
+
+        assert.equal(result.email, "accountant@mail.com")
+        assert.equal(result.on_behalf_name, "Mr Accountant")
+    })
+
+    it("should map the name and on email for director to sign object", () => {
+        const directorToSign = aDirectorToSign().withEmail("accountant@mail.com").withName("Mr Accountant").build()
+        const result: DissolutionGetDirector = mapper.mapToDissolutionDirector(directorToSign)
+
+        assert.equal(result.email, "accountant@mail.com")
+        assert.equal(result.name, "Mr Accountant")
     })
 })

@@ -32,6 +32,7 @@ describe("ApplicationStatusController", () => {
     let viewApplicationStatus: ViewApplicationStatus
     let dissolutionGetResponse: DissolutionGetResponse
     let viewApplicationStatusMapper: ViewApplicationStatusMapper
+    let app: Application
 
     beforeEach(() => {
         session = mock(SessionService)
@@ -39,19 +40,20 @@ describe("ApplicationStatusController", () => {
         viewApplicationStatusMapper = mock(ViewApplicationStatusMapper)
         dissolutionGetResponse = generateDissolutionGetResponse()
         dissolutionSession = generateDissolutionSession()
+        app = createApp(container => {
+            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
+            container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
+        })
     })
 
     describe("Change", () => {
-        it("should save the signatory ID in sesison and redirect to change details", async () => {
+        it("should save the signatory ID in session and redirect to change details", async () => {
             const signatoryId: string = "abc123"
 
             dissolutionSession.signatoryIdToEdit = undefined
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-
-            const app: Application = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-            })
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change`)
@@ -64,6 +66,29 @@ describe("ApplicationStatusController", () => {
             const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
             assert.equal(updatedSession.signatoryIdToEdit, signatoryId)
+            assert.isFalse(updatedSession.isFromCheckAnswers)
+        })
+
+        it("should save the signatory ID and checkAnswers in session and redirect to change details", async () => {
+            const signatoryId: string = "abc123"
+
+            dissolutionSession.signatoryIdToEdit = undefined
+            dissolutionSession.isFromCheckAnswers = undefined
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+            await request(app)
+                .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change?check_answers=true`)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", CHANGE_DETAILS_URI)
+
+            verify(session.setDissolutionSession(anything(), anything())).once()
+
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+            const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+            assert.equal(updatedSession.signatoryIdToEdit, signatoryId)
+            assert.isTrue(updatedSession.isFromCheckAnswers)
         })
     })
 
@@ -76,12 +101,6 @@ describe("ApplicationStatusController", () => {
                 { ...generateViewApplicationStatusSignatory(), name: "Jane Smith", email: "jane@mail.com" },
                 { ...generateViewApplicationStatusSignatory(), name: "Test One", email: "test@mail.com" }
             ]
-
-            const app: Application = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
-                container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
-            })
 
             when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, EMAIL)).thenResolve(true)
             when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionGetResponse)

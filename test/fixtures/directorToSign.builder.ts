@@ -9,32 +9,32 @@ export class DirectorToSignBuilder {
     private email?: string
     private onBehalfName?: string
 
-    withId (id: string): DirectorToSignBuilder {
+    withId (id: string): this {
         this.id = id
         return this
     }
 
-    withName (name: string): DirectorToSignBuilder {
+    withName (name: string): this {
         this.name = name
         return this
     }
 
-    asApplicant (): DirectorToSignBuilder {
+    asApplicant (): this {
         this.isApplicant = true
         return this
     }
 
-    withOfficerRole (role: OfficerRole): DirectorToSignBuilder {
+    withOfficerRole (role: OfficerRole): this {
         this.officerRole = role
         return this
     }
 
-    withEmail (email: string): DirectorToSignBuilder {
+    withEmail (email: string): this {
         this.email = email
         return this
     }
 
-    withOnBehalfName (name: string): DirectorToSignBuilder {
+    withOnBehalfName (name: string): this {
         this.onBehalfName = name
         return this
     }
