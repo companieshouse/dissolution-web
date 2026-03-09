@@ -7,7 +7,7 @@ import { provide } from "inversify-binding-decorators"
 import CompanyOfficersClient from "../clients/companyOfficers.client"
 
 import DirectorDetailsMapper from "app/mappers/company-officers/directorDetails.mapper"
-import OfficerRole from "app/models/dto/officerRole.enum"
+import OfficerRole, { isCorporateOfficer } from "app/models/dto/officerRole.enum"
 import DirectorDetails from "app/models/view/directorDetails.model"
 
 @provide(CompanyOfficersService)
@@ -44,5 +44,63 @@ export default class CompanyOfficersService {
 
     private excludeDirector (activeDirectors: DirectorDetails[], directorToExclude: string): DirectorDetails[] {
         return activeDirectors.filter(activeDirector => activeDirector.id !== directorToExclude)
+    }
+
+    /**
+     * Get the officer role for a specific officer ID by fetching all officers and matching the ID.
+     * Optionally accepts a pre-fetched officers list to avoid redundant API calls.
+     * @param token the auth token
+     * @param companyNumber the company number
+     * @param officerId the officer ID
+     * @param officersList optional pre-fetched officers list
+     * @returns the officer role or undefined
+     */
+    public async getOfficerRoleById(token: string, companyNumber: string, officerId: string, officersList?: CompanyOfficer[]): Promise<OfficerRole | undefined> {
+        console.log("[DEBUG] Fetching officer role for:", { companyNumber, officerId });
+        let officers: CompanyOfficer[];
+        if (officersList) {
+            officers = officersList;
+            console.log("[DEBUG] Using pre-fetched officers list:", officers);
+        } else {
+            const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber);
+            console.log("[DEBUG] API response for getCompanyOfficers:", response);
+            if (!response.resource) {
+                return undefined;
+            }
+            officers = response.resource.items;
+        }
+        const officer = officers.find((item: CompanyOfficer) => this.extractOfficerId(item) === officerId);
+        console.log("[DEBUG] Officer found:", officer);
+        const officerRole = officer ? (officer.officerRole as OfficerRole) : undefined;
+        console.log("[DEBUG] Determined officerRole:", officerRole);
+        if (officerRole === undefined) {
+            console.warn(`[WARN] Officer role is undefined for officerId: ${officerId} in company: ${companyNumber}`);
+        }
+        return officerRole;
+    }
+
+    /**
+     * Determine if the officer is a corporate officer by their ID.
+     * Optionally accepts a pre-fetched officers list to avoid redundant API calls.
+     * @param token the auth token
+     * @param companyNumber the company number
+     * @param officerId the officer ID
+     * @param officersList optional pre-fetched officers list
+     * @returns true if the officer is a corporate officer, false otherwise
+     */
+    public async isCorporateOfficer(token: string, companyNumber: string, officerId: string, officersList?: CompanyOfficer[]): Promise<boolean> {
+        const officerRole = await this.getOfficerRoleById(token, companyNumber, officerId, officersList);
+        return officerRole ? isCorporateOfficer(officerRole) : false;
+    }
+    
+    /**
+     * Extract the officer ID from a CompanyOfficer object.
+     * @param officer the CompanyOfficer object
+     * @returns the officer ID string or undefined
+     */
+    private extractOfficerId(officer: CompanyOfficer): string | undefined {
+        return officer.links && officer.links.officer && officer.links.officer.appointments
+            ? officer.links.officer.appointments.split("/")[2]
+            : undefined;
     }
 }
