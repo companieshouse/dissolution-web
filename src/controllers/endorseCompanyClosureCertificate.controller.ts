@@ -15,6 +15,7 @@ import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
+import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
 
 interface ViewModel {
   approvalModel: DissolutionApprovalModel
@@ -28,20 +29,25 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
     public constructor (@inject(SessionService) private session: SessionService,
                     @inject(FormValidator) private validator: FormValidator,
                     @inject(DissolutionService) private dissolutionService: DissolutionService,
-                    @inject(IpAddressService) private ipAddressService: IpAddressService) {
+                    @inject(IpAddressService) private ipAddressService: IpAddressService,
+                    @inject(CompanyOfficersService) private companyOfficersService: CompanyOfficersService) {
         super()
     }
 
     @httpGet("")
     public async get (): Promise<string> {
-        return this.renderView()
+        const approvalModel = await this.prepareApprovalModel()
+        const backUri = this.getBackUri(approvalModel.companyNumber)
+        return this.renderView(approvalModel, backUri)
     }
 
     @httpPost("")
     public async post (@requestBody() body: generateEndorseCertificateFormModel): Promise<string | RedirectResult> {
         const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
         if (errors) {
-            return this.renderView(errors)
+            const approvalModel = await this.prepareApprovalModel()
+            const backUri = this.getBackUri(approvalModel.companyNumber)
+            return this.renderView(approvalModel, backUri, errors)
         }
 
         await this.approveDissolution()
@@ -57,10 +63,26 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
         await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress)
     }
 
-    private async renderView (errors?: ValidationErrors): Promise<string> {
-        const approvalModel: DissolutionApprovalModel = this.session.getDissolutionSession(this.httpContext.request)!.approval!
-        const backUri: string = VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + approvalModel.companyNumber
+    private async prepareApprovalModel (): Promise<DissolutionApprovalModel> {
+        const token: string = this.session.getAccessToken(this.httpContext.request)
+        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const approvalModel = dissolutionSession.approval!
 
+        // Determine if officer is a corporate officer
+        approvalModel.isCorporateOfficer = await this.companyOfficersService.isCorporateOfficer(token, approvalModel.companyNumber, approvalModel.officerId)
+
+        // Debug log for the approvalModel
+        console.log("[DEBUG] ApprovalModel:", approvalModel)
+
+        return approvalModel
+    }
+
+    private getBackUri (companyNumber: string): string {
+        return VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + companyNumber
+    }
+
+    private async renderView (approvalModel: DissolutionApprovalModel, backUri: string, errors?: ValidationErrors): Promise<string> {
+        
         const viewModel: ViewModel = {
             approvalModel,
             errors,
