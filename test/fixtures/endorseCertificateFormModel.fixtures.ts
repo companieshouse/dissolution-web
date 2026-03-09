@@ -2,6 +2,7 @@ import EndorseCertificateFormModel from "app/models/form/endorseCertificateFormM
 
 export function generateEndorseCertificateFormModel (): EndorseCertificateFormModel {
     return {
-        confirmation: "understood"
+        confirmation: "understood",
+        declaration: "declared"
     }
 }
