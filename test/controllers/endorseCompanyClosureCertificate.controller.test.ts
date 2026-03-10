@@ -147,94 +147,94 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const app = createApp(async container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            const res = await request(app)
-                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-                .expect(StatusCodes.OK)
+                const res = await request(app)
+                    .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                    .expect(StatusCodes.OK)
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-            // Confirmation label for corporate officer
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_CORPORATE))
-        })
-
-        // Removed test: a director can never have a signatory
-
-        it("should render endorse certificate page with directors for DS01", async () => {
-            dissolutionSession.approval!.officerType = OfficerType.DIRECTOR
-
-      const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-      })
-
-      const res = await request(app)
-          .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-          .expect(StatusCodes.OK)
-
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-    // The template uses 'company' (lowercase) and 'directors' for DS01
-    assert.isTrue(htmlAssertHelper.containsText("#paragraph-statement", "company"))
-    assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
-    assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "director"))
-    assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "company"))
-    assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "LLP"))
-    assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "member"))
-        })
-
-        it("should render endorse certificate page with members for LLDS01", async () => {
-            dissolutionSession.approval!.officerType = OfficerType.MEMBER
-
-      const app = createApp(container => {
-          container.rebind(SessionService).toConstantValue(instance(session))
-          container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-      })
-
-      const res = await request(app)
-          .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-          .expect(StatusCodes.OK)
-
-      const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-    assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_LLP_MEMBER), "Expected confirmation label for LLP member")
-    assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
-    assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "member"))
-    assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "LLP"))
-    assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "company"))
-    assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "director"))
-    // Confirmation label for LLP member
-    assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_LLP_MEMBER), "Expected confirmation label for LLP member")
-    })
-    })
-
-    describe("POST - ensure form submission is handled correctly", () => {
-        it("should redirect successfully if validator returns no errors (non-corporate officer)", async () => {
-            const testObject = generateEndorseCertificateFormModel()
-            mockedCompanyOfficersService.isCorporateOfficer = async () => false
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel()
-            }
-            dissolutionSession.approval.isCorporateOfficer = false
-
-            when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
-            when(mockedDissolutionService.approveDissolution(anything(), anything(), IP_ADDRESS)).thenResolve()
-            // Dynamic validation schema
-            when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(null)
-            when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
-
-            const app = createApp(container => {
-                container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(DissolutionService).toConstantValue(instance(mockedDissolutionService))
-                container.rebind(IpAddressService).toConstantValue(instance(mockedIpAddressService))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                // Confirmation label for corporate officer
+                assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_CORPORATE))
             })
 
-            await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-                .send(testObject)
-                .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", REDIRECT_GATE_URI)
+            // Removed test: a director can never have a signatory
+
+            it("should render endorse certificate page with directors for DS01", async () => {
+                dissolutionSession.approval!.officerType = OfficerType.DIRECTOR
+
+                const app = createApp(container => {
+                    container.rebind(SessionService).toConstantValue(instance(session))
+                    container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+                })
+
+                const res = await request(app)
+                    .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                    .expect(StatusCodes.OK)
+
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+                // The template uses 'company' (lowercase) and 'directors' for DS01
+                assert.isTrue(htmlAssertHelper.containsText("#paragraph-statement", "company"))
+                assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
+                assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "director"))
+                assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "company"))
+                assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "LLP"))
+                assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "member"))
+            })
+
+            it("should render endorse certificate page with members for LLDS01", async () => {
+                dissolutionSession.approval!.officerType = OfficerType.MEMBER
+
+                const app = createApp(container => {
+                    container.rebind(SessionService).toConstantValue(instance(session))
+                    container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+                })
+
+                const res = await request(app)
+                    .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                    .expect(StatusCodes.OK)
+
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+                assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_LLP_MEMBER), "Expected confirmation label for LLP member")
+                assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
+                assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "member"))
+                assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "LLP"))
+                assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "company"))
+                assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "director"))
+                // Confirmation label for LLP member
+                assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_LLP_MEMBER), "Expected confirmation label for LLP member")
+            })
         })
-    })
+
+        describe("POST - ensure form submission is handled correctly", () => {
+            it("should redirect successfully if validator returns no errors (non-corporate officer)", async () => {
+                const testObject = generateEndorseCertificateFormModel()
+                mockedCompanyOfficersService.isCorporateOfficer = async () => false
+                if (!dissolutionSession.approval) {
+                    dissolutionSession.approval = generateApprovalModel()
+                }
+                dissolutionSession.approval.isCorporateOfficer = false
+
+                when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
+                when(mockedDissolutionService.approveDissolution(anything(), anything(), IP_ADDRESS)).thenResolve()
+                // Dynamic validation schema
+                when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(null)
+                when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
+
+                const app = createApp(container => {
+                    container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
+                    container.rebind(SessionService).toConstantValue(instance(session))
+                    container.rebind(DissolutionService).toConstantValue(instance(mockedDissolutionService))
+                    container.rebind(IpAddressService).toConstantValue(instance(mockedIpAddressService))
+                    container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+                })
+
+                await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                    .send(testObject)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", REDIRECT_GATE_URI)
+            })
+        })
 
         it("should redirect successfully if validator returns no errors (corporate officer)", async () => {
             const testObject = generateEndorseCertificateFormModel()
@@ -316,7 +316,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
         })
 
         it("should render view with errors displayed if both confirmation and declaration are missing", async () => {
-            const testObject: EndorseCertificateFormModel = { }
+            const testObject: EndorseCertificateFormModel = {}
             const mockError = {
                 confirmation: CONFIRMATION_ERROR_NON_CORPORATE,
                 declaration: DECLARATION_ERROR
