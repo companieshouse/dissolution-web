@@ -43,7 +43,10 @@
                   items: [{
                     href:  Paths.APPLICATION_STATUS_URI + '/' + director.id + '/change?check_answers=true',
                     text: "Change",
-                    visuallyHiddenText: "email address for " + (director.onBehalfName or director.name)
+                    visuallyHiddenText: "email address for " + (director.onBehalfName or director.name),
+                    attributes: {
+                      'data-event-id': 'change-email-link'
+                    }
                   }]
                 },
                 classes: "director-email"
@@ -55,7 +58,7 @@
 
       {% if isMultiDirector %}
         <p class="govuk-body govuk-!-margin-top-4">
-          <a id="change-signatories" class="govuk-link" href="{{ Paths.SELECT_SIGNATORIES_URI }}">Change which director will sign</a>
+          <a id="change-signatories" class="govuk-link" data-event-id="change-which-director-will-sign-link" href="{{ Paths.SELECT_SIGNATORIES_URI }}">Change which director will sign</a>
         </p>
       {% endif %}
 
