@@ -48,6 +48,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
     const CONFIRMATION_LABEL_DIRECTOR = `I confirm that I am ${APPLICANT_NAME} and I am a director of ${COMPANY_NAME_VALUE}`
     const CONFIRMATION_LABEL_CORPORATE = `I confirm that I am  ${ON_BEHALF_NAME} and that I am authorised by ${COMPANY_NAME_VALUE} to sign this application on its behalf`
     const CONFIRMATION_LABEL_LLP_MEMBER = `I confirm that I am ${APPLICANT_NAME} and I am a member of ${COMPANY_NAME_VALUE}`
+    // Hint text for corporate officer confirmation checkbox
+    const HINT_TEXT = "For directors that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
     // Error message constants for validation
     const CONFIRMATION_ERROR_NON_CORPORATE = "Confirm that you are the named director of this company"
     const CONFIRMATION_ERROR_CORPORATE = "Confirm that you are the named person and you are authorised to sign on the corporate director's behalf"
@@ -143,7 +145,6 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
             // The hint text should not appear
-            const HINT_TEXT = "For directors that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
             assert.isFalse(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be absent for non-corporate officer")
         })
 
@@ -158,7 +159,6 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
             // The hint text should appear
-            const HINT_TEXT = "For directors that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
             assert.isTrue(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be present for corporate officer")
         })
 
