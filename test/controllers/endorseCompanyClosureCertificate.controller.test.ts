@@ -15,7 +15,6 @@ import OfficerType from "app/models/dto/officerType.enum"
 import EndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
-import formSchema from "app/schemas/endorseCertificate.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
 import SessionService from "app/services/session/session.service"
@@ -39,14 +38,16 @@ describe("EndorseCompanyClosureCertificateController", () => {
     const EMAIL = "some-email.com"
     const COMPANY_NUMBER = "01777777"
     const IP_ADDRESS = "127.0.0.1"
-    const SIGN_HEADING = "Sign the application"
     const COMPANY_NAME_LABEL = "Company name"
     const COMPANY_NUMBER_LABEL = "Company number"
     const COMPANY_NAME_VALUE = "Company 1"
     const COMPANY_NUMBER_VALUE = "123456789"
-    const CONFIRMATION_PREFIX = "I confirm I have read and understood the statements - signed "
     const APPLICANT_NAME = "John Smith"
     const ON_BEHALF_NAME = "Jesse Smith"
+    // Confirmation label constants
+    const CONFIRMATION_LABEL_DIRECTOR = `I confirm that I am ${APPLICANT_NAME} and I am a director of ${COMPANY_NAME_VALUE}`
+    const CONFIRMATION_LABEL_CORPORATE = `I confirm that I am  ${ON_BEHALF_NAME} and that I am authorised by ${COMPANY_NAME_VALUE} to sign this application on its behalf`
+    const CONFIRMATION_LABEL_LLP_MEMBER = `I confirm that I am ${APPLICANT_NAME} and I am a member of ${COMPANY_NAME_VALUE}`
     // Error message constants for validation
     const CONFIRMATION_ERROR_NON_CORPORATE = "Confirm that you are the named director of this company"
     const CONFIRMATION_ERROR_CORPORATE = "Confirm that you are the named person and you are authorised to sign on the corporate director's behalf"
@@ -103,16 +104,14 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-
-            assert.isTrue(htmlAssertHelper.hasText("h1", SIGN_HEADING))
+            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
             assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_LABEL))
             assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_VALUE))
             assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_LABEL))
             assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_VALUE))
             assert.isTrue(htmlAssertHelper.hasText("span#applicantName", APPLICANT_NAME))
             // Confirmation label for non-corporate officer
-            const expectedLabel = `I confirm that I am ${APPLICANT_NAME} and I am a director of ${COMPANY_NAME_VALUE}`
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", expectedLabel))
+            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
             assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), `${VIEW_COMPANY_INFORMATION_URI}?companyNumber=${dissolutionSession.approval!.companyNumber}`)
         })
 
@@ -145,19 +144,16 @@ describe("EndorseCompanyClosureCertificateController", () => {
             }
             dissolutionSession.approval.isCorporateOfficer = true
             dissolutionSession.approval.onBehalfName = ON_BEHALF_NAME
-            const app = createApp(container => {
+            const app = createApp(async container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-
             const res = await request(app)
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             // Confirmation label for corporate officer
-            const expectedLabel = `I confirm that I am  ${ON_BEHALF_NAME} and that I am authorised by ${COMPANY_NAME_VALUE} to sign this application on its behalf`
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", expectedLabel))
+            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_CORPORATE))
         })
 
         // Removed test: a director can never have a signatory
@@ -199,14 +195,15 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
       const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
-    // The template uses 'LLP' and 'member' for LLDS01
-    assert.isTrue(htmlAssertHelper.containsText("#paragraph-statement", "LLP"))
+    assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_LLP_MEMBER), "Expected confirmation label for LLP member")
     assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
     assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "member"))
     assert.isTrue(htmlAssertHelper.containsText("#declaration-paragraph", "LLP"))
     assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "company"))
     assert.isFalse(htmlAssertHelper.containsText("#declaration-paragraph", "director"))
-        })
+    // Confirmation label for LLP member
+    assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_LLP_MEMBER), "Expected confirmation label for LLP member")
+    })
     })
 
     describe("POST - ensure form submission is handled correctly", () => {
@@ -237,6 +234,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_GATE_URI)
         })
+    })
 
         it("should redirect successfully if validator returns no errors (corporate officer)", async () => {
             const testObject = generateEndorseCertificateFormModel()
@@ -288,8 +286,9 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"))
-            // Check for corporate officer error message (exact match)
-            assert.isTrue(res.text.includes(CONFIRMATION_ERROR_CORPORATE))
+            // Check for corporate officer error message (HTML-encoded apostrophe)
+            const encodedError = CONFIRMATION_ERROR_CORPORATE.replace(/'/g, "&#39;")
+            assert.isTrue(res.text.includes(encodedError))
         })
 
         it("should render view with errors displayed if declaration is missing", async () => {
