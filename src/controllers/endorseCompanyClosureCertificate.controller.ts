@@ -88,10 +88,6 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
         // Determine if officer is a corporate officer
         approvalModel.isCorporateOfficer = await this.companyOfficersService.isCorporateOfficer(token, approvalModel.companyNumber, approvalModel.officerId)
-
-        // Debug log for the approvalModel
-        console.log("[DEBUG] ApprovalModel:", approvalModel)
-
         return approvalModel
     }
 

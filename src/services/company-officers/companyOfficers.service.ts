@@ -56,23 +56,18 @@ export default class CompanyOfficersService {
      * @returns the officer role or undefined
      */
     public async getOfficerRoleById(token: string, companyNumber: string, officerId: string, officersList?: CompanyOfficer[]): Promise<OfficerRole | undefined> {
-        console.log("[DEBUG] Fetching officer role for:", { companyNumber, officerId });
         let officers: CompanyOfficer[];
         if (officersList) {
             officers = officersList;
-            console.log("[DEBUG] Using pre-fetched officers list:", officers);
         } else {
             const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber);
-            console.log("[DEBUG] API response for getCompanyOfficers:", response);
             if (!response.resource) {
                 return undefined;
             }
             officers = response.resource.items;
         }
         const officer = officers.find((item: CompanyOfficer) => this.extractOfficerId(item) === officerId);
-        console.log("[DEBUG] Officer found:", officer);
         const officerRole = officer ? (officer.officerRole as OfficerRole) : undefined;
-        console.log("[DEBUG] Determined officerRole:", officerRole);
         if (officerRole === undefined) {
             console.warn(`[WARN] Officer role is undefined for officerId: ${officerId} in company: ${companyNumber}`);
         }
