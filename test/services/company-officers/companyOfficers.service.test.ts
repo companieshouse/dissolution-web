@@ -230,4 +230,76 @@ describe("CompanyOfficersService", () => {
             assert.equal(result[0], director2Details)
         })
     })
+
+    describe("getOfficerRoleById", () => {
+        it("should return the officer role for a given officer ID (API fetch)", async () => {
+            const officer: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.CORPORATE_DIRECTOR }
+            const officers: CompanyOfficer[] = [officer]
+            const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+            response.resource = { ...generateCompanyOfficers(), items: officers }
+            when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+            // Officer ID extraction logic
+            const officerId = officer.links && officer.links.officer && officer.links.officer.appointments.split("/")[2]
+            const result = await service.getOfficerRoleById(TOKEN, COMPANY_NUMBER, officerId!)
+            assert.equal(result, OfficerRole.CORPORATE_DIRECTOR)
+        })
+
+        it("should return the officer role for a given officer ID (pre-fetched list)", async () => {
+            const officer: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.LLP_MEMBER }
+            const officers: CompanyOfficer[] = [officer]
+            // Officer ID extraction logic
+            const officerId = officer.links && officer.links.officer && officer.links.officer.appointments.split("/")[2]
+            const result = await service.getOfficerRoleById(TOKEN, COMPANY_NUMBER, officerId!, officers)
+            assert.equal(result, OfficerRole.LLP_MEMBER)
+        })
+
+        it("should return undefined if officer not found", async () => {
+            const officers: CompanyOfficer[] = []
+            const result = await service.getOfficerRoleById(TOKEN, COMPANY_NUMBER, "nonexistent", officers)
+            assert.isUndefined(result)
+        })
+
+        it("should return undefined if API returns no resource", async () => {
+            const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+            response.resource = undefined
+            when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+            const result = await service.getOfficerRoleById(TOKEN, COMPANY_NUMBER, "any")
+            assert.isUndefined(result)
+        })
+    })
+
+    describe("isCorporateOfficer", () => {
+        it("should return true if officer is corporate (API fetch)", async () => {
+            const officer: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.CORPORATE_LLP_MEMBER }
+            const officers: CompanyOfficer[] = [officer]
+            const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+            response.resource = { ...generateCompanyOfficers(), items: officers }
+            when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+            const officerId = officer.links && officer.links.officer && officer.links.officer.appointments.split("/")[2]
+            const result = await service.isCorporateOfficer(TOKEN, COMPANY_NUMBER, officerId!)
+            assert.isTrue(result)
+        })
+
+        it("should return false if officer is not corporate (pre-fetched list)", async () => {
+            const officer: CompanyOfficer = { ...generateCompanyOfficer(), officerRole: OfficerRole.DIRECTOR }
+            const officers: CompanyOfficer[] = [officer]
+            const officerId = officer.links && officer.links.officer && officer.links.officer.appointments.split("/")[2]
+            const result = await service.isCorporateOfficer(TOKEN, COMPANY_NUMBER, officerId!, officers)
+            assert.isFalse(result)
+        })
+
+        it("should return false if officer not found", async () => {
+            const officers: CompanyOfficer[] = []
+            const result = await service.isCorporateOfficer(TOKEN, COMPANY_NUMBER, "nonexistent", officers)
+            assert.isFalse(result)
+        })
+
+        it("should return false if API returns no resource", async () => {
+            const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
+            response.resource = undefined
+            when(client.getCompanyOfficers(TOKEN, COMPANY_NUMBER)).thenResolve(response)
+            const result = await service.isCorporateOfficer(TOKEN, COMPANY_NUMBER, "any")
+            assert.isFalse(result)
+        })
+    })
 })
