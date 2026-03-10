@@ -67,7 +67,7 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
     private getValidationSchema(approvalModel: DissolutionApprovalModel) {
         const confirmationErrorMsg = this.getConfirmationErrorMessage(approvalModel)
         return formSchema.keys({
-            confirmation: formSchema.extract('confirmation').messages({
+            confirmation: formSchema.extract("confirmation").messages({
                 "any.required": confirmationErrorMsg
             })
         })

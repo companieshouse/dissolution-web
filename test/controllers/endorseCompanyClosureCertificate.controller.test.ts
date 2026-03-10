@@ -175,11 +175,11 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             // Check for confirmation checkbox
-            assert.isTrue(htmlAssertHelper.selectorExists('input[name="confirmation"]'))
+            assert.isTrue(htmlAssertHelper.selectorExists("input[name='confirmation']"))
             // Check for declaration checkbox
-            assert.isTrue(htmlAssertHelper.selectorExists('input[name="declaration"]'))
+            assert.isTrue(htmlAssertHelper.selectorExists("input[name='declaration']"))
             // Check for tickboxes heading (exact match, any <h2> tag)
-            assert.isTrue(htmlAssertHelper.anyTagHasText("h2", "By ticking both of the boxes below you are signing the application."), "Expected to find the correct tickboxes heading in an <h2> tag");
+            assert.isTrue(htmlAssertHelper.anyTagHasText("h2", "By ticking both of the boxes below you are signing the application."), "Expected to find the correct tickboxes heading in an <h2> tag")
             // Check for declaration heading
             assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
         })

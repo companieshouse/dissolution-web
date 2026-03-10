@@ -54,7 +54,7 @@ export default class HtmlAssertHelper {
     }
 
     public anyTagHasText(tag: string, expectedValue: string): boolean {
-        const elements = this.dom.window.document.querySelectorAll(tag);
-        return Array.from(elements).some(el => el.textContent?.trim() === expectedValue);
+        const elements = this.dom.window.document.querySelectorAll(tag)
+        return Array.from(elements).some(el => el.textContent?.trim() === expectedValue)
     }
 }

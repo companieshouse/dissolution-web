@@ -56,22 +56,22 @@ export default class CompanyOfficersService {
      * @returns the officer role or undefined
      */
     public async getOfficerRoleById(token: string, companyNumber: string, officerId: string, officersList?: CompanyOfficer[]): Promise<OfficerRole | undefined> {
-        let officers: CompanyOfficer[];
+        let officers: CompanyOfficer[]
         if (officersList) {
-            officers = officersList;
+            officers = officersList
         } else {
-            const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber);
+            const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber)
             if (!response.resource) {
-                return undefined;
+                return undefined
             }
-            officers = response.resource.items;
+            officers = response.resource.items
         }
-        const officer = officers.find((item: CompanyOfficer) => this.extractOfficerId(item) === officerId);
-        const officerRole = officer ? (officer.officerRole as OfficerRole) : undefined;
+        const officer = officers.find((item: CompanyOfficer) => this.extractOfficerId(item) === officerId)
+        const officerRole = officer ? (officer.officerRole as OfficerRole) : undefined
         if (officerRole === undefined) {
-            console.warn(`[WARN] Officer role is undefined for officerId: ${officerId} in company: ${companyNumber}`);
+            console.warn(`[WARN] Officer role is undefined for officerId: ${officerId} in company: ${companyNumber}`)
         }
-        return officerRole;
+        return officerRole
     }
 
     /**
@@ -84,8 +84,8 @@ export default class CompanyOfficersService {
      * @returns true if the officer is a corporate officer, false otherwise
      */
     public async isCorporateOfficer(token: string, companyNumber: string, officerId: string, officersList?: CompanyOfficer[]): Promise<boolean> {
-        const officerRole = await this.getOfficerRoleById(token, companyNumber, officerId, officersList);
-        return officerRole ? isCorporateOfficer(officerRole) : false;
+        const officerRole = await this.getOfficerRoleById(token, companyNumber, officerId, officersList)
+        return officerRole ? isCorporateOfficer(officerRole) : false
     }
     
     /**
@@ -96,6 +96,6 @@ export default class CompanyOfficersService {
     private extractOfficerId(officer: CompanyOfficer): string | undefined {
         return officer.links && officer.links.officer && officer.links.officer.appointments
             ? officer.links.officer.appointments.split("/")[2]
-            : undefined;
+            : undefined
     }
 }
