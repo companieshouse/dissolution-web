@@ -94,7 +94,7 @@ export default class CompanyOfficersService {
      * @returns the officer ID string or undefined
      */
     private extractOfficerId(officer: CompanyOfficer): string | undefined {
-        return officer.links && officer.links.officer && officer.links.officer.appointments
+        return officer.links?.officer?.appointments
             ? officer.links.officer.appointments.split("/")[2]
             : undefined
     }

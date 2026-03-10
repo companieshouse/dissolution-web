@@ -26,11 +26,11 @@ interface ViewModel {
 @controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 export class EndorseCompanyClosureCertificateController extends BaseController {
 
-    public constructor (@inject(SessionService) private session: SessionService,
-                    @inject(FormValidator) private validator: FormValidator,
-                    @inject(DissolutionService) private dissolutionService: DissolutionService,
-                    @inject(IpAddressService) private ipAddressService: IpAddressService,
-                    @inject(CompanyOfficersService) private companyOfficersService: CompanyOfficersService) {
+    public constructor (@inject(SessionService) private readonly session: SessionService,
+                    @inject(FormValidator) private readonly validator: FormValidator,
+                    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+                    @inject(IpAddressService) private readonly ipAddressService: IpAddressService,
+                    @inject(CompanyOfficersService) private readonly companyOfficersService: CompanyOfficersService) {
         super()
     }
 

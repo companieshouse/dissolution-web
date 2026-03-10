@@ -273,6 +273,9 @@ describe("EndorseCompanyClosureCertificateController", () => {
                     .send(testObject)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", REDIRECT_GATE_URI)
+                    .then(response => {
+                        assert.equal(response.text, "Found", "Response body should be 'Found' on redirect")
+                    })
             })
         })
 
@@ -299,6 +302,9 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 .send(testObject)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_GATE_URI)
+                .then(response => {
+                    assert.equal(response.text, "Found", "Response body should be 'Found' on redirect")
+                })
         })
 
         it("should render view with errors displayed if validator returns errors (corporate officer)", async () => {
