@@ -91,7 +91,16 @@ export function generateApprovalModel (
         date = new Date().toDateString(),
         officerType = OfficerType.DIRECTOR,
         isCorporateOfficer = false,
-        onBehalfName = undefined
+        onBehalfName
+    }: {
+        officerId?: string,
+        companyName?: string,
+        companyNumber?: string,
+        applicant?: string,
+        date?: string,
+        officerType?: OfficerType,
+        isCorporateOfficer?: boolean,
+        onBehalfName?: string
     } = {}
 ): DissolutionApprovalModel {
     return {

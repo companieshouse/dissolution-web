@@ -55,6 +55,34 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
     let dissolutionSession: DissolutionSession
 
+    /**
+     * Ensures dissolutionSession.approval is set with the provided options.
+     * If already set, only updates the specified properties.
+     */
+    function configureApprovalModel(options: Partial<ReturnType<typeof generateApprovalModel>> = {}) {
+        const base = {
+            companyName: COMPANY_NAME_VALUE,
+            companyNumber: COMPANY_NUMBER_VALUE,
+            applicant: APPLICANT_NAME,
+            officerId: "abc123",
+            officerType: OfficerType.DIRECTOR,
+            isCorporateOfficer: false
+        }
+        const { onBehalfName, ...remainingOptions } = options
+        if (!dissolutionSession.approval) {
+            dissolutionSession.approval = generateApprovalModel({
+                ...base,
+                ...remainingOptions,
+                ...(onBehalfName !== undefined ? { onBehalfName } : {})
+            })
+        } else {
+            Object.assign(dissolutionSession.approval, remainingOptions)
+            if (onBehalfName !== undefined) {
+                dissolutionSession.approval.onBehalfName = onBehalfName
+            }
+        }
+    }
+
     beforeEach(() => {
         session = mock(SessionService)
         mockedDissolutionService = mock(DissolutionService)
@@ -82,18 +110,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
     describe("GET request", () => {
         it("should render endorse certificate page without an on behalf statement if director is signing and not a corporate officer", async () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel({
-                    companyName: COMPANY_NAME_VALUE,
-                    companyNumber: COMPANY_NUMBER_VALUE,
-                    applicant: APPLICANT_NAME,
-                    officerId: "abc123",
-                    officerType: OfficerType.DIRECTOR,
-                    isCorporateOfficer: false
-                })
-            } else {
-                dissolutionSession.approval.isCorporateOfficer = false
-            }
+            configureApprovalModel({ isCorporateOfficer: false })
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
@@ -113,6 +130,36 @@ describe("EndorseCompanyClosureCertificateController", () => {
             // Confirmation label for non-corporate officer
             assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
             assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), `${VIEW_COMPANY_INFORMATION_URI}?companyNumber=${dissolutionSession.approval!.companyNumber}`)
+        })
+
+        it("should not render confirmation checkbox hint for non-corporate officer", async () => {
+            mockedCompanyOfficersService.isCorporateOfficer = async () => false
+            configureApprovalModel({ isCorporateOfficer: false })
+            const app = createApp(container => {
+                container.rebind(SessionService).toConstantValue(instance(session))
+                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+            })
+            const res = await request(app)
+                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .expect(StatusCodes.OK)
+            // The hint text should not appear
+            const HINT_TEXT = "For directors that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
+            assert.isFalse(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be absent for non-corporate officer")
+        })
+
+        it("should render confirmation checkbox hint for corporate officer", async () => {
+            mockedCompanyOfficersService.isCorporateOfficer = async () => true
+            configureApprovalModel({ isCorporateOfficer: true, onBehalfName: ON_BEHALF_NAME })
+            const app = createApp(container => {
+                container.rebind(SessionService).toConstantValue(instance(session))
+                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+            })
+            const res = await request(app)
+                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .expect(StatusCodes.OK)
+            // The hint text should appear
+            const HINT_TEXT = "For directors that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
+            assert.isTrue(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be present for corporate officer")
         })
 
         it("should render both confirmation and declaration checkboxes and new headings", async () => {
@@ -139,11 +186,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
         it("should render endorse certificate page with corporate officer confirmation label", async () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel()
-            }
-            dissolutionSession.approval.isCorporateOfficer = true
-            dissolutionSession.approval.onBehalfName = ON_BEHALF_NAME
+            configureApprovalModel({ isCorporateOfficer: true, onBehalfName: ON_BEHALF_NAME })
             const app = createApp(async container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
@@ -210,10 +253,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             it("should redirect successfully if validator returns no errors (non-corporate officer)", async () => {
                 const testObject = generateEndorseCertificateFormModel()
                 mockedCompanyOfficersService.isCorporateOfficer = async () => false
-                if (!dissolutionSession.approval) {
-                    dissolutionSession.approval = generateApprovalModel()
-                }
-                dissolutionSession.approval.isCorporateOfficer = false
+                configureApprovalModel({ isCorporateOfficer: false })
 
                 when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
                 when(mockedDissolutionService.approveDissolution(anything(), anything(), IP_ADDRESS)).thenResolve()
@@ -239,10 +279,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
         it("should redirect successfully if validator returns no errors (corporate officer)", async () => {
             const testObject = generateEndorseCertificateFormModel()
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel()
-            }
-            dissolutionSession.approval.isCorporateOfficer = true
+            configureApprovalModel({ isCorporateOfficer: true })
 
             when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
             when(mockedDissolutionService.approveDissolution(anything(), anything(), IP_ADDRESS)).thenResolve()
@@ -268,10 +305,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const testObject: EndorseCertificateFormModel = { confirmation: "understood", declaration: "declared" }
             const mockError = generateValidationError("confirmation", CONFIRMATION_ERROR_CORPORATE)
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel()
-            }
-            dissolutionSession.approval.isCorporateOfficer = true
+            configureApprovalModel({ isCorporateOfficer: true })
 
             when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
             // Dynamic validation schema
@@ -295,10 +329,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const testObject: EndorseCertificateFormModel = { confirmation: "understood" }
             const mockError = generateValidationError("declaration", DECLARATION_ERROR)
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel()
-            }
-            dissolutionSession.approval.isCorporateOfficer = false
+            configureApprovalModel({ isCorporateOfficer: false })
 
             when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError)
@@ -306,7 +337,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const app = createApp(container => {
                 container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
                 container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind("CompanyOfficersService").toConstantValue(mockedCompanyOfficersService)
+                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
             })
 
             const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
@@ -322,10 +353,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 declaration: DECLARATION_ERROR
             }
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
-            if (!dissolutionSession.approval) {
-                dissolutionSession.approval = generateApprovalModel()
-            }
-            dissolutionSession.approval.isCorporateOfficer = false
+            configureApprovalModel({ isCorporateOfficer: false })
 
             when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError)
@@ -333,7 +361,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const app = createApp(container => {
                 container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
                 container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind("CompanyOfficersService").toConstantValue(mockedCompanyOfficersService)
+                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
             })
 
             const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
