@@ -41,8 +41,6 @@ export const createApp = (configureBindings?: (container: Container) => void): A
     mockEnvVars(container)
     mockMiddlewares(container)
 
-    // Bind a default mock for CompanyOfficersService so it can be safely rebound in tests
-    container.bind("CompanyOfficersService").toConstantValue({ isCorporateOfficer: async () => false })
 
     container.load(buildProviderModule())
   configureBindings?.(container) // eslint-disable-line
