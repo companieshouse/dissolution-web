@@ -82,14 +82,36 @@ export function generateGetDirector (name: string = "Jane Smith", approvedAt?: s
     }
 }
 
-export function generateApprovalModel (): DissolutionApprovalModel {
+export function generateApprovalModel (
+    {
+        officerId = "abc123",
+        companyName = "Company 1",
+        companyNumber = "123456789",
+        applicant = "John Smith",
+        date = new Date().toDateString(),
+        officerType = OfficerType.DIRECTOR,
+        isCorporateOfficer = false,
+        onBehalfName
+    }: {
+        officerId?: string,
+        companyName?: string,
+        companyNumber?: string,
+        applicant?: string,
+        date?: string,
+        officerType?: OfficerType,
+        isCorporateOfficer?: boolean,
+        onBehalfName?: string
+    } = {}
+): DissolutionApprovalModel {
     return {
-        officerId: "abc123",
-        companyName: "Example Company",
-        companyNumber: "12345678",
-        applicant: "John Doe",
-        date: new Date().toDateString(),
-        officerType: OfficerType.DIRECTOR
+        officerId,
+        companyName,
+        companyNumber,
+        applicant,
+        date,
+        officerType,
+        isCorporateOfficer: isCorporateOfficer ?? false,
+        onBehalfName
     }
 }
 

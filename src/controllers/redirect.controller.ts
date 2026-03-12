@@ -4,12 +4,14 @@ import { RedirectResult } from "inversify-express-utils/lib/results"
 
 import BaseController from "app/controllers/base.controller"
 import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
+import ApprovalService from "app/services/approval/approval.service"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import PaymentStatus from "app/models/dto/paymentStatus.enum"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
+import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model"
 import {
     CERTIFICATE_SIGNED_URI,
     ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI,
@@ -27,9 +29,11 @@ import SessionService from "app/services/session/session.service"
 export class RedirectController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private session: SessionService,
-    @inject(DissolutionService) private service: DissolutionService,
-    @inject(DissolutionSessionMapper) private mapper: DissolutionSessionMapper) {
+        @inject(SessionService) private readonly session: SessionService,
+        @inject(DissolutionService) private readonly service: DissolutionService,
+        @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
+        @inject(ApprovalService) private readonly approvalService: ApprovalService
+    ) {
         super()
     }
 
@@ -51,7 +55,7 @@ export class RedirectController extends BaseController {
         case ApplicationStatus.PENDING_PAYMENT:
             return this.handlePendingPaymentRedirect(dissolution, session)
         case ApplicationStatus.PENDING_APPROVAL:
-            return this.handlePendingApprovalRedirect(dissolution, session)
+            return await this.handlePendingApprovalRedirect(dissolution, session)
         default:
             return Promise.reject("Unexpected application status received")
         }
@@ -94,13 +98,13 @@ export class RedirectController extends BaseController {
         return this.saveSessionAndRedirect(session, redirectUri)
     }
 
-    private handlePendingApprovalRedirect (dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
+    private async handlePendingApprovalRedirect (dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
         const userEmail: string = this.session.getUserEmail(this.httpContext.request)!
         const signatoriesForUser: DissolutionGetDirector[] = this.getSignatoriesForUser(dissolution, userEmail)
         const signatoryPendingApproval: Optional<DissolutionGetDirector> = signatoriesForUser.find(signatory => !signatory.approved_at)
 
         if (signatoryPendingApproval) {
-            session.approval = this.mapper.mapToApprovalModel(dissolution, signatoryPendingApproval)
+            session.approval = await this.setupDissolutionApproval(session, dissolution, signatoryPendingApproval)
             return this.saveSessionAndRedirect(session, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
         }
 
@@ -126,6 +130,11 @@ export class RedirectController extends BaseController {
     private saveSessionAndRedirect (session: DissolutionSession, redirectUri: string): RedirectResult {
         this.session.setDissolutionSession(this.httpContext.request, session)
         return this.redirect(redirectUri)
+    }
+
+    private async setupDissolutionApproval (session: DissolutionSession, dissolution: DissolutionGetResponse, signatory: DissolutionGetDirector): Promise<DissolutionApprovalModel> {
+        const token: string = this.session.getAccessToken(this.httpContext.request)
+        return await this.approvalService.getApprovalModel(token, dissolution, signatory, session.directorsToSign)
     }
 
     private getPendingPaymentRedirectUri (dissolution: DissolutionGetResponse, userEmail: string): string {
