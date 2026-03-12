@@ -110,7 +110,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
     })
 
     describe("GET request", () => {
-        it("should render endorse certificate page without an on behalf statement if director is signing and not a corporate officer", async () => {
+        it("should render endorse certificate page without an on behalf statement if director is signing and not a corporate officer", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
             configureApprovalModel({ isCorporateOfficer: false })
             const app = createApp(container => {
@@ -118,70 +118,76 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
             })
 
-            const res = await request(app)
+            return request(app)
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
-            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_LABEL))
-            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_VALUE))
-            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_LABEL))
-            assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_VALUE))
-            assert.isTrue(htmlAssertHelper.hasText("span#applicantName", APPLICANT_NAME))
-            // Confirmation label for non-corporate officer
-            assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
-            assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), `${VIEW_COMPANY_INFORMATION_URI}?companyNumber=${dissolutionSession.approval!.companyNumber}`)
+                .then(res => {
+                    const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                    assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
+                    assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_LABEL))
+                    assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NAME_VALUE))
+                    assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_LABEL))
+                    assert.isTrue(htmlAssertHelper.containsRawText(COMPANY_NUMBER_VALUE))
+                    assert.isTrue(htmlAssertHelper.hasText("span#applicantName", APPLICANT_NAME))
+                    // Confirmation label for non-corporate officer
+                    assert.isTrue(htmlAssertHelper.hasText("span#confirmationLabel", CONFIRMATION_LABEL_DIRECTOR))
+                    assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), `${VIEW_COMPANY_INFORMATION_URI}?companyNumber=${dissolutionSession.approval!.companyNumber}`)
+                })
         })
 
-        it("should not render confirmation checkbox hint for non-corporate officer", async () => {
+        it("should not render confirmation checkbox hint for non-corporate officer", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
             configureApprovalModel({ isCorporateOfficer: false })
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
             })
-            const res = await request(app)
+            return request(app)
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
-            // The hint text should not appear
-            assert.isFalse(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be absent for non-corporate officer")
+                .then(res => {
+                    // The hint text should not appear
+                    assert.isFalse(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be absent for non-corporate officer")
+                })
         })
 
-        it("should render confirmation checkbox hint for corporate officer", async () => {
+        it("should render confirmation checkbox hint for corporate officer", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
             configureApprovalModel({ isCorporateOfficer: true, onBehalfName: ON_BEHALF_NAME })
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
             })
-            const res = await request(app)
+            return request(app)
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
-            // The hint text should appear
-            assert.isTrue(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be present for corporate officer")
+                .then(res => {
+                    // The hint text should appear
+                    assert.isTrue(res.text.includes(HINT_TEXT), "Expected confirmation checkbox hint to be present for corporate officer")
+                })
         })
 
-        it("should render both confirmation and declaration checkboxes and new headings", async () => {
+        it("should render both confirmation and declaration checkboxes and new headings", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
             const app = createApp(container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
             })
 
-            const res = await request(app)
+            return request(app)
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
-            // Check for confirmation checkbox
-            assert.isTrue(htmlAssertHelper.selectorExists("input[name='confirmation']"))
-            // Check for declaration checkbox
-            assert.isTrue(htmlAssertHelper.selectorExists("input[name='declaration']"))
-            // Check for tickboxes heading (exact match, any <h2> tag)
-            assert.isTrue(htmlAssertHelper.anyTagHasText("h2", "By ticking both of the boxes below you are signing the application."), "Expected to find the correct tickboxes heading in an <h2> tag")
-            // Check for declaration heading
-            assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
+                .then(res => {
+                    const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                    // Check for confirmation checkbox
+                    assert.isTrue(htmlAssertHelper.selectorExists("input[name='confirmation']"))
+                    // Check for declaration checkbox
+                    assert.isTrue(htmlAssertHelper.selectorExists("input[name='declaration']"))
+                    // Check for tickboxes heading (exact match, any <h2> tag)
+                    assert.isTrue(htmlAssertHelper.anyTagHasText("h2", "By ticking both of the boxes below you are signing the application."), "Expected to find the correct tickboxes heading in an <h2> tag")
+                    // Check for declaration heading
+                    assert.isTrue(htmlAssertHelper.hasText("#declaration-heading", "Declaration"))
+                })
         })
 
         it("should render endorse certificate page with corporate officer confirmation label", async () => {

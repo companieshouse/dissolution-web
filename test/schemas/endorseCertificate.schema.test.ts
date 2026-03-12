@@ -2,11 +2,13 @@ import { ValidationResult, ValidationOptions } from "@hapi/joi"
 import { assert } from "chai"
 
 import EndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel"
-import formSchema from "app/schemas/endorseCertificate.schema"
+import createFormSchema from "app/schemas/endorseCertificate.schema"
 
 describe("Endorse Certificate Schema", () => {
 
     const validationOptions: ValidationOptions = { abortEarly: false }
+
+    const formSchema = createFormSchema()
 
     it("should return no errors when data is valid", () => {
         const validForm: EndorseCertificateFormModel = {

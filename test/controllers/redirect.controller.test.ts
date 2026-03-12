@@ -11,6 +11,7 @@ import { createApp } from "./helpers/application.factory"
 
 import "app/controllers/redirect.controller"
 import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
+import ApprovalService from "app/services/approval/approval.service"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
@@ -42,6 +43,7 @@ describe("RedirectController", () => {
     let session: SessionService
     let service: DissolutionService
     let mapper: DissolutionSessionMapper
+    let approvalService: ApprovalService
 
     const USER_EMAIL = "myemail@mail.com"
     const OTHER_USER_EMAIL = "another@mail.com"
@@ -50,6 +52,7 @@ describe("RedirectController", () => {
         session = mock(SessionService)
         service = mock(DissolutionService)
         mapper = mock(DissolutionSessionMapper)
+        approvalService = mock(ApprovalService)
 
         when(session.getAccessToken(anything())).thenReturn(TOKEN)
     })
@@ -59,6 +62,7 @@ describe("RedirectController", () => {
             container.rebind(SessionService).toConstantValue(instance(session))
             container.rebind(DissolutionService).toConstantValue(instance(service))
             container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper))
+            container.rebind(ApprovalService).toConstantValue(instance(approvalService))
         })
     }
 
@@ -117,15 +121,15 @@ describe("RedirectController", () => {
                 const approval: DissolutionApprovalModel = generateApprovalModel()
 
                 when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
-                when(mapper.mapToApprovalModel(dissolution, pending)).thenReturn(approval)
+                when(approvalService.getApprovalModel(TOKEN, dissolution, pending, anything())).thenResolve(approval)
 
                 await request(initApp())
                     .get(REDIRECT_GATE_URI)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 
-                verify(mapper.mapToApprovalModel(dissolution, pending)).once()
-                verify(mapper.mapToApprovalModel(dissolution, approved)).never()
+                verify(approvalService.getApprovalModel(TOKEN, dissolution, pending, anything())).once()
+                verify(approvalService.getApprovalModel(TOKEN, dissolution, approved, anything())).never()
                 verify(session.setDissolutionSession(anything(), anything())).once()
 
                 const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)

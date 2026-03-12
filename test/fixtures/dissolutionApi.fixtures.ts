@@ -110,7 +110,7 @@ export function generateApprovalModel (
         applicant,
         date,
         officerType,
-        isCorporateOfficer,
+        isCorporateOfficer: isCorporateOfficer ?? false,
         onBehalfName
     }
 }
