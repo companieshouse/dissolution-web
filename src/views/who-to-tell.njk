@@ -76,7 +76,7 @@
       if (selectedInput.length) {
         var eventValue = selectedInput.attr('data-event-value');
         if (eventValue) {
-          _paq.push(['trackEvent', {{ ('dissolutions ' ~ title)}}, eventValue]);
+          _paq.push(['trackEvent', {{ ('dissolutions ' ~ title) | dump}}, eventValue]);
         }
       }
     });

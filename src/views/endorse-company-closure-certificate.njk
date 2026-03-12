@@ -73,7 +73,7 @@
                 value: "understood",
                 html: "<span id=confirmationLabel>" + confirmationLabel + "</span>",
                 attributes: {
-                    'data-event-id': 'understand-checkbox'
+                    'data-event-value': 'understand-checkbox'
                 }
               }
             ]
@@ -90,4 +90,21 @@
       </form>
     </div>
   </div>
+
+{% if piwik %}
+<script nonce={{ nonce | dump | safe }}>
+  $(document).ready(function () {
+    $('#submit').on('click', function () {
+      var selectedInput = $('input[name=confirmation]:checked');
+      if (selectedInput.length) {
+        var eventValue = selectedInput.attr('data-event-value');
+        if (eventValue) {
+          _paq.push(['trackEvent', {{ ('dissolutions ' ~ title) | dump}}, eventValue]);
+        }
+      }
+    });
+  });
+</script>
+{% endif %}
+
 {% endblock %}
