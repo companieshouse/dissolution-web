@@ -60,7 +60,6 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
         return this.redirect(REDIRECT_GATE_URI)
     }
 
-
     private async approveDissolution (): Promise<void> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
@@ -68,8 +67,6 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
         await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress)
     }
-
-
 
     private getBackUri (companyNumber: string): string {
         return VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + companyNumber

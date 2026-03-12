@@ -41,7 +41,6 @@ export const createApp = (configureBindings?: (container: Container) => void): A
     mockEnvVars(container)
     mockMiddlewares(container)
 
-
     container.load(buildProviderModule())
   configureBindings?.(container) // eslint-disable-line
 
