@@ -1,22 +1,21 @@
 {#
   matomo-radio-submit-tracking.njk
   -----------------------------------
-  Purpose: Adds a script to track selected radio buttons with Matomo analytics when a submit button is clicked.
+  Purpose: Adds a script to track selected radio buttons with Matomo analytics when a form is submitted.
   Usage: Include this partial in any Nunjucks view where radio button tracking is needed.
   Expects the following variables to be available in the view:
-    - matomo: boolean, enables/disables the script
+    - piwik: boolean, enables/disables the script
     - nonce: string, for CSP compliance
     - title: string, used as the event category (e.g., page or section title)
-  Behaviour: For each radio group, the script will push the value of the selected radio's data-event-value attribute to Matomo. If data-event-value is not present, it will use the radio's id as the value. To control the tracked value, specify a data-event-value attribute on the radio input. The script is robust to multiple fieldsets or radio groups on a page.
+  Behaviour: For each radio group (determined by the name attribute, not fieldset), the script will push the value of the selected radio's data-event-value attribute to Matomo. If data-event-value is not present, it will use the radio's id as the value. To control the tracked value, specify a data-event-value attribute on the radio input. The script is robust to multiple fieldsets or radio groups on a page. Tracking is attached to the form's submit event, so all submission methods are covered.
 #}
 
 {% if piwik %}
  <script nonce={{ nonce | dump | safe }}>
      $(document).ready(function () {
-       $('#submit').on('click', function () {
-
+       $('form').on('submit', function () {
          var radioNames = [];
-         $('input[type=radio]:checked').each(function () {
+         $(this).find('input[type=radio]:checked').each(function () {
            var name = $(this).attr('name');
            if (name && radioNames.indexOf(name) === -1) {
              radioNames.push(name);
