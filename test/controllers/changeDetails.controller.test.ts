@@ -66,7 +66,7 @@ describe("ChangeDetailsController", () => {
 
             const isFromCheckAnswers = true
             const officerType = OfficerType.DIRECTOR
-            const expectedPageHeading = "Change a director's details"
+            const expectedPageHeading = "Change a director's email address"
 
             const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(SIGNATORY_ID).withOfficerType(officerType)
                 .withIsFromCheckAnswers(isFromCheckAnswers).build()
@@ -140,12 +140,12 @@ describe("ChangeDetailsController", () => {
             {
                 description: "DS01 journey",
                 officerType: OfficerType.DIRECTOR,
-                expectedPageHeading: "Change a director's details"
+                expectedPageHeading: "Change a director's email address"
             },
             {
                 description: "LLDS01 journey",
                 officerType: OfficerType.MEMBER,
-                expectedPageHeading: "Change a member's details"
+                expectedPageHeading: "Change a member's email address"
             }
         ]
 

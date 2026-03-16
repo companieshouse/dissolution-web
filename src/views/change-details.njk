@@ -5,7 +5,8 @@
 {% from "govuk/components/input/macro.njk"          import govukInput %}
 {% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
 
-{% set title = "Change a " + officerType + "'s details - " + pageTitleSuffix %}
+{% set title = "Change a " + officerType + "'s " + ( "details" if signatory.isCorporateOfficer else "email address")
+    + " - " + pageTitleSuffix %}
 
 {% block content %}
   {{
@@ -19,7 +20,11 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">Change a {{ officerType }}'s details</h1>
+      {% if signatory.isCorporateOfficer %}
+        <h1 class="govuk-heading-xl">Change a {{ officerType }}'s details</h1>
+      {% else %}
+        <h1 class="govuk-heading-xl">Change a {{ officerType }}'s email address</h1>
+      {% endif %}
 
 
       <form method="post" novalidate>
