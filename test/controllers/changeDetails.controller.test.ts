@@ -10,7 +10,6 @@ import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/changeDetails.controller"
-import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper"
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 import OfficerType from "app/models/dto/officerType.enum"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
@@ -231,7 +230,7 @@ describe("ChangeDetailsController", () => {
 
     describe("POST", () => {
         it("should reject with a 404 if no signatory is in session to update", async () => {
-            const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit(undefined).build()
+            const dissolutionSession = aDissolutionSession().withSignatoryIdToEdit().build()
             const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build()
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
             const app: Application = initApp()
