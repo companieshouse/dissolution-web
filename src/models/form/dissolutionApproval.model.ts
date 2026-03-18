@@ -6,6 +6,7 @@ export default interface DissolutionApprovalModel {
   companyNumber: string
   applicant: string
   officerType: OfficerType
+  isCorporateOfficer: boolean
   onBehalfName?: string
   date: string
   _csrf?: string
