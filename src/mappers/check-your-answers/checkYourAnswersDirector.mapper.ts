@@ -10,6 +10,7 @@ export default class CheckYourAnswersDirectorMapper {
 
     public mapToCheckYourAnswersDirector (director: DirectorToSign): CheckYourAnswersDirector {
         return {
+            id: director.id,
             name: director.name,
             email: director.email!,
             onBehalfName: director.onBehalfName

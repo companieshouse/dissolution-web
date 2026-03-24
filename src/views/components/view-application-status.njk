@@ -4,7 +4,7 @@
 <div class="govuk-grid-row govuk-!-margin-top-4">
   <div class="govuk-grid-column-two-thirds">
     <h2 class="govuk-heading-l">Application status</h2>
-    <p class="govuk-body">Refresh the page to see updated information. If you exit this page, you can return to it by signing in to the <a class="govuk-link" href="{{ Paths.ROOT_URI }}">Apply to strike off and dissolve a company service</a>.</p>
+    <p class="govuk-body">Refresh the page to see updated information. If you exit this page, you can return to it by signing in to the <a class="govuk-link" href="{{ Paths.ROOT_URI }}" data-event-id="apply-to-strike-off-link">Apply to strike off and dissolve a company service</a>.</p>
   </div>
 
   {% set signatoryRows = [] %}
@@ -24,9 +24,10 @@
               attributes: { id: "name-" + loop.index0 }
             },
             {
-              html:  signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change" data-event-id="change-email-link">Change email</a></p>' if signatory.canChange else signatory.email,
+              html:  signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Change email</a></p>' if signatory.canChange else signatory.email,
               attributes: {
-                id: "email-" + loop.index0
+                id: "email-" + loop.index0,
+                'data-event-id': 'change-email-link'
               }
             },
             {

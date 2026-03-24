@@ -103,7 +103,10 @@
             items: [
               {
                 value: "understood",
-                html: "<span id=confirmationLabel>" + confirmationLabel + "</span>"
+                html: "<span id=confirmationLabel>" + confirmationLabel + "</span>",
+                attributes: {
+                    'data-event-value': 'understand-checkbox'
+                }
               }
             ]
           })
@@ -134,4 +137,7 @@
       </form>
     </div>
   </div>
+
+{% include 'components/matomo-checkbox-submit-tracking.njk' %}
+
 {% endblock %}

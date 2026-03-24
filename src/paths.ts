@@ -35,3 +35,6 @@ export const VIEW_FINAL_CONFIRMATION_URI = `${ROOT_URI}/view-final-confirmation`
 export const HOW_DO_YOU_WANT_TO_PAY_URI = `${PAYMENT_URI}/how-do-you-want-to-pay`
 export const PAY_BY_ACCOUNT_URI = `${PAYMENT_URI}/pay-by-account`
 export const COMPANY_LOOKUP = "/company-lookup/search?forward=/close-a-company/view-company-information?companyNumber={companyNumber}"
+
+// External
+export const CONTACT_US_URI = `${GOV_UK_URI}/find-contact-details-companies-house`

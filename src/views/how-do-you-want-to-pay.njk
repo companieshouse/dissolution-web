@@ -43,7 +43,7 @@
                 checked: data.paymentType === PaymentType.CREDIT_DEBIT_CARD if data,
                 id: 'card-radio-button',
                 attributes: {
-                  'data-event-id': 'payment-credit-debit-card-type-link' if piwik
+                  'data-event-value': 'payment-credit-debit-card-type-radio'
                 }
               },
               {
@@ -55,7 +55,7 @@
                     text: "Only select this option if you usually pay by account. You'll need your presenter ID and presenter authentication code."
                 },
                 attributes: {
-                  'data-event-id': 'payment-ch-account-type-link' if piwik
+                  'data-event-value': 'payment-ch-account-type-radio'
                 }
               }
             ]
@@ -74,4 +74,7 @@
       </form>
     </div>
   </div>
+
+{% include 'components/matomo-radio-submit-tracking.njk' %}
+
 {% endblock %}

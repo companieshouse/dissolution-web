@@ -1,0 +1,27 @@
+{#
+  matomo-checkbox-submit-tracking.njk
+  -----------------------------------
+  Purpose: Adds a script to track checked checkboxes with Matomo analytics when a form is submitted.
+  Usage: Include this partial in any Nunjucks view where checkbox tracking is needed.
+  Expects the following variables to be available in the view:
+    - piwik: boolean, enables/disables the script
+    - nonce: string, for CSP compliance
+    - title: string, used as the event category (e.g., page or section title)
+  Behaviour: For each checked checkbox in the submitted form, the script will push the value of its data-event-value attribute to Matomo. If data-event-value is not present, it will use the checkbox's id as the value. To control the tracked value, specify a data-event-value attribute on the checkbox input. Tracking is attached to the form's submit event, so all submission methods are covered.
+#}
+
+{% if piwik %}
+ <script nonce={{ nonce | dump | safe }}>
+     $(document).ready(function () {
+       $('form').on('submit', function () {
+         $(this).find('input[type=checkbox]:checked').each(function () {
+           var eventValue = $(this).attr('data-event-value');
+           var valueToPush = eventValue ? eventValue : $(this).attr('id');
+           if (valueToPush) {
+             _paq.push(['trackEvent', {{ ('dissolutions ' ~ title) | dump}}, valueToPush]);
+           }
+         });
+       });
+     });
+ </script>
+{% endif %}

@@ -1,5 +1,5 @@
 import { inject } from "inversify"
-import { controller, httpGet, httpPost } from "inversify-express-utils"
+import { controller, httpGet, httpPost, queryParam } from "inversify-express-utils"
 import BaseController from "./base.controller"
 
 import CompanyDetails from "app/models/companyDetails.model"
@@ -20,17 +20,21 @@ interface ViewModel {
 export class ViewCompanyInformationController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private session: SessionService,
-    @inject(CompanyService) private companyService: CompanyService) {
+        @inject(SessionService) private readonly session: SessionService,
+        @inject(CompanyService) private readonly companyService: CompanyService) {
         super()
     }
 
     @httpGet("")
-    public async get (): Promise<string> {
+    public async get (@queryParam("companyNumber") companyNumber: string): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
         const token: string = this.session.getAccessToken(this.httpContext.request)
 
-        const company: CompanyDetails = await this.getCompanyInfo(token, session)
+        if (!companyNumber) {
+            companyNumber = session.companyNumber!
+        }
+
+        const company: CompanyDetails = await this.getCompanyInfo(token, companyNumber)
 
         const error: Optional<string> = await this.validateCompanyDetails(token, company)
 
@@ -48,9 +52,7 @@ export class ViewCompanyInformationController extends BaseController {
         this.httpContext.response.redirect(REDIRECT_GATE_URI)
     }
 
-    private async getCompanyInfo (token: string, session: DissolutionSession): Promise<CompanyDetails> {
-        const companyNumber: string = session.companyNumber!
-
+    private async getCompanyInfo (token: string, companyNumber: string): Promise<CompanyDetails> {
         return this.companyService.getCompanyDetails(token, companyNumber)
     }
 
@@ -61,7 +63,8 @@ export class ViewCompanyInformationController extends BaseController {
     private updateSession (session: DissolutionSession, company: CompanyDetails): void {
         const updatedSession: DissolutionSession = {
             ...session,
-            officerType: company.companyType === ClosableCompanyType.LLP ? OfficerType.MEMBER : OfficerType.DIRECTOR
+            officerType: company.companyType === ClosableCompanyType.LLP ? OfficerType.MEMBER : OfficerType.DIRECTOR,
+            companyNumber: company.companyNumber
         }
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
     }

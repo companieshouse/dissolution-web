@@ -13,15 +13,16 @@ import SessionService from "app/services/session/session.service"
 interface ViewModel {
   backUri: string
   directors?: CheckYourAnswersDirector[]
+    isMultiDirector?: boolean
 }
 
 @controller(CHECK_YOUR_ANSWERS_URI)
 export class CheckYourAnswersController extends BaseController {
 
     public constructor (
-    @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(SessionService) private session: SessionService,
-    @inject(CheckYourAnswersDirectorMapper) private mapper: CheckYourAnswersDirectorMapper) {
+    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+    @inject(SessionService) private readonly session: SessionService,
+    @inject(CheckYourAnswersDirectorMapper) private readonly mapper: CheckYourAnswersDirectorMapper) {
         super()
     }
 
@@ -29,7 +30,8 @@ export class CheckYourAnswersController extends BaseController {
     public async get (): Promise<string> {
         const viewModel: ViewModel = {
             backUri: this.getBackLink(),
-            directors: this.getDirectors()
+            directors: this.getDirectors(),
+            isMultiDirector: this.session.getDissolutionSession(this.httpContext.request)!.isMultiDirector
         }
         return super.render("check-your-answers", viewModel)
     }
@@ -44,7 +46,8 @@ export class CheckYourAnswersController extends BaseController {
     public async post (): Promise<RedirectResult> {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-
+        delete dissolutionSession.isFromCheckAnswers
+        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
         await this.dissolutionService.createDissolution(token, dissolutionSession)
 
         return this.redirect(REDIRECT_GATE_URI)

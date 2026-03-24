@@ -12,6 +12,7 @@ export class DissolutionSessionBuilder {
     private _isMultiDirector?: boolean
     signatoryIdToEdit?: string
     signatoryToEdit?: DissolutionGetDirector
+    isFromCheckAnswers?: boolean
 
     withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {
         this.directorsToSign = directors
@@ -48,6 +49,11 @@ export class DissolutionSessionBuilder {
         return this
     }
 
+    public withIsFromCheckAnswers (isFromCheckAnswers: boolean): this {
+        this.isFromCheckAnswers = isFromCheckAnswers
+        return this
+    }
+
     public build (): DissolutionSession {
         return {
             officerType: this.officerType,
@@ -55,7 +61,8 @@ export class DissolutionSessionBuilder {
             defineSignatoryInfoForm: this.defineSignatoryInfoForm,
             isMultiDirector: this._isMultiDirector,
             signatoryIdToEdit: this.signatoryIdToEdit,
-            signatoryToEdit: this.signatoryToEdit
+            signatoryToEdit: this.signatoryToEdit,
+            isFromCheckAnswers: this.isFromCheckAnswers
         } as DissolutionSession
     }
 }

@@ -47,7 +47,7 @@ export default class CompanyService {
     public async validateCompanyDetails (company: CompanyDetails, token: string): Promise<Optional<string>> {
         if (!Object.values(ClosableCompanyType).some(val => val === company.companyType)) {
             return `Company type of ${asCompanyTypeText(company.companyType)} cannot be closed via this service.
-              <br><a target="_blank" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#when-a-company-cannot-apply-to-be-struck-off-the-register"> Read guidance here (opens in new tab)</a>.`
+              <br><a target="_blank" href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#when-a-company-cannot-apply-to-be-struck-off-the-register" data-event-id="company-struck-off-guidance-link"> Read guidance here (opens in new tab)</a>.`
         }
 
         if (company.companyStatus !== CompanyStatus.ACTIVE) {
