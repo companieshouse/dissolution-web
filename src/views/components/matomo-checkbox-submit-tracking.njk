@@ -18,7 +18,7 @@
            var eventValue = $(this).attr('data-event-value');
            var valueToPush = eventValue ? eventValue : $(this).attr('id');
            if (valueToPush) {
-             _paq.push(['trackEvent', {{ ('dissolutions ' ~ title) | dump}}, valueToPush]);
+             _paq.push(['trackEvent', {{ ('dissolutions ' ~ title) | dump | safe }}, valueToPush]);
            }
          });
        });
