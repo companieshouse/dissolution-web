@@ -9,8 +9,8 @@ import generateEndorseCertificateFormModel from "app/models/form/endorseCertific
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI } from "app/paths"
-import formSchema from "app/schemas/endorseCertificate.schema"
+import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
+import createEndorseCertificateSchema from "app/schemas/endorseCertificate.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
 import SessionService from "app/services/session/session.service"
@@ -19,28 +19,40 @@ import FormValidator from "app/utils/formValidator.util"
 interface ViewModel {
   approvalModel: DissolutionApprovalModel
   errors?: ValidationErrors
+  backUri?: string
 }
 
 @controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
 export class EndorseCompanyClosureCertificateController extends BaseController {
 
-    public constructor (@inject(SessionService) private session: SessionService,
-                    @inject(FormValidator) private validator: FormValidator,
-                    @inject(DissolutionService) private dissolutionService: DissolutionService,
-                    @inject(IpAddressService) private ipAddressService: IpAddressService) {
+    public constructor (
+        @inject(SessionService) private readonly session: SessionService,
+        @inject(FormValidator) private readonly validator: FormValidator,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+        @inject(IpAddressService) private readonly ipAddressService: IpAddressService
+    ) {
         super()
     }
 
     @httpGet("")
     public async get (): Promise<string> {
-        return this.renderView()
+        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const approvalModel = dissolutionSession.approval!
+        const backUri = this.getBackUri(approvalModel.companyNumber)
+        return this.renderView(approvalModel, backUri)
     }
 
     @httpPost("")
     public async post (@requestBody() body: generateEndorseCertificateFormModel): Promise<string | RedirectResult> {
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, formSchema)
+        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const approvalModel = dissolutionSession.approval!
+        const backUri = this.getBackUri(approvalModel.companyNumber)
+
+        const validationSchema = createEndorseCertificateSchema(approvalModel)
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, validationSchema)
+        
         if (errors) {
-            return this.renderView(errors)
+            return this.renderView(approvalModel, backUri, errors)
         }
 
         await this.approveDissolution()
@@ -56,12 +68,16 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
         await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress)
     }
 
-    private async renderView (errors?: ValidationErrors): Promise<string> {
-        const approvalModel: DissolutionApprovalModel = this.session.getDissolutionSession(this.httpContext.request)!.approval!
+    private getBackUri (companyNumber: string): string {
+        return VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + companyNumber
+    }
 
+    private async renderView (approvalModel: DissolutionApprovalModel, backUri: string, errors?: ValidationErrors): Promise<string> {
+        
         const viewModel: ViewModel = {
             approvalModel,
-            errors
+            errors,
+            backUri
         }
         return super.render("endorse-company-closure-certificate", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
     }

@@ -13,7 +13,11 @@ import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.
 @provide(DissolutionSessionMapper)
 export default class DissolutionSessionMapper {
 
-    public mapToApprovalModel (dissolution: DissolutionGetResponse, signatory: DissolutionGetDirector): DissolutionApprovalModel {
+    public mapToApprovalModel (
+        dissolution: DissolutionGetResponse,
+        signatory: DissolutionGetDirector,
+        patch?: Partial<DissolutionApprovalModel>
+    ): DissolutionApprovalModel {
         return {
             officerId: signatory.officer_id,
             companyName: dissolution.company_name,
@@ -21,7 +25,9 @@ export default class DissolutionSessionMapper {
             applicant: signatory.name,
             officerType: dissolution.application_type === ApplicationType.LLDS01 ? OfficerType.MEMBER : OfficerType.DIRECTOR,
             onBehalfName: signatory.on_behalf_name,
-            date: moment().format("DD MMMM YYYY")
+            date: moment().format("DD MMMM YYYY"),
+            isCorporateOfficer: false,
+            ...patch
         }
     }
 
