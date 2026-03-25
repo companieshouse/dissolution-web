@@ -51,20 +51,13 @@
         }}
 
         {% if officerType == 'director' %}
-          {% set infoLink = '<a href="https://www.gov.uk/file-changes-to-a-company-with-companies-house" class="govuk-link piwik-event" data-event-id="file-change-to-company-link" rel="noreferrer noopener" target="_blank">make changes to the company directors (opens in new tab)</a>' %}
+          {% set infoLink = '<a href="https://www.gov.uk/file-changes-to-a-company-with-companies-house" class="govuk-link piwik-event" data-event-id="file-change-to-company-link" rel="noreferrer noopener" target="_blank">inform us about changes to directors (opens in new tab)</a>' %}
         {% else %}
-          {% set infoLink = '<a href="https://ewf.companieshouse.gov.uk" class="govuk-link piwik-event" data-event-id="web-filing-link" rel="noreferrer noopener" target="_blank">make changes to the LLP\'s members using our WebFiling service (opens in new tab)</a>' %}
+          {% set infoLink = '<a href="https://ewf.companieshouse.gov.uk" class="govuk-link piwik-event" data-event-id="web-filing-link" rel="noreferrer noopener" target="_blank">inform us about changes to members (opens in new tab)</a>' %}
         {% endif %}
 
-        {{
-          govukDetails({
-            summaryHtml: '<div class="piwik-event">If a ' + officerType + ' cannot sign the application themselves</div>',
-            html: '<p>' + (officerType | capitalize) + 's who are people must sign the application themselves. Nobody can sign on their behalf.<br /><br />Sometimes a ' + officerType + ' cannot sign. For example, because they no longer have mental capacity. If there are not enough ' + officerType + 's who are able to sign, you\'ll need to ' + infoLink + ' before continuing with this application.</p>',
-            attributes: {
-                'data-event-id': 'director-cannot-sign-details-reveal'
-            }
-          })
-        }}
+        <p class="govuk-body">{{ (officerType | capitalize) + 's' }} who are people must sign the application themselves. Nobody can sign on their behalf.</p>
+        <p class="govuk-body">If this list of {{ officerType + 's' }} is incorrect or out of date, you need to {{ infoLink | safe }} before continuing with this application.</p>
 
         {{
           govukButton({

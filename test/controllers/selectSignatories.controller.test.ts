@@ -92,9 +92,8 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: false,
                 expectedPageHeading: "Which directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
-                explanatory1: "If a director cannot sign the application themselves",
-                explanatory2: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
-                linkText: "make changes to the company directors (opens in new tab)"
+                explanatory1: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2: "If this list of directors is incorrect or out of date, you need to inform us about changes to directors (opens in new tab) before continuing with this application.",
             },
             {
                 description: "DS01 journey (applicant is a director)",
@@ -102,9 +101,8 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: true,
                 expectedPageHeading: "Which other directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
-                explanatory1: "If a director cannot sign the application themselves",
-                explanatory2: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
-                linkText: "make changes to the company directors (opens in new tab)"
+                explanatory1: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2: "If this list of directors is incorrect or out of date, you need to inform us about changes to directors (opens in new tab) before continuing with this application."
             },
             {
                 description: "LLDS01 journey (applicant is not a member)",
@@ -112,9 +110,8 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: false,
                 expectedPageHeading: "Which members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
-                explanatory1: "If a member cannot sign the application themselves",
-                explanatory2: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
-                linkText: "make changes to the LLP's members using our WebFiling service (opens in new tab)"
+                explanatory1: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2: "If this list of members is incorrect or out of date, you need to inform us about changes to members (opens in new tab) before continuing with this application."
             },
             {
                 description: "LLDS01 journey (applicant is a member)",
@@ -122,15 +119,14 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: true,
                 expectedPageHeading: "Which other members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
-                explanatory1: "If a member cannot sign the application themselves",
-                explanatory2: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
-                linkText: "make changes to the LLP's members using our WebFiling service (opens in new tab)"
+                explanatory1: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2: "If this list of members is incorrect or out of date, you need to inform us about changes to members (opens in new tab) before continuing with this application."
             }
         ]
 
         expectedContentCases.forEach(testCase => {
             it(`should render the select signatories page with correct static content for ${testCase.description}`, async () => {
-                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2, linkText } = testCase
+                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2 } = testCase
                 dissolutionSession.officerType = officerType
                 dissolutionSession.isApplicantADirector = isApplicantADirector
 
@@ -158,7 +154,6 @@ describe("SelectSignatoriesController", () => {
                 assert.equal(htmlAssertHelper.getText("#signatories-hint"), hint)
                 assert.isTrue(htmlAssertHelper.containsRawText(explanatory1))
                 assert.isTrue(htmlAssertHelper.containsRawText(explanatory2))
-                assert.isTrue(htmlAssertHelper.containsRawText(linkText))
             })
         })
 
