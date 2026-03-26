@@ -5,6 +5,7 @@ export type GovUKRadio = {
   value: string
   text: string
   checked: boolean
+  attributes?: Record<string, string>
 }
 
 export type GovUKRadioDivider = {
@@ -17,7 +18,16 @@ export function asSelectDirectorList (directors: DirectorDetails[],
     const divider: GovUKRadioDivider = { divider: "or" }
     const notADirectorRadio: GovUKRadio = getNotADirectorRadio(officerType, choice)
 
-    return [...directorRadios, divider, notADirectorRadio]
+    const directorRadiosWithAttrs = directorRadios.map(radio => ({
+        ...radio,
+        attributes: { "data-event-value": "director-radio" }
+    }))
+    const notADirectorRadioWithAttr = {
+        ...notADirectorRadio,
+        attributes: { "data-event-value": "not-a-director-radio" }
+    }
+
+    return [...directorRadiosWithAttrs, divider, notADirectorRadioWithAttr]
 }
 
 function getDirectorRadios (directors: DirectorDetails[], choice?: string): GovUKRadio[] {
