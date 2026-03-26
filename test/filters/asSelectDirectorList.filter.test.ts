@@ -28,10 +28,12 @@ describe("asSelectDirectorList", () => {
         const director1Radio: GovUKRadio = result[0] as GovUKRadio
         assert.equal(director1Radio.text, "Director One")
         assert.equal(director1Radio.value, "123")
+        assert.deepEqual(director1Radio.attributes, { "data-event-value": "director-radio" })
 
         const director2Radio: GovUKRadio = result[1] as GovUKRadio
         assert.equal(director2Radio.text, "Director Two")
         assert.equal(director2Radio.value, "456")
+        assert.deepEqual(director2Radio.attributes, { "data-event-value": "director-radio" })
     })
 
     it("should create the divider radio correctly", () => {
@@ -57,6 +59,7 @@ describe("asSelectDirectorList", () => {
         const defaultRadio: GovUKRadio = result[3] as GovUKRadio
         assert.equal(defaultRadio.text, "I am not a director of this company")
         assert.equal(defaultRadio.value, "other")
+        assert.deepEqual(defaultRadio.attributes, { "data-event-value": "not-a-director-radio" })
     })
 
     it("should display OfficerType Member on radio button where user selects they are not a member", () => {
