@@ -17,10 +17,11 @@ import DissolutionSession from "app/models/session/dissolutionSession.model"
 export default class DissolutionDirectorService {
 
     public constructor (
-    @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
-    @inject(DissolutionDirectorMapper) private readonly mapper: DissolutionDirectorMapper,
-    @inject(DissolutionApiClient) private readonly client: DissolutionApiClient
-    ) {}
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+        @inject(DissolutionDirectorMapper) private readonly mapper: DissolutionDirectorMapper,
+        @inject(DissolutionApiClient) private readonly client: DissolutionApiClient
+    ) {
+    }
 
     public async getSignatoryToEdit (token: string, session: DissolutionSession): Promise<DissolutionGetDirector> {
         const dissolution: DissolutionGetResponse = (await this.dissolutionService.getDissolution(token, session))!
