@@ -341,18 +341,19 @@ describe("ChangeDetailsController", () => {
             assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
         })
 
-        it("should update the signatory in session and redirect to the check your answers screen if validation passes for a natural director", async () => {
-            const isFromCheckAnswers = true
-            const updatedEmail = "updated.accountant@mail.com"
+        it("should update signatory info in session and redirect to the check your answers screen if validation passes for a natural director", async () => {
+
+            const updatedEmail = "updated@mail.com"
 
             const dissolutionSession = aDissolutionSession()
                 .withSignatoryIdToEdit(SIGNATORY_ID)
-                .withIsFromCheckAnswers(isFromCheckAnswers)
+                .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_ID).withEmail("director@mail.com").withName("Mr Accountant"))
+                .withDefineSignatoryInfoForm({
+                    [`directorEmail_${SIGNATORY_ID}`]: "old@mail.com",
+                })
+                .withIsFromCheckAnswers(true)
                 .withSignatoryToEdit(aDissolutionGetDirector().withName("Mr Accountant").build())
                 .build()
-
-            const directorToSign = aDirectorToSign().withId(SIGNATORY_ID).withEmail("director@mail.com").withName("Mr Accountant").build()
-            dissolutionSession.directorsToSign = [directorToSign]
 
             const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel()
                 .withDirectorEmail(updatedEmail)
@@ -366,10 +367,14 @@ describe("ChangeDetailsController", () => {
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHECK_YOUR_ANSWERS_URI)
 
-            const updatedDirectorsToSign = dissolutionSession.directorsToSign
+            const updatedDirectorsToSign = dissolutionSession.directorsToSign!
             assert.equal(updatedDirectorsToSign[0].email, updatedEmail)
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, CHECK_YOUR_ANSWERS_URI)
+            const updatedDefineSignatoryInfoForm = dissolutionSession.defineSignatoryInfoForm!
+            assert.equal(updatedDefineSignatoryInfoForm[`directorEmail_${SIGNATORY_ID}`], updatedEmail)
+            assert.isUndefined(updatedDefineSignatoryInfoForm[`onBehalfName_${SIGNATORY_ID}`])
+            assert.isUndefined(updatedDefineSignatoryInfoForm[`onBehalfEmail_${SIGNATORY_ID}`])
         })
 
         it("should update the signatory in session and redirect to the check your answers screen if validation passes for a corporate director", async () => {
@@ -379,12 +384,14 @@ describe("ChangeDetailsController", () => {
 
             const dissolutionSession = aDissolutionSession()
                 .withSignatoryIdToEdit(SIGNATORY_ID)
+                .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_ID).withEmail("director@mail.com").withOnBehalfName("Mr Accountant"))
+                .withDefineSignatoryInfoForm({
+                    [`onBehalfName_${SIGNATORY_ID}`]: "oldName",
+                    [`onBehalfEmail_${SIGNATORY_ID}`]: "old@mail.com"
+                })
                 .withIsFromCheckAnswers(isFromCheckAnswers)
                 .withSignatoryToEdit(aDissolutionGetDirector().withOnBehalfName("Mr Accountant").build())
                 .build()
-
-            const directorToSign = aDirectorToSign().withId(SIGNATORY_ID).withEmail("director@mail.com").withOnBehalfName("Mr Accountant").build()
-            dissolutionSession.directorsToSign = [directorToSign]
 
             const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel()
                 .withDirectorEmail()
@@ -399,11 +406,15 @@ describe("ChangeDetailsController", () => {
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHECK_YOUR_ANSWERS_URI)
 
-            const updatedDirectorsToSign = dissolutionSession.directorsToSign
+            const updatedDirectorsToSign = dissolutionSession.directorsToSign!
             assert.equal(updatedDirectorsToSign[0].onBehalfName, updatedName)
             assert.equal(updatedDirectorsToSign[0].email, updatedEmail)
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, CHECK_YOUR_ANSWERS_URI)
+            const updatedDefineSignatoryInfoForm = dissolutionSession.defineSignatoryInfoForm!
+            assert.equal(updatedDefineSignatoryInfoForm[`onBehalfName_${SIGNATORY_ID}`], updatedName)
+            assert.equal(updatedDefineSignatoryInfoForm[`onBehalfEmail_${SIGNATORY_ID}`], updatedEmail)
+            assert.isUndefined(updatedDefineSignatoryInfoForm[`directorEmail_${SIGNATORY_ID}`])
         })
 
         it("should return a 404 if isFromCheckAnswers is true and no signatories in session", async () => {

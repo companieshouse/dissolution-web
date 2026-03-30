@@ -19,6 +19,7 @@ import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import RichFormValidator from "app/utils/richFormValidator.util"
+import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
 
 interface ViewModel {
     officerType: OfficerType
@@ -52,7 +53,7 @@ export class ChangeDetailsController extends BaseController {
             return Promise.reject(new NotFoundError("Signatory not in session"))
         }
 
-        const signatory = session.isFromCheckAnswers ? this.getSignatoryFromSession(session) 
+        const signatory = session.isFromCheckAnswers ? this.getSignatoryFromSession(session)
             : await this.getSignatoryFromDissolution(session)
 
         this.updateSession(session, signatory)
@@ -70,44 +71,32 @@ export class ChangeDetailsController extends BaseController {
     public async post (@requestBody() body: ChangeDetailsFormModel): Promise<string | RedirectResult> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
-        if (!session.signatoryIdToEdit) {
+        if (!session.signatoryIdToEdit || !session.signatoryToEdit) {
             return Promise.reject(new NotFoundError("Signatory not in session"))
         }
 
-        const token: string = this.session.getAccessToken(this.httpContext.request)
-        let signatory: DissolutionGetDirector = session.signatoryToEdit!
+        const signatory: DissolutionGetDirector = session.signatoryToEdit
         const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(signatory))
 
         if (errors) {
-            if (!session.isFromCheckAnswers) {
-                signatory = await this.directorService.getSignatoryToEdit(token, session)
-            }
             return this.renderView(session.officerType!, this.getBackLink(session), signatory, body, errors)
         }
 
-        let redirectUri
-        if(session.isFromCheckAnswers) {
-            const directorsToSign = session.directorsToSign
-            if(directorsToSign != null) {
-                this.updateSignatoryInSession(session, body, directorsToSign)
-                redirectUri = CHECK_YOUR_ANSWERS_URI
-            } else {
-                return Promise.reject(new NotFoundError("Could not retrieve signatories from session"))
-            }
+        if (session.isFromCheckAnswers) {
+            this.updateSignatoryInfoInSession(session, body)
+            return this.redirect(CHECK_YOUR_ANSWERS_URI)
         } else {
+            const token: string = this.session.getAccessToken(this.httpContext.request)
             await this.directorService.updateSignatory(token, session, body)
-            redirectUri = WAIT_FOR_OTHERS_TO_SIGN_URI
+            this.cleanUpSession(session)
+            this.session.setDissolutionSession(this.httpContext.request, session)
+            return this.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
         }
-
-        this.cleanUpSession(session)
-
-        return this.redirect(redirectUri)
     }
 
     private cleanUpSession (session: DissolutionSession) {
         delete session.signatoryToEdit
         delete session.isFromCheckAnswers
-        this.session.setDissolutionSession(this.httpContext.request, session)
     }
 
     private async renderView (
@@ -137,21 +126,67 @@ export class ChangeDetailsController extends BaseController {
         return session.isFromCheckAnswers ? CHECK_YOUR_ANSWERS_URI : WAIT_FOR_OTHERS_TO_SIGN_URI
     }
 
-    private updateSignatoryInSession(session: DissolutionSession, body: ChangeDetailsFormModel, directorsToSign: DirectorToSign[]) {
-        const updateIndex = directorsToSign?.findIndex((director) => director.id === session.signatoryIdToEdit)
-        if (updateIndex === undefined || updateIndex === null || updateIndex < 0) {
+    private updateSignatoryInfoInSession (session: DissolutionSession, body: ChangeDetailsFormModel) {
+        const directorsToSign = session.directorsToSign
+        if (!directorsToSign) {
+            throw new NotFoundError("Could not retrieve signatories from session")
+        }
+        const updateIndex = directorsToSign.findIndex((director) => director.id === session.signatoryIdToEdit)
+        if (updateIndex < 0) {
             throw new NotFoundError("Signatory ID not found in session")
         }
-        if (directorsToSign[updateIndex].onBehalfName) {
-            directorsToSign[updateIndex].email = body.onBehalfEmail
-            directorsToSign[updateIndex].onBehalfName = body.onBehalfName
-        } else {
-            directorsToSign[updateIndex].email = body.directorEmail
-        }
-        session.directorsToSign = directorsToSign
+
+        session.directorsToSign = this.withSignatoryDetailsFromForm(session.signatoryIdToEdit!, directorsToSign, body)
+
+        session.defineSignatoryInfoForm = this.withUpdatedDefineSignatoryInfoForm(
+            session.signatoryIdToEdit!,
+            session.defineSignatoryInfoForm || {},
+            body)
+
+        this.cleanUpSession(session)
+        this.session.setDissolutionSession(this.httpContext.request, session)
     }
 
-    private getSignatoryFromSession(session: DissolutionSession) {
+    private withUpdatedDefineSignatoryInfoForm (
+        signatoryId: string,
+        defineSignatoryInfoFormModel: DefineSignatoryInfoFormModel,
+        changeDetailsFormModel: ChangeDetailsFormModel
+    ): DefineSignatoryInfoFormModel {
+        const directorEmailKey = `directorEmail_${signatoryId}`
+        const onBehalfNameKey = `onBehalfName_${signatoryId}`
+        const onBehalfEmailKey = `onBehalfEmail_${signatoryId}`
+
+        const isOnBehalf = !!defineSignatoryInfoFormModel[onBehalfNameKey] && defineSignatoryInfoFormModel[onBehalfNameKey] !== ""
+
+        return isOnBehalf
+            ? {
+                ...defineSignatoryInfoFormModel,
+                [onBehalfNameKey]: changeDetailsFormModel.onBehalfName ?? "",
+                [onBehalfEmailKey]: changeDetailsFormModel.onBehalfEmail ?? ""
+            }
+            : {
+                ...defineSignatoryInfoFormModel,
+                [directorEmailKey]: changeDetailsFormModel.directorEmail ?? ""
+            }
+    }
+
+    private withSignatoryDetailsFromForm (
+        signatoryId: string,
+        directorsToSign: DirectorToSign[],
+        body: ChangeDetailsFormModel
+    ): DirectorToSign[] {
+        return directorsToSign.map((director) =>
+            director.id !== signatoryId
+                ? director
+                : {
+                    ...director,
+                    email: director.onBehalfName ? body.onBehalfEmail : body.directorEmail,
+                    ...(director.onBehalfName ? { onBehalfName: body.onBehalfName } : {})
+                }
+        )
+    }
+
+    private getSignatoryFromSession (session: DissolutionSession) {
         const directorsToSign = session.directorsToSign
         if (!directorsToSign) {
             throw new NotFoundError("Signatories not found in session")
@@ -163,10 +198,10 @@ export class ChangeDetailsController extends BaseController {
         return this.directorMapper.mapToDissolutionDirector(directorToEdit)
     }
 
-    private async getSignatoryFromDissolution(session: DissolutionSession) {
+    private async getSignatoryFromDissolution (session: DissolutionSession) {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const signatory = await this.directorService.getSignatoryToEdit(token, session)
-        if(!signatory) {
+        if (!signatory) {
             throw new NotFoundError("Signatory to edit not found in session")
         }
         return signatory
