@@ -98,7 +98,7 @@
               text: errors.confirmation
             } if errors.confirmation,
             hint: { 
-              text: "For {{ approvalModel.officerType }}s that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
+              text: "For " + (approvalModel.officerType) + "s that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application."
             } if approvalModel.isCorporateOfficer,
             items: [
               {
