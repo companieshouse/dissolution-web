@@ -14,6 +14,8 @@ import SessionService from "app/services/session/session.service"
 
 interface ViewModel {
   applicationReferenceNumber: string,
+  companyNumber: string,
+  companyName: string,
   officerType: OfficerType,
   paymentType: PaymentType,
   isMultiDirector: boolean,
@@ -39,6 +41,8 @@ export class ViewFinalConfirmationController extends BaseController {
 
         const viewModel: ViewModel = {
             applicationReferenceNumber: this.getApplicationReferenceNumber(),
+            companyNumber: dissolution!.company_number,
+            companyName: dissolution!.company_name,
             officerType: dissolutionSession.officerType!,
             paymentType: dissolutionSession.paymentType!,
             isMultiDirector: dissolution!.directors.length > 1,

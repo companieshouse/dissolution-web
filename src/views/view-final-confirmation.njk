@@ -1,6 +1,7 @@
 {% extends 'layout.njk' %}
 
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
 {% set title = "View final confirmation - " + pageTitleSuffix %}
@@ -16,17 +17,34 @@
         })
       }}
 
-      <p class="govuk-body">We will email you within 2 working days to let you know if the application has been accepted or rejected.</p>
+      {{
+        govukSummaryList({
+          rows: [
+            {
+              key: { text: officerType | asCompanyDisplayName(true) + ' number' },
+              value: { text: companyNumber }
+            },
+            {
+              key: { text: officerType | asCompanyDisplayName(true) + ' name' },
+              value: { text: companyName }
+            }
+          ]
+        })
+      }}
 
-      <h2 class="govuk-heading-m" id="first-header">What to do next</h2>
+      <p class="govuk-body">We'll email you to confirm that we've received the application. We'll email you again within 2 working days to let you know if the application has been accepted or rejected.</p>
 
-      <p id="inform" class="govuk-body">
-        A strike off notice for the company will be published in the local Gazette. After 2 months, the notice will expire. In this time, if nobody has objected to the company closing, it will be removed from the register.
-
-      <h2 class="govuk-heading-s">{{ officerType | capitalize }}s must inform all interested parties</h2>
-      <p class="govuk-body">A copy of the signed application to close the company must be sent to all interested parties within 7 days of it being submitted. You can download a PDF of the signed application by signing back in to the Apply to strike off and dissolve a company service.  A full list of interested parties can be found here:
-      <a href="https://www.gov.uk/government/publications/company-strike-off-dissolution-and-restoration/strike-off-dissolution-and-restoration#how-to-apply-for-strike-off-and-who-to-tell"
-      target="_blank" class="govuk-link piwik-event" data-event-id="confirmation-read-guidance-link">full list of parties you must tell about the company closing (opens in a new tab)</a>.</p>
+      <h2 class="govuk-heading-m">{{ officerType | capitalize }}s must inform all interested parties</h2>
+      <p class="govuk-body">
+        The {{ officerType }}s must send a copy to all interested parties within 7 days of making the application.
+        </p>
+      <p class="govuk-body">
+        <a id="certificate-download" href="{{ Paths.CERTIFICATE_DOWNLOAD_URI }}" target="_blank" class="govuk-link" data-event-id="download-signed-application-link">Download the signed copy of the application (opens in new tab)</a>.
+      </p>
+      <p class="govuk-body">
+         Read the <a href="https://www.gov.uk/government/publications/striking-off-or-dissolving-a-limited-company/striking-off-or-dissolving-a-limited-company#how-to-apply-and-who-to-tell"
+      target="_blank" class="govuk-link piwik-event" data-event-id="confirmation-read-guidance-link">full list of interested parties to tell about the company closing (opens in new tab)</a>.
+      </p>
 
       {{
         govukWarningText({
@@ -35,8 +53,11 @@
         })
       }}
 
-      <p class="govuk-body"><a id="certificate-download" href="{{ Paths.CERTIFICATE_DOWNLOAD_URI }}" target="_blank" class="govuk-link" data-event-id="download-signed-application-link">Download the signed copy of the application (opens in a new tab)</a>.</p>
-      <p class="govuk-body govuk-!-margin-top-8">This is a new service. Help us improve it by providing <a href="{{ confirmationFeedbackLink }}" target="_blank" data-event-id="feedback-link">feedback (opens in a new tab)</a>.</p>
+      <h2 class="govuk-heading-m">What happens next</h2>
+      <p class="govuk-body">
+        We'll publish a strike off notice for the company in the relevant Gazette. After 2 months, unless there is an objection to the company closing, another notice will be published in the relevant Gazette and the company will be dissolved.
+      </p>
+      <p class="govuk-body">This is a new service. Help us improve it by providing <a href="{{ confirmationFeedbackLink }}" target="_blank" data-event-id="feedback-link">feedback (opens in a new tab)</a>.</p>
     </div>
   </div>
   {% if piwik %}
