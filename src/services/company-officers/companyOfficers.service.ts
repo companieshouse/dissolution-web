@@ -60,14 +60,14 @@ export default class CompanyOfficersService {
             const response: Resource<CompanyOfficers> = await this.client.getCompanyOfficers(token, companyNumber)
             if (!response.resource) return undefined
             return response.resource.items
-        })());
+        })())
 
-        const officer = officers?.find((item: CompanyOfficer) => this.extractOfficerId(item) === officerId);
+        const officer = officers?.find((item: CompanyOfficer) => this.extractOfficerId(item) === officerId)
         if (!officer) {
-            console.warn(`[WARN] Officer not found for officerId: ${officerId} in company: ${companyNumber}`);
-            return undefined;
+            console.warn(`[WARN] Officer not found for officerId: ${officerId} in company: ${companyNumber}`)
+            return undefined
         }
-        return officer.officerRole as OfficerRole;
+        return officer.officerRole as OfficerRole
     }
 
     /**
