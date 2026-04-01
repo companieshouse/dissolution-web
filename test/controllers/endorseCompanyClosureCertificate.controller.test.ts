@@ -49,10 +49,10 @@ describe("EndorseCompanyClosureCertificateController", () => {
     const CONFIRMATION_LABEL_CORPORATE = `I confirm that I am  ${ON_BEHALF_NAME} and that I am authorised by ${COMPANY_NAME_VALUE} to sign this application on its behalf`
     const CONFIRMATION_LABEL_LLP_MEMBER = `I confirm that I am ${APPLICANT_NAME} and I am a member of ${COMPANY_NAME_VALUE}`
     // Hint text for corporate officer confirmation checkbox
-    const OFFICER_TYPE_MEMBER_PLURAL = OfficerType.MEMBER.toLowerCase() + 's';
-    const OFFICER_TYPE_DIRECTOR_PLURAL = OfficerType.DIRECTOR.toLowerCase() + 's';
-    const HINT_TEXT_MEMBER = `For ${OFFICER_TYPE_MEMBER_PLURAL} that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application.`;
-    const HINT_TEXT_DIRECTOR = `For ${OFFICER_TYPE_DIRECTOR_PLURAL} that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application.`;
+    const OFFICER_TYPE_MEMBER_PLURAL = OfficerType.MEMBER.toLowerCase() + "s"
+    const OFFICER_TYPE_DIRECTOR_PLURAL = OfficerType.DIRECTOR.toLowerCase() + "s"
+    const HINT_TEXT_MEMBER = `For ${OFFICER_TYPE_MEMBER_PLURAL} that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application.`
+    const HINT_TEXT_DIRECTOR = `For ${OFFICER_TYPE_DIRECTOR_PLURAL} that are corporate bodies, a person authorised to sign on behalf of that corporate body must sign the application.`
 
     // Error message constants for validation
     const CONFIRMATION_ERROR_NON_CORPORATE = "Confirm that you are the named director of this company"
