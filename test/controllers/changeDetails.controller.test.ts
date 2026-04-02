@@ -29,7 +29,7 @@ describe("ChangeDetailsController", () => {
     let session: SessionService
     let directorService: DissolutionDirectorService
 
-    const SIGNATORY_ID = "abc123"
+    const SIGNATORY_ID = "aBc123"
 
     beforeEach(() => {
         session = mock(SessionService)
@@ -349,7 +349,7 @@ describe("ChangeDetailsController", () => {
                 .withSignatoryIdToEdit(SIGNATORY_ID)
                 .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_ID).withEmail("director@mail.com").withName("Mr Accountant"))
                 .withDefineSignatoryInfoForm({
-                    [`directorEmail_${SIGNATORY_ID}`]: "old@mail.com",
+                    [`directorEmail_${SIGNATORY_ID.toLowerCase()}`]: "old@mail.com",
                 })
                 .withIsFromCheckAnswers(true)
                 .withSignatoryToEdit(aDissolutionGetDirector().withName("Mr Accountant").build())
@@ -372,12 +372,12 @@ describe("ChangeDetailsController", () => {
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, CHECK_YOUR_ANSWERS_URI)
             const updatedDefineSignatoryInfoForm = dissolutionSession.defineSignatoryInfoForm!
-            assert.equal(updatedDefineSignatoryInfoForm[`directorEmail_${SIGNATORY_ID}`], updatedEmail)
-            assert.isUndefined(updatedDefineSignatoryInfoForm[`onBehalfName_${SIGNATORY_ID}`])
-            assert.isUndefined(updatedDefineSignatoryInfoForm[`onBehalfEmail_${SIGNATORY_ID}`])
+            assert.equal(updatedDefineSignatoryInfoForm[`directorEmail_${SIGNATORY_ID.toLowerCase()}`], updatedEmail)
+            assert.isUndefined(updatedDefineSignatoryInfoForm[`onBehalfName_${SIGNATORY_ID.toLowerCase()}`])
+            assert.isUndefined(updatedDefineSignatoryInfoForm[`onBehalfEmail_${SIGNATORY_ID.toLowerCase()}`])
         })
 
-        it("should update the signatory in session and redirect to the check your answers screen if validation passes for a corporate director", async () => {
+        it("should update the signatory info in session and redirect to the check your answers screen if validation passes for a corporate director", async () => {
             const isFromCheckAnswers = true
             const updatedName = "Mr Accountant Updated"
             const updatedEmail = "updated.accountant@mail.com"
@@ -386,8 +386,8 @@ describe("ChangeDetailsController", () => {
                 .withSignatoryIdToEdit(SIGNATORY_ID)
                 .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_ID).withEmail("director@mail.com").withOnBehalfName("Mr Accountant"))
                 .withDefineSignatoryInfoForm({
-                    [`onBehalfName_${SIGNATORY_ID}`]: "oldName",
-                    [`onBehalfEmail_${SIGNATORY_ID}`]: "old@mail.com"
+                    [`onBehalfName_${SIGNATORY_ID.toLowerCase()}`]: "oldName",
+                    [`onBehalfEmail_${SIGNATORY_ID.toLowerCase()}`]: "old@mail.com"
                 })
                 .withIsFromCheckAnswers(isFromCheckAnswers)
                 .withSignatoryToEdit(aDissolutionGetDirector().withOnBehalfName("Mr Accountant").build())
@@ -412,9 +412,9 @@ describe("ChangeDetailsController", () => {
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, CHECK_YOUR_ANSWERS_URI)
             const updatedDefineSignatoryInfoForm = dissolutionSession.defineSignatoryInfoForm!
-            assert.equal(updatedDefineSignatoryInfoForm[`onBehalfName_${SIGNATORY_ID}`], updatedName)
-            assert.equal(updatedDefineSignatoryInfoForm[`onBehalfEmail_${SIGNATORY_ID}`], updatedEmail)
-            assert.isUndefined(updatedDefineSignatoryInfoForm[`directorEmail_${SIGNATORY_ID}`])
+            assert.equal(updatedDefineSignatoryInfoForm[`onBehalfName_${SIGNATORY_ID.toLowerCase()}`], updatedName)
+            assert.equal(updatedDefineSignatoryInfoForm[`onBehalfEmail_${SIGNATORY_ID.toLowerCase()}`], updatedEmail)
+            assert.isUndefined(updatedDefineSignatoryInfoForm[`directorEmail_${SIGNATORY_ID.toLowerCase()}`])
         })
 
         it("should return a 404 if isFromCheckAnswers is true and no signatories in session", async () => {

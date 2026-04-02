@@ -152,9 +152,13 @@ export class ChangeDetailsController extends BaseController {
         defineSignatoryInfoFormModel: DefineSignatoryInfoFormModel,
         changeDetailsFormModel: ChangeDetailsFormModel
     ): DefineSignatoryInfoFormModel {
-        const directorEmailKey = `directorEmail_${signatoryId}`
-        const onBehalfNameKey = `onBehalfName_${signatoryId}`
-        const onBehalfEmailKey = `onBehalfEmail_${signatoryId}`
+
+        // The define-signatory-info view lowers the id's in the view...
+        const id = signatoryId.toLowerCase()
+
+        const directorEmailKey = `directorEmail_${id}`
+        const onBehalfNameKey = `onBehalfName_${id}`
+        const onBehalfEmailKey = `onBehalfEmail_${id}`
 
         const isOnBehalf = !!defineSignatoryInfoFormModel[onBehalfNameKey] && defineSignatoryInfoFormModel[onBehalfNameKey] !== ""
 
