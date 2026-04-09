@@ -119,7 +119,7 @@ export class SelectDirectorController extends BaseController {
 
         if (isCorporateOfficer(selectedDirector.officerRole)) {
             const onBehalfNameKey = `onBehalfName_${selectedDirector.id}`
-            const onBehalfName = (body[onBehalfNameKey] || "").toString().trim()
+            const onBehalfName = (body[onBehalfNameKey] ?? "").toString().trim()
             if (!onBehalfName) {
                 throw new Error(`onBehalfName for key ${onBehalfNameKey} must be a non-empty string`)
             }
