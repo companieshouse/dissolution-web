@@ -96,9 +96,6 @@ export class DefineSignatoryInfoController extends BaseController {
     }
 
     private updateSession (session: DissolutionSession, body: DefineSignatoryInfoFormModel): void {
-        if (!this.hasFormChanged(session, body)) {
-            return
-        }
 
         const updatedSignatories = this.signatoryService.updateSignatoriesWithContactInfo(session.directorsToSign || [], body)
 
@@ -109,9 +106,5 @@ export class DefineSignatoryInfoController extends BaseController {
         }
 
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
-    }
-
-    private hasFormChanged (session: DissolutionSession, body: DefineSignatoryInfoFormModel): boolean {
-        return JSON.stringify(session.defineSignatoryInfoForm) !== JSON.stringify(body)
     }
 }

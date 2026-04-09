@@ -23,10 +23,9 @@ export class DirectorDetailsBuilder {
 
     build (): DirectorDetails {
         return {
-            ...({} as DirectorDetails),
             id: this._id,
             name: this._name,
-            officerRole: this._officerRole as OfficerRole
+            officerRole: this._officerRole!
         }
     }
 }

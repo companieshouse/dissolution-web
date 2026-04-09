@@ -1,20 +1,22 @@
 import "reflect-metadata"
 
-import { provide } from "inversify-binding-decorators"
+import {provide} from "inversify-binding-decorators"
 
-import { DirectorToSign } from "app/models/session/directorToSign.model"
+import {DirectorToSign} from "app/models/session/directorToSign.model"
 import DirectorDetails from "app/models/view/directorDetails.model"
+import SelectedDirectorDetails from "app/models/view/selectedDirectorDetails.model"
 
 @provide(DirectorToSignMapper)
 export default class DirectorToSignMapper {
 
-    public mapAsApplicant (selectedDirector: DirectorDetails, email: string): DirectorToSign {
+    public mapAsApplicant(selectedDirector: SelectedDirectorDetails, email: string): DirectorToSign {
         return {
             id: selectedDirector.id,
             name: selectedDirector.name,
             officerRole: selectedDirector.officerRole,
             email,
-            isApplicant: true
+            isApplicant: true,
+            ...(selectedDirector.onBehalfName !== undefined && { onBehalfName: selectedDirector.onBehalfName })
         }
     }
 

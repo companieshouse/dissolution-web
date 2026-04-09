@@ -1,0 +1,62 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{#
+  Macro that renders govukRadios for the select-director page. It builds the
+  items array (including conditional corporate input) and returns the rendered
+  radios HTML.
+#}
+
+{% macro selectDirectorRadios(directors, data, errors, officerType) %}
+  {% set items = [] %}
+  {% for director in directors %}
+    {% set onBehalfNameId = "on-behalf-name_" + director.id %}
+    {% set onBehalfNameName = "onBehalfName_" + director.id %}
+
+    {% set onBehalfNameInput = '' %}
+    {% if director.isCorporate %}
+      {% set onBehalfNameInput = govukInput({
+        id: onBehalfNameId,
+        name: onBehalfNameName,
+        label: { text: "What is your full name?" },
+        hint: { text: "You must be authorised by this corporate director to sign the application on its behalf." },
+        classes: "govuk-!-width-full",
+        value: data[onBehalfNameName] if data,
+        errorMessage: { text: errors[onBehalfNameName] } if errors[onBehalfNameName]
+      }) %}
+    {% endif %}
+
+    {% set _ = items.push({
+      value: director.id,
+      text: director.name,
+      checked: data.director == director.id,
+      attributes: { "data-event-value": "director-radio" },
+      conditional: { html: onBehalfNameInput } if onBehalfNameInput
+    }) %}
+  {% endfor %}
+
+  {# add divider #}
+  {% set _ = items.push({ divider: 'or' }) %}
+
+  {# default "not a director/member" radio #}
+  {% set _ = items.push({
+    value: 'other',
+    text: 'I am not a ' + officerType + ' of this company',
+    checked: data.director == 'other',
+    attributes: { "data-event-value": "not-a-director-radio" }
+  }) %}
+
+  {{ govukRadios({
+    idPrefix: "select-director",
+    name: "director",
+    fieldset: {
+      legend: {
+        text: "Which " + officerType + " are you?",
+        isPageHeading: true,
+        classes: "govuk-fieldset__legend--l"
+      }
+    },
+    errorMessage: { text: errors.director } if errors and errors.director,
+    items: items
+  }) }}
+{% endmacro %}

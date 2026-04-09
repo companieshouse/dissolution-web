@@ -6,7 +6,9 @@ import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInf
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 
 export class DissolutionSessionBuilder {
-    officerType?: OfficerType
+
+    companyNumber?: string = "01777777"
+    officerType?: OfficerType = OfficerType.DIRECTOR
     directorsToSign: DirectorToSign[] = []
     defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
     private _isMultiDirector?: boolean
@@ -54,8 +56,14 @@ export class DissolutionSessionBuilder {
         return this
     }
 
+    public withCompanyNumber (companyNumber: string): this {
+        this.companyNumber = companyNumber
+        return this
+    }
+
     public build (): DissolutionSession {
         return {
+            companyNumber: this.companyNumber,
             officerType: this.officerType,
             directorsToSign: this.directorsToSign,
             defineSignatoryInfoForm: this.defineSignatoryInfoForm,

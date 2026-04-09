@@ -221,26 +221,6 @@ describe("SelectSignatoriesController", () => {
         })
 
         describe("session", () => {
-            it("should not update session if nothing has changed", async () => {
-                const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
-
-                dissolutionSession.selectSignatoriesForm = form
-
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-                ])
-                when(validator.validate(deepEqual(form), anything())).thenReturn(null)
-
-                const app = initApp()
-
-                await request(app)
-                    .post(SELECT_SIGNATORIES_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
-
-                verify(session.setDissolutionSession(anything(), anything())).never()
-            })
 
             it("should store the form in session if validation passes", async () => {
                 const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
