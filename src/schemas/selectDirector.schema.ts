@@ -4,6 +4,7 @@ import OfficerType from "app/models/dto/officerType.enum"
 import DirectorDetails from "app/models/view/directorDetails.model"
 import {isCorporateOfficer} from "app/models/dto/officerRole.enum"
 
+
 export default function selectDirectorSchema (officerType: OfficerType, directors?: DirectorDetails[]): Joi.ObjectSchema {
 
     const allowedIds: string[] = (directors || []).map(d => d.id)
@@ -26,28 +27,32 @@ export default function selectDirectorSchema (officerType: OfficerType, director
             })
     })
 
-    ;(directors || []).forEach(d => {
-        if (isCorporateOfficer(d.officerRole)) {
+    ;(directors || [])
+        .filter(d => isCorporateOfficer(d.officerRole))
+        .forEach(d => {
             const fieldName = `onBehalfName_${d.id}`
             const fieldSchema = Joi.string()
                 .when("director", {
                     is: d.id,
-                    then: Joi.string()
-                        .required()
-                        .max(250)
-                        .pattern(/\S/, { name: "non-whitespace" })
-                        .messages({
-                            "any.required": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
-                            "string.empty": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
-                            "string.max": `Name of authorised person signing must be 250 characters or less`,
-                            "string.pattern.name": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`
-                        }),
+                    then: onBehalfNameValidationSchema(officerType),
                     otherwise: Joi.string().allow("").optional()
                 })
 
-            schema = schema.keys({ [fieldName]: fieldSchema })
-        }
-    })
+            schema = schema.keys({[fieldName]: fieldSchema})
+        })
 
     return schema
+}
+
+function onBehalfNameValidationSchema(officerType: OfficerType) {
+    return Joi.string()
+        .required()
+        .max(250)
+        .pattern(/\S/, { name: "non-whitespace" })
+        .messages({
+            "any.required": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
+            "string.empty": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
+            "string.max": `Name of authorised person signing must be 250 characters or less`,
+            "string.pattern.name": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`
+        })
 }
