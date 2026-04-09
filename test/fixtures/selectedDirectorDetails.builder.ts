@@ -4,7 +4,7 @@ import OfficerRole from "app/models/dto/officerRole.enum"
 export class SelectedDirectorDetailsBuilder {
     private _id: string = "default-id"
     private _name: string = "default-name"
-    private _officerRole: string = OfficerRole.DIRECTOR
+    private _officerRole: OfficerRole = OfficerRole.DIRECTOR
     private _onBehalfName?: string
 
     withId(id: string): this {
@@ -17,7 +17,7 @@ export class SelectedDirectorDetailsBuilder {
         return this
     }
 
-    withOfficerRole(officerRole: string): this {
+    withOfficerRole(officerRole: OfficerRole): this {
         this._officerRole = officerRole
         return this
     }

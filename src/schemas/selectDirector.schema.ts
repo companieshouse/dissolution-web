@@ -32,11 +32,16 @@ export default function selectDirectorSchema (officerType: OfficerType, director
             const fieldSchema = Joi.string()
                 .when("director", {
                     is: d.id,
-                    then: Joi.string().trim().required().max(250).messages({
-                        "any.required": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
-                        "string.empty": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
-                        "string.max": `Name of authorised person signing must be 250 characters or less`
-                    }),
+                    then: Joi.string()
+                        .required()
+                        .max(250)
+                        .pattern(/\S/, { name: "non-whitespace" })
+                        .messages({
+                            "any.required": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
+                            "string.empty": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`,
+                            "string.max": `Name of authorised person signing must be 250 characters or less`,
+                            "string.pattern.name": `Enter the name of the authorised person who will sign on behalf of the corporate ${officerType}`
+                        }),
                     otherwise: Joi.string().allow("").optional()
                 })
 

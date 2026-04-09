@@ -111,6 +111,18 @@ describe("Select Director Schema", () => {
             expectedError: "Enter the name of the authorised person who will sign on behalf of the corporate member"
         },
         {
+            scenario: "empty whitespace name",
+            form: aSelectDirectorFormModel().withDirector("abc123").withOnBehalfName("abc123", "   ").build(),
+            officerType: OfficerType.DIRECTOR,
+            expectedError: "Enter the name of the authorised person who will sign on behalf of the corporate director"
+        },
+        {
+            scenario: "empty whitespace name",
+            form: aSelectDirectorFormModel().withDirector("abc123").withOnBehalfName("abc123", "   ").build(),
+            officerType: OfficerType.MEMBER,
+            expectedError: "Enter the name of the authorised person who will sign on behalf of the corporate member"
+        },
+        {
             scenario: "name too long",
             form: aSelectDirectorFormModel().withDirector("abc123").withOnBehalfName("abc123", "X".repeat(251)).build(),
             officerType: OfficerType.DIRECTOR,

@@ -5,10 +5,6 @@
   Macro that renders govukRadios for the select-director page. It builds the
   items array (including conditional corporate input) and returns the rendered
   radios HTML.
-
-  Usage in a parent template:
-    {% from 'components/select-director-items.njk' import selectDirectorRadios %}
-    {{ selectDirectorRadios(directors, data, errors, officerType) }}
 #}
 
 {% macro selectDirectorRadios(directors, data, errors, officerType) %}

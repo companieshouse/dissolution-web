@@ -119,7 +119,11 @@ export class SelectDirectorController extends BaseController {
 
         if (isCorporateOfficer(selectedDirector.officerRole)) {
             const onBehalfNameKey = `onBehalfName_${selectedDirector.id}`
-            dto.onBehalfName = body[onBehalfNameKey] || ""
+            const onBehalfName = (body[onBehalfNameKey] || "").toString().trim()
+            if (!onBehalfName) {
+                throw new Error(`onBehalfName for key ${onBehalfNameKey} must be a non-empty string`)
+            }
+            dto.onBehalfName = onBehalfName
         }
         return dto
     }
@@ -146,8 +150,8 @@ export class SelectDirectorController extends BaseController {
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
     }
 
-    private hasFormChanged (body: SelectDirectorFormModel, session: DissolutionSession): boolean {
-        return session.selectDirectorForm?.director !== body.director
+    private hasFormChanged(body: SelectDirectorFormModel, session: DissolutionSession): boolean {
+        return JSON.stringify(session.selectDirectorForm) !== JSON.stringify(body)
     }
 
     private prepareDirectorsToSign (
