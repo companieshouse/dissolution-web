@@ -135,10 +135,6 @@ export class SelectDirectorController extends BaseController {
         selectedDirector?: Optional<SelectedDirectorDetails>
     ): void {
 
-        if (!this.hasFormChanged(body, session)) {
-            return
-        }
-
         const updatedSession: DissolutionSession = {
             ...session,
             selectDirectorForm: body,
@@ -148,10 +144,6 @@ export class SelectDirectorController extends BaseController {
         }
 
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
-    }
-
-    private hasFormChanged(body: SelectDirectorFormModel, session: DissolutionSession): boolean {
-        return JSON.stringify(session.selectDirectorForm) !== JSON.stringify(body)
     }
 
     private prepareDirectorsToSign (

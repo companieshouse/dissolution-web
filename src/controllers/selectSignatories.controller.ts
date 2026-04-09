@@ -109,9 +109,6 @@ export class SelectSignatoriesController extends BaseController {
     }
 
     private updateSession (session: DissolutionSession, body: SelectSignatoriesFormModel, signatories: DirectorDetails[]): void {
-        if (!this.hasFormChanged(body, session)) {
-            return
-        }
 
         const updatedSession: DissolutionSession = {
             ...session,
@@ -120,10 +117,6 @@ export class SelectSignatoriesController extends BaseController {
         }
 
         this.session.setDissolutionSession(this.httpContext.request, updatedSession)
-    }
-
-    private hasFormChanged (body: SelectSignatoriesFormModel, session: DissolutionSession): boolean {
-        return JSON.stringify(session.selectSignatoriesForm!) !== JSON.stringify(body)
     }
 
     private getDirectorsToSign (session: DissolutionSession, body: SelectSignatoriesFormModel,

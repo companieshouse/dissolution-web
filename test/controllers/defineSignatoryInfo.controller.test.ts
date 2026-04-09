@@ -204,25 +204,6 @@ describe("DefineSignatoryInfoController", () => {
         })
 
         describe("session", () => {
-            it("should not update session if nothing has changed", async () => {
-
-                const form = aDefineSignatoryInfoForm()
-                    .withDirectorEmail(SIGNATORY_1_ID_LOWER, "director@mail.com")
-                    .build()
-
-                when(session.getDissolutionSession(anything())).thenReturn(aDissolutionSession()
-                    .withDirectorToSign(aDirectorToSign().withId(SIGNATORY_1_ID).withName("Standard signatory").withOfficerRole(OfficerRole.DIRECTOR))
-                    .withDefineSignatoryInfoForm(form).build())
-
-                const app = initApp()
-
-                await request(app)
-                    .post(DEFINE_SIGNATORY_INFO_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
-
-                verify(session.setDissolutionSession(anything(), anything())).never()
-            })
 
             it("should store the form in session if validation passes", async () => {
 

@@ -218,25 +218,6 @@ describe("SelectDirectorController", () => {
         })
 
         describe("session", () => {
-            it("should not update session if nothing has changed", async () => {
-                const form: SelectDirectorFormModel = generateSelectDirectorFormModel(DIRECTOR_1_ID)
-
-                dissolutionSession.selectDirectorForm = form
-
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-                    {...generateDirectorDetails(), id: DIRECTOR_1_ID}
-                ])
-                when(validator.validate(deepEqual(form), selectDirectorSchema(dissolutionSession.officerType!))).thenReturn(null)
-
-                const app = initApp()
-
-                await request(app)
-                    .post(SELECT_DIRECTOR_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
-
-                verify(session.setDissolutionSession(anything(), anything())).never()
-            })
 
             it("should store the form in session if validation passes", async () => {
                 const form: SelectDirectorFormModel = aSelectDirectorFormModel().withDirector(DIRECTOR_1_ID).withOnBehalfName(DIRECTOR_1_ID, "Authorised person").build()
@@ -301,15 +282,15 @@ describe("SelectDirectorController", () => {
                 })
 
                 it("should store the director details with an onBehalfName when corporate director selected", async () => {
-                    const directorName: string = "Some Director"
+                    const corporateDirectorName: string = "a-corporate-director-name"
+                    const corporateDirectorId: string = "corporate-director-id"
                     const directorEmail: string = "some@mail.com"
 
                     const directors = [
-                        // aDirectorDetails().withId("standard-director-id").withName("Mr Standard Director").build(),
-                        aDirectorDetails().withId("corporate-director-id").withName("Corporate Director").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
+                        aDirectorDetails().withId(corporateDirectorId).withName(corporateDirectorName).withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
                     ]
 
-                    const form: SelectDirectorFormModel = aSelectDirectorFormModel().withDirector("corporate-director-id").withOnBehalfName("corporate-director-id", "Joe").build()
+                    const form: SelectDirectorFormModel = aSelectDirectorFormModel().withDirector(corporateDirectorId).withOnBehalfName(corporateDirectorId, "Gus").build()
 
                     when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve(directors)
                     when(validator.validate(anything(), anything())).thenReturn(null)
@@ -327,67 +308,70 @@ describe("SelectDirectorController", () => {
                     assert.isFalse(updatedSession.isMultiDirector)
                     assert.equal(updatedSession.directorsToSign!.length, 1)
                     assert.deepEqual(updatedSession.directorsToSign![0], {
-                        "id": "corporate-director-id",
-                        "name": "Corporate Director",
+                        "id": corporateDirectorId,
+                        "name": corporateDirectorName,
                         "officerRole": OfficerRole.CORPORATE_DIRECTOR,
                         "email": directorEmail,
                         "isApplicant": true,
-                        "onBehalfName": "Joe"
+                        "onBehalfName": "Gus"
                     })
                 })
             })
 
-            it("should store the director details if applicant is not a director and is a single director company", async () => {
-                const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
+            describe("Applicant is not a director", () => {
 
-                const director: DirectorDetails = {...generateDirectorDetails(), id: DIRECTOR_1_ID}
+                it("should store the director details for a single director company", async () => {
+                    const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
 
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([director])
-                when(validator.validate(deepEqual(form), deepEqual(selectDirectorSchema(dissolutionSession.officerType!)))).thenReturn(null)
+                    const director: DirectorDetails = {...generateDirectorDetails(), id: DIRECTOR_1_ID}
 
-                await request(initApp())
-                    .post(SELECT_DIRECTOR_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([director])
+                    when(validator.validate(deepEqual(form), deepEqual(selectDirectorSchema(dissolutionSession.officerType!)))).thenReturn(null)
 
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+                    await request(initApp())
+                        .post(SELECT_DIRECTOR_URI)
+                        .send(form)
+                        .expect(StatusCodes.MOVED_TEMPORARILY)
 
-                assert.isFalse(updatedSession.isApplicantADirector)
-                assert.isFalse(updatedSession.isMultiDirector)
-                assert.equal(updatedSession.directorsToSign!.length, 1)
-                assert.deepEqual(updatedSession.directorsToSign![0], {
-                    "id": DIRECTOR_1_ID,
-                    "isApplicant": false,
-                    "name": "Some Director",
-                    "officerRole": OfficerRole.DIRECTOR,
+                    const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+                    const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+
+                    assert.isFalse(updatedSession.isApplicantADirector)
+                    assert.isFalse(updatedSession.isMultiDirector)
+                    assert.equal(updatedSession.directorsToSign!.length, 1)
+                    assert.deepEqual(updatedSession.directorsToSign![0], {
+                        "id": DIRECTOR_1_ID,
+                        "isApplicant": false,
+                        "name": "Some Director",
+                        "officerRole": OfficerRole.DIRECTOR,
+                    })
                 })
-            })
 
-            it("should not store the director details if applicant is not a director and is a multi director company", async () => {
-                const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
+                it("should not store the director details for a multi director company", async () => {
+                    const form: SelectDirectorFormModel = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
 
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
-                    {...generateDirectorDetails(), id: DIRECTOR_1_ID},
-                    {...generateDirectorDetails(), id: DIRECTOR_2_ID}
-                ])
-                when(validator.validate(deepEqual(form), deepEqual(selectDirectorSchema(dissolutionSession.officerType!)))).thenReturn(null)
+                    when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([
+                        {...generateDirectorDetails(), id: DIRECTOR_1_ID},
+                        {...generateDirectorDetails(), id: DIRECTOR_2_ID}
+                    ])
+                    when(validator.validate(deepEqual(form), deepEqual(selectDirectorSchema(dissolutionSession.officerType!)))).thenReturn(null)
 
-                const app = initApp()
+                    const app = initApp()
 
-                await request(app)
-                    .post(SELECT_DIRECTOR_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    await request(app)
+                        .post(SELECT_DIRECTOR_URI)
+                        .send(form)
+                        .expect(StatusCodes.MOVED_TEMPORARILY)
 
-                verify(session.setDissolutionSession(anything(), anything())).once()
+                    verify(session.setDissolutionSession(anything(), anything())).once()
 
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+                    const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+                    const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
-                assert.isFalse(updatedSession.isApplicantADirector)
-                assert.isTrue(updatedSession.isMultiDirector)
-                assert.isEmpty(updatedSession.directorsToSign)
+                    assert.isFalse(updatedSession.isApplicantADirector)
+                    assert.isTrue(updatedSession.isMultiDirector)
+                    assert.isEmpty(updatedSession.directorsToSign)
+                })
             })
         })
 
