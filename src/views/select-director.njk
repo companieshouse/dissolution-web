@@ -2,8 +2,9 @@
 
 {% from 'govuk/components/back-link/macro.njk'     import govukBackLink %}
 {% from 'govuk/components/error-summary/macro.njk' import govukErrorSummary %}
-{% from "govuk/components/radios/macro.njk"        import govukRadios %}
 {% from 'govuk/components/button/macro.njk'        import govukButton %}
+{% from "govuk/components/input/macro.njk"         import govukInput %}
+{% from "components/select-director-radios.njk"    import selectDirectorRadios %}
 
 {% set title = "Which " + officerType + " are you? - " + pageTitleSuffix %}
 
@@ -24,23 +25,7 @@
 
         {% include "components/csrf_token.njk" %}
 
-        {{
-          govukRadios({
-            idPrefix: "select-director",
-            name: "director",
-            fieldset: {
-              legend: {
-                text: "Which " + officerType + " are you?",
-                isPageHeading: true,
-                classes: "govuk-fieldset__legend--l"
-              }
-            },
-            errorMessage: {
-              text: errors.director
-            } if errors.director,
-            items: directors | asSelectDirectorList(officerType, data.director)
-          })
-        }}
+        {{ selectDirectorRadios(directors, data, errors, officerType) }}
 
         {{
           govukButton({

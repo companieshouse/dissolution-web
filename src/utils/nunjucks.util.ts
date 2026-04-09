@@ -9,14 +9,12 @@ import { asDirectorSingleMultiConfirmationGoalId } from "app/filters/asDirectorS
 import { asEmailLabel } from "app/filters/asEmailLabel.filter"
 import { asFormattedDate } from "app/filters/asFormattedDate.filter"
 import { asGovUKErrorList } from "app/filters/asGovUKErrorList.filter"
-import { asSelectDirectorList } from "app/filters/asSelectDirectorList.filter"
 import { asSelectSignatoriesList } from "app/filters/asSelectSignatoriesList.filter"
 import PaymentType from "app/models/dto/paymentType.enum"
 import * as Paths from "app/paths"
 
 export const addFilters = (env: Environment): void => {
     env.addFilter("asGovUKErrorList", asGovUKErrorList)
-    env.addFilter("asSelectDirectorList", asSelectDirectorList)
     env.addFilter("asSelectSignatoriesList", asSelectSignatoriesList)
     env.addFilter("asCompanyTypeText", asCompanyTypeText)
     env.addFilter("asCompanyStatusText", asCompanyStatusText)
