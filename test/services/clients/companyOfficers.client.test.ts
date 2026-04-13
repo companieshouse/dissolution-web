@@ -29,7 +29,7 @@ describe("CompanyOfficersClient", () => {
         it("should fetch and return the company officers for the provided company number", async () => {
             const response: Resource<CompanyOfficers> = generateCompanyOfficersResource()
 
-            when(companyOfficersService.getCompanyOfficers(COMPANY_NUMBER)).thenResolve(response)
+            when(companyOfficersService.getCompanyOfficers(COMPANY_NUMBER, 150)).thenResolve(response)
             when(factory.getCompanyOfficersService(TOKEN)).thenReturn(instance(companyOfficersService))
 
             const result: Resource<CompanyOfficers> = await companyOfficersClient.getCompanyOfficers(TOKEN, COMPANY_NUMBER)

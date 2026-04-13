@@ -14,6 +14,6 @@ export default class CompanyOfficersClient {
     public async getCompanyOfficers (token: string, companyNumber: string): Promise<Resource<CompanyOfficers>> {
         return this.factory
             .getCompanyOfficersService(token)
-            .getCompanyOfficers(companyNumber)
+            .getCompanyOfficers(companyNumber, 150)
     }
 }
