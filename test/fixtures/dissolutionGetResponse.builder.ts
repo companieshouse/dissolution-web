@@ -17,7 +17,7 @@ export class DissolutionGetResponseBuilder {
     private _application_type: ApplicationType = ApplicationType.DS01
     private _company_number: string = "12345678"
     private _company_name: string = "example name"
-    private _created_at: string = new Date().toDateString()
+    private _created_at: string = "2023-01-01T00:00:00.000Z"
     private _created_by: string = "some name"
     private _directors: DissolutionGetDirector[] = []
     private _certificate_key: string = "some-key"

@@ -16,9 +16,9 @@ import {APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI}
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
-import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder";
-import {aDissolutionGetResponse} from "test/fixtures/dissolutionGetResponse.builder";
-import {aDissolutionGetDirector} from "test/fixtures/dissolutionGetDirector.builder";
+import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder"
+import {aDissolutionGetResponse} from "test/fixtures/dissolutionGetResponse.builder"
+import {aDissolutionGetDirector} from "test/fixtures/dissolutionGetDirector.builder"
 
 mockCsrfMiddleware.restore()
 
