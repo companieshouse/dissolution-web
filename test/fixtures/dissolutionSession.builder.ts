@@ -1,5 +1,5 @@
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
+import { DirectorToSign, DirectorToRemind } from "app/models/session/directorToSign.model"
 import { DirectorToSignBuilder } from "./directorToSign.builder"
 import OfficerType from "app/models/dto/officerType.enum"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
@@ -15,6 +15,7 @@ export class DissolutionSessionBuilder {
     signatoryIdToEdit?: string
     signatoryToEdit?: DissolutionGetDirector
     isFromCheckAnswers?: boolean
+    remindDirectorList: DirectorToRemind[] = []
 
     withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {
         this.directorsToSign = directors
@@ -56,6 +57,11 @@ export class DissolutionSessionBuilder {
         return this
     }
 
+    public withRemindDirectorList(remindDirectorList: DirectorToRemind[]): this {
+        this.remindDirectorList = remindDirectorList
+        return this
+    }
+
     public withCompanyNumber (companyNumber: string): this {
         this.companyNumber = companyNumber
         return this
@@ -70,7 +76,8 @@ export class DissolutionSessionBuilder {
             isMultiDirector: this._isMultiDirector,
             signatoryIdToEdit: this.signatoryIdToEdit,
             signatoryToEdit: this.signatoryToEdit,
-            isFromCheckAnswers: this.isFromCheckAnswers
+            isFromCheckAnswers: this.isFromCheckAnswers,
+            remindDirectorList: this.remindDirectorList
         } as DissolutionSession
     }
 }

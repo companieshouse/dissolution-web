@@ -15,7 +15,7 @@ import SessionService from "app/services/session/session.service"
 export class ApplicationStatusController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private readonly session: SessionService,
+    @inject(SessionService) private readonly sessionService: SessionService,
     @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
     @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper
     ) {
@@ -24,11 +24,11 @@ export class ApplicationStatusController extends BaseController {
 
     @httpGet("/:signatoryId/change")
     public async change (@requestParam("signatoryId") signatoryId: string, @queryParam("check_answers") isFromCheckAnswers: string): Promise<RedirectResult> {
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
         dissolutionSession.signatoryIdToEdit = signatoryId
         dissolutionSession.isFromCheckAnswers = isFromCheckAnswers === "true"
 
-        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
         return super.redirect(CHANGE_DETAILS_URI)
     }
@@ -36,10 +36,10 @@ export class ApplicationStatusController extends BaseController {
     @httpGet("/:signatoryEmail/send-email")
     public async resend (@requestParam("signatoryEmail") signatoryEmail: string): Promise<RedirectResult> {
 
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
         const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
-            this.session.getAccessToken(this.httpContext.request),
+            this.sessionService.getAccessToken(this.httpContext.request),
             dissolutionSession
         )
 
@@ -52,7 +52,7 @@ export class ApplicationStatusController extends BaseController {
             }
         })
 
-        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
         return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
     }
