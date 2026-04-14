@@ -33,9 +33,8 @@ export class ApplicationStatusController extends BaseController {
         return super.redirect(CHANGE_DETAILS_URI)
     }
 
-    @httpGet("/:signatoryEmail/send-email")
-    public async resend (@requestParam("signatoryEmail") signatoryEmail: string): Promise<RedirectResult> {
-
+    @httpGet("/:signatoryId/send-email")
+    public async resend (@requestParam("signatoryId") signatoryId: string): Promise<RedirectResult> {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
         const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
@@ -43,11 +42,16 @@ export class ApplicationStatusController extends BaseController {
             dissolutionSession
         )
 
-        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
+        const signatory = dissolution!.directors.find(d => d.officer_id === signatoryId)
+        if (!signatory) {
+            return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+        }
 
-        this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
-            if (signatory.email === signatoryEmail) {
-                const id: string = signatory.id
+        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatory.email)
+
+        this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(s => {
+            if (s.id === signatoryId) {
+                const id: string = s.id
                 dissolutionSession.remindDirectorList.push({ id, reminderSent })
             }
         })

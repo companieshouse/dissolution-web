@@ -108,5 +108,22 @@ describe("ApplicationStatusController", () => {
             assert.equal(dissolutionSession.remindDirectorList[0].id, signatoryId)
             assert.equal(dissolutionSession.remindDirectorList[0].reminderSent, true)
         })
+
+        it("Should redirect to wait for other to sign if signatoryId is invalid", async () => {
+            const companyNumber = "12345678"
+            const invalidSignatoryId = "not-a-real-id"
+            const dissolutionSession = aDissolutionSession().withCompanyNumber(companyNumber).build()
+            const dissolutionGetResponse = aDissolutionGetResponse().build() // No directors with invalidSignatoryId
+
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionGetResponse)
+
+            await request(app)
+                .get(`${APPLICATION_STATUS_URI}/${invalidSignatoryId}/send-email`)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
+
+            assert.equal(dissolutionSession.remindDirectorList.length, 0)
+        })
     })
 })
