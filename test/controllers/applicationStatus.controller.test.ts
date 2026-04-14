@@ -1,49 +1,42 @@
 import "reflect-metadata"
 
-import { assert } from "chai"
-import { Application, Request } from "express"
-import { StatusCodes } from "http-status-codes"
+import {assert} from "chai"
+import {Application, Request} from "express"
+import {StatusCodes} from "http-status-codes"
 import request from "supertest"
-import { anything, capture, instance, mock, verify, when } from "ts-mockito"
-import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
-import { generateDissolutionGetResponse } from "../fixtures/dissolutionApi.fixtures"
-import { generateDirectorToRemind, generateDissolutionSession, EMAIL } from "../fixtures/session.fixtures"
-import { generateViewApplicationStatusModel, generateViewApplicationStatusSignatory } from "../fixtures/viewApplicationStatus.fixtures"
-import { createApp } from "./helpers/application.factory"
+import {anything, capture, instance, mock, verify, when} from "ts-mockito"
+import {ArgCaptor2} from "ts-mockito/lib/capture/ArgCaptor"
+import {generateDissolutionSession} from "../fixtures/session.fixtures"
+import {createApp} from "./helpers/application.factory"
 
 import "app/controllers/applicationStatus.controller"
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
-import { DirectorToRemind } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ViewApplicationStatus } from "app/models/view/viewApplicationStatus.model"
-import { APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
+import {APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder"
+import {aDissolutionGetResponse} from "test/fixtures/dissolutionGetResponse.builder"
+import {aDissolutionGetDirector} from "test/fixtures/dissolutionGetDirector.builder"
 
 mockCsrfMiddleware.restore()
 
 describe("ApplicationStatusController", () => {
 
-    let session: SessionService
+    let sessionService: SessionService
     let dissolutionService: DissolutionService
     let dissolutionSession: DissolutionSession
-    let viewApplicationStatus: ViewApplicationStatus
-    let dissolutionGetResponse: DissolutionGetResponse
-    let viewApplicationStatusMapper: ViewApplicationStatusMapper
     let app: Application
 
     beforeEach(() => {
-        session = mock(SessionService)
+        sessionService = mock(SessionService)
         dissolutionService = mock(DissolutionService)
-        viewApplicationStatusMapper = mock(ViewApplicationStatusMapper)
-        dissolutionGetResponse = generateDissolutionGetResponse()
         dissolutionSession = generateDissolutionSession()
         app = createApp(container => {
-            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(SessionService).toConstantValue(instance(sessionService))
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
-            container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
+            container.rebind(ViewApplicationStatusMapper).toConstantValue(new ViewApplicationStatusMapper())
         })
     })
 
@@ -53,16 +46,16 @@ describe("ApplicationStatusController", () => {
 
             dissolutionSession.signatoryIdToEdit = undefined
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change`)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHANGE_DETAILS_URI)
 
-            verify(session.setDissolutionSession(anything(), anything())).once()
+            verify(sessionService.setDissolutionSession(anything(), anything())).once()
 
-            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
             const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
             assert.equal(updatedSession.signatoryIdToEdit, signatoryId)
@@ -75,16 +68,16 @@ describe("ApplicationStatusController", () => {
             dissolutionSession.signatoryIdToEdit = undefined
             dissolutionSession.isFromCheckAnswers = undefined
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change?check_answers=true`)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHANGE_DETAILS_URI)
 
-            verify(session.setDissolutionSession(anything(), anything())).once()
+            verify(sessionService.setDissolutionSession(anything(), anything())).once()
 
-            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
             const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
             assert.equal(updatedSession.signatoryIdToEdit, signatoryId)
@@ -95,28 +88,42 @@ describe("ApplicationStatusController", () => {
     describe("Send-email", () => {
         it("Should save the email reminder status in the session and redirect to send-email", async () => {
 
-            viewApplicationStatus = generateViewApplicationStatusModel()
+            const companyNumber = "12345678"
+            const email = "test@mail.com"
+            const signatoryId = "test-signatory-id"
+            const dissolutionSession = aDissolutionSession().withCompanyNumber(companyNumber).build()
+            const dissolutionGetResponse = aDissolutionGetResponse()
+                .withDirector(aDissolutionGetDirector().withOfficerId(signatoryId).withEmail(email)).build()
 
-            viewApplicationStatus.signatories = [
-                { ...generateViewApplicationStatusSignatory(), name: "Jane Smith", email: "jane@mail.com" },
-                { ...generateViewApplicationStatusSignatory(), name: "Test One", email: "test@mail.com" }
-            ]
-
-            when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, EMAIL)).thenResolve(true)
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
             when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionGetResponse)
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolutionGetResponse, true)).thenReturn(viewApplicationStatus)
+            when(dissolutionService.sendEmailNotification(companyNumber, email)).thenResolve(true)
 
             await request(app)
-                .get(`${APPLICATION_STATUS_URI}/${EMAIL}/send-email`)
+                .get(`${APPLICATION_STATUS_URI}/${signatoryId}/send-email`)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
-            const reminderList: DirectorToRemind[] = [generateDirectorToRemind()]
+            assert.equal(dissolutionSession.remindDirectorList.length, 1)
+            assert.equal(dissolutionSession.remindDirectorList[0].id, signatoryId)
+            assert.equal(dissolutionSession.remindDirectorList[0].reminderSent, true)
+        })
 
-            assert.equal(dissolutionSession.remindDirectorList.length, reminderList.length)
-            assert.equal(dissolutionSession.remindDirectorList[0].id, reminderList[0].id)
-            assert.equal(dissolutionSession.remindDirectorList[0].reminderSent, reminderList[0].reminderSent)
+        it("Should redirect to wait for other to sign if signatoryId is invalid", async () => {
+            const companyNumber = "12345678"
+            const invalidSignatoryId = "not-a-real-id"
+            const dissolutionSession = aDissolutionSession().withCompanyNumber(companyNumber).build()
+            const dissolutionGetResponse = aDissolutionGetResponse().build() // No directors with invalidSignatoryId
+
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionGetResponse)
+
+            await request(app)
+                .get(`${APPLICATION_STATUS_URI}/${invalidSignatoryId}/send-email`)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
+
+            assert.equal(dissolutionSession.remindDirectorList.length, 0)
         })
     })
 })

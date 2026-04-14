@@ -15,7 +15,7 @@ import SessionService from "app/services/session/session.service"
 export class ApplicationStatusController extends BaseController {
 
     public constructor (
-    @inject(SessionService) private readonly session: SessionService,
+    @inject(SessionService) private readonly sessionService: SessionService,
     @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
     @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper
     ) {
@@ -24,37 +24,35 @@ export class ApplicationStatusController extends BaseController {
 
     @httpGet("/:signatoryId/change")
     public async change (@requestParam("signatoryId") signatoryId: string, @queryParam("check_answers") isFromCheckAnswers: string): Promise<RedirectResult> {
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
         dissolutionSession.signatoryIdToEdit = signatoryId
         dissolutionSession.isFromCheckAnswers = isFromCheckAnswers === "true"
 
-        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
         return super.redirect(CHANGE_DETAILS_URI)
     }
 
-    @httpGet("/:signatoryEmail/send-email")
-    public async resend (@requestParam("signatoryEmail") signatoryEmail: string): Promise<RedirectResult> {
-
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+    @httpGet("/:signatoryId/send-email")
+    public async resend (@requestParam("signatoryId") signatoryId: string): Promise<RedirectResult> {
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
         const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
-            this.session.getAccessToken(this.httpContext.request),
+            this.sessionService.getAccessToken(this.httpContext.request),
             dissolutionSession
         )
 
-        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
+        const signatory = dissolution!.directors.find(d => d.officer_id === signatoryId)
+        if (!signatory) {
+            return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+        }
 
-        this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
-            if (signatory.email === signatoryEmail) {
-                const id: string = signatory.id
-                dissolutionSession.remindDirectorList.push({ id, reminderSent })
-            }
-        })
+        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatory.email)
 
-        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+        dissolutionSession.remindDirectorList.push({ id: signatory.officer_id, reminderSent })
+
+        this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
         return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
     }
-
 }
