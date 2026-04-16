@@ -88,4 +88,16 @@ describe("SessionService", () => {
       assert.isTrue(setExtraDataStub.withArgs("dissolution", dissolutionSession).called)
         })
     })
+
+    describe("clearDissolutionSession", () => {
+        it("should clear the dissolution object in the session", () => {
+            const req: Request = generateRequest()
+            const setExtraDataStub: sinon.SinonStub = sinon.stub()
+            req.session!.setExtraData = setExtraDataStub
+
+            service.clearDissolutionSession(req)
+
+            assert.isTrue(setExtraDataStub.withArgs("dissolution", undefined).called)
+        })
+    })
 })

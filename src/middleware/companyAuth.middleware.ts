@@ -62,7 +62,9 @@ export default function CompanyAuthMiddleware (
             logger.info(`User is authenticated for ${companyNumber}`)
             return next()
         }
+
         logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
+        sessionService.clearDissolutionSession(req)
         return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
     }
 }

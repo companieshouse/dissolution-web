@@ -14,6 +14,9 @@ import DissolutionSession from "app/models/session/dissolutionSession.model"
 
 @provide(SessionService)
 export default class SessionService {
+    public clearDissolutionSession(req: Request): void {
+        req.session!.setExtraData(DISSOLUTION_SESSION_KEY, undefined)
+    }
 
     public getAccessToken (req: Request): string {
         return this.getSignInInfo(req).access_token!.access_token!
