@@ -6,7 +6,7 @@ import ApplicationLogger from "@companieshouse/structured-logging-node/lib/Appli
 import { assert } from "chai"
 import { RequestHandler, Response } from "express"
 import sinon from "sinon"
-import { anything, instance, mock, when } from "ts-mockito"
+import { anything, instance, mock, when, verify } from "ts-mockito"
 
 import CompanyAuthMiddleware from "app/middleware/companyAuth.middleware"
 import AuthConfig from "app/models/authConfig"
@@ -16,6 +16,7 @@ import SessionService from "app/services/session/session.service"
 
 import { generateRequest } from "test/fixtures/http.fixtures"
 import { generateDissolutionSession, generateSession } from "test/fixtures/session.fixtures"
+
 
 describe("AuthMiddleware", () => {
 
@@ -61,7 +62,7 @@ describe("AuthMiddleware", () => {
 
     })
 
-    it("should invoke next() function if user is authenticated for company number", () => {
+    it("should invoke next() function if authenticated user is authorized for company number", () => {
         const signInInfo: ISignInInfo = {
             company_number: "12345678"
         }
@@ -100,7 +101,7 @@ describe("AuthMiddleware", () => {
         assert.isTrue(next.calledOnce, "next should be called once for authenticated user")
     })
 
-    it("should redirect if user is not authenticated for company number", async () => {
+    it("should redirect if authenticated user is not authorized for company number", async () => {
         const signInInfo: ISignInInfo = {
             company_number: "false_number"
         }
@@ -119,10 +120,10 @@ describe("AuthMiddleware", () => {
         when(sessionService.getSignInInfo(req)).thenReturn(signInInfo)
 
         await middleware(req, res, next)
+
+        verify(sessionService.clearDissolutionSession(req)).once()
         assert.isTrue(redirectStub.calledOnce)
-
         const redirectUrl: string = redirectStub.args[0][0]
-
         assert.include(redirectUrl, "http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678")
     })
 })

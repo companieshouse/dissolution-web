@@ -1,6 +1,5 @@
-import { NextFunction, Request, RequestHandler, Response } from "express"
-import { SignInInfoKeys } from "@companieshouse/node-session-handler/lib/session/keys/SignInInfoKeys"
-import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces"
+import {NextFunction, Request, RequestHandler, Response} from "express"
+import {SignInInfoKeys} from "@companieshouse/node-session-handler/lib/session/keys/SignInInfoKeys"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
 
 import AuthConfig from "app/models/authConfig"
@@ -11,7 +10,8 @@ import SessionService from "app/services/session/session.service"
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
-    HEALTHCHECK_URI, ROOT_URI,
+    HEALTHCHECK_URI,
+    ROOT_URI,
     SEARCH_COMPANY_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
     VIEW_COMPANY_INFORMATION_URI,
@@ -37,6 +37,8 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     `${ACCESSIBILITY_STATEMENT_URI}/`
 ]
 
+
+
 export default function CompanyAuthMiddleware (
     authConfig: AuthConfig, encryptionService: JwtEncryptionService, sessionService: SessionService, logger: ApplicationLogger
 ): RequestHandler {
@@ -47,26 +49,36 @@ export default function CompanyAuthMiddleware (
 
         const dissolutionSession = sessionService.getDissolutionSession(req)
         const companyNumber = getCompanyNumber(dissolutionSession, req)
+
         if (!companyNumber) {
             return next(new Error("No Company Number in session"))
         }
-        if (!dissolutionSession?.companyNumber) {
-            sessionService.setDissolutionSession(req, {
-                ...(dissolutionSession || {}),
-                companyNumber,
-                remindDirectorList: []
-            })
-        }
-        const signInInfo = sessionService.getSignInInfo(req)
-        if (isAuthorisedForCompany(signInInfo, companyNumber)) {
-            logger.info(`User is authenticated for ${companyNumber}`)
-            return next()
-        }
 
-        logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
-        sessionService.clearDissolutionSession(req)
-        return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
+        if (isAuthorisedForCompany(companyNumber, sessionService, req)) {
+            logger.info(`Authenticated user is authorized for ${companyNumber}`)
+
+            if (dissolutionSessionDoesNotExist(dissolutionSession)) {
+                initDissolutionSession(sessionService, req, companyNumber)
+            }
+
+            return next()
+        } else {
+            logger.info(`Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`)
+            sessionService.clearDissolutionSession(req)
+            return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
+        }
     }
+}
+
+function initDissolutionSession(sessionService: SessionService, req: Request, companyNumber: string) {
+    sessionService.setDissolutionSession(req, {
+        companyNumber,
+        remindDirectorList: []
+    })
+}
+
+function dissolutionSessionDoesNotExist(dissolutionSession: Optional<DissolutionSession>) {
+    return !dissolutionSession?.companyNumber
 }
 
 function getCompanyNumber (session: Optional<DissolutionSession>, req: Request): string | undefined {
@@ -77,7 +89,8 @@ function isWhitelistedUrl (url: string): boolean {
     return COMPANY_AUTH_WHITELISTED_URLS.includes(url)
 }
 
-function isAuthorisedForCompany (signInInfo: ISignInInfo, companyNumber: string): boolean {
+function isAuthorisedForCompany (companyNumber: string, sessionService: SessionService, req: Request): boolean {
+    const signInInfo = sessionService.getSignInInfo(req)
     return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
 }
 
