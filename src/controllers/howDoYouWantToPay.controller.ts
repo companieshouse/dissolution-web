@@ -26,7 +26,7 @@ interface ViewModel {
   errors?: Optional<ValidationErrors>
 }
 
-@controller(HOW_DO_YOU_WANT_TO_PAY_URI)
+@controller(HOW_DO_YOU_WANT_TO_PAY_URI, TYPES.JourneyIdAuthMiddleware)
 export class HowDoYouWantToPayController extends BaseController {
 
     public constructor (

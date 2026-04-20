@@ -22,14 +22,16 @@ import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
 import PaymentType from "app/models/dto/paymentType.enum"
 import { v4 as uuidv4 } from "uuid"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
     data?: PayByAccountDetailsFormModel
     errors?: ValidationErrors
 }
 
-@controller(PAY_BY_ACCOUNT_DETAILS_URI)
-export class PayByAccountDetailsController extends BaseController {
+@controller(PAY_BY_ACCOUNT_DETAILS_URI, TYPES.JourneyIdAuthMiddleware)
+export class PayByAccountDetailsController extends JourneyBaseController {
 
     private readonly ERROR_INCORRECT_CREDENTIALS: string = "Your Presenter ID or Presenter authentication code is incorrect"
 
@@ -40,9 +42,11 @@ export class PayByAccountDetailsController extends BaseController {
         @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
         @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
         @inject(PaymentService) private readonly paymentService: PaymentService,
-        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
+
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -59,6 +63,7 @@ export class PayByAccountDetailsController extends BaseController {
         return this.renderView()
     }
 
+    //TODO: double check
     @httpGet("/change-payment-type")
     public async changePaymentType (): Promise<string | RedirectResult> {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
@@ -107,7 +112,7 @@ export class PayByAccountDetailsController extends BaseController {
         dissolutionSession.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
         this.updateSession(dissolutionSession)
 
-        return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
+        return this.redirect(this.journeyPath(VIEW_FINAL_CONFIRMATION_URI))
     }
 
     private async renderView (data?: PayByAccountDetailsFormModel, errors?: ValidationErrors): Promise<string> {

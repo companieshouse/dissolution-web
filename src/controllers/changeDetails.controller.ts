@@ -20,6 +20,9 @@ import FormValidator from "app/utils/formValidator.util"
 import { DirectorToSign } from "app/models/session/directorToSign.model"
 import RichFormValidator from "app/utils/richFormValidator.util"
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
+import TYPES from "app/types";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
 
 interface ViewModel {
     officerType: OfficerType
@@ -34,15 +37,16 @@ interface SignatoryViewModel {
     isCorporateOfficer: boolean
 }
 
-@controller(CHANGE_DETAILS_URI)
-export class ChangeDetailsController extends BaseController {
+@controller(CHANGE_DETAILS_URI, TYPES.JourneyIdAuthMiddleware)
+export class ChangeDetailsController extends JourneyBaseController {
 
     public constructor (
         @inject(SessionService) private readonly session: SessionService,
         @inject(DissolutionDirectorService) private readonly directorService: DissolutionDirectorService,
         @inject(DissolutionDirectorMapper) private readonly directorMapper: DissolutionDirectorMapper,
-        @inject(RichFormValidator) private readonly validator: FormValidator) {
-        super()
+        @inject(RichFormValidator) private readonly validator: FormValidator,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -84,13 +88,13 @@ export class ChangeDetailsController extends BaseController {
 
         if (session.isFromCheckAnswers) {
             this.updateSignatoryInfoInSession(session, body)
-            return this.redirect(CHECK_YOUR_ANSWERS_URI)
+            return this.redirect(this.journeyPath(CHECK_YOUR_ANSWERS_URI))
         } else {
             const token: string = this.session.getAccessToken(this.httpContext.request)
             await this.directorService.updateSignatory(token, session, body)
             this.cleanUpSession(session)
             this.session.setDissolutionSession(this.httpContext.request, session)
-            return this.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+            return this.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI))
         }
     }
 

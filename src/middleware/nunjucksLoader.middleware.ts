@@ -15,6 +15,7 @@ import {
     PAGE_TITLE_SUFFIX,
     SERVICE_NAME
 } from "app/constants/app.const"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
@@ -23,7 +24,8 @@ export default class NunjucksLoader {
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
     @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(JourneyPathService) private readonly journeyPathService: JourneyPathService
     ) {}
 
     public configureNunjucks (app: express.Application, directory: string, nonce: string): void {
@@ -50,6 +52,7 @@ export default class NunjucksLoader {
         addFilters(env)
         addGlobals(env)
 
+        this.addRequestLocals(app)
         this.addLocals(app, nonce)
     }
 
@@ -69,5 +72,17 @@ export default class NunjucksLoader {
         app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED
         app.locals.bannerFeedbackLink = BANNER_FEEDBACK_LINK
         app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
+    }
+
+    private addRequestLocals(app: express.Application): void {
+        app.use((req, res, next) => {
+            res.locals.journeyPath = (pathTemplate: string, options?: {
+                journeyId?: string,
+                params?: Record<string, string | number>
+            }): string => {
+                return this.journeyPathService.journeyPath(req, pathTemplate, options)
+            }
+            next()
+        })
     }
 }

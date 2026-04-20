@@ -8,12 +8,14 @@ import { Request } from "express"
 import { provide } from "inversify-binding-decorators"
 
 import { DISSOLUTION_SESSION_KEY } from "app/constants/app.const"
+
 import { Mutable } from "app/models/mutable"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 
 @provide(SessionService)
 export default class SessionService {
+
     public clearDissolutionSession(req: Request): void {
         req.session!.setExtraData(DISSOLUTION_SESSION_KEY, undefined)
     }
@@ -30,12 +32,20 @@ export default class SessionService {
         return req.session!.getExtraData<DissolutionSession>(DISSOLUTION_SESSION_KEY)
     }
 
-    public setDissolutionSession (req: Request, updatedSession: DissolutionSession): void {
-    req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
+    public getJourneyId (req: Request): Optional<string> {
+        return this.getDissolutionSession(req)?.journeyId
     }
 
-    public setSession (req: Request, updatedSession: Session): void {
-        req.session = updatedSession
+    public requireJourneyId (req: Request): string {
+        const journeyId = this.getJourneyId(req)
+        if (!journeyId) {
+            throw new Error("No journeyId in session")
+        }
+        return journeyId
+    }
+
+    public setDissolutionSession (req: Request, updatedSession: DissolutionSession): void {
+    req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
     }
 
     public getSession (req: Request): Session {

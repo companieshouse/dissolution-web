@@ -35,6 +35,7 @@ import SessionService from "app/services/session/session.service"
 import { generateApprovalModel, generateDissolutionGetResponse, generateGetDirector } from "test/fixtures/dissolutionApi.fixtures"
 import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -63,6 +64,9 @@ describe("RedirectController", () => {
             container.rebind(DissolutionService).toConstantValue(instance(service))
             container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper))
             container.rebind(ApprovalService).toConstantValue(instance(approvalService))
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
         })
     }
 

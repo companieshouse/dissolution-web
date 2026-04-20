@@ -1,24 +1,26 @@
 import "reflect-metadata"
 
-import { assert } from "chai"
-import { StatusCodes } from "http-status-codes"
+import {assert} from "chai"
+import {StatusCodes} from "http-status-codes"
 import request from "supertest"
-import { anything, instance, mock, when } from "ts-mockito"
-import { TOKEN } from "../fixtures/session.fixtures"
-import { createApp } from "./helpers/application.factory"
+import {anything, instance, mock, when} from "ts-mockito"
+import {TOKEN} from "../fixtures/session.fixtures"
+import {createApp} from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/viewCompanyInformation.controller"
 import CompanyDetails from "app/models/companyDetails.model"
 import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
+import {REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
 import CompanyService from "app/services/company/company.service"
 import SessionService from "app/services/session/session.service"
 
-import { generateCompanyDetails } from "test/fixtures/companyProfile.fixtures"
-import { generateDissolutionSession } from "test/fixtures/session.fixtures"
+import {generateCompanyDetails} from "test/fixtures/companyProfile.fixtures"
+import {generateDissolutionSession} from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import {Application} from "express";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -41,6 +43,16 @@ describe("ViewCompanyInformationController", () => {
         when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
     })
 
+    function initApp (): Application {
+        return createApp(container => {
+            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(CompanyService).toConstantValue(instance(companyService))
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
+        })
+    }
+
     describe("GET request", () => {
         it("should render the view company information page with company info", async () => {
             const company: CompanyDetails = generateCompanyDetails()
@@ -52,10 +64,7 @@ describe("ViewCompanyInformationController", () => {
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyService).toConstantValue(instance(companyService))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
@@ -78,10 +87,7 @@ describe("ViewCompanyInformationController", () => {
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyService).toConstantValue(instance(companyService))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
@@ -117,10 +123,7 @@ describe("ViewCompanyInformationController", () => {
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyService).toConstantValue(instance(companyService))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
@@ -142,10 +145,7 @@ describe("ViewCompanyInformationController", () => {
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve("error message")
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyService).toConstantValue(instance(companyService))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
@@ -170,10 +170,7 @@ describe("ViewCompanyInformationController", () => {
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company)
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyService).toConstantValue(instance(companyService))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
@@ -189,7 +186,7 @@ describe("ViewCompanyInformationController", () => {
 
     describe("POST request", () => {
         it("should redirect to the select director screen upon submission", async () => {
-            await request(createApp())
+            await request(initApp())
                 .post(VIEW_COMPANY_INFORMATION_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_GATE_URI)

@@ -1,26 +1,27 @@
 import "reflect-metadata"
 
-import { CookieConfig, SessionMiddleware, SessionStore } from "@companieshouse/node-session-handler"
-import { createLogger } from "@companieshouse/structured-logging-node"
+import {CookieConfig, SessionMiddleware, SessionStore} from "@companieshouse/node-session-handler"
+import {createLogger} from "@companieshouse/structured-logging-node"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import { authMiddleware as commonAuthMiddleware } from "@companieshouse/web-security-node"
-import { S3Client } from "@aws-sdk/client-s3"
-import axios, { AxiosInstance } from "axios"
-import { Container } from "inversify"
-import { buildProviderModule } from "inversify-binding-decorators"
+import {authMiddleware as commonAuthMiddleware} from "@companieshouse/web-security-node"
+import {S3Client} from "@aws-sdk/client-s3"
+import axios, {AxiosInstance} from "axios"
+import {Container} from "inversify"
+import {buildProviderModule} from "inversify-binding-decorators"
 import IORedis from "ioredis"
 import PiwikConfig from "./models/piwikConfig"
 
-import { APP_NAME } from "app/constants/app.const"
+import {APP_NAME} from "app/constants/app.const"
 import AuthMiddleware from "app/middleware/auth.middleware"
 import CompanyAuthMiddleware from "app/middleware/companyAuth.middleware"
 import SaveUserEmailToLocals from "app/middleware/saveUserEmailToLocals.middleware"
+import JourneyIdAuthMiddleware from "app/middleware/journeyIdAuth.middleware"
 import AuthConfig from "app/models/authConfig"
 import Optional from "app/models/optional"
 import JwtEncryptionService from "app/services/encryption/jwtEncryption.service"
 import SessionService from "app/services/session/session.service"
 import TYPES from "app/types"
-import { getEnv, getEnvOrDefault, getEnvOrThrow } from "app/utils/env.util"
+import {getEnv, getEnvOrDefault, getEnvOrThrow} from "app/utils/env.util"
 import UriFactory from "app/utils/uri.factory"
 
 export function initContainer (): Container {
@@ -99,6 +100,10 @@ export function initContainer (): Container {
 
     container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(
         SaveUserEmailToLocals(sessionService)
+    )
+
+    container.bind(TYPES.JourneyIdAuthMiddleware).toConstantValue(
+        JourneyIdAuthMiddleware(sessionService)
     )
 
     container.load(buildProviderModule())

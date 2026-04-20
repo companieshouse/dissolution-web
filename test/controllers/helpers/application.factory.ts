@@ -1,17 +1,17 @@
-import { createLogger } from "@companieshouse/structured-logging-node"
+import {createLogger} from "@companieshouse/structured-logging-node"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import { S3Client } from "@aws-sdk/client-s3"
-import axios, { AxiosInstance } from "axios"
+import {S3Client} from "@aws-sdk/client-s3"
+import axios, {AxiosInstance} from "axios"
 import * as bodyParser from "body-parser"
-import { Application, NextFunction, Request, Response } from "express"
-import { Container } from "inversify"
-import { buildProviderModule } from "inversify-binding-decorators"
-import { InversifyExpressServer } from "inversify-express-utils"
+import {Application, NextFunction, Request, Response} from "express"
+import {Container} from "inversify"
+import {buildProviderModule} from "inversify-binding-decorators"
+import {InversifyExpressServer} from "inversify-express-utils"
 import * as nunjucks from "nunjucks"
 
-import { APP_NAME } from "app/constants/app.const"
+import {APP_NAME} from "app/constants/app.const"
 import TYPES from "app/types"
-import { addFilters, addGlobals } from "app/utils/nunjucks.util"
+import {addFilters, addGlobals} from "app/utils/nunjucks.util"
 
 const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL")
@@ -33,6 +33,7 @@ const mockMiddlewares = (container: Container): void => {
     container.bind(TYPES.SessionMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
     container.bind(TYPES.AuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
     container.bind(TYPES.CompanyAuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
+    container.bind(TYPES.JourneyIdAuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
 }
 
 export const createApp = (configureBindings?: (container: Container) => void): Application => {
@@ -40,7 +41,6 @@ export const createApp = (configureBindings?: (container: Container) => void): A
 
     mockEnvVars(container)
     mockMiddlewares(container)
-
     container.load(buildProviderModule())
   configureBindings?.(container) // eslint-disable-line
 
@@ -50,6 +50,14 @@ export const createApp = (configureBindings?: (container: Container) => void): A
             server.use(bodyParser.json())
             server.use(bodyParser.urlencoded({ extended: false }))
 
+            // Provide a test-friendly journeyPath helper on res.locals so templates
+            // that call `journeyPath(...)` don't fail during unit tests. In the app
+            // this is provided by NunjucksLoader.addRequestLocals which relies on
+            // the full DI container; for tests a simple passthrough is sufficient.
+            server.use((req: Request, res: Response, next: NextFunction) => {
+                res.locals.journeyPath = (pathTemplate: string) => pathTemplate
+                next()
+            })
             server.set("view engine", "njk")
 
             const env: nunjucks.Environment = nunjucks.configure(

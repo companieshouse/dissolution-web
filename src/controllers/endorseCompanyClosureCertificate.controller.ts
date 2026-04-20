@@ -1,20 +1,22 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-import BaseController from "./base.controller"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 
 import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model"
 import generateEndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
+import {ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
 import createEndorseCertificateSchema from "app/schemas/endorseCertificate.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
+import TYPES from "app/types";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
 
 interface ViewModel {
   approvalModel: DissolutionApprovalModel
@@ -22,16 +24,18 @@ interface ViewModel {
   backUri?: string
 }
 
-@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
-export class EndorseCompanyClosureCertificateController extends BaseController {
+@controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, TYPES.JourneyIdAuthMiddleware)
+export class EndorseCompanyClosureCertificateController extends JourneyBaseController {
 
     public constructor (
         @inject(SessionService) private readonly session: SessionService,
         @inject(FormValidator) private readonly validator: FormValidator,
         @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
-        @inject(IpAddressService) private readonly ipAddressService: IpAddressService
+        @inject(IpAddressService) private readonly ipAddressService: IpAddressService,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
+
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -50,14 +54,14 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
 
         const validationSchema = createEndorseCertificateSchema(approvalModel)
         const errors: Optional<ValidationErrors> = this.validator.validate(body, validationSchema)
-        
+
         if (errors) {
             return this.renderView(approvalModel, backUri, errors)
         }
 
         await this.approveDissolution()
 
-        return this.redirect(REDIRECT_GATE_URI)
+        return this.redirect(this.journeyPath(REDIRECT_GATE_URI))
     }
 
     private async approveDissolution (): Promise<void> {
@@ -73,7 +77,7 @@ export class EndorseCompanyClosureCertificateController extends BaseController {
     }
 
     private async renderView (approvalModel: DissolutionApprovalModel, backUri: string, errors?: ValidationErrors): Promise<string> {
-        
+
         const viewModel: ViewModel = {
             approvalModel,
             errors,

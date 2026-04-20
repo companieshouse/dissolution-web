@@ -1,25 +1,27 @@
-import { inject } from "inversify"
-import { controller, httpGet, requestParam, queryParam } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-
-import BaseController from "app/controllers/base.controller"
+import {inject} from "inversify"
+import {controller, httpGet, queryParam, requestParam} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
+import {APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import TYPES from "app/types";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
 
-@controller(APPLICATION_STATUS_URI)
-export class ApplicationStatusController extends BaseController {
+@controller(APPLICATION_STATUS_URI, TYPES.JourneyIdAuthMiddleware)
+export class ApplicationStatusController extends JourneyBaseController {
 
     public constructor (
     @inject(SessionService) private readonly session: SessionService,
     @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper
+    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("/:signatoryId/change")
@@ -30,7 +32,7 @@ export class ApplicationStatusController extends BaseController {
 
         this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
-        return super.redirect(CHANGE_DETAILS_URI)
+        return super.redirect(this.journeyPath(CHANGE_DETAILS_URI))
     }
 
     @httpGet("/:signatoryEmail/send-email")
@@ -54,7 +56,7 @@ export class ApplicationStatusController extends BaseController {
 
         this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
-        return super.redirect(WAIT_FOR_OTHERS_TO_SIGN_URI)
+        return super.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI))
     }
 
 }

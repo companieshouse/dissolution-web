@@ -61,7 +61,11 @@ export default class ServerMiddlewareLoader {
     public configureErrorHandling (app: Application): void {
         app.use((err: any, _: Request, res: Response, _2: NextFunction) => {
             this.logger.error(`${err.constructor.name} - ${err.message}`)
-            return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).render("error")
+            let errorMessage = "Sorry, an unexpected error occurred."
+            if (err.type === "JOURNEY_EXPIRED") {
+                errorMessage = "Journey expired - You can only file a dissolution for one company at a time"
+            }
+            return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).render("error", { errorMessage })
         })
     }
 

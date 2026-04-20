@@ -3,8 +3,8 @@ import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/mo
 import { assert } from "chai"
 import { Request } from "express"
 import sinon from "sinon"
-import { generateRequest } from "../../fixtures/http.fixtures"
-import { generateDissolutionSession, generateISignInInfo, TOKEN } from "../../fixtures/session.fixtures"
+import { generateRequest } from "test/fixtures/http.fixtures"
+import { generateDissolutionSession, generateISignInInfo, TOKEN } from "test/fixtures/session.fixtures"
 
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"

@@ -29,6 +29,7 @@ import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 import OfficerRole from "app/models/dto/officerRole.enum";
 import {aDissolutionSession} from "../fixtures/dissolutionSession.builder"
 import {aSelectDirectorFormModel} from "test/fixtures/selectDirectorForm.builder";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -189,6 +190,9 @@ describe("SelectDirectorController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
                 container.rebind(FormValidator).toConstantValue(instance(validator))
                 container.rebind(DirectorToSignMapper).toConstantValue(new DirectorToSignMapper())
+                container.rebind(JourneyPathService).toConstantValue({
+                    journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+                } as any)
             })
         }
 

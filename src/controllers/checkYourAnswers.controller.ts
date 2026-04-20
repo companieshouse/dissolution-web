@@ -1,14 +1,15 @@
-import { inject } from "inversify"
-import { controller, httpGet, httpPost } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-
-import BaseController from "app/controllers/base.controller"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 import CheckYourAnswersDirectorMapper from "app/mappers/check-your-answers/checkYourAnswersDirector.mapper"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model"
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI } from "app/paths"
+import {CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import TYPES from "app/types";
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
   backUri: string
@@ -16,14 +17,15 @@ interface ViewModel {
     isMultiDirector?: boolean
 }
 
-@controller(CHECK_YOUR_ANSWERS_URI)
-export class CheckYourAnswersController extends BaseController {
+@controller(CHECK_YOUR_ANSWERS_URI, TYPES.JourneyIdAuthMiddleware)
+export class CheckYourAnswersController extends JourneyBaseController {
 
     public constructor (
     @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
     @inject(SessionService) private readonly session: SessionService,
-    @inject(CheckYourAnswersDirectorMapper) private readonly mapper: CheckYourAnswersDirectorMapper) {
-        super()
+    @inject(CheckYourAnswersDirectorMapper) private readonly mapper: CheckYourAnswersDirectorMapper,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -50,7 +52,7 @@ export class CheckYourAnswersController extends BaseController {
         this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
         await this.dissolutionService.createDissolution(token, dissolutionSession)
 
-        return this.redirect(REDIRECT_GATE_URI)
+        return this.redirect(this.journeyPath(REDIRECT_GATE_URI))
     }
 
     private getDirectors (): CheckYourAnswersDirector[] {

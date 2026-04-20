@@ -11,6 +11,7 @@ import DissolutionSession from "app/models/session/dissolutionSession.model"
 import { VIEW_FINAL_CONFIRMATION_URI } from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import TYPES from "app/types"
 
 interface ViewModel {
   applicationReferenceNumber: string,
@@ -22,7 +23,7 @@ interface ViewModel {
   applicationType: ApplicationType
 }
 
-@controller(VIEW_FINAL_CONFIRMATION_URI)
+@controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.JourneyIdAuthMiddleware)
 export class ViewFinalConfirmationController extends BaseController {
 
     public constructor (

@@ -14,8 +14,8 @@ import {
     ROOT_URI,
     SEARCH_COMPANY_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
-    VIEW_COMPANY_INFORMATION_URI,
-    WHO_TO_TELL_URI
+    WHO_TO_TELL_URI,
+    BOOTSTRAP_JOURNEY_URI
 } from "app/paths"
 
 const OAUTH_COMPANY_SCOPE_PREFIX = "https://api.companieshouse.gov.uk/company/"
@@ -31,12 +31,9 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     SEARCH_COMPANY_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
     `${SEARCH_COMPANY_URI}/`,
-    VIEW_COMPANY_INFORMATION_URI,
-    `${VIEW_COMPANY_INFORMATION_URI}/`,
     ACCESSIBILITY_STATEMENT_URI,
     `${ACCESSIBILITY_STATEMENT_URI}/`
 ]
-
 
 
 export default function CompanyAuthMiddleware (
@@ -51,41 +48,24 @@ export default function CompanyAuthMiddleware (
         const companyNumber = getCompanyNumber(dissolutionSession, req)
 
         if (!companyNumber) {
-            return next(new Error("No Company Number in session"))
+            return next(new Error("No Company Number"))
         }
 
         if (isAuthorisedForCompany(companyNumber, sessionService, req)) {
             logger.info(`Authenticated user is authorized for ${companyNumber}`)
-
-            if (dissolutionSessionDoesNotExist(dissolutionSession)) {
-                initDissolutionSession(sessionService, req, companyNumber)
-            }
-
             return next()
         } else {
             logger.info(`Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`)
-            sessionService.clearDissolutionSession(req)
             return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
         }
     }
-}
-
-function initDissolutionSession(sessionService: SessionService, req: Request, companyNumber: string) {
-    sessionService.setDissolutionSession(req, {
-        companyNumber,
-        remindDirectorList: []
-    })
-}
-
-function dissolutionSessionDoesNotExist(dissolutionSession: Optional<DissolutionSession>) {
-    return !dissolutionSession?.companyNumber
 }
 
 function getCompanyNumber (session: Optional<DissolutionSession>, req: Request): string | undefined {
     return (req.query.companyNumber as string | undefined) ?? session?.companyNumber
 }
 
-function isWhitelistedUrl (url: string): boolean {
+export function isWhitelistedUrl (url: string): boolean {
     return COMPANY_AUTH_WHITELISTED_URLS.includes(url)
 }
 
@@ -94,10 +74,14 @@ function isAuthorisedForCompany (companyNumber: string, sessionService: SessionS
     return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
 }
 
+function getBootstrapJourneyUrl(companyNumber: string): string {
+    return `${BOOTSTRAP_JOURNEY_URI}?companyNumber=${encodeURIComponent(companyNumber)}`
+}
+
 async function getAuthRedirectUri (
     req: Request, authConfig: AuthConfig, encryptionService: JwtEncryptionService, sessionService: SessionService, companyNumber?: string
 ): Promise<string> {
-    const originalUrl: string = req.originalUrl
+    const originalUrl: string = getBootstrapJourneyUrl(companyNumber!)
     const scope: string = OAUTH_USER_SCOPE + " " + OAUTH_COMPANY_SCOPE_PREFIX + companyNumber
     const nonce: string = encryptionService.generateNonce()
     const encodedNonce: string = await encryptionService.jweEncodeWithNonce(originalUrl, nonce)

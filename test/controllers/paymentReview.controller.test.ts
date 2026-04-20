@@ -22,6 +22,7 @@ import TYPES from "app/types"
 
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -43,6 +44,9 @@ describe("PaymentReviewController", () => {
             container.rebind(SessionService).toConstantValue(instance(sessionService))
             container.rebind(PaymentService).toConstantValue(instance(paymentService))
             container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
         })
     }
 

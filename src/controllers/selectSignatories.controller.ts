@@ -1,23 +1,25 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-import BaseController from "./base.controller"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 
 import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper"
 import OfficerType from "app/models/dto/officerType.enum"
 import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
 import Optional from "app/models/optional"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
+import {DirectorToSign} from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import DirectorDetails from "app/models/view/directorDetails.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from "app/paths"
+import {DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI} from "app/paths"
 import selectSignatoriesSchema from "app/schemas/selectSignatories.schema"
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
 import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
+import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import TYPES from "app/types";
 
 interface ViewModel {
     officerType: OfficerType
@@ -28,16 +30,17 @@ interface ViewModel {
     errors?: Optional<ValidationErrors>
 }
 
-@controller(SELECT_SIGNATORIES_URI)
-export class SelectSignatoriesController extends BaseController {
+@controller(SELECT_SIGNATORIES_URI, TYPES.JourneyIdAuthMiddleware)
+export class SelectSignatoriesController extends JourneyBaseController {
 
     public constructor (
     @inject(SessionService) private session: SessionService,
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
     @inject(SignatoryService) private signatoryService: SignatoryService,
     @inject(FormValidator) private validator: FormValidator,
-    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper) {
-        super()
+    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -70,7 +73,7 @@ export class SelectSignatoriesController extends BaseController {
 
         this.updateSession(session, body, signatories)
 
-        return this.redirect(DEFINE_SIGNATORY_INFO_URI)
+        return this.redirect(this.journeyPath(DEFINE_SIGNATORY_INFO_URI))
     }
 
     private async getSignatories (selectedDirector: string): Promise<DirectorDetails[]> {

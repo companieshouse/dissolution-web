@@ -15,6 +15,7 @@ export class DissolutionSessionBuilder {
     signatoryIdToEdit?: string
     signatoryToEdit?: DissolutionGetDirector
     isFromCheckAnswers?: boolean
+    journeyId?: string
 
     withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {
         this.directorsToSign = directors
@@ -56,8 +57,13 @@ export class DissolutionSessionBuilder {
         return this
     }
 
-    public withCompanyNumber (companyNumber: string): this {
+    public withCompanyNumber (companyNumber?: string): this {
         this.companyNumber = companyNumber
+        return this
+    }
+
+    public withJourneyId (journeyId: string): this {
+        this.journeyId = journeyId
         return this
     }
 
@@ -70,7 +76,8 @@ export class DissolutionSessionBuilder {
             isMultiDirector: this._isMultiDirector,
             signatoryIdToEdit: this.signatoryIdToEdit,
             signatoryToEdit: this.signatoryToEdit,
-            isFromCheckAnswers: this.isFromCheckAnswers
+            isFromCheckAnswers: this.isFromCheckAnswers,
+            journeyId: this.journeyId
         } as DissolutionSession
     }
 }

@@ -10,18 +10,21 @@ import { ViewApplicationStatus } from "app/models/view/viewApplicationStatus.mod
 import { NOT_SELECTED_SIGNATORY } from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import Types from "app/types";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
   viewApplicationStatus: ViewApplicationStatus
 }
 
-@controller(NOT_SELECTED_SIGNATORY)
+@controller(NOT_SELECTED_SIGNATORY, Types.JourneyIdAuthMiddleware)
 export class NotSelectedSignatoryController extends BaseController {
 
     public constructor (
     @inject(SessionService) private session: SessionService,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private viewApplicationStatusMapper: ViewApplicationStatusMapper
+    @inject(ViewApplicationStatusMapper) private viewApplicationStatusMapper: ViewApplicationStatusMapper,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
         super()
     }
