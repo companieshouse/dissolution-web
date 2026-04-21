@@ -12,6 +12,7 @@ import * as nunjucks from "nunjucks"
 import {APP_NAME} from "app/constants/app.const"
 import TYPES from "app/types"
 import {addFilters, addGlobals} from "app/utils/nunjucks.util"
+import { buildPath } from "app/utils/buildPath"
 
 const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL")
@@ -51,11 +52,14 @@ export const createApp = (configureBindings?: (container: Container) => void): A
             server.use(bodyParser.urlencoded({ extended: false }))
 
             // Provide a test-friendly journeyPath helper on res.locals so templates
-            // that call `journeyPath(...)` don't fail during unit tests. In the app
-            // this is provided by NunjucksLoader.addRequestLocals which relies on
-            // the full DI container; for tests a simple passthrough is sufficient.
+            // that call `journeyPath(pathTemplate, { params })` behave like production.
+            // In the app this is provided by NunjucksLoader.addRequestLocals which
+            // uses JourneyPathService; for tests we replicate param substitution
+            // using the shared buildPath util so encoding/placeholder replacement
+            // matches runtime behaviour.
+
             server.use((req: Request, res: Response, next: NextFunction) => {
-                res.locals.journeyPath = (pathTemplate: string) => pathTemplate
+                res.locals.journeyPath = testJourneyPath
                 next()
             })
             server.set("view engine", "njk")
@@ -78,3 +82,23 @@ export const createApp = (configureBindings?: (container: Container) => void): A
         })
         .build()
 }
+
+
+function testJourneyPath(pathTemplate: string, options?: {
+    journeyId?: string,
+    params?: Record<string, string | number>
+}): string {
+    const params = { ...(options?.params || {}) } as Record<string, string | number>
+    if (options?.journeyId) {
+        params.journeyId = options.journeyId
+    }
+    try {
+        return Object.keys(params).length > 0 ? buildPath(pathTemplate, params) : pathTemplate
+    } catch (err) {
+        // If required params are missing, fall back to the template to
+        // keep tests from throwing; individual tests should provide
+        // params when they expect substitution.
+        return pathTemplate
+    }
+}
+
