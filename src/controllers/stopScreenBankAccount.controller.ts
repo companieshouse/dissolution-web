@@ -3,7 +3,6 @@ import { controller, httpGet, httpPost } from "inversify-express-utils"
 import { RedirectResult } from "inversify-express-utils/lib/results"
 import BaseController from "app/controllers/base.controller"
 import { SEARCH_COMPANY_URI, WHO_TO_TELL_URI, STOP_SCREEN_BANK_ACCOUNT_URI } from "app/paths"
-import TYPES from "app/types";
 
 interface ViewModel {
 backUri?: string
