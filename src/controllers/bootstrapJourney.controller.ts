@@ -4,10 +4,11 @@ import SessionService from "app/services/session/session.service"
 import UuidGenerator from "app/utils/uuidGenerator"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import TYPES from "app/types"
-import {BOOTSTRAP_JOURNEY_URI, VIEW_COMPANY_INFORMATION_URI, SEARCH_COMPANY_URI} from "app/paths"
+import {BOOTSTRAP_JOURNEY_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
 import JourneyBaseController from "app/controllers/JourneyBase.controller"
 import JourneyPathService from "app/services/session/journeyPath.service"
 import companyNumberSchema from "app/schemas/companyNumber.schema"
+import { firstParam } from "app/utils/query.util"
 import {RedirectResult} from "inversify-express-utils/lib/results"
 
 @controller(BOOTSTRAP_JOURNEY_URI)
@@ -37,8 +38,8 @@ export class BootstrapJourneyController extends JourneyBaseController {
     }
 
     private validate(companyNumber?: string | string[]): { value?: string, error?: any } {
-        const raw = Array.isArray(companyNumber) ? companyNumber[0] : companyNumber
-        const { value, error } = companyNumberSchema.validate(raw)
+        const rawCompanyNumber = firstParam(companyNumber)
+        const { value, error } = companyNumberSchema.validate(rawCompanyNumber)
         return { value, error }
     }
 

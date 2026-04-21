@@ -67,7 +67,7 @@ describe("PaymentService", () => {
             )).thenReturn(createPaymentRequest)
             when(client.createPayment(TOKEN, createPaymentRequest)).thenResolve(paymentResponse)
 
-            const paymentURL: string = await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state)
+            const paymentURL: string = await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state, anything())
 
             assert.equal(paymentURL, `${paymentResponse.resource!.links.journey}?summary=false`)
 

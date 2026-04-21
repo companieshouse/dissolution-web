@@ -10,12 +10,12 @@ import SessionService from "app/services/session/session.service"
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
+    BOOTSTRAP_JOURNEY_URI,
     HEALTHCHECK_URI,
     ROOT_URI,
     SEARCH_COMPANY_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
-    WHO_TO_TELL_URI,
-    BOOTSTRAP_JOURNEY_URI
+    WHO_TO_TELL_URI
 } from "app/paths"
 
 const OAUTH_COMPANY_SCOPE_PREFIX = "https://api.companieshouse.gov.uk/company/"
