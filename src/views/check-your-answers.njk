@@ -40,8 +40,8 @@
                   text: director.email
                 },
                 actions: {
-                  items: [{
-                    href:  journeyPath(Paths.APPLICATION_STATUS_URI + '/:directorId/change', { params: { directorId: director.id } }) + '?check_answers=true',
+                    items: [{
+                    href:  journeyPath(Paths.APPLICATION_STATUS_URI + '/:signatoryId/change', { params: { signatoryId: director.id } }) + '?check_answers=true',
                     text: "Change",
                     visuallyHiddenText: "email address for " + (director.onBehalfName or director.name),
                     attributes: {
