@@ -99,6 +99,10 @@ describe("AuthMiddleware", () => {
             middleware(req, res, next)
 
             verify(sessionService.getDissolutionSession(req)).once()
+            assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${url}`)
+            const err = next.args[0][0]
+            assert.instanceOf(err, Error)
+            assert.equal(err.message, "No Company Number")
         }
     })
 

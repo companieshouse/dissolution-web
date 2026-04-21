@@ -27,7 +27,7 @@ export class PaymentReviewController extends JourneyBaseController {
     @inject(SessionService) private sessionService: SessionService,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
         super(journeyPathService)
@@ -47,7 +47,6 @@ export class PaymentReviewController extends JourneyBaseController {
         return this.renderView(paymentSummary)
     }
 
-    //TODO: double check behaviour
     @httpPost("")
     public async post (): Promise<RedirectResult> {
         if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {

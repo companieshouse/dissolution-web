@@ -38,7 +38,7 @@ export class SelectSignatoriesController extends JourneyBaseController {
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
     @inject(SignatoryService) private signatoryService: SignatoryService,
     @inject(FormValidator) private validator: FormValidator,
-    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper,
+    @inject(DirectorToSignMapper) private readonly mapper: DirectorToSignMapper,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
         super(journeyPathService)
     }

@@ -42,7 +42,7 @@ export class SelectDirectorController extends JourneyBaseController {
     @inject(SessionService) private session: SessionService,
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
     @inject(FormValidator) private validator: FormValidator,
-    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper,
+    @inject(DirectorToSignMapper) private readonly mapper: DirectorToSignMapper,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
         super(journeyPathService)
     }

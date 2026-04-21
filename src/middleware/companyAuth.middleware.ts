@@ -61,8 +61,22 @@ export default function CompanyAuthMiddleware (
     }
 }
 
-function getCompanyNumber (session: Optional<DissolutionSession>, req: Request): string | undefined {
-    return (req.query.companyNumber as string | undefined) ?? session?.companyNumber
+function getCompanyNumber(session: Optional<DissolutionSession>, req: Request): string | undefined {
+    const rawQuery = req.query?.companyNumber
+    const queryValue = Array.isArray(rawQuery) ? rawQuery[0] : rawQuery
+    const queryStr = typeof queryValue === "string" ? queryValue.trim() : undefined
+
+    const sessionStr = typeof session?.companyNumber === "string"
+        ? session.companyNumber.trim()
+        : undefined
+
+    if (queryStr && queryStr.length > 0) {
+        return queryStr
+    }
+    if (sessionStr && sessionStr.length > 0) {
+        return sessionStr
+    }
+    return undefined
 }
 
 export function isWhitelistedUrl (url: string): boolean {

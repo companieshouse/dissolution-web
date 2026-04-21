@@ -1,17 +1,15 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-
-import BaseController from "app/controllers/base.controller"
-import { NotFoundError } from "app/errors/notFoundError.error"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
+import {NotFoundError} from "app/errors/notFoundError.error"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI } from "app/paths"
+import {PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI} from "app/paths"
 import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
@@ -21,7 +19,7 @@ import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.map
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
 import PaymentType from "app/models/dto/paymentType.enum"
-import { v4 as uuidv4 } from "uuid"
+import {v4 as uuidv4} from "uuid"
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 
@@ -63,7 +61,6 @@ export class PayByAccountDetailsController extends JourneyBaseController {
         return this.renderView()
     }
 
-    //TODO: double check
     @httpGet("/change-payment-type")
     public async changePaymentType (): Promise<string | RedirectResult> {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!

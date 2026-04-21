@@ -26,7 +26,7 @@ import JourneyBaseController from "app/controllers/JourneyBase.controller";
 
 interface ViewModel {
     officerType: OfficerType
-    backURI: string
+    backUri: string
     signatory: SignatoryViewModel
     data?: Optional<ChangeDetailsFormModel>
     errors?: Optional<ValidationErrors>
@@ -105,7 +105,7 @@ export class ChangeDetailsController extends JourneyBaseController {
 
     private async renderView (
         officerType: OfficerType,
-        backURI: string,
+        backUri: string,
         signatory: DissolutionGetDirector,
         data?: Optional<ChangeDetailsFormModel>,
         errors?: Optional<ValidationErrors>): Promise<string> {
@@ -117,7 +117,7 @@ export class ChangeDetailsController extends JourneyBaseController {
 
         const viewModel: ViewModel = {
             officerType,
-            backURI,
+            backUri,
             signatory: signatoryViewModel,
             data,
             errors

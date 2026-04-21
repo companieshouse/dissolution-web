@@ -8,6 +8,7 @@
   </div>
 
   {% set signatoryRows = [] %}
+  {% set applicationStatusBase = journeyPath(Paths.APPLICATION_STATUS_URI) %}
   {% for signatory in viewApplicationStatus.signatories %}
     {% set isReminded = false %}
     {% for director in signatory.remindDirectorList %}
@@ -15,40 +16,38 @@
           {% set isReminded = director.reminderSent %}
         {% endif %}
     {% endfor %}
-    {% set signatoryRows =
-      (
-        signatoryRows.push(
-          [
-            {
-              text: signatory.name,
-              attributes: { id: "name-" + loop.index0 }
-            },
-            {
-              html:  signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.id + '/change">Change email</a></p>' if signatory.canChange else signatory.email,
-              attributes: {
-                id: "email-" + loop.index0,
-                'data-event-id': 'change-email-link'
-              }
-            },
-            {
-              html: '<a>Email sent </a>' if isReminded else '<a class="govuk-link" href="' + Paths.APPLICATION_STATUS_URI + '/' + signatory.email + '/send-email">Resend email</a>',
-              attributes: {
-                id: "resend-" + loop.index0 ,
-                'data-event-id': 'resend-email-link' if piwik
-                }
-            } if not signatory.hasApproved,
-            {
-              html: govukTag({
-                text: "Signed" if signatory.hasApproved else "Not signed",
-                classes: "govuk-tag--grey" if not signatory.hasApproved
-              }),
-              attributes: { id: "signed-" + loop.index0 }
-            }
-          ]
-        ),
-        signatoryRows
-      )
-    %}
+    {% set changeHref = applicationStatusBase + '/' + signatory.id + '/change' %}
+    {% set resendHref = applicationStatusBase + '/' + signatory.email + '/send-email' %}
+    {% set signatoryRows = (
+      signatoryRows.push([
+        {
+          text: signatory.name,
+          attributes: { id: "name-" + loop.index0 }
+        },
+        {
+          html: signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + changeHref + '">Change email</a></p>' if signatory.canChange else signatory.email,
+          attributes: {
+            id: "email-" + loop.index0,
+            'data-event-id': 'change-email-link'
+          }
+        },
+        {
+          html: '<a>Email sent </a>' if isReminded else '<a class="govuk-link" href="' + resendHref + '">Resend email</a>',
+          attributes: {
+            id: "resend-" + loop.index0,
+            'data-event-id': 'resend-email-link' if piwik
+          }
+        } if not signatory.hasApproved,
+        {
+          html: govukTag({
+            text: "Signed" if signatory.hasApproved else "Not signed",
+            classes: "govuk-tag--grey" if not signatory.hasApproved
+          }),
+          attributes: { id: "signed-" + loop.index0 }
+        }
+      ]),
+      signatoryRows
+    ) %}
   {% endfor %}
 
   <div class="govuk-grid-column-full">

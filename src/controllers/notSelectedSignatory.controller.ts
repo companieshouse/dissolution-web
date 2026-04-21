@@ -23,7 +23,7 @@ export class NotSelectedSignatoryController extends BaseController {
     public constructor (
     @inject(SessionService) private session: SessionService,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private viewApplicationStatusMapper: ViewApplicationStatusMapper,
+    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
         super()
