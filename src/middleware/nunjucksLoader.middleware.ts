@@ -22,7 +22,7 @@ export default class NunjucksLoader {
 
     public constructor (
     @inject(TYPES.CDN_HOST) private CDN_HOST: string,
-    @inject(TYPES.CHS_URL) private CHS_URL: string,
+    @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
     @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
     @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
     @inject(JourneyPathService) private readonly journeyPathService: JourneyPathService

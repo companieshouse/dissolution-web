@@ -46,7 +46,7 @@ export class PayByAccountDetailsController extends JourneyBaseController {
         @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
         @inject(PaymentService) private readonly paymentService: PaymentService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
-        @inject(TYPES.CHS_URL) private CHS_URL: string,
+        @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
 
     ) {

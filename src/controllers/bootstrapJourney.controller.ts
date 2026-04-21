@@ -33,7 +33,7 @@ export class BootstrapJourneyController extends JourneyBaseController {
         }
 
         const journeyId = this.uuidGenerator.generate()
-        this.initDissolutionSession(journeyId, value as string)
+        this.initDissolutionSession(journeyId, value)
         return this.redirect(this.journeyPath(VIEW_COMPANY_INFORMATION_URI, {journeyId}))
     }
 

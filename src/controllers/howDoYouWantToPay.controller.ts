@@ -35,8 +35,8 @@ export class HowDoYouWantToPayController extends JourneyBaseController {
     @inject(FormValidator) private validator: FormValidator,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
-    @inject(TYPES.CHS_URL) private CHS_URL: string,
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
         super(journeyPathService)
