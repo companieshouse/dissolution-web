@@ -12,7 +12,6 @@ import PaymentApiClient from "../clients/paymentApi.client"
 import PaymentMapper from "app/mappers/payment/payment.mapper"
 import DissolutionPaymentPatchRequest from "app/models/dto/dissolutionPaymentPatchRequest"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { PAYMENT_CALLBACK_URI } from "app/paths"
 import TYPES from "app/types"
 
 @provide(PaymentService)
@@ -20,7 +19,6 @@ export default class PaymentService {
 
     public constructor (
     @inject(PaymentMapper) private mapper: PaymentMapper,
-    @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
     @inject(PaymentApiClient) private client: PaymentApiClient,
     @inject(ApplicationLogger) private logger: ApplicationLogger,
@@ -28,9 +26,11 @@ export default class PaymentService {
     ) {}
 
     public async generatePaymentURL (
-        token: string, dissolutionSession: DissolutionSession, paymentStateUUID: string
+        token: string,
+        dissolutionSession: DissolutionSession,
+        paymentStateUUID: string,
+        paymentRedirectURI: string
     ): Promise<string> {
-        const paymentRedirectURI: string = `${this.CHS_URL}${PAYMENT_CALLBACK_URI}`
 
         const applicationReferenceNumber: string = dissolutionSession.applicationReferenceNumber!
 

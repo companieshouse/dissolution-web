@@ -35,7 +35,6 @@ describe("PaymentService", () => {
 
         service = new PaymentService(
             instance(mapper),
-            CHS_URL,
             DISSOLUTIONS_API_URL,
             instance(client),
             instance(logger),
@@ -89,7 +88,7 @@ describe("PaymentService", () => {
             when(client.createPayment(TOKEN, createPaymentRequest)).thenResolve(paymentResponse)
 
             try {
-                await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state)
+                await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state, anything())
                 assert.fail()
             } catch (err: any) {
                 assert.equal(err.message, "Payment session failed to create")

@@ -27,6 +27,7 @@ import FormValidator from "app/utils/formValidator.util"
 
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -54,7 +55,7 @@ describe("HowDoYouWantToPayController", () => {
 
         when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
         when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-        when(paymentService.generatePaymentURL(TOKEN, anything(), anything())).thenResolve(REDIRECT_CARD_URL)
+        when(paymentService.generatePaymentURL(TOKEN, anything(), anything(), anything())).thenResolve(REDIRECT_CARD_URL)
         when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution)
     })
 
@@ -64,6 +65,9 @@ describe("HowDoYouWantToPayController", () => {
             container.rebind(SessionService).toConstantValue(instance(sessionService))
             container.rebind(PaymentService).toConstantValue(instance(paymentService))
             container.rebind(FormValidator).toConstantValue(instance(validator))
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
         })
     }
 

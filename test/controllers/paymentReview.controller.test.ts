@@ -22,7 +22,7 @@ import TYPES from "app/types"
 
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService from "app/services/session/journeyPath.service"
 
 mockCsrfMiddleware.restore()
 
@@ -38,12 +38,12 @@ describe("PaymentReviewController", () => {
     let dissolution: DissolutionGetResponse
     let dissolutionSession: DissolutionSession
 
-    function initApp (): Application {
+    function initApp (payByAccountEnabled = 1): Application {
         return createApp(container => {
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
             container.rebind(SessionService).toConstantValue(instance(sessionService))
             container.rebind(PaymentService).toConstantValue(instance(paymentService))
-            container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
+            container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(payByAccountEnabled)
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate
             } as any)
@@ -111,14 +111,9 @@ describe("PaymentReviewController", () => {
         it("should redirect to the GOV.UK Pay journey (if the pay by account feature toggle is off)", async () => {
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN)
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything())).thenResolve(REDIRECT_URL)
+            when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())).thenResolve(REDIRECT_URL)
 
-            const app: Application = createApp(container => {
-                container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
-                container.rebind(SessionService).toConstantValue(instance(sessionService))
-                container.rebind(PaymentService).toConstantValue(instance(paymentService))
-                container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(0)
-            })
+            const app = initApp(0)
 
             await request(app)
                 .post(PAYMENT_REVIEW_URI)

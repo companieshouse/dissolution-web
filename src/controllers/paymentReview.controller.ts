@@ -8,7 +8,7 @@ import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import PaymentSummary from "app/models/dto/paymentSummary"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import {HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI} from "app/paths"
+import {HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_CALLBACK_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PaymentService from "app/services/payment/payment.service"
 import SessionService from "app/services/session/session.service"
@@ -28,6 +28,7 @@ export class PaymentReviewController extends JourneyBaseController {
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
     @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(TYPES.CHS_URL) private CHS_URL: string,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
         super(journeyPathService)
@@ -58,7 +59,9 @@ export class PaymentReviewController extends JourneyBaseController {
 
         const paymentStateUUID: string = uuidv4()
 
-        const paymentURL: string = await this.paymentService.generatePaymentURL(token, dissolutionSession, paymentStateUUID)
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`
+
+        const paymentURL: string = await this.paymentService.generatePaymentURL(token, dissolutionSession, paymentStateUUID, paymentRedirectURI)
 
         this.updateSession(dissolutionSession, paymentStateUUID)
 

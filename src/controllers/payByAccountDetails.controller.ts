@@ -9,7 +9,12 @@ import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.mo
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import {PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI} from "app/paths"
+import {
+    PAY_BY_ACCOUNT_DETAILS_URI,
+    PAYMENT_CALLBACK_URI,
+    SEARCH_COMPANY_URI,
+    VIEW_FINAL_CONFIRMATION_URI
+} from "app/paths"
 import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
@@ -41,6 +46,7 @@ export class PayByAccountDetailsController extends JourneyBaseController {
         @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
         @inject(PaymentService) private readonly paymentService: PaymentService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+        @inject(TYPES.CHS_URL) private CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
 
     ) {
@@ -75,7 +81,9 @@ export class PayByAccountDetailsController extends JourneyBaseController {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         dissolutionSession.paymentStateUUID = uuidv4()
 
-        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID)
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`
+
+        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID, paymentRedirectURI)
     }
 
     private updateSessionWithPaymentType (

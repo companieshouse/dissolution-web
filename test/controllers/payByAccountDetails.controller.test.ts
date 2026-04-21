@@ -135,7 +135,7 @@ describe("PayByAccountDetailsController", () => {
         it("should redirect to pay by card", async () => {
             const app: Application = initApp()
             const REDIRECT_CARD_URL = "http://card-payment-ui-url"
-            when(paymentService.generatePaymentURL(TOKEN, anything(), anything())).thenResolve(REDIRECT_CARD_URL)
+            when(paymentService.generatePaymentURL(TOKEN, anything(), anything(), anything())).thenResolve(REDIRECT_CARD_URL)
 
             await request(app)
                 .get(PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI)
