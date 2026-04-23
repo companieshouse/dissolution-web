@@ -62,14 +62,14 @@ describe("BootstrapJourneyController", () => {
         assert.deepEqual(savedSession.remindDirectorList, [])
     })
 
-    const invalidApplicationNumberCases = [
+    const invalidCompanyNumberCases = [
         { desc: "undefined input", input: undefined },
         { desc: "empty string", input: "" },
         { desc: "spaces only", input: "   " },
         { desc: "array with empty", input: [""] },
     ]
 
-    invalidApplicationNumberCases.forEach((tc) => {
+    invalidCompanyNumberCases.forEach((tc) => {
         it(`applicationNumber invalid: ${tc.desc}`, async () => {
 
             when(uuidGeneratorMock.generate()).thenReturn("should-not-be-used")
@@ -82,13 +82,13 @@ describe("BootstrapJourneyController", () => {
         })
     })
 
-    const validApplicationNumberCases = [
+    const validCompanyNumberCases = [
         { desc: "array with valid first element", input: [" 12345 "], expected: "12345" },
         { desc: "valid simple", input: "12345678", expected: "12345678" },
         { desc: "valid trimmed", input: " abc123 ", expected: "abc123" }
     ]
 
-    validApplicationNumberCases.forEach((tc) => {
+    validCompanyNumberCases.forEach((tc) => {
         it(`applicationNumber valid: ${tc.desc}`, async () => {
 
             when(uuidGeneratorMock.generate()).thenReturn("e1101f0a-5121-4429-acee-a817c5cAAAAA")
