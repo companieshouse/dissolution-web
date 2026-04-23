@@ -1,22 +1,24 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-import BaseController from "./base.controller"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 
 import OfficerType from "app/models/dto/officerType.enum"
-import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
+import {DefineSignatoryInfoFormModel} from "app/models/form/defineSignatoryInfo.model"
 import Optional from "app/models/optional"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
+import {DirectorToSign} from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
+import {isCorporateOfficer} from "app/models/dto/officerRole.enum"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI } from "app/paths"
+import {CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI} from "app/paths"
 import defineSignatoryInfoSchema from "app/schemas/defineSignatoryInfo.schema"
 import SessionService from "app/services/session/session.service"
 import SignatoryService from "app/services/signatories/signatory.service"
 import RichFormValidator from "app/utils/richFormValidator.util"
 import FormValidator from "app/utils/formValidator.util"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import TYPES from "app/types";
 
 interface ViewModel {
     officerType: OfficerType
@@ -34,14 +36,15 @@ interface SignatoryViewModel {
     isCorporateOfficer: boolean
 }
 
-@controller(DEFINE_SIGNATORY_INFO_URI)
-export class DefineSignatoryInfoController extends BaseController {
+@controller(DEFINE_SIGNATORY_INFO_URI, TYPES.JourneyIdAuthMiddleware)
+export class DefineSignatoryInfoController extends JourneyBaseController {
 
     public constructor (
         @inject(SessionService) private session: SessionService,
         @inject(SignatoryService) private signatoryService: SignatoryService,
-        @inject(RichFormValidator) private readonly validator: FormValidator) {
-        super()
+        @inject(RichFormValidator) private readonly validator: FormValidator,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
+        super(journeyPathService)
     }
 
     private getViewableSignatories (session: DissolutionSession): DirectorToSign[] {
@@ -65,7 +68,7 @@ export class DefineSignatoryInfoController extends BaseController {
             return this.renderView(officerType, viewableSignatories, session.isMultiDirector!, body, errors)
         }
         this.updateSession(session, body)
-        return this.redirect(CHECK_YOUR_ANSWERS_URI)
+        return this.redirect(this.journeyPath(CHECK_YOUR_ANSWERS_URI))
     }
 
     private async renderView (

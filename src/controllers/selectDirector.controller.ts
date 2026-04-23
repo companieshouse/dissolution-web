@@ -1,24 +1,26 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-import BaseController from "./base.controller"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 
 import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper"
 import OfficerType from "app/models/dto/officerType.enum"
 import SelectDirectorFormModel from "app/models/form/selectDirector.model"
 import Optional from "app/models/optional"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
+import {DirectorToSign} from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import DirectorDetails from "app/models/view/directorDetails.model"
 import SelectedDirectorDetails from "app/models/view/selectedDirectorDetails.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from "app/paths"
+import {CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI} from "app/paths"
 import selectDirectorSchema from "app/schemas/selectDirector.schema"
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
-import { isCorporateOfficer } from "app/models/dto/officerRole.enum"
+import {isCorporateOfficer} from "app/models/dto/officerRole.enum"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import TYPES from "app/types";
 
 interface ViewModel {
   officerType: OfficerType
@@ -33,15 +35,16 @@ interface DirectorViewModel {
     isCorporate: boolean
 }
 
-@controller(SELECT_DIRECTOR_URI)
-export class SelectDirectorController extends BaseController {
+@controller(SELECT_DIRECTOR_URI, TYPES.JourneyIdAuthMiddleware)
+export class SelectDirectorController extends JourneyBaseController {
 
     public constructor (
     @inject(SessionService) private session: SessionService,
     @inject(CompanyOfficersService) private officerService: CompanyOfficersService,
     @inject(FormValidator) private validator: FormValidator,
-    @inject(DirectorToSignMapper) private mapper: DirectorToSignMapper) {
-        super()
+    @inject(DirectorToSignMapper) private readonly mapper: DirectorToSignMapper,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService) {
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -68,7 +71,9 @@ export class SelectDirectorController extends BaseController {
 
         this.updateSession(session, body, directors, selectedDirector)
 
-        return this.redirect(this.getRedirectURI(directors, selectedDirector))
+        const redirectURI = this.getRedirectURI(directors, selectedDirector)
+
+        return this.redirect(this.journeyPath(redirectURI))
     }
 
     private async getDirectors (): Promise<DirectorDetails[]> {

@@ -34,6 +34,7 @@ export default class CompanyService {
         return !!response.resource
     }
 
+
     public async getCompanyDetails (token: string, companyNumber: string): Promise<CompanyDetails> {
         const response: Resource<CompanyProfile> = await this.client.getCompanyProfile(token, companyNumber)
 

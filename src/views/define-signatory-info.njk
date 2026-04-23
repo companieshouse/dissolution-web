@@ -12,7 +12,7 @@
   {{
     govukBackLink({
       text: "Back",
-      href: Paths.SELECT_SIGNATORIES_URI if isMultiDirector else Paths.SELECT_DIRECTOR_URI
+      href: journeyPath(Paths.SELECT_SIGNATORIES_URI) if isMultiDirector else journeyPath(Paths.SELECT_DIRECTOR_URI)
     })
   }}
 

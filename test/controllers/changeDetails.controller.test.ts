@@ -21,6 +21,7 @@ import { aChangeDetailsFormModel } from "test/fixtures/changeDetailsFormModel.bu
 import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.builder"
 import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
 import { aDissolutionSession } from "test/fixtures/dissolutionSession.builder"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -42,6 +43,9 @@ describe("ChangeDetailsController", () => {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session))
             container.rebind(DissolutionDirectorService).toConstantValue(instance(directorService))
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
         })
     }
 

@@ -1,8 +1,6 @@
-import { inject } from "inversify"
-import { controller, httpGet, queryParam } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-
-import BaseController from "app/controllers/base.controller"
+import {inject} from "inversify"
+import {controller, httpGet, queryParam} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
 import ApprovalService from "app/services/approval/approval.service"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
@@ -18,32 +16,37 @@ import {
     NOT_SELECTED_SIGNATORY,
     PAYMENT_REVIEW_URI,
     REDIRECT_GATE_URI,
-    SEARCH_COMPANY_URI, SELECT_DIRECTOR_URI,
+    SEARCH_COMPANY_URI,
+    SELECT_DIRECTOR_URI,
     VIEW_FINAL_CONFIRMATION_URI,
     WAIT_FOR_OTHERS_TO_SIGN_URI
 } from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import TYPES from "app/types";
 
-@controller(REDIRECT_GATE_URI)
-export class RedirectController extends BaseController {
+@controller(REDIRECT_GATE_URI, TYPES.JourneyIdAuthMiddleware)
+export class RedirectController extends JourneyBaseController {
 
     public constructor (
-        @inject(SessionService) private readonly session: SessionService,
+        @inject(SessionService) readonly sessionService: SessionService,
         @inject(DissolutionService) private readonly service: DissolutionService,
         @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
-        @inject(ApprovalService) private readonly approvalService: ApprovalService
+        @inject(ApprovalService) private readonly approvalService: ApprovalService,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("")
     public async get (): Promise<RedirectResult> {
-        const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const session: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session)
 
         if (!dissolution) {
-            return this.redirect(SELECT_DIRECTOR_URI)
+            return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI))
         }
 
         session.applicationReferenceNumber = dissolution.application_reference
@@ -66,7 +69,7 @@ export class RedirectController extends BaseController {
     @queryParam("state") state: string,
     @queryParam("status") status: PaymentStatus,
     @queryParam("ref") reference: string): Promise<RedirectResult> {
-        const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const session: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
 
         if (session.paymentStateUUID !== state) {
             console.log(session.paymentStateUUID)
@@ -87,19 +90,19 @@ export class RedirectController extends BaseController {
     }
 
     private async getDissolution (session: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
-        const token: string = this.session.getAccessToken(this.httpContext.request)
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         return this.service.getDissolution(token, session)
     }
 
     private handlePendingPaymentRedirect (dissolution: DissolutionGetResponse, session: DissolutionSession): RedirectResult {
-        const userEmail: string = this.session.getUserEmail(this.httpContext.request)!
+        const userEmail: string = this.sessionService.getUserEmail(this.httpContext.request)!
         const redirectUri: string = this.getPendingPaymentRedirectUri(dissolution, userEmail)
 
         return this.saveSessionAndRedirect(session, redirectUri)
     }
 
     private async handlePendingApprovalRedirect (dissolution: DissolutionGetResponse, session: DissolutionSession): Promise<RedirectResult> {
-        const userEmail: string = this.session.getUserEmail(this.httpContext.request)!
+        const userEmail: string = this.sessionService.getUserEmail(this.httpContext.request)!
         const signatoriesForUser: DissolutionGetDirector[] = this.getSignatoriesForUser(dissolution, userEmail)
         const signatoryPendingApproval: Optional<DissolutionGetDirector> = signatoriesForUser.find(signatory => !signatory.approved_at)
 
@@ -128,12 +131,12 @@ export class RedirectController extends BaseController {
     }
 
     private saveSessionAndRedirect (session: DissolutionSession, redirectUri: string): RedirectResult {
-        this.session.setDissolutionSession(this.httpContext.request, session)
-        return this.redirect(redirectUri)
+        this.sessionService.setDissolutionSession(this.httpContext.request, session)
+        return this.redirect(this.journeyPath(redirectUri))
     }
 
     private async setupDissolutionApproval (session: DissolutionSession, dissolution: DissolutionGetResponse, signatory: DissolutionGetDirector): Promise<DissolutionApprovalModel> {
-        const token: string = this.session.getAccessToken(this.httpContext.request)
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         return await this.approvalService.getApprovalModel(token, dissolution, signatory, session.directorsToSign)
     }
 

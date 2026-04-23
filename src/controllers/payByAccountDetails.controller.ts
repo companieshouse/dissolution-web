@@ -1,17 +1,20 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-
-import BaseController from "app/controllers/base.controller"
-import { NotFoundError } from "app/errors/notFoundError.error"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
+import {NotFoundError} from "app/errors/notFoundError.error"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { PAY_BY_ACCOUNT_DETAILS_URI, SEARCH_COMPANY_URI, VIEW_FINAL_CONFIRMATION_URI } from "app/paths"
+import {
+    PAY_BY_ACCOUNT_DETAILS_URI,
+    PAYMENT_CALLBACK_URI,
+    SEARCH_COMPANY_URI,
+    VIEW_FINAL_CONFIRMATION_URI
+} from "app/paths"
 import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PayByAccountService from "app/services/payment/payByAccount.service"
@@ -21,15 +24,17 @@ import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.map
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
 import PaymentType from "app/models/dto/paymentType.enum"
-import { v4 as uuidv4 } from "uuid"
+import {v4 as uuidv4} from "uuid"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
     data?: PayByAccountDetailsFormModel
     errors?: ValidationErrors
 }
 
-@controller(PAY_BY_ACCOUNT_DETAILS_URI)
-export class PayByAccountDetailsController extends BaseController {
+@controller(PAY_BY_ACCOUNT_DETAILS_URI, TYPES.JourneyIdAuthMiddleware)
+export class PayByAccountDetailsController extends JourneyBaseController {
 
     private readonly ERROR_INCORRECT_CREDENTIALS: string = "Your Presenter ID or Presenter authentication code is incorrect"
 
@@ -40,9 +45,12 @@ export class PayByAccountDetailsController extends BaseController {
         @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
         @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
         @inject(PaymentService) private readonly paymentService: PaymentService,
-        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+        @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
+
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -73,7 +81,9 @@ export class PayByAccountDetailsController extends BaseController {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request)
         dissolutionSession.paymentStateUUID = uuidv4()
 
-        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID)
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`
+
+        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID, paymentRedirectURI)
     }
 
     private updateSessionWithPaymentType (
@@ -107,7 +117,7 @@ export class PayByAccountDetailsController extends BaseController {
         dissolutionSession.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
         this.updateSession(dissolutionSession)
 
-        return this.redirect(VIEW_FINAL_CONFIRMATION_URI)
+        return this.redirect(this.journeyPath(VIEW_FINAL_CONFIRMATION_URI))
     }
 
     private async renderView (data?: PayByAccountDetailsFormModel, errors?: ValidationErrors): Promise<string> {

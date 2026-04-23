@@ -22,6 +22,7 @@ import { APP_NAME, CSRF_ENABLED } from "app/constants/app.const"
 import PiwikConfig from "app/models/piwikConfig"
 import TYPES from "app/types"
 import { getEnvOrThrow } from "app/utils/env.util"
+import { JourneyExpiredError } from "app/errors/journeyExpired.error"
 
 @provide(ServerMiddlewareLoader)
 export default class ServerMiddlewareLoader {
@@ -61,7 +62,12 @@ export default class ServerMiddlewareLoader {
     public configureErrorHandling (app: Application): void {
         app.use((err: any, _: Request, res: Response, _2: NextFunction) => {
             this.logger.error(`${err.constructor.name} - ${err.message}`)
-            return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).render("error")
+            let errorMessage = "Sorry, an unexpected error occurred."
+
+            if (err instanceof JourneyExpiredError) {
+                errorMessage = err.message
+            }
+            return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).render("error", { errorMessage })
         })
     }
 

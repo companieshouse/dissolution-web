@@ -8,7 +8,11 @@
       <h1 class="govuk-heading-xl">
         Sorry, there is a problem with the service
       </h1>
-      <p class="govuk-body">Try again later.</p>
+      {% if errorMessage %}
+        <p class="govuk-body">{{ errorMessage }}</p>
+      {% else %}
+        <p class="govuk-body">Try again later.</p>
+      {% endif %}
       <p class="govuk-body">
         If the problem persists, <a href="https://www.gov.uk/contact-companies-house" target="_blank">contact us (opens in new tab)</a> to speak to someone about applying to strike off and dissolve a company.
       </p>

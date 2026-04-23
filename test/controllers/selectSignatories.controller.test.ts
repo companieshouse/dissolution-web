@@ -30,6 +30,7 @@ import SignatoryService from "app/services/signatories/signatory.service"
 import FormValidator from "app/utils/formValidator.util"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 import { aDirectorDetails } from "../fixtures/directorDetails.builder"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -189,6 +190,9 @@ describe("SelectSignatoriesController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
                 container.rebind(FormValidator).toConstantValue(instance(validator))
                 container.rebind(DirectorToSignMapper).toConstantValue(directorToSignmapper)
+                container.rebind(JourneyPathService).toConstantValue({
+                    journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+                } as any)
             })
         }
 

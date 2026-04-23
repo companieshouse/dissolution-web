@@ -1,27 +1,28 @@
-import { inject } from "inversify"
-import { controller, httpGet } from "inversify-express-utils"
+import {inject} from "inversify"
+import {controller, httpGet} from "inversify-express-utils"
 
 import BaseController from "app/controllers/base.controller"
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ViewApplicationStatus } from "app/models/view/viewApplicationStatus.model"
-import { NOT_SELECTED_SIGNATORY } from "app/paths"
+import {ViewApplicationStatus} from "app/models/view/viewApplicationStatus.model"
+import {NOT_SELECTED_SIGNATORY} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import Types from "app/types";
 
 interface ViewModel {
   viewApplicationStatus: ViewApplicationStatus
 }
 
-@controller(NOT_SELECTED_SIGNATORY)
+@controller(NOT_SELECTED_SIGNATORY, Types.JourneyIdAuthMiddleware)
 export class NotSelectedSignatoryController extends BaseController {
 
     public constructor (
     @inject(SessionService) private session: SessionService,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private viewApplicationStatusMapper: ViewApplicationStatusMapper
+    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper,
     ) {
         super()
     }

@@ -4,7 +4,6 @@ import { controller, httpGet, httpPost, requestBody } from "inversify-express-ut
 import { RedirectResult } from "inversify-express-utils/lib/results"
 import { v4 as uuidv4 } from "uuid"
 
-import BaseController from "app/controllers/base.controller"
 import { NotFoundError } from "app/errors/notFoundError.error"
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
@@ -13,30 +12,34 @@ import HowDoYouWantToPayFormModel from "app/models/form/howDoYouWantToPay.model"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { HOW_DO_YOU_WANT_TO_PAY_URI, PAY_BY_ACCOUNT_URI, SEARCH_COMPANY_URI } from "app/paths"
+import { HOW_DO_YOU_WANT_TO_PAY_URI, PAY_BY_ACCOUNT_URI, SEARCH_COMPANY_URI, PAYMENT_CALLBACK_URI } from "app/paths"
 import { howDoYouWantToPaySchema } from "app/schemas/howDoYouWantToPay.schema"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PaymentService from "app/services/payment/payment.service"
 import SessionService from "app/services/session/session.service"
 import TYPES from "app/types"
 import FormValidator from "app/utils/formValidator.util"
+import JourneyBaseController from "app/controllers/JourneyBase.controller"
+import JourneyPathService from "app/services/session/journeyPath.service"
 
 interface ViewModel {
   data?: Optional<HowDoYouWantToPayFormModel>
   errors?: Optional<ValidationErrors>
 }
 
-@controller(HOW_DO_YOU_WANT_TO_PAY_URI)
-export class HowDoYouWantToPayController extends BaseController {
+@controller(HOW_DO_YOU_WANT_TO_PAY_URI, TYPES.JourneyIdAuthMiddleware)
+export class HowDoYouWantToPayController extends JourneyBaseController {
 
     public constructor (
     @inject(SessionService) private sessionService: SessionService,
     @inject(FormValidator) private validator: FormValidator,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -89,7 +92,7 @@ export class HowDoYouWantToPayController extends BaseController {
 
     private async getRedirectURI (paymentType: PaymentType, dissolutionSession: DissolutionSession): Promise<string> {
         if (paymentType === PaymentType.ACCOUNT) {
-            return PAY_BY_ACCOUNT_URI
+            return this.journeyPath(PAY_BY_ACCOUNT_URI)
         }
 
         return await this.getCreditCardPaymentUrl(dissolutionSession)
@@ -100,7 +103,14 @@ export class HowDoYouWantToPayController extends BaseController {
 
         dissolutionSession.paymentStateUUID = uuidv4()
 
-        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID)
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`
+
+        return await this.paymentService.generatePaymentURL(
+            token,
+            dissolutionSession,
+            dissolutionSession.paymentStateUUID,
+            paymentRedirectURI
+        )
     }
 
     private updateSession (

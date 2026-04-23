@@ -1,34 +1,37 @@
-import { inject } from "inversify"
-import { controller, httpGet, httpPost } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-import { v4 as uuidv4 } from "uuid"
-import BaseController from "./base.controller"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
+import {v4 as uuidv4} from "uuid"
 
 import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import PaymentSummary from "app/models/dto/paymentSummary"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from "app/paths"
+import {HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_CALLBACK_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import PaymentService from "app/services/payment/payment.service"
 import SessionService from "app/services/session/session.service"
 import TYPES from "app/types"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
   paymentSummary: PaymentSummary
 }
 
-@controller(PAYMENT_REVIEW_URI)
-export class PaymentReviewController extends BaseController {
+@controller(PAYMENT_REVIEW_URI, TYPES.JourneyIdAuthMiddleware)
+export class PaymentReviewController extends JourneyBaseController {
 
     public constructor (
     @inject(SessionService) private sessionService: SessionService,
     @inject(DissolutionService) private dissolutionService: DissolutionService,
     @inject(PaymentService) private paymentService: PaymentService,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private PAY_BY_ACCOUNT_FEATURE_ENABLED: number
+    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+    @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
+    @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
-        super()
+        super(journeyPathService)
     }
 
     @httpGet("")
@@ -48,7 +51,7 @@ export class PaymentReviewController extends BaseController {
     @httpPost("")
     public async post (): Promise<RedirectResult> {
         if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-            return this.redirect(HOW_DO_YOU_WANT_TO_PAY_URI)
+            return this.redirect(this.journeyPath(HOW_DO_YOU_WANT_TO_PAY_URI))
         }
 
         const token: string = this.sessionService.getAccessToken(this.httpContext.request)
@@ -56,7 +59,9 @@ export class PaymentReviewController extends BaseController {
 
         const paymentStateUUID: string = uuidv4()
 
-        const paymentURL: string = await this.paymentService.generatePaymentURL(token, dissolutionSession, paymentStateUUID)
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`
+
+        const paymentURL: string = await this.paymentService.generatePaymentURL(token, dissolutionSession, paymentStateUUID, paymentRedirectURI)
 
         this.updateSession(dissolutionSession, paymentStateUUID)
 

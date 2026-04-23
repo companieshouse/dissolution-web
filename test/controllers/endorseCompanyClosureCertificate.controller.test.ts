@@ -1,29 +1,31 @@
 import "reflect-metadata"
 
-import { assert } from "chai"
-import { StatusCodes } from "http-status-codes"
+import {assert} from "chai"
+import {StatusCodes} from "http-status-codes"
 import request from "supertest"
-import { anything, deepEqual, instance, mock, when } from "ts-mockito"
-import { generateEndorseCertificateFormModel } from "../fixtures/endorseCertificateFormModel.fixtures"
-import { generateValidationError } from "../fixtures/error.fixtures"
-import { TOKEN } from "../fixtures/session.fixtures"
-import { createApp } from "./helpers/application.factory"
+import {anything, deepEqual, instance, mock, when} from "ts-mockito"
+import {generateEndorseCertificateFormModel} from "../fixtures/endorseCertificateFormModel.fixtures"
+import {generateValidationError} from "../fixtures/error.fixtures"
+import {TOKEN} from "../fixtures/session.fixtures"
+import {createApp} from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/endorseCompanyClosureCertificate.controller"
 import OfficerType from "app/models/dto/officerType.enum"
 import EndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
+import {ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import IpAddressService from "app/services/ip-address/ipAddress.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
 
-import { generateApprovalModel } from "test/fixtures/dissolutionApi.fixtures"
-import { generateDissolutionSession } from "test/fixtures/session.fixtures"
+import {generateApprovalModel} from "test/fixtures/dissolutionApi.fixtures"
+import {generateDissolutionSession} from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
+import {Application} from "express"
+import JourneyPathService from "app/services/session/journeyPath.service"
 
 mockCsrfMiddleware.restore()
 
@@ -113,6 +115,19 @@ describe("EndorseCompanyClosureCertificateController", () => {
         mockedCompanyOfficersService.isCorporateOfficer = async () => false
     })
 
+    function initApp (): Application {
+        return createApp(container => {
+            container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
+            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(DissolutionService).toConstantValue(instance(mockedDissolutionService))
+            container.rebind(IpAddressService).toConstantValue(instance(mockedIpAddressService))
+            container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
+        })
+    }
+
     describe("GET request", () => {
         it("should render confirmation checkbox hint for LLP corporate member", () => {
             configureApprovalModel({
@@ -121,11 +136,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 onBehalfName: ON_BEHALF_NAME
             })
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-            return request(app)
+
+            return request(initApp())
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
                 .then(res => {
@@ -135,12 +147,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
         it("should render endorse certificate page without an on behalf statement if director is signing and not a corporate officer", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
             configureApprovalModel({ isCorporateOfficer: false })
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
 
-            return request(app)
+            return request(initApp())
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
                 .then(res => {
@@ -160,11 +168,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
         it("should not render confirmation checkbox hint for non-corporate officer", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
             configureApprovalModel({ isCorporateOfficer: false })
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-            return request(app)
+
+            return request(initApp())
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
                 .then(res => {
@@ -176,11 +181,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
         it("should render confirmation checkbox hint for corporate director", () => {
             configureApprovalModel({ isCorporateOfficer: true, onBehalfName: ON_BEHALF_NAME })
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-            return request(app)
+
+            return request(initApp())
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
                 .then(res => {
@@ -191,12 +193,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
         it("should render both confirmation and declaration checkboxes and new headings", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
 
-            return request(app)
+            return request(initApp())
                 .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .expect(StatusCodes.OK)
                 .then(res => {
@@ -214,7 +212,8 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
         it("should render endorse certificate page with corporate officer confirmation label", async () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true
-            configureApprovalModel({ isCorporateOfficer: true, onBehalfName: ON_BEHALF_NAME })
+            configureApprovalModel({isCorporateOfficer: true, onBehalfName: ON_BEHALF_NAME})
+
             const app = createApp(async container => {
                 container.rebind(SessionService).toConstantValue(instance(session))
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
@@ -232,12 +231,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             it("should render endorse certificate page with directors for DS01", async () => {
                 dissolutionSession.approval!.officerType = OfficerType.DIRECTOR
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-                })
-
-                const res = await request(app)
+                const res = await request(initApp())
                     .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                     .expect(StatusCodes.OK)
 
@@ -255,12 +249,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             it("should render endorse certificate page with members for LLDS01", async () => {
                 dissolutionSession.approval!.officerType = OfficerType.MEMBER
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-                })
-
-                const res = await request(app)
+                const res = await request(initApp())
                     .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                     .expect(StatusCodes.OK)
 
@@ -289,15 +278,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(null)
                 when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
 
-                const app = createApp(container => {
-                    container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(DissolutionService).toConstantValue(instance(mockedDissolutionService))
-                    container.rebind(IpAddressService).toConstantValue(instance(mockedIpAddressService))
-                    container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-                })
-
-                await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                await request(initApp()).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                     .send(testObject)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", REDIRECT_GATE_URI)
@@ -318,15 +299,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(null)
             when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS)
 
-            const app = createApp(container => {
-                container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(DissolutionService).toConstantValue(instance(mockedDissolutionService))
-                container.rebind(IpAddressService).toConstantValue(instance(mockedIpAddressService))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-
-            await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+            await request(initApp()).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
                 .send(testObject)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_GATE_URI)
@@ -345,13 +318,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             // Dynamic validation schema
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError)
 
-            const app = createApp(container => {
-                container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-
-            const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
+            const res = await request(initApp()).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"))
             // Check for corporate officer error message (HTML-encoded apostrophe)
@@ -368,13 +335,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError)
 
-            const app = createApp(container => {
-                container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-
-            const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
+            const res = await request(initApp()).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"))
             assert.isTrue(res.text.includes(DECLARATION_ERROR))
@@ -392,13 +353,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve()
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError)
 
-            const app = createApp(container => {
-                container.rebind(FormValidator).toConstantValue(instance(mockedFormValidator))
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService)
-            })
-
-            const res = await request(app).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
+            const res = await request(initApp()).post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).send(testObject).expect(StatusCodes.BAD_REQUEST)
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
             assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"))
             assert.isTrue(res.text.includes(CONFIRMATION_ERROR_NON_CORPORATE))

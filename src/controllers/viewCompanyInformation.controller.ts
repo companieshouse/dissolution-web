@@ -1,40 +1,40 @@
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, queryParam } from "inversify-express-utils"
-import BaseController from "./base.controller"
+import TYPES from "app/types"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost} from "inversify-express-utils"
 
 import CompanyDetails from "app/models/companyDetails.model"
 import OfficerType from "app/models/dto/officerType.enum"
 import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths"
+import {REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
 import CompanyService from "app/services/company/company.service"
 import SessionService from "app/services/session/session.service"
+import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
-  company: CompanyDetails
-  error: Optional<string>
+    company: CompanyDetails
+    error: Optional<string>
 }
 
-@controller(VIEW_COMPANY_INFORMATION_URI)
-export class ViewCompanyInformationController extends BaseController {
+@controller(VIEW_COMPANY_INFORMATION_URI, TYPES.JourneyIdAuthMiddleware)
+export class ViewCompanyInformationController extends JourneyBaseController {
 
-    public constructor (
-        @inject(SessionService) private readonly session: SessionService,
-        @inject(CompanyService) private readonly companyService: CompanyService) {
-        super()
+    public constructor(
+        @inject(SessionService) readonly sessionService: SessionService,
+        @inject(CompanyService) private readonly companyService: CompanyService,
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,) {
+
+        super(journeyPathService)
     }
 
     @httpGet("")
-    public async get (@queryParam("companyNumber") companyNumber: string): Promise<string> {
-        const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const token: string = this.session.getAccessToken(this.httpContext.request)
+    public async get(): Promise<string> {
+        const session: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
 
-        if (!companyNumber) {
-            companyNumber = session.companyNumber!
-        }
-
-        const company: CompanyDetails = await this.getCompanyInfo(token, companyNumber)
+        const company: CompanyDetails = await this.getCompanyInfo(token, session.companyNumber!)
 
         const error: Optional<string> = await this.validateCompanyDetails(token, company)
 
@@ -48,24 +48,24 @@ export class ViewCompanyInformationController extends BaseController {
     }
 
     @httpPost("")
-    public post (): void {
-        this.httpContext.response.redirect(REDIRECT_GATE_URI)
+    public post(): void {
+        this.httpContext.response.redirect(this.journeyPath(REDIRECT_GATE_URI))
     }
 
-    private async getCompanyInfo (token: string, companyNumber: string): Promise<CompanyDetails> {
+    private async getCompanyInfo(token: string, companyNumber: string): Promise<CompanyDetails> {
         return this.companyService.getCompanyDetails(token, companyNumber)
     }
 
-    private async validateCompanyDetails (token: string, companyDetails: CompanyDetails): Promise<Optional<string>> {
+    private async validateCompanyDetails(token: string, companyDetails: CompanyDetails): Promise<Optional<string>> {
         return this.companyService.validateCompanyDetails(companyDetails, token)
     }
 
-    private updateSession (session: DissolutionSession, company: CompanyDetails): void {
+    private updateSession(session: DissolutionSession, company: CompanyDetails): void {
         const updatedSession: DissolutionSession = {
             ...session,
             officerType: company.companyType === ClosableCompanyType.LLP ? OfficerType.MEMBER : OfficerType.DIRECTOR,
             companyNumber: company.companyNumber
         }
-        this.session.setDissolutionSession(this.httpContext.request, updatedSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
     }
 }

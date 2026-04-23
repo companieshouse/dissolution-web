@@ -35,6 +35,7 @@ import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
 import PaymentService from "app/services/payment/payment.service"
 import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
 import PaymentType from "app/models/dto/paymentType.enum"
+import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -58,6 +59,9 @@ describe("PayByAccountDetailsController", () => {
             container.rebind(PayByAccountService).toConstantValue(instance(payByAccountService))
             container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper))
             container.rebind(PaymentService).toConstantValue(instance(paymentService))
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
         })
     }
 
@@ -131,7 +135,7 @@ describe("PayByAccountDetailsController", () => {
         it("should redirect to pay by card", async () => {
             const app: Application = initApp()
             const REDIRECT_CARD_URL = "http://card-payment-ui-url"
-            when(paymentService.generatePaymentURL(TOKEN, anything(), anything())).thenResolve(REDIRECT_CARD_URL)
+            when(paymentService.generatePaymentURL(TOKEN, anything(), anything(), anything())).thenResolve(REDIRECT_CARD_URL)
 
             await request(app)
                 .get(PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI)

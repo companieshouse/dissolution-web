@@ -10,6 +10,7 @@ import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 
 export default interface DissolutionSession {
+  journeyId?: string
   companyNumber?: string
   officerType?: OfficerType
   selectDirectorForm?: SelectDirectorFormModel

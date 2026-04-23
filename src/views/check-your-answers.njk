@@ -10,7 +10,7 @@
   {{
     govukBackLink({
       text: 'Back',
-      href: backUri
+      href: journeyPath(backUri)
     })
   }}
   <div class="govuk-grid-row">
@@ -40,8 +40,8 @@
                   text: director.email
                 },
                 actions: {
-                  items: [{
-                    href:  Paths.APPLICATION_STATUS_URI + '/' + director.id + '/change?check_answers=true',
+                    items: [{
+                    href:  journeyPath(Paths.APPLICATION_STATUS_URI + '/:signatoryId/change', { params: { signatoryId: director.id } }) + '?check_answers=true',
                     text: "Change",
                     visuallyHiddenText: "email address for " + (director.onBehalfName or director.name),
                     attributes: {
@@ -58,7 +58,7 @@
 
       {% if isMultiDirector %}
         <p class="govuk-body govuk-!-margin-top-4">
-          <a id="change-signatories" class="govuk-link" data-event-id="change-which-director-will-sign-link" href="{{ Paths.SELECT_SIGNATORIES_URI }}">Change which director will sign</a>
+          <a id="change-signatories" class="govuk-link" data-event-id="change-which-director-will-sign-link" href="{{ journeyPath(Paths.SELECT_SIGNATORIES_URI) }}">Change which director will sign</a>
         </p>
       {% endif %}
 

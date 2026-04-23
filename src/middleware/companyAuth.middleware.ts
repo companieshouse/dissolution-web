@@ -1,6 +1,5 @@
-import { NextFunction, Request, RequestHandler, Response } from "express"
-import { SignInInfoKeys } from "@companieshouse/node-session-handler/lib/session/keys/SignInInfoKeys"
-import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces"
+import {NextFunction, Request, RequestHandler, Response} from "express"
+import {SignInInfoKeys} from "@companieshouse/node-session-handler/lib/session/keys/SignInInfoKeys"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
 
 import AuthConfig from "app/models/authConfig"
@@ -11,10 +10,11 @@ import SessionService from "app/services/session/session.service"
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
-    HEALTHCHECK_URI, ROOT_URI,
+    BOOTSTRAP_JOURNEY_URI,
+    HEALTHCHECK_URI,
+    ROOT_URI,
     SEARCH_COMPANY_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
-    VIEW_COMPANY_INFORMATION_URI,
     WHO_TO_TELL_URI
 } from "app/paths"
 
@@ -29,13 +29,13 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     HEALTHCHECK_URI,
     `${HEALTHCHECK_URI}/`,
     SEARCH_COMPANY_URI,
-    STOP_SCREEN_BANK_ACCOUNT_URI,
     `${SEARCH_COMPANY_URI}/`,
-    VIEW_COMPANY_INFORMATION_URI,
-    `${VIEW_COMPANY_INFORMATION_URI}/`,
+    STOP_SCREEN_BANK_ACCOUNT_URI,
+    `${STOP_SCREEN_BANK_ACCOUNT_URI}/`,
     ACCESSIBILITY_STATEMENT_URI,
     `${ACCESSIBILITY_STATEMENT_URI}/`
 ]
+
 
 export default function CompanyAuthMiddleware (
     authConfig: AuthConfig, encryptionService: JwtEncryptionService, sessionService: SessionService, logger: ApplicationLogger
@@ -47,42 +47,56 @@ export default function CompanyAuthMiddleware (
 
         const dissolutionSession = sessionService.getDissolutionSession(req)
         const companyNumber = getCompanyNumber(dissolutionSession, req)
+
         if (!companyNumber) {
-            return next(new Error("No Company Number in session"))
+            return next(new Error("No Company Number"))
         }
-        if (!dissolutionSession?.companyNumber) {
-            sessionService.setDissolutionSession(req, {
-                ...(dissolutionSession || {}),
-                companyNumber,
-                remindDirectorList: []
-            })
-        }
-        const signInInfo = sessionService.getSignInInfo(req)
-        if (isAuthorisedForCompany(signInInfo, companyNumber)) {
-            logger.info(`User is authenticated for ${companyNumber}`)
+
+        if (isAuthorisedForCompany(companyNumber, sessionService, req)) {
+            logger.info(`Authenticated user is authorized for ${companyNumber}`)
             return next()
+        } else {
+            logger.info(`Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`)
+            return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
         }
-        logger.info(`User is not authenticated for ${companyNumber}, redirecting`)
-        return res.redirect(await getAuthRedirectUri(req, authConfig, encryptionService, sessionService, companyNumber))
     }
 }
 
-function getCompanyNumber (session: Optional<DissolutionSession>, req: Request): string | undefined {
-    return (req.query.companyNumber as string | undefined) ?? session?.companyNumber
+function getCompanyNumber(session: Optional<DissolutionSession>, req: Request): string | undefined {
+    const rawQuery = req.query?.companyNumber
+    const queryValue = Array.isArray(rawQuery) ? rawQuery[0] : rawQuery
+    const queryStr = typeof queryValue === "string" ? queryValue.trim() : undefined
+
+    const sessionStr = typeof session?.companyNumber === "string"
+        ? session.companyNumber.trim()
+        : undefined
+
+    if (queryStr && queryStr.length > 0) {
+        return queryStr
+    }
+    if (sessionStr && sessionStr.length > 0) {
+        return sessionStr
+    }
+    return undefined
 }
 
-function isWhitelistedUrl (url: string): boolean {
+export function isWhitelistedUrl (url: string): boolean {
     return COMPANY_AUTH_WHITELISTED_URLS.includes(url)
 }
 
-function isAuthorisedForCompany (signInInfo: ISignInInfo, companyNumber: string): boolean {
+function isAuthorisedForCompany (companyNumber: string, sessionService: SessionService, req: Request): boolean {
+    const signInInfo = sessionService.getSignInInfo(req)
     return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
+}
+
+function getBootstrapJourneyUrl(companyNumber: string): string {
+    return `${BOOTSTRAP_JOURNEY_URI}?companyNumber=${encodeURIComponent(companyNumber)}`
 }
 
 async function getAuthRedirectUri (
     req: Request, authConfig: AuthConfig, encryptionService: JwtEncryptionService, sessionService: SessionService, companyNumber?: string
 ): Promise<string> {
-    const originalUrl: string = req.originalUrl
+    const originalUrl: string = getBootstrapJourneyUrl(companyNumber!)
     const scope: string = OAUTH_USER_SCOPE + " " + OAUTH_COMPANY_SCOPE_PREFIX + companyNumber
     const nonce: string = encryptionService.generateNonce()
     const encodedNonce: string = await encryptionService.jweEncodeWithNonce(originalUrl, nonce)

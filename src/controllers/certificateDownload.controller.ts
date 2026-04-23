@@ -7,8 +7,9 @@ import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.
 import { CERTIFICATE_DOWNLOAD_URI } from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
+import TYPES from "app/types";
 
-@controller(CERTIFICATE_DOWNLOAD_URI)
+@controller(CERTIFICATE_DOWNLOAD_URI, TYPES.JourneyIdAuthMiddleware)
 export class CertificateDownloadController extends BaseController {
 
     public constructor (

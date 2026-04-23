@@ -1,24 +1,32 @@
 import "reflect-metadata"
 
-import { assert } from "chai"
-import { StatusCodes } from "http-status-codes"
+import {assert} from "chai"
+import {StatusCodes} from "http-status-codes"
 import request from "supertest"
-import { anything, instance, mock, verify, when } from "ts-mockito"
-import { generateCheckYourAnswersDirector } from "../fixtures/checkYourAnswersDirector.fixtures"
-import { TOKEN } from "../fixtures/session.fixtures"
+import {anything, instance, mock, verify, when} from "ts-mockito"
+import {generateCheckYourAnswersDirector} from "../fixtures/checkYourAnswersDirector.fixtures"
+import {TOKEN} from "../fixtures/session.fixtures"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/checkYourAnswers.controller"
 import CheckYourAnswersDirectorMapper from "app/mappers/check-your-answers/checkYourAnswersDirector.mapper"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model"
-import { CHECK_YOUR_ANSWERS_URI, DEFINE_SIGNATORY_INFO_URI, REDIRECT_GATE_URI, SELECT_DIRECTOR_URI, SELECT_SIGNATORIES_URI } from "app/paths"
+import {
+    CHECK_YOUR_ANSWERS_URI,
+    DEFINE_SIGNATORY_INFO_URI,
+    REDIRECT_GATE_URI,
+    SELECT_DIRECTOR_URI,
+    SELECT_SIGNATORIES_URI
+} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 
-import { createApp } from "test/controllers/helpers/application.factory"
-import { generateDirectorToSign, generateDissolutionSession } from "test/fixtures/session.fixtures"
+import {createApp} from "test/controllers/helpers/application.factory"
+import {generateDirectorToSign, generateDissolutionSession} from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import JourneyPathService from "app/services/session/journeyPath.service";
+import {Application} from "express";
 
 mockCsrfMiddleware.restore()
 
@@ -44,6 +52,17 @@ describe("CheckYourAnswersController", () => {
         dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
     })
 
+    function initApp (): Application {
+        return createApp(container => {
+            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(DissolutionService).toConstantValue(instance(service))
+            container.rebind(JourneyPathService).toConstantValue({
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+            } as any)
+            container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
+        })
+    }
+
     describe("GET - ensure that page loads correctly", () => {
         it("render correct rows for standard signatory", async () => {
             const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector()
@@ -54,10 +73,7 @@ describe("CheckYourAnswersController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
             when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(CHECK_YOUR_ANSWERS_URI)
@@ -86,10 +102,7 @@ describe("CheckYourAnswersController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
             when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-            })
+            const app = initApp()
 
             const res = await request(app)
                 .get(CHECK_YOUR_ANSWERS_URI)
@@ -114,10 +127,7 @@ describe("CheckYourAnswersController", () => {
                 when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
                 when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-                })
+                const app = initApp()
 
                 const res = await request(app)
                     .get(CHECK_YOUR_ANSWERS_URI)
@@ -135,10 +145,7 @@ describe("CheckYourAnswersController", () => {
                 when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
                 when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-                })
+                const app = initApp()
 
                 const res = await request(app)
                     .get(CHECK_YOUR_ANSWERS_URI)
@@ -156,10 +163,7 @@ describe("CheckYourAnswersController", () => {
                 when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
                 when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-                })
+                const app = initApp()
 
                 const res = await request(app)
                     .get(CHECK_YOUR_ANSWERS_URI)
@@ -177,10 +181,7 @@ describe("CheckYourAnswersController", () => {
                 when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
                 when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
 
-                const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-                })
+                const app = initApp()
 
                 const res = await request(app)
                     .get(CHECK_YOUR_ANSWERS_URI)
@@ -197,10 +198,7 @@ describe("CheckYourAnswersController", () => {
         it("should create dissolution", async () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(DissolutionService).toConstantValue(instance(service))
-            })
+            const app = initApp()
 
             await request(app)
                 .post(CHECK_YOUR_ANSWERS_URI)
