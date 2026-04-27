@@ -10,8 +10,8 @@ import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
 
 export default interface DissolutionSession {
-  journeyId?: string
-  companyNumber?: string
+  journeyId: string
+  companyNumber: string
   officerType?: OfficerType
   selectDirectorForm?: SelectDirectorFormModel
   selectSignatoriesForm?: SelectSignatoriesFormModel
@@ -27,6 +27,6 @@ export default interface DissolutionSession {
   isApplicantADirector?: boolean
   paymentStateUUID?: string
   paymentType?: PaymentType
-  remindDirectorList: DirectorToRemind[]
+  remindDirectorList?: DirectorToRemind[]
   isFromCheckAnswers?: boolean
 }

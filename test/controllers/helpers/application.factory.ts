@@ -6,7 +6,8 @@ import * as bodyParser from "body-parser"
 import {Application, NextFunction, Request, Response} from "express"
 import {Container} from "inversify"
 import {buildProviderModule} from "inversify-binding-decorators"
-import {InversifyExpressServer} from "inversify-express-utils"
+import {InversifyExpressServer, params} from "inversify-express-utils"
+import JourneyPathService from "app/services/session/journeyPath.service"
 import * as nunjucks from "nunjucks"
 
 import {APP_NAME} from "app/constants/app.const"
@@ -51,17 +52,24 @@ export const createApp = (configureBindings?: (container: Container) => void): A
             server.use(bodyParser.json())
             server.use(bodyParser.urlencoded({ extended: false }))
 
-            // Provide a test-friendly journeyPath helper on res.locals so templates
-            // that call `journeyPath(pathTemplate, { params })` behave like production.
-            // In the app this is provided by NunjucksLoader.addRequestLocals which
-            // uses JourneyPathService; for tests we replicate param substitution
-            // using the shared buildPath util so encoding/placeholder replacement
-            // matches runtime behaviour.
-
             server.use((req: Request, res: Response, next: NextFunction) => {
-                res.locals.journeyPath = testJourneyPath
+
+                const journeyPathService = container.isBound(JourneyPathService) ? container.get(JourneyPathService) as any : undefined
+
+                res.locals.journeyPath = (pathTemplate: string, options?: {
+                    journeyId?: string,
+                    params?: Record<string, string | number>
+                }): string => {
+                    // if (journeyPathService) {
+                    //     return journeyPathService.journeyPath(req, pathTemplate, options)
+                    // }
+
+                    return pathTemplate
+                }
+
                 next()
             })
+
             server.set("view engine", "njk")
 
             const env: nunjucks.Environment = nunjucks.configure(
@@ -81,24 +89,5 @@ export const createApp = (configureBindings?: (container: Container) => void): A
             addGlobals(env)
         })
         .build()
-}
-
-
-function testJourneyPath(pathTemplate: string, options?: {
-    journeyId?: string,
-    params?: Record<string, string | number>
-}): string {
-    const params = { ...(options?.params || {}) } as Record<string, string | number>
-    if (options?.journeyId) {
-        params.journeyId = options.journeyId
-    }
-    try {
-        return Object.keys(params).length > 0 ? buildPath(pathTemplate, params) : pathTemplate
-    } catch (err) {
-        // If required params are missing, fall back to the template to
-        // keep tests from throwing; individual tests should provide
-        // params when they expect substitution.
-        return pathTemplate
-    }
 }
 

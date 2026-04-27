@@ -1,6 +1,8 @@
 import { assert } from "chai"
 import { generateDissolutionGetResponse, generateGetDirector } from "../../fixtures/dissolutionApi.fixtures"
-import { generateDissolutionSession } from "../../fixtures/session.fixtures"
+import { generateDissolutionSession } from "test/fixtures/session.fixtures"
+import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.builder"
+import { aDissolutionGetResponse } from "test/fixtures/dissolutionGetResponse.builder"
 
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
@@ -120,6 +122,44 @@ describe("ViewApplicationStatusMapper", () => {
             const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, false)
 
             assert.isFalse(result.signatories[0].canChange)
+        })
+
+        it("should set isReminded to true when a remind entry exists with reminderSent true", () => {
+            dissolution = aDissolutionGetResponse()
+                .withDirectors([aDissolutionGetDirector().withOfficerId("abc123").build()])
+                .build()
+
+            dissolutionSession.remindDirectorList = [{ id: "abc123", reminderSent: true }]
+
+            const result: ViewApplicationStatus = mapper.mapToViewModel(dissolutionSession, dissolution, true)
+
+            assert.isTrue(result.signatories[0].isReminded)
+        })
+
+        it("should set isReminded to false when no remind entry exists", () => {
+            dissolution = aDissolutionGetResponse()
+                .withDirectors([aDissolutionGetDirector().withOfficerId("abc123").build()])
+                .build()
+
+            // empty remind list -> not reminded
+            dissolutionSession.remindDirectorList = []
+
+            const result = mapper.mapToViewModel(dissolutionSession, dissolution, true)
+
+            assert.isFalse(result.signatories[0].isReminded)
+        })
+
+        it("should set isReminded to false when a remind entry exists but reminderSent is false", () => {
+            dissolution = aDissolutionGetResponse()
+                .withDirectors([aDissolutionGetDirector().withOfficerId("abc123").build()])
+                .build()
+
+            // remind entry exists but reminderSent is false -> not reminded
+            dissolutionSession.remindDirectorList = [{ id: "abc123", reminderSent: false }]
+
+            const result = mapper.mapToViewModel(dissolutionSession, dissolution, true)
+
+            assert.isFalse(result.signatories[0].isReminded)
         })
     })
 })

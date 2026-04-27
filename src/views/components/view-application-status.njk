@@ -1,6 +1,8 @@
 {% from "govuk/components/table/macro.njk"  import govukTable %}
 {% from "govuk/components/tag/macro.njk"    import govukTag %}
 
+{% from "components/resend-email-cell.njk" import resendEmailCell %}
+
 <div class="govuk-grid-row govuk-!-margin-top-4">
   <div class="govuk-grid-column-two-thirds">
     <h2 class="govuk-heading-l">Application status</h2>
@@ -8,46 +10,39 @@
   </div>
 
   {% set signatoryRows = [] %}
-  {% set applicationStatusBase = journeyPath(Paths.APPLICATION_STATUS_URI) %}
   {% for signatory in viewApplicationStatus.signatories %}
-    {% set isReminded = false %}
-    {% for director in signatory.remindDirectorList %}
-        {% if director.id === signatory.id %}
-          {% set isReminded = director.reminderSent %}
-        {% endif %}
-    {% endfor %}
-    {% set changeHref = applicationStatusBase + '/' + signatory.id + '/change' %}
-    {% set resendHref = applicationStatusBase + '/' + signatory.email + '/send-email' %}
-    {% set signatoryRows = (
-      signatoryRows.push([
-        {
-          text: signatory.name,
-          attributes: { id: "name-" + loop.index0 }
-        },
-        {
-          html: signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + changeHref + '">Change email</a></p>' if signatory.canChange else signatory.email,
-          attributes: {
-            id: "email-" + loop.index0,
-            'data-event-id': 'change-email-link'
-          }
-        },
-        {
-          html: '<a>Email sent </a>' if isReminded else '<a class="govuk-link" href="' + resendHref + '">Resend email</a>',
-          attributes: {
-            id: "resend-" + loop.index0,
-            'data-event-id': 'resend-email-link' if piwik
-          }
-        } if not signatory.hasApproved,
-        {
-          html: govukTag({
-            text: "Signed" if signatory.hasApproved else "Not signed",
-            classes: "govuk-tag--grey" if not signatory.hasApproved
-          }),
-          attributes: { id: "signed-" + loop.index0 }
+    {% set changeDetailsPath = journeyPath(Paths.APPLICATION_STATUS_CHANGE_URI, { params: { signatoryId: signatory.id } }) %}
+    {% set resendEmailPath = journeyPath(Paths.APPLICATION_STATUS_SEND_EMAIL_URI) %}
+
+    {% set resendEmailCellMarkup = resendEmailCell(signatory, loop.index0, resendEmailPath, csrfToken) %}
+
+    {% set _ = signatoryRows.push([
+      {
+        text: signatory.name,
+        attributes: { id: "name-" + loop.index0 }
+      },
+      {
+          html: signatory.email + '<p><a id="change-email-' + loop.index0 + '" class="govuk-link" href="' + changeDetailsPath + '">Change email</a></p>' if signatory.canChange else signatory.email,
+        attributes: {
+          id: "email-" + loop.index0,
+          'data-event-id': 'change-email-link'
         }
-      ]),
-      signatoryRows
-    ) %}
+      },
+      {
+        html: resendEmailCellMarkup,
+        attributes: {
+          id: "resend-" + loop.index0,
+          'data-event-id': 'resend-email-link' if piwik
+        }
+      } if not signatory.hasApproved,
+      {
+        html: govukTag({
+          text: "Signed" if signatory.hasApproved else "Not signed",
+          classes: "govuk-tag--grey" if not signatory.hasApproved
+        }),
+        attributes: { id: "signed-" + loop.index0 }
+      }
+    ]) %}
   {% endfor %}
 
   <div class="govuk-grid-column-full">

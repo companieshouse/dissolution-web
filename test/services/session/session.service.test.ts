@@ -9,6 +9,7 @@ import { generateDissolutionSession, generateISignInInfo, TOKEN } from "test/fix
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import SessionService from "app/services/session/session.service"
+import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder";
 
 describe("SessionService", () => {
 
@@ -71,6 +72,51 @@ describe("SessionService", () => {
       const result: Optional<DissolutionSession> = service.getDissolutionSession(req)
 
       assert.equal(result, dissolutionSession)
+        })
+    })
+
+    describe("requireDissolutionSession", () => {
+        it("should return the dissolution session when present", () => {
+            const dissolutionSession = aDissolutionSession().build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const result: DissolutionSession = service.requireDissolutionSession(req)
+
+            assert.equal(result, dissolutionSession)
+        })
+
+        it("should throw an Error when there is no dissolution session", () => {
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(undefined)
+
+            assert.throws(() => service.requireDissolutionSession(req), Error, "No dissolution session in request")
+        })
+    })
+
+    describe("requireJourneyId", () => {
+        it("should return the journeyId when present", () => {
+            const journeyId = "journey-123"
+            const dissolutionSession = aDissolutionSession().withJourneyId(journeyId).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const result: string = service.requireJourneyId(req)
+
+            assert.equal(result, journeyId)
+        })
+
+        it("should throw an Error when there is no journeyId", () => {
+            // Create a session object without a journeyId (or with a falsy journeyId)
+            const dissolutionSession: any = generateDissolutionSession()
+            dissolutionSession.journeyId = undefined
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            assert.throws(() => service.requireJourneyId(req), Error, "No journeyId in session")
         })
     })
 

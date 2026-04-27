@@ -19,10 +19,6 @@ export function generateViewApplicationStatusSignatory (): ViewApplicationStatus
         email: "test@mail.com",
         hasApproved: true,
         canChange: false,
-        remindDirectorList: [
-            generateDirectorToRemind(),
-            generateDirectorToRemind(),
-            generateDirectorToRemind()
-        ]
+        isReminded: false
     }
 }

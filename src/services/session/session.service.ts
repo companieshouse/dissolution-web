@@ -32,6 +32,14 @@ export default class SessionService {
         return req.session!.getExtraData<DissolutionSession>(DISSOLUTION_SESSION_KEY)
     }
 
+    public requireDissolutionSession(req: Request): DissolutionSession {
+        const dissolutionSession = this.getDissolutionSession(req)
+        if (!dissolutionSession) {
+            throw new Error("No dissolution session in request")
+        }
+        return dissolutionSession
+    }
+
     public getJourneyId(req: Request): Optional<string> {
         return this.getDissolutionSession(req)?.journeyId
     }

@@ -13,5 +13,5 @@ export interface ViewApplicationStatusSignatory {
   email: string
   hasApproved: boolean
   canChange: boolean
-  remindDirectorList: DirectorToRemind[]
+  isReminded: boolean
 }

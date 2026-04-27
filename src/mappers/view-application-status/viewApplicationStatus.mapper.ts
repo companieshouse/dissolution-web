@@ -21,13 +21,15 @@ export default class ViewApplicationStatusMapper {
 
     private mapToSignatory (dissolutionSession: DissolutionSession, signatory: DissolutionGetDirector, isApplicant: boolean):
   ViewApplicationStatusSignatory {
+        const remindEntry = (dissolutionSession.remindDirectorList || []).find(r => r.id === signatory.officer_id)
+
         return {
             id: signatory.officer_id,
             name: this.mapToSignatoryDisplayName(signatory),
             email: signatory.email,
             hasApproved: !!signatory.approved_at,
             canChange: isApplicant && !signatory.approved_at,
-            remindDirectorList: dissolutionSession.remindDirectorList
+            isReminded: !!remindEntry && !!remindEntry.reminderSent
         }
     }
 

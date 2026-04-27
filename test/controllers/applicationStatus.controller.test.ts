@@ -1,33 +1,32 @@
 import "reflect-metadata"
 
-import { assert } from "chai"
-import { Application, Request } from "express"
-import { StatusCodes } from "http-status-codes"
+import {assert} from "chai"
+import {Application, Request} from "express"
+import {StatusCodes} from "http-status-codes"
 import request from "supertest"
-import { anything, capture, instance, mock, verify, when } from "ts-mockito"
-import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
-import { generateDissolutionGetResponse } from "../fixtures/dissolutionApi.fixtures"
-import { generateDirectorToRemind, generateDissolutionSession, EMAIL } from "../fixtures/session.fixtures"
-import { generateViewApplicationStatusModel, generateViewApplicationStatusSignatory } from "../fixtures/viewApplicationStatus.fixtures"
-import { createApp } from "./helpers/application.factory"
+import {anything, capture, instance, mock, verify, when} from "ts-mockito"
+import {ArgCaptor2} from "ts-mockito/lib/capture/ArgCaptor"
+import {aDissolutionGetResponse} from "../fixtures/dissolutionGetResponse.builder"
+import {aDissolutionSession} from "../fixtures/dissolutionSession.builder"
+import {createApp} from "./helpers/application.factory"
+import {aDissolutionGetDirector} from "../fixtures/dissolutionGetDirector.builder"
 
 import "app/controllers/applicationStatus.controller"
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
-import { DirectorToRemind } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ViewApplicationStatus } from "app/models/view/viewApplicationStatus.model"
-import { APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
+import {ViewApplicationStatus} from "app/models/view/viewApplicationStatus.model"
+import {APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService from "app/services/session/journeyPath.service"
 
 mockCsrfMiddleware.restore()
 
 describe("ApplicationStatusController", () => {
 
-    let session: SessionService
+    let sessionService: SessionService
     let dissolutionService: DissolutionService
     let dissolutionSession: DissolutionSession
     let viewApplicationStatus: ViewApplicationStatus
@@ -36,13 +35,13 @@ describe("ApplicationStatusController", () => {
     let app: Application
 
     beforeEach(() => {
-        session = mock(SessionService)
+        sessionService = mock(SessionService)
         dissolutionService = mock(DissolutionService)
         viewApplicationStatusMapper = mock(ViewApplicationStatusMapper)
-        dissolutionGetResponse = generateDissolutionGetResponse()
-        dissolutionSession = generateDissolutionSession()
+        dissolutionGetResponse = aDissolutionGetResponse().build()
+        dissolutionSession = aDissolutionSession().build()
         app = createApp(container => {
-            container.rebind(SessionService).toConstantValue(instance(session))
+            container.rebind(SessionService).toConstantValue(instance(sessionService))
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
             container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
             container.rebind(JourneyPathService).toConstantValue({
@@ -57,16 +56,16 @@ describe("ApplicationStatusController", () => {
 
             dissolutionSession.signatoryIdToEdit = undefined
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change`)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHANGE_DETAILS_URI)
 
-            verify(session.setDissolutionSession(anything(), anything())).once()
+            verify(sessionService.setDissolutionSession(anything(), anything())).once()
 
-            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
             const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
             assert.equal(updatedSession.signatoryIdToEdit, signatoryId)
@@ -79,16 +78,16 @@ describe("ApplicationStatusController", () => {
             dissolutionSession.signatoryIdToEdit = undefined
             dissolutionSession.isFromCheckAnswers = undefined
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession)
 
             await request(app)
                 .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change?check_answers=true`)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHANGE_DETAILS_URI)
 
-            verify(session.setDissolutionSession(anything(), anything())).once()
+            verify(sessionService.setDissolutionSession(anything(), anything())).once()
 
-            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
             const updatedSession: DissolutionSession = sessionCaptor.last()[1]
 
             assert.equal(updatedSession.signatoryIdToEdit, signatoryId)
@@ -97,30 +96,89 @@ describe("ApplicationStatusController", () => {
     })
 
     describe("Send-email", () => {
-        it("Should save the email reminder status in the session and redirect to send-email", async () => {
 
-            viewApplicationStatus = generateViewApplicationStatusModel()
+        const sendEmailCases = [
+            { name: "reminder email sent successfully", reminderSent: true },
+            { name: "reminder email NOT sent successfully", reminderSent: false }
+        ]
 
-            viewApplicationStatus.signatories = [
-                { ...generateViewApplicationStatusSignatory(), name: "Jane Smith", email: "jane@mail.com" },
-                { ...generateViewApplicationStatusSignatory(), name: "Test One", email: "test@mail.com" }
-            ]
+        sendEmailCases.forEach(testCase => {
+            it(`attempts to send email and records reminder attempt - ${testCase.name}`, async () => {
 
-            when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, EMAIL)).thenResolve(true)
-            when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionGetResponse)
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolutionGetResponse, true)).thenReturn(viewApplicationStatus)
+                const signatoryId = "valid-signatory-id"
+                const signatoryEmail = "signatory@mail.com"
 
-            await request(app)
-                .get(`${APPLICATION_STATUS_URI}/${EMAIL}/send-email`)
-                .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
+                const dissolutionSession = aDissolutionSession().build()
+                const dissolutionSessionGetResponse = aDissolutionGetResponse().withDirectors([
+                    aDissolutionGetDirector().withOfficerId("other-1").build(),
+                    aDissolutionGetDirector().withOfficerId(signatoryId).withEmail(signatoryEmail).build()]).build()
 
-            const reminderList: DirectorToRemind[] = [generateDirectorToRemind()]
+                when(sessionService.requireDissolutionSession(anything())).thenReturn(dissolutionSession)
+                when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionSessionGetResponse)
+                when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)).thenResolve(testCase.reminderSent)
 
-            assert.equal(dissolutionSession.remindDirectorList.length, reminderList.length)
-            assert.equal(dissolutionSession.remindDirectorList[0].id, reminderList[0].id)
-            assert.equal(dissolutionSession.remindDirectorList[0].reminderSent, reminderList[0].reminderSent)
+                await request(app)
+                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .send({ signatoryId: signatoryId })
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
+
+                verify(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)).once()
+                verify(sessionService.setDissolutionSession(anything(), anything())).once()
+
+                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
+                const updatedDissolutionSession = sessionCaptor.last()[1]
+
+                assert.equal(updatedDissolutionSession.remindDirectorList!.length, 1)
+                assert.equal(updatedDissolutionSession.remindDirectorList![0].id, signatoryId)
+                assert.equal(updatedDissolutionSession.remindDirectorList![0].reminderSent, testCase.reminderSent)
+            })
+        })
+
+        const invalidSignatoryIds: Array<any> = [
+            {},
+            { signatoryId: " " },
+            { signatoryId: "" },
+            { signatoryId: "@@@" },
+            { signatoryId: "a".repeat(51) }
+        ]
+
+        invalidSignatoryIds.forEach((body) => {
+            it(`when invalid signatory id then error returned: ${JSON.stringify(body)}`, async () => {
+
+                await request(app)
+                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .send(body)
+                    .expect(StatusCodes.INTERNAL_SERVER_ERROR)
+
+                verify(sessionService.setDissolutionSession(anything(), anything())).never()
+                verify(dissolutionService.sendEmailNotification(anything(), anything())).never()
+            })
+        })
+
+        const noEmailFoundCases = [
+            { name: "no directors", dissolution: aDissolutionGetResponse().withDirectors([]).build() },
+            { name: "directors present but id not found", dissolution: aDissolutionGetResponse().withDirectors([
+                aDissolutionGetDirector().withOfficerId("other-1").build(),
+                aDissolutionGetDirector().withOfficerId("other-2").build()
+            ]).build() }
+        ]
+
+        noEmailFoundCases.forEach(testCase => {
+            it(`when no email found for signatoryId then error returned: ${testCase.name}`, async () => {
+                const dissolutionSession = aDissolutionSession().build()
+
+                when(sessionService.requireDissolutionSession(anything())).thenReturn(dissolutionSession)
+                when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(testCase.dissolution)
+
+                await request(app)
+                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .send({ signatoryId: "a-valid-id" })
+                    .expect(StatusCodes.INTERNAL_SERVER_ERROR)
+
+                verify(sessionService.setDissolutionSession(anything(), anything())).never()
+                verify(dissolutionService.sendEmailNotification(anything(), anything())).never()
+            })
         })
     })
 })
