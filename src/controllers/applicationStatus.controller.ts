@@ -10,10 +10,10 @@ import FormValidator from "app/utils/formValidator.util"
 import RichFormValidator from "app/utils/richFormValidator.util"
 import SessionService from "app/services/session/session.service"
 import ResendEmailFormModel from "app/models/form/resendEmail.model"
-import TYPES from "app/types";
-import JourneyPathService from "app/services/session/journeyPath.service";
-import JourneyBaseController from "app/controllers/JourneyBase.controller";
-import resendEmailSchema from "app/schemas/resendEmail.schema";
+import TYPES from "app/types"
+import JourneyPathService from "app/services/session/journeyPath.service"
+import JourneyBaseController from "app/controllers/JourneyBase.controller"
+import resendEmailSchema from "app/schemas/resendEmail.schema"
 
 @controller(APPLICATION_STATUS_URI, TYPES.JourneyIdAuthMiddleware)
 export class ApplicationStatusController extends JourneyBaseController {

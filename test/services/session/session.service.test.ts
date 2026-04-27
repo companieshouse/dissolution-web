@@ -9,7 +9,7 @@ import { generateDissolutionSession, generateISignInInfo, TOKEN } from "test/fix
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import SessionService from "app/services/session/session.service"
-import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder";
+import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder"
 
 describe("SessionService", () => {
 
