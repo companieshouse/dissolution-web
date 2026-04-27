@@ -1,5 +1,5 @@
+import "../openTelemetry"
 import "reflect-metadata"
-
 import { Container } from "inversify"
 import { Application } from "express"
 import "../bootstrap"
