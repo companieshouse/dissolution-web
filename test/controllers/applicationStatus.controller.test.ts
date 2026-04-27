@@ -103,7 +103,7 @@ describe("ApplicationStatusController", () => {
         ]
 
         sendEmailCases.forEach(testCase => {
-            it(`attempts to send email and records reminder attempt - ${testCase.name}`, async () => {
+            it(`attempts to send email and records reminder attempt - ${testCase.name}`, async () => { // NOSONAR
 
                 const signatoryId = "valid-signatory-id"
                 const signatoryEmail = "signatory@mail.com"
@@ -134,7 +134,7 @@ describe("ApplicationStatusController", () => {
         ]
 
         invalidSignatoryIds.forEach((body) => {
-            it(`when invalid signatory id then error returned: ${JSON.stringify(body)}`, async () => {
+            it(`when invalid signatory id then error returned: ${JSON.stringify(body)}`, async () => { // NOSONAR
 
                 await request(app)
                     .post(`${APPLICATION_STATUS_URI}/send-email`)
@@ -155,7 +155,7 @@ describe("ApplicationStatusController", () => {
         ]
 
         noEmailFoundCases.forEach(testCase => {
-            it(`when no email found for signatoryId then error returned: ${testCase.name}`, async () => {
+            it(`when no email found for signatoryId then error returned: ${testCase.name}`, async () => { // NOSONAR
                 const dissolutionSession = aDissolutionSession().build()
 
                 when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(dissolutionSession.companyNumber!)

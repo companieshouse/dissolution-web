@@ -3,6 +3,27 @@
 
 {% from "components/resend-email-cell.njk" import resendEmailCell %}
 
+<style>
+  .resend-link {
+    background-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+    color: #1d70b8;
+    text-decoration: underline;
+    cursor: pointer;
+    display: inline;
+  }
+
+  .resend-link:focus-visible {
+    /* keep a visible, text-only focus indicator */
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+  }
+</style>
+
 <div class="govuk-grid-row govuk-!-margin-top-4">
   <div class="govuk-grid-column-two-thirds">
     <h2 class="govuk-heading-l">Application status</h2>
