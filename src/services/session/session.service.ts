@@ -56,6 +56,30 @@ export default class SessionService {
         req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
     }
 
+    public updateRemindDirectorList(req: Request, signatoryId: string, reminderSent: boolean): void {
+        const session = this.requireDissolutionSession(req)
+
+        const filteredList = (session.remindDirectorList || []).filter(r => r.id !== signatoryId)
+
+        const updatedSession: DissolutionSession = {
+            ...session,
+            remindDirectorList: [
+                ...filteredList,
+                { id: signatoryId, reminderSent }
+            ]
+        }
+
+        this.setDissolutionSession(req, updatedSession)
+    }
+
+    public requireDissolutionCompanyNumber(req: Request): string {
+        const companyNumber = this.getDissolutionSession(req)?.companyNumber
+        if (!companyNumber) {
+            throw new Error("No company number in dissolution session")
+        }
+        return companyNumber
+    }
+
     public getSession(req: Request): Session {
         return req.session!
     }

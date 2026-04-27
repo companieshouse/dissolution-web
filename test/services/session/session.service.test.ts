@@ -13,12 +13,12 @@ import {aDissolutionSession} from "test/fixtures/dissolutionSession.builder";
 
 describe("SessionService", () => {
 
-    let service: SessionService
+    let sessionService: SessionService
 
     let getSessionStub: sinon.SinonStub
 
     beforeEach(() => {
-        service = new SessionService()
+        sessionService = new SessionService()
 
         getSessionStub = sinon.stub()
     })
@@ -31,7 +31,7 @@ describe("SessionService", () => {
       const req: Request = generateRequest()
       req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(signInInfo)
 
-      const result: string = service.getAccessToken(req)
+      const result: string = sessionService.getAccessToken(req)
 
       assert.equal(result, TOKEN)
         })
@@ -47,7 +47,7 @@ describe("SessionService", () => {
       const req: Request = generateRequest()
       req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(signInInfo)
 
-      const result: Optional<string> = service.getUserEmail(req)
+      const result: Optional<string> = sessionService.getUserEmail(req)
 
       assert.equal(result, EMAIL)
         })
@@ -56,7 +56,7 @@ describe("SessionService", () => {
             const req: Request = generateRequest()
       req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(undefined)
 
-      const result: Optional<string> = service.getUserEmail(req)
+      const result: Optional<string> = sessionService.getUserEmail(req)
 
       assert.isUndefined(result)
         })
@@ -69,7 +69,7 @@ describe("SessionService", () => {
             const req: Request = generateRequest()
       req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
 
-      const result: Optional<DissolutionSession> = service.getDissolutionSession(req)
+      const result: Optional<DissolutionSession> = sessionService.getDissolutionSession(req)
 
       assert.equal(result, dissolutionSession)
         })
@@ -82,7 +82,7 @@ describe("SessionService", () => {
             const req: Request = generateRequest()
             req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
 
-            const result: DissolutionSession = service.requireDissolutionSession(req)
+            const result: DissolutionSession = sessionService.requireDissolutionSession(req)
 
             assert.equal(result, dissolutionSession)
         })
@@ -91,7 +91,7 @@ describe("SessionService", () => {
             const req: Request = generateRequest()
             req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(undefined)
 
-            assert.throws(() => service.requireDissolutionSession(req), Error, "No dissolution session in request")
+            assert.throws(() => sessionService.requireDissolutionSession(req), Error, "No dissolution session in request")
         })
     })
 
@@ -103,7 +103,7 @@ describe("SessionService", () => {
             const req: Request = generateRequest()
             req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
 
-            const result: string = service.requireJourneyId(req)
+            const result: string = sessionService.requireJourneyId(req)
 
             assert.equal(result, journeyId)
         })
@@ -116,7 +116,31 @@ describe("SessionService", () => {
             const req: Request = generateRequest()
             req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
 
-            assert.throws(() => service.requireJourneyId(req), Error, "No journeyId in session")
+            assert.throws(() => sessionService.requireJourneyId(req), Error, "No journeyId in session")
+        })
+    })
+
+    describe("requireDissolutionCompanyNumber", () => {
+        it("should return the company number when present", () => {
+            const companyNumber = "COMP-123"
+            const dissolutionSession = aDissolutionSession().withCompanyNumber(companyNumber).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const result: string = sessionService.requireDissolutionCompanyNumber(req)
+
+            assert.equal(result, companyNumber)
+        })
+
+        it("should throw an Error when there is no company number", () => {
+            const dissolutionSession: any = generateDissolutionSession()
+            dissolutionSession.companyNumber = undefined
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            assert.throws(() => sessionService.requireDissolutionCompanyNumber(req), Error, "No company number in dissolution session")
         })
     })
 
@@ -129,7 +153,7 @@ describe("SessionService", () => {
             const setExtraDataStub: sinon.SinonStub = sinon.stub()
       req.session!.setExtraData = setExtraDataStub
 
-      service.setDissolutionSession(req, dissolutionSession)
+      sessionService.setDissolutionSession(req, dissolutionSession)
 
       assert.isTrue(setExtraDataStub.withArgs("dissolution", dissolutionSession).called)
         })
@@ -141,9 +165,69 @@ describe("SessionService", () => {
             const setExtraDataStub: sinon.SinonStub = sinon.stub()
             req.session!.setExtraData = setExtraDataStub
 
-            service.clearDissolutionSession(req)
+            sessionService.clearDissolutionSession(req)
 
             assert.isTrue(setExtraDataStub.withArgs("dissolution", undefined).called)
+        })
+    })
+
+    describe("updateRemindDirectorList", () => {
+        it("should add a new remind entry when none exist", () => {
+            const dissolutionSession = aDissolutionSession().withRemindDirectorList(undefined).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const setExtraDataStub: sinon.SinonStub = sinon.stub()
+            req.session!.setExtraData = setExtraDataStub
+
+            sessionService.updateRemindDirectorList(req, "sign-1", true)
+
+            assert.isTrue(setExtraDataStub.calledOnce)
+            const updated: DissolutionSession = setExtraDataStub.getCall(0).args[1]
+            assert.deepEqual(updated.remindDirectorList, [{ id: "sign-1", reminderSent: true }])
+        })
+
+        it("should replace existing entry for the same signatoryId", () => {
+            const dissolutionSession = aDissolutionSession().withRemindDirectorList([{ id: "sign-1", reminderSent: false }]).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const setExtraDataStub: sinon.SinonStub = sinon.stub()
+            req.session!.setExtraData = setExtraDataStub
+
+            sessionService.updateRemindDirectorList(req, "sign-1", true)
+
+            assert.isTrue(setExtraDataStub.calledOnce)
+            const updated: DissolutionSession = setExtraDataStub.getCall(0).args[1]
+            assert.deepEqual(updated.remindDirectorList, [{ id: "sign-1", reminderSent: true }])
+        })
+
+        it("should preserve other entries and append the new entry at the end", () => {
+            const initialList = [
+                { id: "other-1", reminderSent: true },
+                { id: "sign-1", reminderSent: false },
+                { id: "other-2", reminderSent: false }
+            ]
+
+            const dissolutionSession = aDissolutionSession().withRemindDirectorList(initialList).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const setExtraDataStub: sinon.SinonStub = sinon.stub()
+            req.session!.setExtraData = setExtraDataStub
+
+            sessionService.updateRemindDirectorList(req, "sign-1", true)
+
+            assert.isTrue(setExtraDataStub.calledOnce)
+            const updated: DissolutionSession = setExtraDataStub.getCall(0).args[1]
+            assert.deepEqual(updated.remindDirectorList, [
+                { id: "other-1", reminderSent: true },
+                { id: "other-2", reminderSent: false },
+                { id: "sign-1", reminderSent: true }
+            ])
         })
     })
 })

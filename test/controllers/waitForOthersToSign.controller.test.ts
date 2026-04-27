@@ -27,7 +27,6 @@ import SessionService from "app/services/session/session.service"
 
 import {generateDissolutionSession} from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
-import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -61,9 +60,6 @@ beforeEach(() => {
         container.rebind(SessionService).toConstantValue(instance(session))
         container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
         container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
-        container.rebind(JourneyPathService).toConstantValue({
-            journeyPath: (_req: any, pathTemplate: string) => pathTemplate
-        } as any)
     })
 })
 

@@ -50,6 +50,12 @@ export default class DissolutionService {
         return response.reminderSent
     }
 
+    public async getDissolutionSignatoryEmail (token: string, companyNumber: string, signatoryId: string): Promise<string | undefined> {
+        const dissolution = await this.client.getDissolution(token, companyNumber)
+        const signatory = dissolution?.directors.find(d => d.officer_id === signatoryId)
+        return signatory?.email
+    }
+
     public async getDissolutionPaymentSummary (dissolutionSession: DissolutionSession): Promise<PaymentSummary> {
         const applicationReference: string = dissolutionSession.applicationReferenceNumber!
 

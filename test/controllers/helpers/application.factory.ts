@@ -6,14 +6,13 @@ import * as bodyParser from "body-parser"
 import {Application, NextFunction, Request, Response} from "express"
 import {Container} from "inversify"
 import {buildProviderModule} from "inversify-binding-decorators"
-import {InversifyExpressServer, params} from "inversify-express-utils"
+import {InversifyExpressServer} from "inversify-express-utils"
 import JourneyPathService from "app/services/session/journeyPath.service"
 import * as nunjucks from "nunjucks"
 
 import {APP_NAME} from "app/constants/app.const"
 import TYPES from "app/types"
 import {addFilters, addGlobals} from "app/utils/nunjucks.util"
-import { buildPath } from "app/utils/buildPath"
 
 const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL")
@@ -44,28 +43,27 @@ export const createApp = (configureBindings?: (container: Container) => void): A
     mockEnvVars(container)
     mockMiddlewares(container)
     container.load(buildProviderModule())
-  configureBindings?.(container) // eslint-disable-line
+
+    container.rebind(JourneyPathService).toConstantValue({
+        journeyPath: (_req: any, pathTemplate: string) => pathTemplate
+    } as any)
+
+    configureBindings?.(container) // eslint-disable-line
+
+    const journeyPathService = container.get(JourneyPathService) as any
 
     return new InversifyExpressServer(container)
         .setConfig(server => {
 
             server.use(bodyParser.json())
-            server.use(bodyParser.urlencoded({ extended: false }))
+            server.use(bodyParser.urlencoded({extended: false}))
 
             server.use((req: Request, res: Response, next: NextFunction) => {
-
-                const journeyPathService = container.isBound(JourneyPathService) ? container.get(JourneyPathService) as any : undefined
 
                 res.locals.journeyPath = (pathTemplate: string, options?: {
                     journeyId?: string,
                     params?: Record<string, string | number>
-                }): string => {
-                    // if (journeyPathService) {
-                    //     return journeyPathService.journeyPath(req, pathTemplate, options)
-                    // }
-
-                    return pathTemplate
-                }
+                }): string => journeyPathService.journeyPath(req, pathTemplate, options)
 
                 next()
             })

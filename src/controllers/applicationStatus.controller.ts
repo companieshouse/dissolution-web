@@ -1,8 +1,8 @@
 import {inject} from "inversify"
-import {controller, httpGet, httpPost, queryParam, requestParam, requestBody} from "inversify-express-utils"
+import {controller, httpGet, httpPost, queryParam, requestBody, requestParam} from "inversify-express-utils"
 import {RedirectResult} from "inversify-express-utils/lib/results"
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
-import Optional from "app/models/optional"
+import {StatusCodes} from "http-status-codes"
+import {FrontendError} from "app/errors/frontendError.error"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import {APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
@@ -44,46 +44,26 @@ export class ApplicationStatusController extends JourneyBaseController {
         const errors = this.validator.validate(body, resendEmailSchema())
 
         if (errors) {
-            throw new Error("Invalid signatory id")
+            throw new FrontendError("Invalid signatory id", StatusCodes.BAD_REQUEST)
         }
 
-        const dissolutionSession = this.sessionService.requireDissolutionSession(this.httpContext.request)
-
+        const companyNumber = this.sessionService.requireDissolutionCompanyNumber(this.httpContext.request)
         const signatoryId = body.signatoryId!
 
-        const signatoryEmail = await this.getSignatoryEmail(dissolutionSession, signatoryId)
-
-        if (!signatoryEmail) {
-            throw new Error("Signatory email not found")
-        }
-
-        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
-
-        this.updateRemindDirectorListInSession(dissolutionSession, signatoryId, reminderSent)
-
-        return super.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI))
-    }
-
-    private async getSignatoryEmail(dissolutionSession: DissolutionSession, signatoryId: string): Promise<string | undefined> {
-        const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
+        const signatoryEmail = await this.dissolutionService.getDissolutionSignatoryEmail(
             this.sessionService.getAccessToken(this.httpContext.request),
-            dissolutionSession
+            companyNumber,
+            signatoryId
         )
 
-        const signatory = dissolution?.directors.find(d => (d as any).officer_id === signatoryId)
-
-        return signatory?.email
-    }
-
-    private updateRemindDirectorListInSession(session: DissolutionSession, signatoryId: string, reminderSent: boolean) {
-        const updatedSession: DissolutionSession = {
-            ...session,
-            remindDirectorList: [
-                ...(session.remindDirectorList || []),
-                { id: signatoryId, reminderSent }
-            ]
+        if (!signatoryEmail) {
+            throw new FrontendError("Signatory email not found", StatusCodes.NOT_FOUND)
         }
 
-        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
+        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, signatoryEmail)
+
+        this.sessionService.updateRemindDirectorList(this.httpContext.request, signatoryId, reminderSent)
+
+        return super.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI))
     }
 }

@@ -113,8 +113,8 @@ describe("ApplicationStatusController", () => {
                     aDissolutionGetDirector().withOfficerId("other-1").build(),
                     aDissolutionGetDirector().withOfficerId(signatoryId).withEmail(signatoryEmail).build()]).build()
 
-                when(sessionService.requireDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(dissolutionSessionGetResponse)
+                when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(dissolutionSession.companyNumber!)
+                when(dissolutionService.getDissolutionSignatoryEmail(anything(), dissolutionSession.companyNumber!, signatoryId)).thenResolve(signatoryEmail)
                 when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)).thenResolve(testCase.reminderSent)
 
                 await request(app)
@@ -124,14 +124,7 @@ describe("ApplicationStatusController", () => {
                     .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
                 verify(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)).once()
-                verify(sessionService.setDissolutionSession(anything(), anything())).once()
-
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(sessionService.setDissolutionSession)
-                const updatedDissolutionSession = sessionCaptor.last()[1]
-
-                assert.equal(updatedDissolutionSession.remindDirectorList!.length, 1)
-                assert.equal(updatedDissolutionSession.remindDirectorList![0].id, signatoryId)
-                assert.equal(updatedDissolutionSession.remindDirectorList![0].reminderSent, testCase.reminderSent)
+                verify(sessionService.updateRemindDirectorList(anything(), signatoryId, testCase.reminderSent)).once()
             })
         })
 
@@ -149,9 +142,9 @@ describe("ApplicationStatusController", () => {
                 await request(app)
                     .post(`${APPLICATION_STATUS_URI}/send-email`)
                     .send(body)
-                    .expect(StatusCodes.INTERNAL_SERVER_ERROR)
+                    .expect(StatusCodes.BAD_REQUEST)
 
-                verify(sessionService.setDissolutionSession(anything(), anything())).never()
+                verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never()
                 verify(dissolutionService.sendEmailNotification(anything(), anything())).never()
             })
         })
@@ -168,15 +161,15 @@ describe("ApplicationStatusController", () => {
             it(`when no email found for signatoryId then error returned: ${testCase.name}`, async () => {
                 const dissolutionSession = aDissolutionSession().build()
 
-                when(sessionService.requireDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(dissolutionService.getDissolution(anything(), dissolutionSession)).thenResolve(testCase.dissolution)
+                when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(dissolutionSession.companyNumber!)
+                when(dissolutionService.getDissolutionSignatoryEmail(anything(), dissolutionSession.companyNumber!, "a-valid-id")).thenResolve(undefined)
 
                 await request(app)
                     .post(`${APPLICATION_STATUS_URI}/send-email`)
                     .send({ signatoryId: "a-valid-id" })
-                    .expect(StatusCodes.INTERNAL_SERVER_ERROR)
+                    .expect(StatusCodes.NOT_FOUND)
 
-                verify(sessionService.setDissolutionSession(anything(), anything())).never()
+                verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never()
                 verify(dissolutionService.sendEmailNotification(anything(), anything())).never()
             })
         })
