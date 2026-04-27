@@ -1,5 +1,26 @@
 {% from 'web-security-node/components/csrf-token-input/macro.njk' import csrfTokenInput %}
 
+<style>
+  .resend-link {
+    background-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+    color: #1d70b8;
+    text-decoration: underline;
+    cursor: pointer;
+    display: inline;
+  }
+
+  .resend-link:focus-visible {
+    /* keep a visible, text-only focus indicator */
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+  }
+</style>
+
 {% macro resendEmailCell(signatory, index, resendEmailPath, csrfToken) %}
   {% if signatory.isReminded %}
     <span>Email sent</span>
@@ -8,7 +29,9 @@
       {{ csrfTokenInput({ csrfToken: csrfToken }) }}
 
       <input type="hidden" name="signatoryId" value="{{ signatory.id }}">
-      <button type="submit" id="resend-button-{{ index }}" class="govuk-link" data-event-id="resend-email-link">Resend email</button>
+      <button type="submit" id="resend-button-{{ index }}" class="govuk-link resend-link" data-event-id="resend-email-link">
+        Resend email
+      </button>
     </form>
   {% endif %}
 {% endmacro %}

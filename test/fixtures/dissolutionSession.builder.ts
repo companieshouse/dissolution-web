@@ -14,8 +14,8 @@ export class DissolutionSessionBuilder {
     private _isMultiDirector?: boolean
     signatoryIdToEdit?: string
     signatoryToEdit?: DissolutionGetDirector
-    isFromCheckAnswers?: boolean
     journeyId?: string
+    isFromCheckAnswers?: boolean
     remindDirectorList?: DirectorToRemind[]
 
     withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {

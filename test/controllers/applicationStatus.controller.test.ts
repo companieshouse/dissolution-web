@@ -109,9 +109,6 @@ describe("ApplicationStatusController", () => {
                 const signatoryEmail = "signatory@mail.com"
 
                 const dissolutionSession = aDissolutionSession().build()
-                const dissolutionSessionGetResponse = aDissolutionGetResponse().withDirectors([
-                    aDissolutionGetDirector().withOfficerId("other-1").build(),
-                    aDissolutionGetDirector().withOfficerId(signatoryId).withEmail(signatoryEmail).build()]).build()
 
                 when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(dissolutionSession.companyNumber!)
                 when(dissolutionService.getDissolutionSignatoryEmail(anything(), dissolutionSession.companyNumber!, signatoryId)).thenResolve(signatoryEmail)

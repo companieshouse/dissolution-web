@@ -1,4 +1,3 @@
-import { DirectorToRemind } from "app/models/session/directorToSign.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 
 export interface ViewApplicationStatus {
