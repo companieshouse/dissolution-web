@@ -41,6 +41,7 @@ export function generateISignInInfo (): ISignInInfo {
 
 export function generateDissolutionSession (companyNumber: string = "12345678"): DissolutionSession {
     return {
+        journeyId: "e1101f0a-5121-4429-acee-a817c5cAAAAA",
         companyNumber,
         directorsToSign: [
             generateDirectorToSign(),

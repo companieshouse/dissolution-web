@@ -46,11 +46,10 @@ export class BootstrapJourneyController extends JourneyBaseController {
     private initDissolutionSession(journeyId: string, companyNumber: string): void {
         const req = this.httpContext.request
 
-        const session: DissolutionSession = {
+        const dissolutionSession: DissolutionSession = {
             journeyId,
-            companyNumber,
-            remindDirectorList: []
+            companyNumber
         }
-        this.sessionService.setDissolutionSession(req, session)
+        this.sessionService.setDissolutionSession(req, dissolutionSession)
     }
 }
