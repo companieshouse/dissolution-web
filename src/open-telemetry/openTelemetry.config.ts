@@ -16,7 +16,7 @@ if (!otlpEndpoint) {
 }
 
 const openTelemetryConfig: OpenTelemetryConfiguration = {
-    env: (env.NODE_ENV || "development").toLowerCase(),
+    env: (env.NODE_ENV ?? "development").toLowerCase(),
     applicationNamespace: env.OTEL_SERVICE_NAME ?? "undefined-service",
     baseUrl: env.CHS_URL ?? "",
     otel: {
