@@ -8,7 +8,7 @@
       {{ csrfTokenInput({ csrfToken: csrfToken }) }}
 
       <input type="hidden" name="signatoryId" value="{{ signatory.id }}">
-      <button type="submit" id="resend-button-{{ index }}" class="govuk-link resend-link" data-event-id="resend-email-link">
+      <button type="submit" id="resend-button-{{ index }}" class="govuk-link govuk-button--link" data-event-id="resend-email-link">
         Resend email
       </button>
     </form>
