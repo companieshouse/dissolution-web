@@ -16,11 +16,11 @@ describe("openTelemetry side-effect startup", function () {
         delete require.cache[require.resolve(openTelemetry)]
     })
 
-    afterEach(() => {
+    afterEach( async () => {
         process.env = OLD_ENV
         delete require.cache[require.resolve(openTelemetryConfig)]
         delete require.cache[require.resolve(openTelemetry)]
-        shutdownOpenTelemetry()
+        await shutdownOpenTelemetry()
     })
 
     it("logs disabled message and does not throw if 'OTEL_LOG_ENABLED' is false", () => {
