@@ -57,9 +57,10 @@ describe("BootstrapJourneyController", () => {
         void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).once()
         const [, savedSession] = capture(sessionServiceMock.setDissolutionSession).last()
         assert.isDefined(savedSession)
+        // Ensure only companyNumber and journeyId are set on the saved session
+        assert.deepEqual(Object.keys(savedSession).sort(), ["companyNumber", "journeyId"])
         assert.equal(savedSession.companyNumber, companyNumber)
         assert.equal(savedSession.journeyId, journeyId)
-        assert.deepEqual(savedSession.remindDirectorList, [])
     })
 
     const invalidCompanyNumberCases = [

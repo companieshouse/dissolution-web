@@ -83,7 +83,7 @@
     "@types/nunjucks": "^3.2.6",
     "@types/sinon": "^9.0.11",
     "@types/supertest": "^2.0.16",
-    "@types/uuid": "^8.3.4",
+    "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
     "chai": "^6.2.2",
@@ -106,7 +106,8 @@
   "overrides": {
     "fast-xml-parser": "^5.3.8",
     "diff": "^8.0.3",
-    "serialize-javascript": "^7.0.3"
+    "serialize-javascript": "^7.0.3",
+    "uuid": "^14.0.0"
   },
   "nodemonConfig": {
     "watch": [

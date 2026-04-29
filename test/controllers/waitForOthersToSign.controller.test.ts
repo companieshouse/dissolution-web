@@ -1,14 +1,17 @@
 import "reflect-metadata"
 
-import { assert } from "chai"
-import { Application } from "express"
-import { StatusCodes } from "http-status-codes"
+import {assert} from "chai"
+import {Application} from "express"
+import {StatusCodes} from "http-status-codes"
 import request from "supertest"
-import { anything, instance, mock, when } from "ts-mockito"
-import { generateDissolutionGetResponse } from "../fixtures/dissolutionApi.fixtures"
-import { TOKEN } from "../fixtures/session.fixtures"
-import { generateViewApplicationStatusModel, generateViewApplicationStatusSignatory } from "../fixtures/viewApplicationStatus.fixtures"
-import { createApp } from "./helpers/application.factory"
+import {anything, instance, mock, when} from "ts-mockito"
+import {generateDissolutionGetResponse} from "../fixtures/dissolutionApi.fixtures"
+import {TOKEN} from "../fixtures/session.fixtures"
+import {
+    generateViewApplicationStatusModel,
+    generateViewApplicationStatusSignatory
+} from "../fixtures/viewApplicationStatus.fixtures"
+import {createApp} from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
 
 import "app/controllers/waitForOthersToSign.controller"
@@ -17,14 +20,13 @@ import ApplicationStatus from "app/models/dto/applicationStatus.enum"
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
 import OfficerType from "app/models/dto/officerType.enum"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ViewApplicationStatus } from "app/models/view/viewApplicationStatus.model"
-import { APPLICATION_STATUS_URI, PAYMENT_REVIEW_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
+import {ViewApplicationStatus} from "app/models/view/viewApplicationStatus.model"
+import {APPLICATION_STATUS_CHANGE_URI, PAYMENT_REVIEW_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import SessionService from "app/services/session/session.service"
 
-import { generateDissolutionSession } from "test/fixtures/session.fixtures"
+import {generateDissolutionSession} from "test/fixtures/session.fixtures"
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
-import JourneyPathService from "app/services/session/journeyPath.service";
 
 mockCsrfMiddleware.restore()
 
@@ -58,9 +60,6 @@ beforeEach(() => {
         container.rebind(SessionService).toConstantValue(instance(session))
         container.rebind(DissolutionService).toConstantValue(instance(dissolutionService))
         container.rebind(ViewApplicationStatusMapper).toConstantValue(instance(viewApplicationStatusMapper))
-        container.rebind(JourneyPathService).toConstantValue({
-            journeyPath: (_req: any, pathTemplate: string) => pathTemplate
-        } as any)
     })
 })
 
@@ -204,7 +203,7 @@ describe("WaitForOthersToSignController", () => {
                     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
                     assert.isTrue(htmlAssertHelper.selectorExists("#change-email-0"))
-                    assert.equal(htmlAssertHelper.getAttributeValue("#change-email-0", "href"), `${APPLICATION_STATUS_URI}/abc123/change`)
+                    assert.equal(htmlAssertHelper.getAttributeValue("#change-email-0", "href"), APPLICATION_STATUS_CHANGE_URI)
                     assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#change-email-1"))
                 })
             })

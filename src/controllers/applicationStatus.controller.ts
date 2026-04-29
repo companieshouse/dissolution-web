@@ -1,24 +1,27 @@
 import {inject} from "inversify"
-import {controller, httpGet, queryParam, requestParam} from "inversify-express-utils"
+import {controller, httpGet, httpPost, queryParam, requestBody, requestParam} from "inversify-express-utils"
 import {RedirectResult} from "inversify-express-utils/lib/results"
-import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper"
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
-import Optional from "app/models/optional"
+import {StatusCodes} from "http-status-codes"
+import {FrontendError} from "app/errors/frontendError.error"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import {APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import DissolutionService from "app/services/dissolution/dissolution.service"
+import FormValidator from "app/utils/formValidator.util"
+import RichFormValidator from "app/utils/richFormValidator.util"
 import SessionService from "app/services/session/session.service"
-import TYPES from "app/types";
-import JourneyPathService from "app/services/session/journeyPath.service";
-import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import ResendEmailFormModel from "app/models/form/resendEmail.model"
+import TYPES from "app/types"
+import JourneyPathService from "app/services/session/journeyPath.service"
+import JourneyBaseController from "app/controllers/JourneyBase.controller"
+import resendEmailSchema from "app/schemas/resendEmail.schema"
 
 @controller(APPLICATION_STATUS_URI, TYPES.JourneyIdAuthMiddleware)
 export class ApplicationStatusController extends JourneyBaseController {
 
     public constructor (
-    @inject(SessionService) private readonly session: SessionService,
+    @inject(SessionService) private readonly sessionService: SessionService,
     @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
-    @inject(ViewApplicationStatusMapper) private readonly viewApplicationStatusMapper: ViewApplicationStatusMapper,
+    @inject(RichFormValidator) private readonly validator: FormValidator,
     @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
         super(journeyPathService)
@@ -26,37 +29,41 @@ export class ApplicationStatusController extends JourneyBaseController {
 
     @httpGet("/:signatoryId/change")
     public async change (@requestParam("signatoryId") signatoryId: string, @queryParam("check_answers") isFromCheckAnswers: string): Promise<RedirectResult> {
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
         dissolutionSession.signatoryIdToEdit = signatoryId
         dissolutionSession.isFromCheckAnswers = isFromCheckAnswers === "true"
 
-        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, dissolutionSession)
 
         return super.redirect(this.journeyPath(CHANGE_DETAILS_URI))
     }
 
-    @httpGet("/:signatoryEmail/send-email")
-    public async resend (@requestParam("signatoryEmail") signatoryEmail: string): Promise<RedirectResult> {
+    @httpPost("/send-email")
+    public async resend (@requestBody() body: ResendEmailFormModel): Promise<RedirectResult> {
 
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
+        const errors = this.validator.validate(body, resendEmailSchema())
 
-        const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
-            this.session.getAccessToken(this.httpContext.request),
-            dissolutionSession
+        if (errors) {
+            throw new FrontendError("Invalid signatory id", StatusCodes.BAD_REQUEST)
+        }
+
+        const companyNumber = this.sessionService.requireDissolutionCompanyNumber(this.httpContext.request)
+        const signatoryId = body.signatoryId!
+
+        const signatoryEmail = await this.dissolutionService.getDissolutionSignatoryEmail(
+            this.sessionService.getAccessToken(this.httpContext.request),
+            companyNumber,
+            signatoryId
         )
 
-        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
+        if (!signatoryEmail) {
+            throw new FrontendError("Signatory email not found", StatusCodes.NOT_FOUND)
+        }
 
-        this.viewApplicationStatusMapper.mapToViewModel(dissolutionSession, dissolution!, true).signatories.forEach(signatory => {
-            if (signatory.email === signatoryEmail) {
-                const id: string = signatory.id
-                dissolutionSession.remindDirectorList.push({ id, reminderSent })
-            }
-        })
+        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(companyNumber, signatoryEmail)
 
-        this.session.setDissolutionSession(this.httpContext.request, dissolutionSession)
+        this.sessionService.updateRemindDirectorList(this.httpContext.request, signatoryId, reminderSent)
 
         return super.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI))
     }
-
 }

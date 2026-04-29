@@ -1,0 +1,17 @@
+{% from 'web-security-node/components/csrf-token-input/macro.njk' import csrfTokenInput %}
+
+{% macro resendEmailCell(signatory, index, resendEmailPath, csrfToken) %}
+  {% if signatory.isReminded %}
+    <span>Email sent</span>
+  {% else %}
+    <form method="post" action="{{ resendEmailPath }}" class="inline-form" aria-label="Resend email to {{ signatory.name }}">
+      {{ csrfTokenInput({ csrfToken: csrfToken }) }}
+
+      <input type="hidden" name="signatoryId" value="{{ signatory.id }}">
+      <button type="submit" id="resend-button-{{ index }}" class="govuk-link govuk-button--link" data-event-id="resend-email-link">
+        Resend email
+      </button>
+    </form>
+  {% endif %}
+{% endmacro %}
+

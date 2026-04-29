@@ -1,11 +1,11 @@
-import { assert } from "chai"
-import { anything, instance, mock, verify, when } from "ts-mockito"
-import { generatePaymentSummary } from "../../fixtures/payment.fixtures"
-import { EMAIL, TOKEN } from "../../fixtures/session.fixtures"
+import {assert} from "chai"
+import {anything, instance, mock, verify, when} from "ts-mockito"
+import {generatePaymentSummary} from "../../fixtures/payment.fixtures"
+import {EMAIL, TOKEN} from "../../fixtures/session.fixtures"
 
 import DissolutionRequestMapper from "app/mappers/dissolution/dissolutionRequest.mapper"
 import PaymentMapper from "app/mappers/payment/payment.mapper"
-import { DissolutionCreateRequest } from "app/models/dto/dissolutionCreateRequest"
+import {DissolutionCreateRequest} from "app/models/dto/dissolutionCreateRequest"
 import DissolutionCreateResponse from "app/models/dto/dissolutionCreateResponse"
 import DissolutionGetPaymentUIData from "app/models/dto/dissolutionGetPaymentUIData"
 import DissolutionGetResendEmailResponse from "app/models/dto/dissolutionGetResendEmailResponse"
@@ -16,19 +16,26 @@ import PaymentSummary from "app/models/dto/paymentSummary"
 import Optional from "app/models/optional"
 import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { DissolutionApiClient } from "app/services/clients/dissolutionApi.client"
+import {DissolutionApiClient} from "app/services/clients/dissolutionApi.client"
 import DissolutionService from "app/services/dissolution/dissolution.service"
 import DissolutionCertificateService from "app/services/dissolution/dissolutionCertificate.service"
 
 import {
-    generateApprovalModel, generateDissolutionCreateRequest, generateDissolutionCreateResponse, generateDissolutionGetPaymentUIData,
-    generateDissolutionGetResendEmailResponse, generateDissolutionGetResponse, generateDissolutionPatchRequest,
+    generateApprovalModel,
+    generateDissolutionCreateRequest,
+    generateDissolutionCreateResponse,
+    generateDissolutionGetPaymentUIData,
+    generateDissolutionGetResendEmailResponse,
+    generateDissolutionGetResponse,
+    generateDissolutionPatchRequest,
     generateDissolutionPaymentPatchRequest
 } from "test/fixtures/dissolutionApi.fixtures"
-import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures"
+import {generateDissolutionConfirmation, generateDissolutionSession} from "test/fixtures/session.fixtures"
+import {aDissolutionGetResponse} from "test/fixtures/dissolutionGetResponse.builder"
+import {aDissolutionGetDirector} from "test/fixtures/dissolutionGetDirector.builder"
 
 describe("DissolutionService", () => {
-    let service: DissolutionService
+    let dissolutionService: DissolutionService
 
     let dissolutionRequestMapper: DissolutionRequestMapper
     let client: DissolutionApiClient
@@ -53,7 +60,7 @@ describe("DissolutionService", () => {
         dissolutionGetResponse = generateDissolutionGetResponse()
         dissolutionSession = generateDissolutionSession()
 
-        service = new DissolutionService(
+        dissolutionService = new DissolutionService(
             instance(dissolutionRequestMapper),
             instance(client),
             instance(certificateService),
@@ -67,7 +74,7 @@ describe("DissolutionService", () => {
 
             when(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY)).thenResolve(dissolutionCreateResponse)
 
-            const res: Optional<string> = await service.createDissolution(TOKEN, dissolutionSession)
+            const res: Optional<string> = await dissolutionService.createDissolution(TOKEN, dissolutionSession)
 
             verify(client.createDissolution(TOKEN, dissolutionSession.companyNumber!, MAPPED_BODY)).once()
 
@@ -79,7 +86,7 @@ describe("DissolutionService", () => {
         it("should call dissolution api client and return a boolean", async () => {
             when(client.sendEmailNotification(anything(), anything())).thenResolve(GET_RESEND_EMAIL_RESPONSE)
 
-            const res: boolean = await service.sendEmailNotification("companyNo", EMAIL)
+            const res: boolean = await dissolutionService.sendEmailNotification("companyNo", EMAIL)
 
             verify(client.sendEmailNotification("companyNo", EMAIL)).once()
 
@@ -91,7 +98,7 @@ describe("DissolutionService", () => {
         it("should call dissolution api client and return dissolution info if dissolution is present", async () => {
             when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).thenResolve(dissolutionGetResponse)
 
-            const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
+            const res: Optional<DissolutionGetResponse> = await dissolutionService.getDissolution(TOKEN, dissolutionSession)
 
             verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
@@ -101,7 +108,7 @@ describe("DissolutionService", () => {
         it("should call dissolution api client and return null if dissolution is not present", async () => {
             when(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).thenResolve(null)
 
-            const res: Optional<DissolutionGetResponse> = await service.getDissolution(TOKEN, dissolutionSession)
+            const res: Optional<DissolutionGetResponse> = await dissolutionService.getDissolution(TOKEN, dissolutionSession)
 
             verify(client.getDissolution(TOKEN, dissolutionSession.companyNumber!)).once()
 
@@ -122,7 +129,7 @@ describe("DissolutionService", () => {
             when(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).thenResolve(dissolutionGetPaymentUIData)
             when(paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)).thenReturn(paymentSummary)
 
-            const response: PaymentSummary = await service.getDissolutionPaymentSummary(dissolutionSession)
+            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(dissolutionSession)
 
             verify(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).once()
 
@@ -137,7 +144,7 @@ describe("DissolutionService", () => {
         it("should call dissolution api client to update the payment data of a dissolution", async () => {
             when(paymentMapper.mapToPayByAccountPaymentPatchRequest(dissolutionSession, accountNumber)).thenReturn(dissolutionPaymentPatchRequest)
 
-            await service.addPayByAccountPaymentData(dissolutionSession, accountNumber)
+            await dissolutionService.addPayByAccountPaymentData(dissolutionSession, accountNumber)
 
             verify(client.patchDissolutionPaymentData(dissolutionSession.applicationReferenceNumber!, dissolutionPaymentPatchRequest)).once()
         })
@@ -153,7 +160,7 @@ describe("DissolutionService", () => {
 
             when(dissolutionRequestMapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body)
 
-            await service.approveDissolution(TOKEN, dissolutionSession, ipAddress)
+            await dissolutionService.approveDissolution(TOKEN, dissolutionSession, ipAddress)
 
             verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once()
         })
@@ -166,11 +173,62 @@ describe("DissolutionService", () => {
 
             when(certificateService.generateDissolutionCertificateUrl(confirmation)).thenResolve(certificateUrl)
 
-            const result: string = await service.generateDissolutionCertificateUrl(confirmation)
+            const result: string = await dissolutionService.generateDissolutionCertificateUrl(confirmation)
 
             assert.equal(result, certificateUrl)
 
             verify(certificateService.generateDissolutionCertificateUrl(confirmation)).once()
+        })
+    })
+
+    describe("getSignatoryEmail", () => {
+        it("should return the signatory email when present in the dissolution resource", async () => {
+            const signatoryId = "sign-1"
+            const companyNumber = "COMP-1"
+            const directorEmail = "sign1@example.com"
+
+            const dissolutionGetResponse = aDissolutionGetResponse()
+                .withCompanyNumber(companyNumber)
+                .withDirectors([
+                    aDissolutionGetDirector().withOfficerId(signatoryId).withEmail(directorEmail).build()
+                ])
+                .build()
+
+            when(client.getDissolution(TOKEN, companyNumber)).thenResolve(dissolutionGetResponse)
+
+            const res: string | undefined = await dissolutionService.getDissolutionSignatoryEmail(TOKEN, companyNumber, signatoryId)
+
+            verify(client.getDissolution(TOKEN, companyNumber)).once()
+            assert.equal(res, directorEmail)
+        })
+
+        it("should return undefined when the signatory is not present", async () => {
+            const companyNumber = "COMP-2"
+
+            const dissolutionGetResponse = aDissolutionGetResponse()
+                .withCompanyNumber(companyNumber)
+                .withDirectors([
+                    aDissolutionGetDirector().withOfficerId("other-1").withEmail("other1@example.com").build()
+                ])
+                .build()
+
+            when(client.getDissolution(TOKEN, companyNumber)).thenResolve(dissolutionGetResponse)
+
+            const res: string | undefined = await dissolutionService.getDissolutionSignatoryEmail(TOKEN, companyNumber, "no-such-id")
+
+            verify(client.getDissolution(TOKEN, companyNumber)).once()
+            assert.isUndefined(res)
+        })
+
+        it("should return undefined when the dissolution resource is not present", async () => {
+            const companyNumber = "COMP-3"
+
+            when(client.getDissolution(TOKEN, companyNumber)).thenResolve(null)
+
+            const res: string | undefined = await dissolutionService.getDissolutionSignatoryEmail(TOKEN, companyNumber, "abc123")
+
+            verify(client.getDissolution(TOKEN, companyNumber)).once()
+            assert.isUndefined(res)
         })
     })
 })
