@@ -31,14 +31,14 @@ describe("openTelemetryConfig integration", () => {
         assert.throws(() => require(openTelemetryConfig), /OTEL_EXPORTER_OTLP_ENDPOINT is not set/)
     })
 
-    it("defaults NODE_ENV to development and OTEL_SERVICE_NAME to undefined-service", () => {
+    it("defaults serviceName to undefined-service when OTEL_SERVICE_NAME is undefined", () => {
         delete process.env.NODE_ENV
         delete process.env.OTEL_SERVICE_NAME
         const config = require(openTelemetryConfig).default
         assert.equal(config.serviceName, "undefined-service")
     })
 
-    it("sets otelLogEnabled to false if OTEL_LOG_ENABLED is not 'true'", () => {
+    it("sets enabled to false if OTEL_LOG_ENABLED is not 'true'", () => {
         process.env.OTEL_LOG_ENABLED = "false"
         const config = require(openTelemetryConfig).default
         assert.isFalse(config.enabled)

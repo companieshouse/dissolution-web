@@ -7,8 +7,9 @@ import openTelemetryConfig from "./open-telemetry/openTelemetry.config"
 import {ALLOW_ALL_BAGGAGE_KEYS, BaggageSpanProcessor} from "@opentelemetry/baggage-span-processor"
 import {BatchSpanProcessor} from "@opentelemetry/sdk-trace-node"
 
+let openTelemetry: NodeSDK
 
-function setupOpenTelemetry() : NodeSDK {
+function setupOpenTelemetry(): NodeSDK {
     const traceExporter = new OTLPTraceExporter({
         url: openTelemetryConfig.endpoints.traceExporterUrl,
         headers: {}
@@ -32,7 +33,7 @@ function setupOpenTelemetry() : NodeSDK {
 if (openTelemetryConfig.enabled) {
     console.info(`Starting OpenTelemetry for ${openTelemetryConfig.serviceName}...`)
     try {
-        let openTelemetry = setupOpenTelemetry()
+        openTelemetry = setupOpenTelemetry()
         openTelemetry.start()
         console.info("OpenTelemetry started successfully.")
     } catch (error) {
@@ -40,4 +41,12 @@ if (openTelemetryConfig.enabled) {
     }
 } else {
     console.info("OpenTelemetry is disabled.")
+}
+
+export async function shutdownOpenTelemetry() {
+    if (openTelemetry) {
+        await openTelemetry?.shutdown()
+            .then(() => console.info("OpenTelemetry shutdown complete."))
+            .catch((error) => console.error("Error during OpenTelemetry shutdown:", error))
+    }
 }
