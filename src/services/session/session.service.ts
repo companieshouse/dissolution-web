@@ -56,6 +56,14 @@ export default class SessionService {
         req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
     }
 
+    public initDissolutionSession(req: Request, journeyId: string, companyNumber: string): void {
+        const dissolutionSession: DissolutionSession = {
+            journeyId,
+            companyNumber
+        }
+        this.setDissolutionSession(req, dissolutionSession)
+    }
+
     public updateRemindDirectorList(req: Request, signatoryId: string, reminderSent: boolean): void {
         const session = this.requireDissolutionSession(req)
 

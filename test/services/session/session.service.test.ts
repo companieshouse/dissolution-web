@@ -230,4 +230,27 @@ describe("SessionService", () => {
             ])
         })
     })
+
+    describe("initDissolutionSession", () => {
+        it("should create and set a minimal dissolution session with journeyId and companyNumber", () => {
+            const req: Request = generateRequest()
+
+            const setExtraDataStub: sinon.SinonStub = sinon.stub()
+            req.session!.setExtraData = setExtraDataStub
+
+            const journeyId = "journey-123"
+            const companyNumber = "COMP-123"
+
+            sessionService.initDissolutionSession(req, journeyId, companyNumber)
+
+            assert.isTrue(setExtraDataStub.calledOnce)
+            const callArgs = setExtraDataStub.getCall(0).args
+            assert.equal(callArgs[0], "dissolution")
+            const savedSession: any = callArgs[1]
+
+            assert.deepEqual(Object.keys(savedSession).sort(), ["companyNumber", "journeyId"])
+            assert.equal(savedSession.journeyId, journeyId)
+            assert.equal(savedSession.companyNumber, companyNumber)
+        })
+    })
 })

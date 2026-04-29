@@ -2,7 +2,6 @@ import {inject} from "inversify"
 import {controller, httpGet, queryParam} from "inversify-express-utils"
 import SessionService from "app/services/session/session.service"
 import UuidGenerator from "app/utils/uuidGenerator"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
 import TYPES from "app/types"
 import {BOOTSTRAP_JOURNEY_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
 import JourneyBaseController from "app/controllers/JourneyBase.controller"
@@ -24,32 +23,22 @@ export class BootstrapJourneyController extends JourneyBaseController {
     }
 
     @httpGet("")
-    public async get(@queryParam("companyNumber") companyNumber?: string | string[]): Promise<string | RedirectResult> {
+    public async get(@queryParam("companyNumber") rawCompanyNumber?: string | string[]): Promise<string | RedirectResult> {
 
-        const { value, error } = this.validate(companyNumber)
+        const { companyNumber, error } = this.validate(rawCompanyNumber)
 
-        if (error || !value) {
+        if (error || !companyNumber) {
             throw new Error("Invalid company number")
         }
 
         const journeyId = this.uuidGenerator.generate()
-        this.initDissolutionSession(journeyId, value)
+        this.sessionService.initDissolutionSession(this.httpContext.request, journeyId, companyNumber)
+
         return this.redirect(this.journeyPath(VIEW_COMPANY_INFORMATION_URI, {journeyId}))
     }
-
-    private validate(companyNumber?: string | string[]): { value?: string, error?: any } {
+    private validate(companyNumber?: string | string[]): { companyNumber?: string, error?: any } {
         const rawCompanyNumber = firstParam(companyNumber)
         const { value, error } = companyNumberSchema.validate(rawCompanyNumber)
-        return { value, error }
-    }
-
-    private initDissolutionSession(journeyId: string, companyNumber: string): void {
-        const req = this.httpContext.request
-
-        const dissolutionSession: DissolutionSession = {
-            journeyId,
-            companyNumber
-        }
-        this.sessionService.setDissolutionSession(req, dissolutionSession)
+        return { companyNumber: value, error }
     }
 }

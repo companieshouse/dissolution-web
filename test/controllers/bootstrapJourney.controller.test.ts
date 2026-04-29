@@ -54,13 +54,10 @@ describe("BootstrapJourneyController", () => {
         assert.equal(res.status, 302)
         assert.equal(res.headers.location, VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", journeyId))
 
-        void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).once()
-        const [, savedSession] = capture(sessionServiceMock.setDissolutionSession).last()
-        assert.isDefined(savedSession)
-        // Ensure only companyNumber and journeyId are set on the saved session
-        assert.deepEqual(Object.keys(savedSession).sort(), ["companyNumber", "journeyId"])
-        assert.equal(savedSession.companyNumber, companyNumber)
-        assert.equal(savedSession.journeyId, journeyId)
+        void verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).once()
+        const [reqArg, savedJourneyId, savedCompanyNumber] = capture(sessionServiceMock.initDissolutionSession).last()
+        assert.equal(savedJourneyId, journeyId)
+        assert.equal(savedCompanyNumber, companyNumber)
     })
 
     const invalidCompanyNumberCases = [
@@ -79,7 +76,7 @@ describe("BootstrapJourneyController", () => {
                 .query({ companyNumber: tc.input })
 
             assert.equal(res.status, 500)
-            void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).never()
+            void verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).never()
         })
     })
 
@@ -100,10 +97,9 @@ describe("BootstrapJourneyController", () => {
 
             assert.equal(res.status, 302)
             assert.equal(res.headers.location, VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "e1101f0a-5121-4429-acee-a817c5cAAAAA"))
-            void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).once()
-            const [, savedSession] = capture(sessionServiceMock.setDissolutionSession).last()
-            assert.isDefined(savedSession)
-            assert.equal(savedSession.companyNumber, tc.expected)
+            void verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).once()
+            const [reqArg, savedJourneyId, savedCompanyNumber] = capture(sessionServiceMock.initDissolutionSession).last()
+            assert.equal(savedCompanyNumber, tc.expected)
         })
     })
 })
