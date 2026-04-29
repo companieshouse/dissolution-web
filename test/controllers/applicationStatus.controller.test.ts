@@ -125,6 +125,36 @@ describe("ApplicationStatusController", () => {
             })
         })
 
+        const validSignatoryIds: Array<any> = [
+            { signatoryId: "a" },
+            { signatoryId: "A1-9" },
+            { signatoryId: "abc-123" },
+            { signatoryId: "a".repeat(50) }, // max length
+            { signatoryId: "Z9-xyz-987" },
+            { signatoryId: "yK7psNr-W-lF68mo2n7fs_q8Gw"}
+        ]
+
+        validSignatoryIds.forEach((body) => {
+            it(`accepts valid signatory id: ${JSON.stringify(body)}`, async () => { // NOSONAR
+                const id = body.signatoryId
+                const dissolutionSession = aDissolutionSession().build()
+                const signatoryEmail = "signatory@mail.com"
+
+                when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(dissolutionSession.companyNumber!)
+                when(dissolutionService.getDissolutionSignatoryEmail(anything(), dissolutionSession.companyNumber!, id)).thenResolve(signatoryEmail)
+                when(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)).thenResolve(true)
+
+                await request(app)
+                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .send(body)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
+
+                verify(dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)).once()
+                verify(sessionService.updateRemindDirectorList(anything(), id, true)).once()
+            })
+        })
+
         const invalidSignatoryIds: Array<any> = [
             {},
             { signatoryId: " " },
