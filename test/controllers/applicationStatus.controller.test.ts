@@ -135,7 +135,7 @@ describe("ApplicationStatusController", () => {
         ]
 
         validSignatoryIds.forEach((body) => {
-            it(`accepts valid signatory id: ${JSON.stringify(body)}`, async () => {
+            it(`accepts valid signatory id: ${JSON.stringify(body)}`, async () => { // NOSONAR
                 const id = body.signatoryId
                 const dissolutionSession = aDissolutionSession().build()
                 const signatoryEmail = "signatory@mail.com"
