@@ -15,7 +15,7 @@ interface AuthPayload {
 
 @provide(JwtEncryptionService)
 export default class JwtEncryptionService {
-    public constructor (@inject(TYPES.AuthConfig) private authConfig: AuthConfig) {}
+    public constructor (@inject(TYPES.AuthConfig) private readonly authConfig: AuthConfig) {}
 
     public generateNonce (): string {
         const bytes = randomBytes(5)
