@@ -44,6 +44,10 @@ export default class SessionService {
         return this.getDissolutionSession(req)?.journeyId
     }
 
+    public getDissolutionCompanyNumber(req: Request): Optional<string> {
+        return this.getDissolutionSession(req)?.companyNumber
+    }
+
     public requireJourneyId(req: Request): string {
         const journeyId = this.getJourneyId(req)
         if (!journeyId) {

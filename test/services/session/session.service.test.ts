@@ -120,6 +120,29 @@ describe("SessionService", () => {
         })
     })
 
+    describe("getDissolutionCompanyNumber", () => {
+        it("should return the company number when present", () => {
+            const companyNumber = "COMP-123"
+            const dissolutionSession = aDissolutionSession().withCompanyNumber(companyNumber).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const result: Optional<string> = sessionService.getDissolutionCompanyNumber(req)
+
+            assert.equal(result, companyNumber)
+        })
+
+        it("should return undefined when there is no company number", () => {
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(undefined)
+
+            const result: Optional<string> = sessionService.getDissolutionCompanyNumber(req)
+
+            assert.isUndefined(result)
+        })
+    })
+
     describe("requireDissolutionCompanyNumber", () => {
         it("should return the company number when present", () => {
             const companyNumber = "COMP-123"

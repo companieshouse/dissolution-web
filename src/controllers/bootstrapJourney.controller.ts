@@ -1,6 +1,7 @@
 import {inject} from "inversify"
 import {controller, httpGet, queryParam} from "inversify-express-utils"
 import SessionService from "app/services/session/session.service"
+import CompanyAuthService from "app/services/auth/companyAuth.service"
 import UuidGenerator from "app/utils/uuidGenerator"
 import TYPES from "app/types"
 import {BOOTSTRAP_JOURNEY_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
@@ -17,6 +18,7 @@ export class BootstrapJourneyController extends JourneyBaseController {
     public constructor(
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
         @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(CompanyAuthService) private readonly companyAuthService: CompanyAuthService,
         @inject(TYPES.UuidGenerator) private readonly uuidGenerator: UuidGenerator
     ) {
         super(journeyPathService)
@@ -31,7 +33,13 @@ export class BootstrapJourneyController extends JourneyBaseController {
             throw new Error("Invalid company number")
         }
 
+        if (!this.companyAuthService.isAuthorisedForCompany(this.httpContext.request, companyNumber)) {
+            const redirectUri = await this.companyAuthService.getAuthRedirectUri(this.httpContext.request, companyNumber)
+            return this.redirect(redirectUri)
+        }
+
         const journeyId = this.uuidGenerator.generate()
+
         this.sessionService.initDissolutionSession(this.httpContext.request, journeyId, companyNumber)
 
         return this.redirect(this.journeyPath(VIEW_COMPANY_INFORMATION_URI, {journeyId}))
