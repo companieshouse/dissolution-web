@@ -42,7 +42,7 @@ describe("BootstrapJourneyController", () => {
         const companyNumber = "88888888"
 
         when(companyAuthServiceMock.isAuthorisedForCompany(anything(), anything())).thenReturn(false)
-        when(companyAuthServiceMock.getAuthRedirectUri(anything(), anything())).thenReturn(Promise.resolve("http://account.chs-dev/oauth2/authorise?state=encoded"))
+        when(companyAuthServiceMock.issueAuthRedirectUri(anything(), anything())).thenReturn(Promise.resolve("http://account.chs-dev/oauth2/authorise?state=encoded"))
 
         const res = await request(app)
             .get(BOOTSTRAP_JOURNEY_URI)
@@ -52,7 +52,7 @@ describe("BootstrapJourneyController", () => {
         assert.equal(res.headers.location, "http://account.chs-dev/oauth2/authorise?state=encoded")
 
         verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).never()
-        verify(companyAuthServiceMock.getAuthRedirectUri(anything(), anything())).once()
+        verify(companyAuthServiceMock.issueAuthRedirectUri(anything(), anything())).once()
     })
 
     it("when authenticated user IS authorised for company then dissolution session initialized and redirect", async () => {

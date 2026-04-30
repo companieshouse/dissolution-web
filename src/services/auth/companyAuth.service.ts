@@ -31,14 +31,12 @@ export default class CompanyAuthService {
         return signInInfo[SignInInfoKeys.CompanyNumber] === companyNumber
     }
 
-    public async getAuthRedirectUri(req: Request, companyNumber: string): Promise<string> {
+    public async buildAuthRedirectUri(req: Request, companyNumber: string): Promise<{ redirectUri: string, nonce: string, state: string }> {
         const originalUrl = `${BOOTSTRAP_JOURNEY_URI}?companyNumber=${encodeURIComponent(companyNumber)}`
         const scope = `${OAUTH_USER_SCOPE} ${OAUTH_COMPANY_SCOPE_PREFIX}${companyNumber}`
 
         const nonce: string = this.encryptionService.generateNonce()
         const encodedState: string = await this.encryptionService.jweEncodeWithNonce(originalUrl, nonce)
-
-        this.sessionService.setCompanyAuthNonce(req, nonce)
 
         const params = new URLSearchParams({
             client_id: this.authConfig.accountClientId,
@@ -48,7 +46,14 @@ export default class CompanyAuthService {
             state: encodedState
         })
 
-        return `${this.authConfig.accountUrl}/oauth2/authorise?${params.toString()}`
+        const redirectUri = `${this.authConfig.accountUrl}/oauth2/authorise?${params.toString()}`
+        return { redirectUri, nonce, state: encodedState }
+    }
+
+    public async issueAuthRedirectUri(req: Request, companyNumber: string): Promise<string> {
+        const { redirectUri, nonce } = await this.buildAuthRedirectUri(req, companyNumber)
+        this.sessionService.setCompanyAuthNonce(req, nonce)
+        return redirectUri
     }
 }
 

@@ -58,12 +58,12 @@ describe("CompanyAuthService", () => {
         })
     })
 
-    describe("getAuthRedirectUri", () => {
+    describe("issueAuthRedirectUri", () => {
         it("composes the auth url and stores nonce in session", async () => {
             const req = {} as Request
             const companyNumber = "12345678"
 
-            const url = await service.getAuthRedirectUri(req, companyNumber)
+            const url = await service.issueAuthRedirectUri(req, companyNumber)
 
             assert.include(url, "http://account.chs-dev/oauth2/authorise?")
             assert.include(url, "client_id=client-id")

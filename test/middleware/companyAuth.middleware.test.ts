@@ -1,28 +1,32 @@
 import "reflect-metadata"
 
-import { Session } from "@companieshouse/node-session-handler"
-import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces"
+import {Session} from "@companieshouse/node-session-handler"
+import {ISignInInfo} from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces"
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import { assert } from "chai"
-import { RequestHandler, Response } from "express"
+import {assert} from "chai"
+import {RequestHandler, Response} from "express"
 import sinon from "sinon"
-import { anything, instance, mock, when, verify } from "ts-mockito"
+import {anything, instance, mock, verify, when} from "ts-mockito"
 
 import CompanyAuthMiddleware from "app/middleware/companyAuth.middleware"
 import SessionService from "app/services/session/session.service"
 import CompanyAuthService from "app/services/auth/companyAuth.service"
 import {
     ACCESSIBILITY_STATEMENT_URI,
+    BOOTSTRAP_JOURNEY_URI,
+    CHECK_YOUR_ANSWERS_URI,
+    DEFINE_SIGNATORY_INFO_URI,
     HEALTHCHECK_URI,
     ROOT_URI,
     SEARCH_COMPANY_URI,
+    SELECT_DIRECTOR_URI,
+    SELECT_SIGNATORIES_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
-    WHO_TO_TELL_URI,
-    BOOTSTRAP_JOURNEY_URI, SELECT_DIRECTOR_URI, JOURNEY_PATH_PREFIX, VIEW_COMPANY_INFORMATION_URI,
-    SELECT_SIGNATORIES_URI, DEFINE_SIGNATORY_INFO_URI, CHECK_YOUR_ANSWERS_URI
+    VIEW_COMPANY_INFORMATION_URI,
+    WHO_TO_TELL_URI
 } from "app/paths"
 
-import { generateSession } from "test/fixtures/session.fixtures"
+import {generateSession} from "test/fixtures/session.fixtures"
 
 
 describe("AuthMiddleware", () => {
@@ -42,7 +46,7 @@ describe("AuthMiddleware", () => {
 
         when(sessionService.getSession(anything())).thenReturn(session)
         when(companyAuthService.isAuthorisedForCompany(anything(), anything())).thenReturn(false)
-        when(companyAuthService.getAuthRedirectUri(anything(), anything())).thenResolve("http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678")
+        when(companyAuthService.issueAuthRedirectUri(anything(), anything())).thenResolve("http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678")
 
         middleware = CompanyAuthMiddleware(
             instance(companyAuthService), instance(sessionService), logger
@@ -79,17 +83,17 @@ describe("AuthMiddleware", () => {
     })
 
     const nonWhitelistedUrls = [
-        VIEW_COMPANY_INFORMATION_URI,
-        SELECT_DIRECTOR_URI,
-        SELECT_SIGNATORIES_URI,
-        DEFINE_SIGNATORY_INFO_URI,
-        CHECK_YOUR_ANSWERS_URI,
-        `${CHECK_YOUR_ANSWERS_URI}/subpath`,
+        VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "test-uuid"),
+        SELECT_DIRECTOR_URI.replace(":journeyId", "test-uuid"),
+        SELECT_SIGNATORIES_URI.replace(":journeyId", "test-uuid"),
+        DEFINE_SIGNATORY_INFO_URI.replace(":journeyId", "test-uuid"),
+        CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid"),
+        `${CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid")}/subpath`,
         `${ROOT_URI}/not-whitelisted`,
         `${ROOT_URI}/abc/view-company-information/extra`,
         "/random-path",
         `${ROOT_URI}/abc%2Fview-company-information/extra`,
-        `${BOOTSTRAP_JOURNEY_URI}/subpath?companyNumber=01777777`
+        `${BOOTSTRAP_JOURNEY_URI}/subpath`
     ]
 
     nonWhitelistedUrls.forEach((path) => {
@@ -156,7 +160,7 @@ describe("AuthMiddleware", () => {
 
         when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678")
         when(sessionService.getSignInInfo(req)).thenReturn(signInInfo as any)
-        when(companyAuthService.getAuthRedirectUri(anything(), anything())).thenResolve("http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678")
+        when(companyAuthService.issueAuthRedirectUri(anything(), anything())).thenResolve("http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678")
 
         await middleware(req, res, next)
 

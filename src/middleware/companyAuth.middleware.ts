@@ -51,7 +51,8 @@ export default function CompanyAuthMiddleware (
             return next()
         } else {
             logger.info(`Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`)
-            return res.redirect(await companyAuthService.getAuthRedirectUri(req, companyNumber))
+            const redirectUri = await companyAuthService.issueAuthRedirectUri(req, companyNumber)
+            return res.redirect(redirectUri)
         }
     }
 }

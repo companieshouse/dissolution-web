@@ -34,7 +34,7 @@ export class BootstrapJourneyController extends JourneyBaseController {
         }
 
         if (!this.companyAuthService.isAuthorisedForCompany(this.httpContext.request, companyNumber)) {
-            const redirectUri = await this.companyAuthService.getAuthRedirectUri(this.httpContext.request, companyNumber)
+            const redirectUri = await this.companyAuthService.issueAuthRedirectUri(this.httpContext.request, companyNumber)
             return this.redirect(redirectUri)
         }
 
