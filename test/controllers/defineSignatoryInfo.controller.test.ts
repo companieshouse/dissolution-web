@@ -80,28 +80,47 @@ describe("DefineSignatoryInfoController", () => {
 
         const expectedContentCases = [
             {
-                description: "DS01 journey",
+                description: "DS01 - multi director",
                 officerType: OfficerType.DIRECTOR,
+                isMultiDirector: true,
                 expectedPageHeading: "Provide directors' email addresses",
                 expectedExplanatoryText: "We'll email each director you've selected, to ask them to sign the application online."
             },
             {
-                description: "LLDS01 journey",
+                description: "DS01 - single director",
+                officerType: OfficerType.DIRECTOR,
+                isMultiDirector: false,
+                expectedPageHeading: "Provide the director's email address",
+                expectedExplanatoryText: "We'll email the director to ask them to sign the application online."
+            },
+            {
+                description: "LLDS01 - multi member",
                 officerType: OfficerType.MEMBER,
+                isMultiDirector: true,
                 expectedPageHeading: "Provide members' email addresses",
                 expectedExplanatoryText: "We'll email each member you've selected, to ask them to sign the application online."
+            },
+            {
+                description: "LLDS01 - single member",
+                officerType: OfficerType.MEMBER,
+                isMultiDirector: false,
+                expectedPageHeading: "Provide the member's email address",
+                expectedExplanatoryText: "We'll email the member to ask them to sign the application online."
             }
         ]
 
         expectedContentCases.forEach((testCase) => {
-            it(`should render the select signatories page with correct static content for ${testCase.description}`, async () => {
+            it(`should render the define signatory info page with correct static content for ${testCase.description}`, async () => {
                 const {
                     officerType,
+                    isMultiDirector,
                     expectedPageHeading,
                     expectedExplanatoryText
                 } = testCase
 
-                when(session.getDissolutionSession(anything())).thenReturn(aDissolutionSession().withOfficerType(officerType).build())
+                when(session.getDissolutionSession(anything())).thenReturn(
+                    aDissolutionSession().withOfficerType(officerType).withIsMultiDirector(isMultiDirector).build()
+                )
 
                 const app = initApp()
 

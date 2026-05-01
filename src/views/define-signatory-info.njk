@@ -6,13 +6,23 @@
 {% from "govuk/components/back-link/macro.njk"      import govukBackLink %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
-{% set title = "Provide " + officerType + "s' email addresses - " + pageTitleSuffix %}
+{% if isMultiDirector %}
+  {% set title = "Provide " + officerType + "s' email addresses - " + pageTitleSuffix %}
+  {% set heading = "Provide " + officerType + "s' email addresses" %}
+  {% set bodyText = "We'll email each " + officerType + " you've selected, to ask them to sign the application online." %}
+  {% set backLinkHref = journeyPath(Paths.SELECT_SIGNATORIES_URI) %}
+{% else %}
+  {% set title = "Provide the " + officerType + "'s email address - " + pageTitleSuffix %}
+  {% set heading = "Provide the " + officerType + "'s email address" %}
+  {% set bodyText = "We'll email the " + officerType + " to ask them to sign the application online." %}
+  {% set backLinkHref = journeyPath(Paths.SELECT_DIRECTOR_URI) %}
+{% endif %}
 
 {% block content %}
   {{
     govukBackLink({
       text: "Back",
-      href: journeyPath(Paths.SELECT_SIGNATORIES_URI) if isMultiDirector else journeyPath(Paths.SELECT_DIRECTOR_URI)
+      href: backLinkHref
     })
   }}
 
@@ -20,9 +30,9 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-xl">Provide {{ officerType }}s' email addresses</h1>
+      <h1 class="govuk-heading-xl">{{ heading }}</h1>
 
-      <p class="govuk-body">We'll email each {{ officerType }} you've selected, to ask them to sign the application online.</p>
+      <p class="govuk-body">{{ bodyText }}</p>
 
       <form method="post" novalidate>
 
