@@ -13,9 +13,9 @@ import TYPES from "app/types"
 export default class Server {
 
     public constructor (
-        @inject(TYPES.NODE_ENV) private NODE_ENV: Optional<string>,
-        @inject(TYPES.PORT) private PORT: number,
-        @inject(ApplicationLogger) private logger: ApplicationLogger) {}
+        @inject(TYPES.NODE_ENV) private readonly NODE_ENV: Optional<string>,
+        @inject(TYPES.PORT) private readonly PORT: number,
+        @inject(ApplicationLogger) private readonly logger: ApplicationLogger) {}
 
     public start (container: Container): void {
         const server: Application = createInversifyExpressServer(container)
