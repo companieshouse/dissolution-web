@@ -19,7 +19,8 @@ const TYPES = {
     LLDS01_AND_DS01_FEE: "LLDS01_AND_DS01_FEE",
     UuidGenerator: "UuidGenerator",
     JourneyIdAuthMiddleware: "JourneyIdAuthMiddleware",
-    JourneyPathService: "JourneyPathService"
+    JourneyPathService: "JourneyPathService",
+    AuthConfig: "AuthConfig"
 }
 
 export default TYPES

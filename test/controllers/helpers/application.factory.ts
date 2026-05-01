@@ -13,6 +13,7 @@ import * as nunjucks from "nunjucks"
 import {APP_NAME} from "app/constants/app.const"
 import TYPES from "app/types"
 import {addFilters, addGlobals} from "app/utils/nunjucks.util"
+import AuthConfig from "app/models/authConfig"
 
 const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL")
@@ -28,6 +29,14 @@ const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.PAYMENTS_API_URL).toConstantValue("PAYMENTS_API_URL")
     container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
     container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client())
+
+    const testAuthConfig: AuthConfig = {
+        accountUrl: "http://account.test",
+        accountRequestKey: "test-key",
+        accountClientId: "test-client-id",
+        chsUrl: "http://chs.test"
+    }
+    container.bind<AuthConfig>(TYPES.AuthConfig).toConstantValue(testAuthConfig)
 }
 
 const mockMiddlewares = (container: Container): void => {

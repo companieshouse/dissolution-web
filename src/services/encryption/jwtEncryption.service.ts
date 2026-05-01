@@ -2,6 +2,8 @@ import "reflect-metadata"
 
 import { randomBytes } from "crypto"
 import { provide } from "inversify-binding-decorators"
+import { inject } from "inversify"
+import TYPES from "app/types"
 import { JWE, JWK } from "node-jose"
 
 import AuthConfig from "app/models/authConfig"
@@ -13,7 +15,7 @@ interface AuthPayload {
 
 @provide(JwtEncryptionService)
 export default class JwtEncryptionService {
-    public constructor (private authConfig: AuthConfig) {}
+    public constructor (@inject(TYPES.AuthConfig) private readonly authConfig: AuthConfig) {}
 
     public generateNonce (): string {
         const bytes = randomBytes(5)
