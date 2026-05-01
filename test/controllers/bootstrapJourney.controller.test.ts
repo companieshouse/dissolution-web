@@ -3,6 +3,7 @@ import request from "supertest"
 import "app/controllers/bootstrapJourney.controller"
 import { anything, instance, mock, when, verify, capture } from "ts-mockito"
 import { assert } from "chai"
+import CompanyAuthService from "app/services/auth/companyAuth.service"
 import SessionService from "app/services/session/session.service"
 import UuidGenerator from "app/utils/uuidGenerator"
 import { VIEW_COMPANY_INFORMATION_URI, BOOTSTRAP_JOURNEY_URI } from "app/paths"
@@ -13,23 +14,19 @@ import TYPES from "app/types"
 
 describe("BootstrapJourneyController", () => {
     let sessionServiceMock: SessionService
-    let sessionService: SessionService
-    let journeyPathService: JourneyPathService
     let uuidGeneratorMock: UuidGenerator
-    let uuidGenerator: UuidGenerator
+    let companyAuthServiceMock: any
     let app: any
 
     beforeEach(() => {
         sessionServiceMock = mock(SessionService)
-        sessionService = instance(sessionServiceMock)
-        journeyPathService = new JourneyPathService(sessionService)
-
         uuidGeneratorMock = mock(UuidGenerator)
-        uuidGenerator = instance(uuidGeneratorMock)
+        companyAuthServiceMock = mock(CompanyAuthService)
 
         app = createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(sessionServiceMock))
             container.rebind(TYPES.UuidGenerator).toConstantValue(instance(uuidGeneratorMock))
+            container.rebind(CompanyAuthService).toConstantValue(instance(companyAuthServiceMock))
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string, options?: any) => {
                     if (options && options.journeyId) {
@@ -41,10 +38,28 @@ describe("BootstrapJourneyController", () => {
         })
     })
 
-    it("initializes dissolution session and redirects to view company information", async () => {
+    it("when authenticated user is NOT authorised for requested company then redirects to account auth", async () => {
+        const companyNumber = "88888888"
+
+        when(companyAuthServiceMock.isAuthorisedForCompany(anything(), anything())).thenReturn(false)
+        when(companyAuthServiceMock.issueAuthRedirectUri(anything(), anything())).thenReturn(Promise.resolve("http://account.chs-dev/oauth2/authorise?state=encoded"))
+
+        const res = await request(app)
+            .get(BOOTSTRAP_JOURNEY_URI)
+            .query({ companyNumber })
+
+        assert.equal(res.status, 302)
+        assert.equal(res.headers.location, "http://account.chs-dev/oauth2/authorise?state=encoded")
+
+        verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).never()
+        verify(companyAuthServiceMock.issueAuthRedirectUri(anything(), anything())).once()
+    })
+
+    it("when authenticated user IS authorised for company then dissolution session initialized and redirect", async () => {
         const companyNumber = "12345678"
         const journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA"
 
+        when(companyAuthServiceMock.isAuthorisedForCompany(anything(), anything())).thenReturn(true)
         when(uuidGeneratorMock.generate()).thenReturn(journeyId)
 
         const res = await request(app)
@@ -54,13 +69,10 @@ describe("BootstrapJourneyController", () => {
         assert.equal(res.status, 302)
         assert.equal(res.headers.location, VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", journeyId))
 
-        void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).once()
-        const [, savedSession] = capture(sessionServiceMock.setDissolutionSession).last()
-        assert.isDefined(savedSession)
-        // Ensure only companyNumber and journeyId are set on the saved session
-        assert.deepEqual(Object.keys(savedSession).sort(), ["companyNumber", "journeyId"])
-        assert.equal(savedSession.companyNumber, companyNumber)
-        assert.equal(savedSession.journeyId, journeyId)
+        verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).once()
+        const [, savedJourneyId, savedCompanyNumber] = capture(sessionServiceMock.initDissolutionSession).last()
+        assert.equal(savedJourneyId, journeyId)
+        assert.equal(savedCompanyNumber, companyNumber)
     })
 
     const invalidCompanyNumberCases = [
@@ -79,7 +91,7 @@ describe("BootstrapJourneyController", () => {
                 .query({ companyNumber: tc.input })
 
             assert.equal(res.status, 500)
-            void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).never()
+            void verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).never()
         })
     })
 
@@ -92,6 +104,7 @@ describe("BootstrapJourneyController", () => {
     validCompanyNumberCases.forEach((tc) => {
         it(`applicationNumber valid: ${tc.desc}`, async () => {
 
+            when(companyAuthServiceMock.isAuthorisedForCompany(anything(), anything())).thenReturn(true)
             when(uuidGeneratorMock.generate()).thenReturn("e1101f0a-5121-4429-acee-a817c5cAAAAA")
 
             const res = await request(app)
@@ -100,10 +113,9 @@ describe("BootstrapJourneyController", () => {
 
             assert.equal(res.status, 302)
             assert.equal(res.headers.location, VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "e1101f0a-5121-4429-acee-a817c5cAAAAA"))
-            void verify(sessionServiceMock.setDissolutionSession(anything(), anything())).once()
-            const [, savedSession] = capture(sessionServiceMock.setDissolutionSession).last()
-            assert.isDefined(savedSession)
-            assert.equal(savedSession.companyNumber, tc.expected)
+            verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).once()
+            const [, , savedCompanyNumber] = capture(sessionServiceMock.initDissolutionSession).last()
+            assert.equal(savedCompanyNumber, tc.expected)
         })
     })
 })

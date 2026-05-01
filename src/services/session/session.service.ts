@@ -44,6 +44,10 @@ export default class SessionService {
         return this.getDissolutionSession(req)?.journeyId
     }
 
+    public getDissolutionCompanyNumber(req: Request): Optional<string> {
+        return this.getDissolutionSession(req)?.companyNumber
+    }
+
     public requireJourneyId(req: Request): string {
         const journeyId = this.getJourneyId(req)
         if (!journeyId) {
@@ -54,6 +58,14 @@ export default class SessionService {
 
     public setDissolutionSession(req: Request, updatedSession: DissolutionSession): void {
         req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession)
+    }
+
+    public initDissolutionSession(req: Request, journeyId: string, companyNumber: string): void {
+        const dissolutionSession: DissolutionSession = {
+            journeyId,
+            companyNumber
+        }
+        this.setDissolutionSession(req, dissolutionSession)
     }
 
     public updateRemindDirectorList(req: Request, signatoryId: string, reminderSent: boolean): void {

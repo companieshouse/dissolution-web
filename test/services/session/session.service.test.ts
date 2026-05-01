@@ -120,6 +120,29 @@ describe("SessionService", () => {
         })
     })
 
+    describe("getDissolutionCompanyNumber", () => {
+        it("should return the company number when present", () => {
+            const companyNumber = "COMP-123"
+            const dissolutionSession = aDissolutionSession().withCompanyNumber(companyNumber).build()
+
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession)
+
+            const result: Optional<string> = sessionService.getDissolutionCompanyNumber(req)
+
+            assert.equal(result, companyNumber)
+        })
+
+        it("should return undefined when there is no company number", () => {
+            const req: Request = generateRequest()
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(undefined)
+
+            const result: Optional<string> = sessionService.getDissolutionCompanyNumber(req)
+
+            assert.isUndefined(result)
+        })
+    })
+
     describe("requireDissolutionCompanyNumber", () => {
         it("should return the company number when present", () => {
             const companyNumber = "COMP-123"
@@ -228,6 +251,29 @@ describe("SessionService", () => {
                 { id: "other-2", reminderSent: false },
                 { id: "sign-1", reminderSent: true }
             ])
+        })
+    })
+
+    describe("initDissolutionSession", () => {
+        it("should create and set a minimal dissolution session with journeyId and companyNumber", () => {
+            const req: Request = generateRequest()
+
+            const setExtraDataStub: sinon.SinonStub = sinon.stub()
+            req.session!.setExtraData = setExtraDataStub
+
+            const journeyId = "journey-123"
+            const companyNumber = "COMP-123"
+
+            sessionService.initDissolutionSession(req, journeyId, companyNumber)
+
+            assert.isTrue(setExtraDataStub.calledOnce)
+            const callArgs = setExtraDataStub.getCall(0).args
+            assert.equal(callArgs[0], "dissolution")
+            const savedSession: any = callArgs[1]
+
+            assert.deepEqual(Object.keys(savedSession).sort(), ["companyNumber", "journeyId"])
+            assert.equal(savedSession.journeyId, journeyId)
+            assert.equal(savedSession.companyNumber, companyNumber)
         })
     })
 })

@@ -18,8 +18,8 @@ import SaveUserEmailToLocals from "app/middleware/saveUserEmailToLocals.middlewa
 import JourneyIdAuthMiddleware from "app/middleware/journeyIdAuth.middleware"
 import AuthConfig from "app/models/authConfig"
 import Optional from "app/models/optional"
-import JwtEncryptionService from "app/services/encryption/jwtEncryption.service"
 import SessionService from "app/services/session/session.service"
+import CompanyAuthService from "app/services/auth/companyAuth.service"
 import TYPES from "app/types"
 import {getEnv, getEnvOrDefault, getEnvOrThrow} from "app/utils/env.util"
 import UriFactory from "app/utils/uri.factory"
@@ -84,9 +84,6 @@ export function initContainer (): Container {
         AuthMiddleware(getEnvOrThrow("CHS_URL"), new UriFactory(), commonAuthMiddleware)
     )
 
-    const sessionService: SessionService = new SessionService()
-
-    // Company authentication
     const authConfig: AuthConfig = {
         accountUrl: getEnvOrThrow("ACCOUNT_URL"),
         accountRequestKey: getEnvOrThrow("OAUTH2_REQUEST_KEY"),
@@ -94,8 +91,15 @@ export function initContainer (): Container {
         chsUrl: getEnvOrThrow("CHS_URL")
     }
 
+    container.bind<AuthConfig>(TYPES.AuthConfig).toConstantValue(authConfig)
+
+    container.load(buildProviderModule())
+
+    const sessionService = container.get(SessionService)
+    const companyAuthService = container.get(CompanyAuthService)
+
     container.bind(TYPES.CompanyAuthMiddleware).toConstantValue(
-        CompanyAuthMiddleware(authConfig, new JwtEncryptionService(authConfig), sessionService, logger)
+        CompanyAuthMiddleware(companyAuthService, sessionService, logger)
     )
 
     container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(
@@ -106,7 +110,6 @@ export function initContainer (): Container {
         JourneyIdAuthMiddleware(sessionService)
     )
 
-    container.load(buildProviderModule())
 
     return container
 }
