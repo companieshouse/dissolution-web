@@ -105,7 +105,8 @@
     "fast-xml-parser": "^5.3.8",
     "diff": "^8.0.3",
     "serialize-javascript": "^7.0.3",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.0",
+    "axios": "^1.15.2"
   },
   "nodemonConfig": {
     "watch": [
