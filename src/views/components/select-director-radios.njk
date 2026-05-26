@@ -8,6 +8,7 @@
 #}
 
 {% macro selectDirectorRadios(directors, data, errors, officerType) %}
+  {% set hintText = "You must be authorised by this corporate " + officerType + " to sign the application on its behalf." %}
   {% set items = [] %}
   {% for director in directors %}
     {% set onBehalfNameId = "on-behalf-name_" + director.id %}
@@ -19,7 +20,6 @@
         id: onBehalfNameId,
         name: onBehalfNameName,
         label: { text: "What is your full name?" },
-        hint: { text: "You must be authorised by this corporate director to sign the application on its behalf." },
         classes: "govuk-!-width-full",
         value: data[onBehalfNameName] if data,
         errorMessage: { text: errors[onBehalfNameName] } if errors[onBehalfNameName]
@@ -31,6 +31,7 @@
       text: director.name,
       checked: data.director == director.id,
       attributes: { "data-event-value": "director-radio" },
+      hint: { text: hintText } if onBehalfNameInput,
       conditional: { html: onBehalfNameInput } if onBehalfNameInput
     }) %}
   {% endfor %}

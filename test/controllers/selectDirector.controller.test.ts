@@ -44,6 +44,8 @@ describe("SelectDirectorController", () => {
     const DIRECTOR_1_ID = "123"
     const DIRECTOR_2_ID = "456"
     const NOT_A_DIRECTOR_ID = "other"
+    const CORPORATE_DIRECTOR_HINT_TEXT = "You must be authorised by this corporate director to sign the application on its behalf.";
+    const CORPORATE_MEMBER_HINT_TEXT = "You must be authorised by this corporate member to sign the application on its behalf.";
 
     let dissolutionSession: DissolutionSession
 
@@ -179,7 +181,27 @@ describe("SelectDirectorController", () => {
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
 
             assert.isTrue(htmlAssertHelper.containsRawText("What is your full name?"))
-            assert.isTrue(htmlAssertHelper.containsRawText("You must be authorised by this corporate director to sign the application on its behalf."))
+            assert.isTrue(htmlAssertHelper.containsText(".govuk-radios__hint", CORPORATE_DIRECTOR_HINT_TEXT))
+        })
+
+        it("should provide a full name input when a corporate member is selected for LLDS01", async () => {
+            dissolutionSession.officerType = OfficerType.MEMBER
+
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(officerService.getActiveDirectorsForCompany(anything(), anything())).thenResolve([
+                aDirectorDetails().withOfficerRole(OfficerRole.CORPORATE_LLP_MEMBER).build()
+            ])
+
+            const app = initApp()
+
+            const res = await request(app)
+                .get(SELECT_DIRECTOR_URI)
+                .expect(StatusCodes.OK)
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+
+            assert.isTrue(htmlAssertHelper.containsRawText("What is your full name?"))
+            assert.isTrue(htmlAssertHelper.containsText(".govuk-radios__hint", CORPORATE_MEMBER_HINT_TEXT))
         })
     })
 
