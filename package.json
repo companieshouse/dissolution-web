@@ -106,7 +106,7 @@
     "diff": "^8.0.3",
     "serialize-javascript": "^7.0.3",
     "uuid": "^14.0.0",
-    "protobufjs": "8.0.3",
+    "protobufjs": "8.4.2",
     "axios": "^1.16.1"
   },
   "nodemonConfig": {
