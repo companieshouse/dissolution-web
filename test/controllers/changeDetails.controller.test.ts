@@ -4,7 +4,7 @@ import { assert } from "chai"
 import { Application } from "express"
 import { StatusCodes } from "http-status-codes"
 import request from "supertest"
-import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito"
+import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito"
 import { TOKEN } from "../fixtures/session.fixtures"
 import { createApp } from "./helpers/application.factory"
 import HtmlAssertHelper from "./helpers/htmlAssert.helper"
@@ -244,6 +244,44 @@ describe("ChangeDetailsController", () => {
                 .expect(StatusCodes.NOT_FOUND)
 
             assert.equal(res.status, StatusCodes.NOT_FOUND)
+        })
+
+        const formNormalizationCases = [
+            {
+                description: "standard director email",
+                signatoryToEdit: aDissolutionGetDirector().withName("Mr Standard Director").withOnBehalfName(null).build(),
+                formDetails: aChangeDetailsFormModel().withDirectorEmail("  Updated.Email@MAIL.COM  ").build(),
+                expectedField: "directorEmail",
+                expectedValue: "updated.email@mail.com"
+            },
+            {
+                description: "on-behalf email for corporate director",
+                signatoryToEdit: aDissolutionGetDirector().withOnBehalfName("Mr Accountant").build(),
+                formDetails: aChangeDetailsFormModel().withDirectorEmail().withOnBehalfName("Mr Accountant").withOnBehalfEmail("  Accountant@MAIL.COM  ").build(),
+                expectedField: "onBehalfEmail",
+                expectedValue: "accountant@mail.com"
+            }
+        ]
+
+        formNormalizationCases.forEach(({ description, signatoryToEdit, formDetails, expectedField, expectedValue }) => {
+            it(`should normalize ${description} before updating signatory`, async () => {
+                const dissolutionSession = aDissolutionSession()
+                    .withSignatoryIdToEdit(SIGNATORY_ID)
+                    .withSignatoryToEdit(signatoryToEdit)
+                    .build()
+
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+
+                const res = await request(initApp())
+                    .post(CHANGE_DETAILS_URI)
+                    .send(formDetails)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+
+                assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
+
+                const [, , actualForm] = capture(directorService.updateSignatory).last()
+                assert.equal((actualForm as any)[expectedField], expectedValue)
+            })
         })
 
         it("should re-render the view with an error if validation fails for a standard director", async () => {

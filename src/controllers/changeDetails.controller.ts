@@ -1,25 +1,24 @@
-import { StatusCodes } from "http-status-codes"
-import { inject } from "inversify"
-import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils"
-import { RedirectResult } from "inversify-express-utils/lib/results"
-import BaseController from "./base.controller"
+import {StatusCodes} from "http-status-codes"
+import {inject} from "inversify"
+import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
+import {RedirectResult} from "inversify-express-utils/lib/results"
 
-import { NotFoundError } from "app/errors/notFoundError.error"
+import {NotFoundError} from "app/errors/notFoundError.error"
 import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper"
-import DissolutionGetDirector, { isCorporateOfficer } from "app/models/dto/dissolutionGetDirector"
+import DissolutionGetDirector, {isCorporateOfficer} from "app/models/dto/dissolutionGetDirector"
 import OfficerType from "app/models/dto/officerType.enum"
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
 import Optional from "app/models/optional"
 import DissolutionSession from "app/models/session/dissolutionSession.model"
 import ValidationErrors from "app/models/view/validationErrors.model"
-import { CHANGE_DETAILS_URI, CHECK_YOUR_ANSWERS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths"
+import {CHANGE_DETAILS_URI, CHECK_YOUR_ANSWERS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI} from "app/paths"
 import changeDetailsSchema from "app/schemas/changeDetails.schema"
 import DissolutionDirectorService from "app/services/dissolution/dissolutionDirector.service"
 import SessionService from "app/services/session/session.service"
 import FormValidator from "app/utils/formValidator.util"
-import { DirectorToSign } from "app/models/session/directorToSign.model"
+import {DirectorToSign} from "app/models/session/directorToSign.model"
 import RichFormValidator from "app/utils/richFormValidator.util"
-import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
+import {DefineSignatoryInfoFormModel} from "app/models/form/defineSignatoryInfo.model"
 import TYPES from "app/types";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
@@ -40,7 +39,7 @@ interface SignatoryViewModel {
 @controller(CHANGE_DETAILS_URI, TYPES.JourneyIdAuthMiddleware)
 export class ChangeDetailsController extends JourneyBaseController {
 
-    public constructor (
+    public constructor(
         @inject(SessionService) private readonly session: SessionService,
         @inject(DissolutionDirectorService) private readonly directorService: DissolutionDirectorService,
         @inject(DissolutionDirectorMapper) private readonly directorMapper: DissolutionDirectorMapper,
@@ -50,7 +49,7 @@ export class ChangeDetailsController extends JourneyBaseController {
     }
 
     @httpGet("")
-    public async get (): Promise<string> {
+    public async get(): Promise<string> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
         if (!session.signatoryIdToEdit) {
@@ -66,44 +65,54 @@ export class ChangeDetailsController extends JourneyBaseController {
         return this.renderView(session.officerType!, this.getBackLink(session), signatory, form)
     }
 
-    private updateSession (session: DissolutionSession, signatory: DissolutionGetDirector) {
+    private updateSession(session: DissolutionSession, signatory: DissolutionGetDirector) {
         session.signatoryToEdit = signatory
         this.session.setDissolutionSession(this.httpContext.request, session)
     }
 
     @httpPost("")
-    public async post (@requestBody() body: ChangeDetailsFormModel): Promise<string | RedirectResult> {
+    public async post(@requestBody() body: ChangeDetailsFormModel): Promise<string | RedirectResult> {
         const session: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
 
         if (!session.signatoryIdToEdit || !session.signatoryToEdit) {
             return Promise.reject(new NotFoundError("Signatory not in session"))
         }
 
+        const form = this.normalizeFormModelData(body)
+
         const signatory: DissolutionGetDirector = session.signatoryToEdit
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, changeDetailsSchema(signatory))
+        const errors: Optional<ValidationErrors> = this.validator.validate(form, changeDetailsSchema(signatory))
 
         if (errors) {
-            return this.renderView(session.officerType!, this.getBackLink(session), signatory, body, errors)
+            return this.renderView(session.officerType!, this.getBackLink(session), signatory, form, errors)
         }
 
         if (session.isFromCheckAnswers) {
-            this.updateSignatoryInfoInSession(session, body)
+            this.updateSignatoryInfoInSession(session, form)
             return this.redirect(this.journeyPath(CHECK_YOUR_ANSWERS_URI))
         } else {
             const token: string = this.session.getAccessToken(this.httpContext.request)
-            await this.directorService.updateSignatory(token, session, body)
+            await this.directorService.updateSignatory(token, session, form)
             this.cleanUpSession(session)
             this.session.setDissolutionSession(this.httpContext.request, session)
             return this.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI))
         }
     }
 
-    private cleanUpSession (session: DissolutionSession) {
+    private cleanUpSession(session: DissolutionSession) {
         delete session.signatoryToEdit
         delete session.isFromCheckAnswers
     }
 
-    private async renderView (
+    private normalizeFormModelData(body: ChangeDetailsFormModel): ChangeDetailsFormModel {
+        return {
+            ...body,
+            ...(body.directorEmail && {directorEmail: body.directorEmail.trim().toLowerCase()}),
+            ...(body.onBehalfEmail && {onBehalfEmail: body.onBehalfEmail.trim().toLowerCase()})
+        }
+    }
+
+    private async renderView(
         officerType: OfficerType,
         backUri: string,
         signatory: DissolutionGetDirector,
@@ -126,11 +135,11 @@ export class ChangeDetailsController extends JourneyBaseController {
         return super.render("change-details", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
     }
 
-    private getBackLink (session: DissolutionSession): string {
+    private getBackLink(session: DissolutionSession): string {
         return session.isFromCheckAnswers ? CHECK_YOUR_ANSWERS_URI : WAIT_FOR_OTHERS_TO_SIGN_URI
     }
 
-    private updateSignatoryInfoInSession (session: DissolutionSession, body: ChangeDetailsFormModel) {
+    private updateSignatoryInfoInSession(session: DissolutionSession, body: ChangeDetailsFormModel) {
         const directorsToSign = session.directorsToSign
         if (!directorsToSign) {
             throw new NotFoundError("Could not retrieve signatories from session")
@@ -151,7 +160,7 @@ export class ChangeDetailsController extends JourneyBaseController {
         this.session.setDissolutionSession(this.httpContext.request, session)
     }
 
-    private withUpdatedDefineSignatoryInfoForm (
+    private withUpdatedDefineSignatoryInfoForm(
         signatoryId: string,
         defineSignatoryInfoFormModel: DefineSignatoryInfoFormModel,
         changeDetailsFormModel: ChangeDetailsFormModel
@@ -178,7 +187,7 @@ export class ChangeDetailsController extends JourneyBaseController {
             }
     }
 
-    private withSignatoryDetailsFromForm (
+    private withSignatoryDetailsFromForm(
         signatoryId: string,
         directorsToSign: DirectorToSign[],
         body: ChangeDetailsFormModel
@@ -189,12 +198,12 @@ export class ChangeDetailsController extends JourneyBaseController {
                 : {
                     ...director,
                     email: director.onBehalfName ? body.onBehalfEmail : body.directorEmail,
-                    ...(director.onBehalfName ? { onBehalfName: body.onBehalfName } : {})
+                    ...(director.onBehalfName ? {onBehalfName: body.onBehalfName} : {})
                 }
         )
     }
 
-    private getSignatoryFromSession (session: DissolutionSession) {
+    private getSignatoryFromSession(session: DissolutionSession) {
         const directorsToSign = session.directorsToSign
         if (!directorsToSign) {
             throw new NotFoundError("Signatories not found in session")
@@ -206,7 +215,7 @@ export class ChangeDetailsController extends JourneyBaseController {
         return this.directorMapper.mapToDissolutionDirector(directorToEdit)
     }
 
-    private async getSignatoryFromDissolution (session: DissolutionSession) {
+    private async getSignatoryFromDissolution(session: DissolutionSession) {
         const token: string = this.session.getAccessToken(this.httpContext.request)
         const signatory = await this.directorService.getSignatoryToEdit(token, session)
         if (!signatory) {
