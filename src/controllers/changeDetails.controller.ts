@@ -107,8 +107,8 @@ export class ChangeDetailsController extends JourneyBaseController {
     private normalizeFormModelData(body: ChangeDetailsFormModel): ChangeDetailsFormModel {
         return {
             ...body,
-            ...(body.directorEmail && {directorEmail: body.directorEmail.trim().toLowerCase()}),
-            ...(body.onBehalfEmail && {onBehalfEmail: body.onBehalfEmail.trim().toLowerCase()})
+            directorEmail: body.directorEmail?.trim().toLowerCase(),
+            onBehalfEmail: body.onBehalfEmail?.trim().toLowerCase()
         }
     }
 

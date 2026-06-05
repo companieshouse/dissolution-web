@@ -354,7 +354,7 @@ describe("ChangeDetailsController", () => {
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
-            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(updatedDetails))).once()
+            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual({...updatedDetails, onBehalfEmail: undefined}))).once()
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
         })
@@ -378,7 +378,7 @@ describe("ChangeDetailsController", () => {
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI)
 
-            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual(updatedDetails))).once()
+            verify(directorService.updateSignatory(TOKEN, dissolutionSession, deepEqual({...updatedDetails, directorEmail: undefined}))).once()
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY)
             assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI)
         })
