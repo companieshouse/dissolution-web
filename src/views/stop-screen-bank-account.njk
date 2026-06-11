@@ -21,15 +21,17 @@
     <div class="govuk-grid-column-two-thirds">
       {% include 'components/errors/error-summary.njk' %}
 
-      <h1 class="govuk-heading-l">Company bank account access</h1>
+      <h1 class="govuk-heading-l">Access to company bank accounts and other assets</h1>
 
       {{
         govukWarningText({
-            text: "You will not be able to access money in the company bank accounts, or other company assets, once the company is dissolved.",
+            text: "You'll lose access to money in company bank accounts, and other company assets, once the company is dissolved.",
             iconFallbackText: "Warning"
       })
             }}
-      <p class="govuk-body">Any money still in the accounts, and any other assets, will pass to the Crown. You'll have to restore the company to get anything back.</p>
+      <p class="govuk-body">The directors or members should deal with all company assets before submitting this application. This includes, for example, money in company bank accounts and property owned by the company.</p>
+      <p class="govuk-body">Once you've submitted this application and we've accepted it, the company will typically be dissolved (closed) after a minimum period of 2 months, unless there are any objections. We are unable to confirm the exact date of dissolution.</p>
+      <p class="govuk-body">Any assets remaining in the company at the point of dissolution will automatically pass to the Crown. You'll need a court order to restore the company to recover them. This can be costly and time-consuming.</p>
       <p class="govuk-body">By selecting continue, you are confirming that you have read and understood this information.</p>
 
       <form method="post">
