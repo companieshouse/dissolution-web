@@ -15,7 +15,7 @@ describe("StopScreenBankAccountController", () => {
         it("Should render the Company bank account access page", async () => {
             const app = createApp()
             const res = await request(app).get(STOP_SCREEN_BANK_ACCOUNT_URI).expect(StatusCodes.OK)
-            assert.include(res.text, "Company bank account access")
+            assert.include(res.text, "Access to company bank accounts and other assets")
         })
     })
 
