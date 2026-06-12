@@ -39,7 +39,7 @@ describe("CustomServerMiddlewareLoader", () => {
         it("should register all middlewares in the correct order", () => {
             loader.loadCustomServerMiddleware(app)
 
-            const registeredMiddlewares = appUseSpy.args.map((call: any[]) => call[0])
+            const registeredMiddlewares = appUseSpy.args.map((call: RequestHandler[]) => call[0])
 
             assert.equal(appUseSpy.callCount, 4)
             assert.deepEqual(registeredMiddlewares, [
