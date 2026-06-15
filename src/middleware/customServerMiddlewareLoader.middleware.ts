@@ -18,8 +18,8 @@ export default class CustomServerMiddlewareLoader {
 
     public loadCustomServerMiddleware (app: Application): void {
         app.use(this.sessionMiddleware)
-        app.use(this.saveUserEmailToLocals)
         app.use(this.authMiddleware)
+        app.use(this.saveUserEmailToLocals)
         app.use(this.companyAuthMiddleware)
     }
 }
