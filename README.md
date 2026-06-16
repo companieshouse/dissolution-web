@@ -45,3 +45,8 @@ Development mode is available for this service in [Docker CHS Development](https
 * Enables save & resume-like functionality
 * Enables consistency between single and multi director journeys
 * Draw.io source code can be found [here](.github/images/DissolutionControllerFlow.drawio)
+
+## Formatting & Linting
+
+This repo uses ESLint and Prettier for code linting and formatting, and are configured to run automatically via a pre-commit hook.
+You can by-pass the pre-commit hook using the `--no-verify` option in the `git` CLI.
