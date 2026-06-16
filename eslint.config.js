@@ -8,6 +8,8 @@ function tryRequire (name) {
 
 const tsParser = tryRequire("@typescript-eslint/parser")
 const tsPlugin = tryRequire("@typescript-eslint/eslint-plugin")
+const prettierPlugin = tryRequire("eslint-plugin-prettier")
+const prettierConfig = tryRequire("eslint-config-prettier/flat")
 
 // Map legacy ecmaVersion 8 -> 2017
 const ECMA_VERSION = 2017
@@ -42,7 +44,8 @@ module.exports = [
             }
         },
         plugins: {
-            "@typescript-eslint": tsPlugin || undefined
+            "@typescript-eslint": tsPlugin || undefined,
+            prettier: prettierPlugin || undefined
         },
         rules: {
             indent: ["error", 4],
@@ -59,7 +62,8 @@ module.exports = [
                 functions: false,
                 classes: false,
                 variables: true
-            }]
+            }],
+            "prettier/prettier": "error"
         },
         files: ["**/*.ts"]
     },
@@ -69,5 +73,6 @@ module.exports = [
         rules: {
             "no-unused-expressions": "off"
         }
-    }
+    },
+    prettierConfig
 ]
