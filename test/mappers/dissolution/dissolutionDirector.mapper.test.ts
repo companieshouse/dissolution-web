@@ -1,86 +1,88 @@
-import { assert } from "chai"
+import { assert } from "chai";
 import {
     generateOnBehalfChangeDetailsFormModel,
-    generateWillSignChangeDetailsFormModel
-} from "../../fixtures/companyOfficers.fixtures"
-import { generateGetDirector } from "../../fixtures/dissolutionApi.fixtures"
+    generateWillSignChangeDetailsFormModel,
+} from "../../fixtures/companyOfficers.fixtures";
+import { generateGetDirector } from "../../fixtures/dissolutionApi.fixtures";
 
-import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper"
-import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest"
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
-import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
-import { aDirectorToSign } from "test/fixtures/directorToSign.builder"
+import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper";
+import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest";
+import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
+import ChangeDetailsFormModel from "app/models/form/changeDetails.model";
+import { aDirectorToSign } from "test/fixtures/directorToSign.builder";
 
 describe("DissolutionDirectorMapper", () => {
-
-    const mapper: DissolutionDirectorMapper = new DissolutionDirectorMapper()
+    const mapper: DissolutionDirectorMapper = new DissolutionDirectorMapper();
 
     describe("mapToChangeDetailsForm", () => {
-        let signatory: DissolutionGetDirector
+        let signatory: DissolutionGetDirector;
 
-        beforeEach(() => signatory = generateGetDirector())
+        beforeEach(() => (signatory = generateGetDirector()));
 
         it("should map to a form model if signatory is a director signing themselves", () => {
-            signatory.on_behalf_name = undefined
-            signatory.email = "director@mail.com"
+            signatory.on_behalf_name = undefined;
+            signatory.email = "director@mail.com";
 
-            const result: ChangeDetailsFormModel = mapper.mapToChangeDetailsForm(signatory)
+            const result: ChangeDetailsFormModel = mapper.mapToChangeDetailsForm(signatory);
 
-            assert.equal(result.directorEmail, "director@mail.com")
-            assert.isUndefined(result.onBehalfName)
-            assert.isUndefined(result.onBehalfEmail)
-        })
+            assert.equal(result.directorEmail, "director@mail.com");
+            assert.isUndefined(result.onBehalfName);
+            assert.isUndefined(result.onBehalfEmail);
+        });
 
         it("should map to a form model if signatory is signing on behalf of a director", () => {
-            signatory.on_behalf_name = "Some On Behalf Name"
-            signatory.email = "accountant@mail.com"
+            signatory.on_behalf_name = "Some On Behalf Name";
+            signatory.email = "accountant@mail.com";
 
-            const result: ChangeDetailsFormModel = mapper.mapToChangeDetailsForm(signatory)
+            const result: ChangeDetailsFormModel = mapper.mapToChangeDetailsForm(signatory);
 
-            assert.equal(result.onBehalfEmail, "accountant@mail.com")
-            assert.equal(result.onBehalfName, "Some On Behalf Name")
-            assert.isUndefined(result.directorEmail)
-        })
-    })
+            assert.equal(result.onBehalfEmail, "accountant@mail.com");
+            assert.equal(result.onBehalfName, "Some On Behalf Name");
+            assert.isUndefined(result.directorEmail);
+        });
+    });
 
     describe("mapToDissolutionDirectorPatchRequest", () => {
         it("should map the director name only if signatory is a director signing themselves", () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel()
-            form.onBehalfName = undefined
-            form.directorEmail = "director@mail.com"
+            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
+            form.onBehalfName = undefined;
+            form.directorEmail = "director@mail.com";
 
-            const result: DissolutionDirectorPatchRequest = mapper.mapToDissolutionDirectorPatchRequest(form)
+            const result: DissolutionDirectorPatchRequest = mapper.mapToDissolutionDirectorPatchRequest(form);
 
-            assert.equal(result.email, "director@mail.com")
-            assert.isUndefined(result.on_behalf_name)
-        })
+            assert.equal(result.email, "director@mail.com");
+            assert.isUndefined(result.on_behalf_name);
+        });
 
         it("should map the on behalf name and on behalf email if signatory is signing on behalf of a director", () => {
-            const form: ChangeDetailsFormModel = generateOnBehalfChangeDetailsFormModel()
-            form.directorEmail = "ignore@mail.com"
-            form.onBehalfEmail = "accountant@mail.com"
-            form.onBehalfName = "Mr Accountant"
+            const form: ChangeDetailsFormModel = generateOnBehalfChangeDetailsFormModel();
+            form.directorEmail = "ignore@mail.com";
+            form.onBehalfEmail = "accountant@mail.com";
+            form.onBehalfName = "Mr Accountant";
 
-            const result: DissolutionDirectorPatchRequest = mapper.mapToDissolutionDirectorPatchRequest(form)
+            const result: DissolutionDirectorPatchRequest = mapper.mapToDissolutionDirectorPatchRequest(form);
 
-            assert.equal(result.email, "accountant@mail.com")
-            assert.equal(result.on_behalf_name, "Mr Accountant")
-        })
-    })
+            assert.equal(result.email, "accountant@mail.com");
+            assert.equal(result.on_behalf_name, "Mr Accountant");
+        });
+    });
 
     it("should map the on behalf name and email if signatory is signing on behalf of a director for director to sign object", () => {
-        const directorToSign = aDirectorToSign().withEmail("accountant@mail.com").withOnBehalfName("Mr Accountant").build()
-        const result: DissolutionGetDirector = mapper.mapToDissolutionDirector(directorToSign)
+        const directorToSign = aDirectorToSign()
+            .withEmail("accountant@mail.com")
+            .withOnBehalfName("Mr Accountant")
+            .build();
+        const result: DissolutionGetDirector = mapper.mapToDissolutionDirector(directorToSign);
 
-        assert.equal(result.email, "accountant@mail.com")
-        assert.equal(result.on_behalf_name, "Mr Accountant")
-    })
+        assert.equal(result.email, "accountant@mail.com");
+        assert.equal(result.on_behalf_name, "Mr Accountant");
+    });
 
     it("should map the name and on email for director to sign object", () => {
-        const directorToSign = aDirectorToSign().withEmail("accountant@mail.com").withName("Mr Accountant").build()
-        const result: DissolutionGetDirector = mapper.mapToDissolutionDirector(directorToSign)
+        const directorToSign = aDirectorToSign().withEmail("accountant@mail.com").withName("Mr Accountant").build();
+        const result: DissolutionGetDirector = mapper.mapToDissolutionDirector(directorToSign);
 
-        assert.equal(result.email, "accountant@mail.com")
-        assert.equal(result.name, "Mr Accountant")
-    })
-})
+        assert.equal(result.email, "accountant@mail.com");
+        assert.equal(result.name, "Mr Accountant");
+    });
+});

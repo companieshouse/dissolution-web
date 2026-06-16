@@ -1,4 +1,4 @@
 export default interface SelectSignatoriesFormModel {
-  signatories?: string[]
-  _csrf?:string
+    signatories?: string[];
+    _csrf?: string;
 }

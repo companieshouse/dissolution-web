@@ -1,17 +1,17 @@
-import {NextFunction, Request, RequestHandler, Response} from "express"
-import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import CompanyAuthService from "app/services/auth/companyAuth.service"
-import SessionService from "app/services/session/session.service"
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
+import CompanyAuthService from "app/services/auth/companyAuth.service";
+import SessionService from "app/services/session/session.service";
 
 import {
-    ACCESSIBILITY_STATEMENT_URI, BOOTSTRAP_JOURNEY_URI,
+    ACCESSIBILITY_STATEMENT_URI,
+    BOOTSTRAP_JOURNEY_URI,
     HEALTHCHECK_URI,
     ROOT_URI,
     SEARCH_COMPANY_URI,
     STOP_SCREEN_BANK_ACCOUNT_URI,
-    WHO_TO_TELL_URI
-} from "app/paths"
-
+    WHO_TO_TELL_URI,
+} from "app/paths";
 
 const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     ROOT_URI,
@@ -28,35 +28,37 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     `${ACCESSIBILITY_STATEMENT_URI}/`,
     BOOTSTRAP_JOURNEY_URI,
     `${BOOTSTRAP_JOURNEY_URI}/`,
-]
+];
 
-
-export default function CompanyAuthMiddleware (
-    companyAuthService: CompanyAuthService, sessionService: SessionService, logger: ApplicationLogger
+export default function CompanyAuthMiddleware(
+    companyAuthService: CompanyAuthService,
+    sessionService: SessionService,
+    logger: ApplicationLogger
 ): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
-
         if (isWhitelistedUrl(req.path)) {
-            return next()
+            return next();
         }
 
-        const companyNumber = sessionService.getDissolutionCompanyNumber(req)
+        const companyNumber = sessionService.getDissolutionCompanyNumber(req);
 
         if (!companyNumber) {
-            return next(new Error("No Company Number in session"))
+            return next(new Error("No Company Number in session"));
         }
 
         if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
-            logger.info(`Authenticated user is authorized for ${companyNumber}`)
-            return next()
+            logger.info(`Authenticated user is authorized for ${companyNumber}`);
+            return next();
         } else {
-            logger.info(`Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`)
-            const redirectUri = await companyAuthService.issueAuthRedirectUri(req, companyNumber)
-            return res.redirect(redirectUri)
+            logger.info(
+                `Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
+            );
+            const redirectUri = await companyAuthService.issueAuthRedirectUri(req, companyNumber);
+            return res.redirect(redirectUri);
         }
-    }
+    };
 }
 
-export function isWhitelistedUrl (url: string): boolean {
-    return COMPANY_AUTH_WHITELISTED_URLS.includes(url)
+export function isWhitelistedUrl(url: string): boolean {
+    return COMPANY_AUTH_WHITELISTED_URLS.includes(url);
 }

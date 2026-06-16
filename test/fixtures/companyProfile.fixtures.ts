@@ -1,19 +1,24 @@
-import { Accounts, CompanyProfile, ConfirmationStatement, RegisteredOfficeAddress } from "@companieshouse/api-sdk-node/dist/services/company-profile/types"
-import Resource from "@companieshouse/api-sdk-node/dist/services/resource"
-import { StatusCodes } from "http-status-codes"
+import {
+    Accounts,
+    CompanyProfile,
+    ConfirmationStatement,
+    RegisteredOfficeAddress,
+} from "@companieshouse/api-sdk-node/dist/services/company-profile/types";
+import Resource from "@companieshouse/api-sdk-node/dist/services/resource";
+import { StatusCodes } from "http-status-codes";
 
-import CompanyDetails from "app/models/companyDetails.model"
-import SearchCompanyFormModel from "app/models/form/searchCompany.model"
-import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum"
+import CompanyDetails from "app/models/companyDetails.model";
+import SearchCompanyFormModel from "app/models/form/searchCompany.model";
+import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 
-export function generateCompanyProfileResource (): Resource<CompanyProfile> {
+export function generateCompanyProfileResource(): Resource<CompanyProfile> {
     return {
         httpStatusCode: StatusCodes.OK,
-        resource: generateCompanyProfile()
-    }
+        resource: generateCompanyProfile(),
+    };
 }
 
-export function generateCompanyProfile (): CompanyProfile {
+export function generateCompanyProfile(): CompanyProfile {
     return {
         companyName: "Test Company",
         companyNumber: "1234",
@@ -30,11 +35,11 @@ export function generateCompanyProfile (): CompanyProfile {
         registeredOfficeAddress: generateRegisteredOfficeAddress(),
         accounts: generateAccounts(),
         confirmationStatement: generateConfirmationStatement(),
-        links: {}
-    }
+        links: {},
+    };
 }
 
-export function generateRegisteredOfficeAddress (): RegisteredOfficeAddress {
+export function generateRegisteredOfficeAddress(): RegisteredOfficeAddress {
     return {
         addressLineOne: "some street",
         addressLineTwo: "some area",
@@ -44,43 +49,43 @@ export function generateRegisteredOfficeAddress (): RegisteredOfficeAddress {
         poBox: "PO Box 123",
         postalCode: "ABC123",
         premises: "some premises",
-        region: "south"
-    }
+        region: "south",
+    };
 }
 
-export function generateAccounts (): Accounts {
+export function generateAccounts(): Accounts {
     return {
         nextAccounts: {
             periodEndOn: `${new Date()}`,
-            periodStartOn: `${new Date()}`
+            periodStartOn: `${new Date()}`,
         },
         nextDue: `${new Date()}`,
-        overdue: false
-    }
+        overdue: false,
+    };
 }
 
-export function generateConfirmationStatement (): ConfirmationStatement {
+export function generateConfirmationStatement(): ConfirmationStatement {
     return {
         nextDue: `${new Date()}`,
         overdue: false,
-        nextMadeUpTo: `${new Date()}`
-    }
+        nextMadeUpTo: `${new Date()}`,
+    };
 }
 
-export function generateSearchCompanyForm (companyNumber: string = "1234"): SearchCompanyFormModel {
+export function generateSearchCompanyForm(companyNumber: string = "1234"): SearchCompanyFormModel {
     return {
         companyNumber,
-        _csrf: "abc123"
-    }
+        _csrf: "abc123",
+    };
 }
 
-export function generateCompanyDetails (): CompanyDetails {
+export function generateCompanyDetails(): CompanyDetails {
     return {
         companyName: "My Company",
         companyNumber: "1234",
         companyStatus: "active",
         companyType: ClosableCompanyType.LTD,
         companyIncDate: new Date().toISOString(),
-        companyRegOffice: "Some address"
-    }
+        companyRegOffice: "Some address",
+    };
 }

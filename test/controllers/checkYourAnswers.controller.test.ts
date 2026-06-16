@@ -1,211 +1,209 @@
-import "reflect-metadata"
+import "reflect-metadata";
 
-import {assert} from "chai"
-import {StatusCodes} from "http-status-codes"
-import request from "supertest"
-import {anything, instance, mock, verify, when} from "ts-mockito"
-import {generateCheckYourAnswersDirector} from "../fixtures/checkYourAnswersDirector.fixtures"
-import {TOKEN} from "../fixtures/session.fixtures"
-import HtmlAssertHelper from "./helpers/htmlAssert.helper"
+import { assert } from "chai";
+import { StatusCodes } from "http-status-codes";
+import request from "supertest";
+import { anything, instance, mock, verify, when } from "ts-mockito";
+import { generateCheckYourAnswersDirector } from "../fixtures/checkYourAnswersDirector.fixtures";
+import { TOKEN } from "../fixtures/session.fixtures";
+import HtmlAssertHelper from "./helpers/htmlAssert.helper";
 
-import "app/controllers/checkYourAnswers.controller"
-import CheckYourAnswersDirectorMapper from "app/mappers/check-your-answers/checkYourAnswersDirector.mapper"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model"
+import "app/controllers/checkYourAnswers.controller";
+import CheckYourAnswersDirectorMapper from "app/mappers/check-your-answers/checkYourAnswersDirector.mapper";
+import DissolutionSession from "app/models/session/dissolutionSession.model";
+import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model";
 import {
     CHECK_YOUR_ANSWERS_URI,
     DEFINE_SIGNATORY_INFO_URI,
     REDIRECT_GATE_URI,
     SELECT_DIRECTOR_URI,
-    SELECT_SIGNATORIES_URI
-} from "app/paths"
-import DissolutionService from "app/services/dissolution/dissolution.service"
-import SessionService from "app/services/session/session.service"
+    SELECT_SIGNATORIES_URI,
+} from "app/paths";
+import DissolutionService from "app/services/dissolution/dissolution.service";
+import SessionService from "app/services/session/session.service";
 
-import {createApp} from "test/controllers/helpers/application.factory"
-import {generateDirectorToSign, generateDissolutionSession} from "test/fixtures/session.fixtures"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
+import { createApp } from "test/controllers/helpers/application.factory";
+import { generateDirectorToSign, generateDissolutionSession } from "test/fixtures/session.fixtures";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
-import {Application} from "express";
+import { Application } from "express";
 
-mockCsrfMiddleware.restore()
+mockCsrfMiddleware.restore();
 
 describe("CheckYourAnswersController", () => {
-    let session: SessionService
-    let service: DissolutionService
-    let mapper: CheckYourAnswersDirectorMapper
+    let session: SessionService;
+    let service: DissolutionService;
+    let mapper: CheckYourAnswersDirectorMapper;
 
-    const COMPANY_NUMBER = "01777777"
-    const DIRECTOR_1_NAME = "Geoff Smith"
-    const DIRECTOR_1_EMAIL = "test@mail.com"
+    const COMPANY_NUMBER = "01777777";
+    const DIRECTOR_1_NAME = "Geoff Smith";
+    const DIRECTOR_1_EMAIL = "test@mail.com";
 
-    let dissolutionSession: DissolutionSession
+    let dissolutionSession: DissolutionSession;
 
     beforeEach(() => {
-        session = mock(SessionService)
-        service = mock(DissolutionService)
-        mapper = mock(CheckYourAnswersDirectorMapper)
+        session = mock(SessionService);
+        service = mock(DissolutionService);
+        mapper = mock(CheckYourAnswersDirectorMapper);
 
-        when(session.getAccessToken(anything())).thenReturn(TOKEN)
-        when(service.createDissolution(anything(), anything())).thenResolve("1234567")
+        when(session.getAccessToken(anything())).thenReturn(TOKEN);
+        when(service.createDissolution(anything(), anything())).thenResolve("1234567");
 
-        dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
-    })
+        dissolutionSession = generateDissolutionSession(COMPANY_NUMBER);
+    });
 
-    function initApp (): Application {
+    function initApp(): Application {
         return createApp(container => {
-            container.rebind(SessionService).toConstantValue(instance(session))
-            container.rebind(DissolutionService).toConstantValue(instance(service))
+            container.rebind(SessionService).toConstantValue(instance(session));
+            container.rebind(DissolutionService).toConstantValue(instance(service));
             container.rebind(JourneyPathService).toConstantValue({
-                journeyPath: (_req: any, pathTemplate: string) => pathTemplate
-            } as any)
-            container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper))
-        })
+                journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
+            } as any);
+            container.rebind(CheckYourAnswersDirectorMapper).toConstantValue(instance(mapper));
+        });
     }
 
     describe("GET - ensure that page loads correctly", () => {
         it("render correct rows for standard signatory", async () => {
-            const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector()
-            director.name = DIRECTOR_1_NAME
-            director.email = DIRECTOR_1_EMAIL
-            dissolutionSession.directorsToSign = [generateDirectorToSign()]
+            const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector();
+            director.name = DIRECTOR_1_NAME;
+            director.email = DIRECTOR_1_EMAIL;
+            dissolutionSession.directorsToSign = [generateDirectorToSign()];
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director)
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director);
 
-            const app = initApp()
+            const app = initApp();
 
-            const res = await request(app)
-                .get(CHECK_YOUR_ANSWERS_URI)
-                .expect(StatusCodes.OK)
+            const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", "Check your answers"))
-            assert.isTrue(htmlAssertHelper.hasText("h2.director-name-header", DIRECTOR_1_NAME))
-            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-name dd", DIRECTOR_1_NAME))
-            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
-            assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#director-details-0 .director-on-behalf-name dd"))
-            const actionHtml = htmlAssertHelper.getInnerHTML("#director-details-0 .director-email .govuk-summary-list__actions a")
-            assert.isTrue(typeof actionHtml === "string" && actionHtml.includes("email address for " + (director.onBehalfName || director.name)))
-
-        })
+            assert.isTrue(htmlAssertHelper.hasText("h1", "Check your answers"));
+            assert.isTrue(htmlAssertHelper.hasText("h2.director-name-header", DIRECTOR_1_NAME));
+            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-name dd", DIRECTOR_1_NAME));
+            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"));
+            assert.isTrue(htmlAssertHelper.selectorDoesNotExist("#director-details-0 .director-on-behalf-name dd"));
+            const actionHtml = htmlAssertHelper.getInnerHTML(
+                "#director-details-0 .director-email .govuk-summary-list__actions a"
+            );
+            assert.isTrue(
+                typeof actionHtml === "string" &&
+                    actionHtml.includes("email address for " + (director.onBehalfName || director.name))
+            );
+        });
 
         it("render correct rows for a corporate signatory", async () => {
-            const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector()
-            director.name = DIRECTOR_1_NAME
-            director.email = DIRECTOR_1_EMAIL
-            director.onBehalfName = "Thor, God of Thunder"
-            dissolutionSession.directorsToSign = [generateDirectorToSign()]
-            dissolutionSession.isMultiDirector = true
+            const director: CheckYourAnswersDirector = generateCheckYourAnswersDirector();
+            director.name = DIRECTOR_1_NAME;
+            director.email = DIRECTOR_1_EMAIL;
+            director.onBehalfName = "Thor, God of Thunder";
+            dissolutionSession.directorsToSign = [generateDirectorToSign()];
+            dissolutionSession.isMultiDirector = true;
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director)
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(mapper.mapToCheckYourAnswersDirector(dissolutionSession.directorsToSign[0])).thenReturn(director);
 
-            const app = initApp()
+            const app = initApp();
 
-            const res = await request(app)
-                .get(CHECK_YOUR_ANSWERS_URI)
-                .expect(StatusCodes.OK)
+            const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-            assert.isTrue(htmlAssertHelper.hasText("h1", "Check your answers"))
-            assert.isTrue(htmlAssertHelper.hasText("h2.director-name-header", DIRECTOR_1_NAME))
-            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-on-behalf-name dd", "Thor, God of Thunder"))
-            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"))
-            const actionHtml = htmlAssertHelper.getInnerHTML("#director-details-0 .director-email .govuk-summary-list__actions a")
-            assert.isTrue(typeof actionHtml === "string" && actionHtml.includes("email address for " + director.onBehalfName))
-            assert.equal(htmlAssertHelper.getAttributeValue("#change-signatories", "href"), SELECT_SIGNATORIES_URI)
-        })
+            assert.isTrue(htmlAssertHelper.hasText("h1", "Check your answers"));
+            assert.isTrue(htmlAssertHelper.hasText("h2.director-name-header", DIRECTOR_1_NAME));
+            assert.isTrue(
+                htmlAssertHelper.hasText("#director-details-0 .director-on-behalf-name dd", "Thor, God of Thunder")
+            );
+            assert.isTrue(htmlAssertHelper.hasText("#director-details-0 .director-email dd", "test@mail.com"));
+            const actionHtml = htmlAssertHelper.getInnerHTML(
+                "#director-details-0 .director-email .govuk-summary-list__actions a"
+            );
+            assert.isTrue(
+                typeof actionHtml === "string" && actionHtml.includes("email address for " + director.onBehalfName)
+            );
+            assert.equal(htmlAssertHelper.getAttributeValue("#change-signatories", "href"), SELECT_SIGNATORIES_URI);
+        });
 
         describe("back link", () => {
             it("should set back to the select director page when single director journey and applicant is the director", async () => {
-                dissolutionSession.isMultiDirector = false
-                dissolutionSession.isApplicantADirector = true
+                dissolutionSession.isMultiDirector = false;
+                dissolutionSession.isApplicantADirector = true;
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector());
 
-                const app = initApp()
+                const app = initApp();
 
-                const res = await request(app)
-                    .get(CHECK_YOUR_ANSWERS_URI)
-                    .expect(StatusCodes.OK)
+                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
 
-                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), SELECT_DIRECTOR_URI)
-            })
+                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), SELECT_DIRECTOR_URI);
+            });
 
             it("should set back to the define signatory info page when single director journey and applicant is not the director", async () => {
-                dissolutionSession.isMultiDirector = false
-                dissolutionSession.isApplicantADirector = false
+                dissolutionSession.isMultiDirector = false;
+                dissolutionSession.isApplicantADirector = false;
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector());
 
-                const app = initApp()
+                const app = initApp();
 
-                const res = await request(app)
-                    .get(CHECK_YOUR_ANSWERS_URI)
-                    .expect(StatusCodes.OK)
+                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
 
-                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), DEFINE_SIGNATORY_INFO_URI)
-            })
+                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), DEFINE_SIGNATORY_INFO_URI);
+            });
 
             it("should set back to the define signatory info page when multi director journey and applicant is the director", async () => {
-                dissolutionSession.isMultiDirector = true
-                dissolutionSession.isApplicantADirector = true
+                dissolutionSession.isMultiDirector = true;
+                dissolutionSession.isApplicantADirector = true;
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector());
 
-                const app = initApp()
+                const app = initApp();
 
-                const res = await request(app)
-                    .get(CHECK_YOUR_ANSWERS_URI)
-                    .expect(StatusCodes.OK)
+                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
 
-                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), DEFINE_SIGNATORY_INFO_URI)
-            })
+                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), DEFINE_SIGNATORY_INFO_URI);
+            });
 
             it("should set back to the define signatory info page when multi director journey and applicant is not the director", async () => {
-                dissolutionSession.isMultiDirector = true
-                dissolutionSession.isApplicantADirector = false
+                dissolutionSession.isMultiDirector = true;
+                dissolutionSession.isApplicantADirector = false;
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector())
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(mapper.mapToCheckYourAnswersDirector(anything())).thenReturn(generateCheckYourAnswersDirector());
 
-                const app = initApp()
+                const app = initApp();
 
-                const res = await request(app)
-                    .get(CHECK_YOUR_ANSWERS_URI)
-                    .expect(StatusCodes.OK)
+                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
 
-                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+                const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), DEFINE_SIGNATORY_INFO_URI)
-            })
-        })
-    })
+                assert.equal(htmlAssertHelper.getAttributeValue(".govuk-back-link", "href"), DEFINE_SIGNATORY_INFO_URI);
+            });
+        });
+    });
 
     describe("POST - create dissolution request", () => {
         it("should create dissolution", async () => {
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
-            const app = initApp()
+            const app = initApp();
 
             await request(app)
                 .post(CHECK_YOUR_ANSWERS_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", REDIRECT_GATE_URI)
+                .expect("Location", REDIRECT_GATE_URI);
 
-            verify(service.createDissolution(TOKEN, dissolutionSession)).once()
-        })
-    })
-})
+            verify(service.createDissolution(TOKEN, dissolutionSession)).once();
+        });
+    });
+});

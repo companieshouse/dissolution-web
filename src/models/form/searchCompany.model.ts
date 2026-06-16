@@ -1,4 +1,4 @@
 export default interface SearchCompanyFormModel {
-    companyNumber?: string
-    _csrf?: string
+    companyNumber?: string;
+    _csrf?: string;
 }

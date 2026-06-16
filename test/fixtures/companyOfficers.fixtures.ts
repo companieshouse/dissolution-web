@@ -1,22 +1,29 @@
-import { Address, CompanyOfficer, CompanyOfficers, DateOfBirth, FormerName, Identification } from "@companieshouse/api-sdk-node/dist/services/company-officers/types"
-import Resource from "@companieshouse/api-sdk-node/dist/services/resource"
-import { StatusCodes } from "http-status-codes"
+import {
+    Address,
+    CompanyOfficer,
+    CompanyOfficers,
+    DateOfBirth,
+    FormerName,
+    Identification,
+} from "@companieshouse/api-sdk-node/dist/services/company-officers/types";
+import Resource from "@companieshouse/api-sdk-node/dist/services/resource";
+import { StatusCodes } from "http-status-codes";
 
-import ChangeDetailsFormModel from "app/models/form/changeDetails.model"
-import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
-import SelectDirectorFormModel from "app/models/form/selectDirector.model"
-import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
-import DirectorDetails from "app/models/view/directorDetails.model"
-import OfficerRole from "app/models/dto/officerRole.enum"
+import ChangeDetailsFormModel from "app/models/form/changeDetails.model";
+import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model";
+import SelectDirectorFormModel from "app/models/form/selectDirector.model";
+import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model";
+import DirectorDetails from "app/models/view/directorDetails.model";
+import OfficerRole from "app/models/dto/officerRole.enum";
 
-export function generateCompanyOfficersResource (): Resource<CompanyOfficers> {
+export function generateCompanyOfficersResource(): Resource<CompanyOfficers> {
     return {
         httpStatusCode: StatusCodes.OK,
-        resource: generateCompanyOfficers()
-    }
+        resource: generateCompanyOfficers(),
+    };
 }
 
-export function generateCompanyOfficers (): CompanyOfficers {
+export function generateCompanyOfficers(): CompanyOfficers {
     return {
         activeCount: "1",
         etag: "someEtag",
@@ -27,15 +34,15 @@ export function generateCompanyOfficers (): CompanyOfficers {
         startIndex: "0",
         totalResults: "1",
         links: {
-            self: "company/123/officers"
+            self: "company/123/officers",
         },
-        items: [generateCompanyOfficer()]
-    }
+        items: [generateCompanyOfficer()],
+    };
 }
 
-export function generateCompanyOfficer (): CompanyOfficer {
+export function generateCompanyOfficer(): CompanyOfficer {
     return {
-        appointedOn: (new Date()).toISOString(),
+        appointedOn: new Date().toISOString(),
         occupation: "director",
         countryOfResidence: "United Kingdom",
         nationality: "British",
@@ -48,16 +55,16 @@ export function generateCompanyOfficer (): CompanyOfficer {
         links: {
             self: "/test/link",
             officer: {
-                appointments: "officers/456/appointments"
-            }
+                appointments: "officers/456/appointments",
+            },
         },
         contactDetails: {
-            contactName: "test name"
-        }
-    }
+            contactName: "test name",
+        },
+    };
 }
 
-export function generateAddress (): Address {
+export function generateAddress(): Address {
     return {
         addressLine1: "123 Street",
         addressLine2: "Some area",
@@ -67,76 +74,80 @@ export function generateAddress (): Address {
         poBox: "123",
         postalCode: "SW1",
         premises: "some premises",
-        region: "South"
-    }
+        region: "South",
+    };
 }
 
-export function generateDateOfBirth (): DateOfBirth {
+export function generateDateOfBirth(): DateOfBirth {
     return {
         day: "15",
         month: "4",
-        year: "1996"
-    }
+        year: "1996",
+    };
 }
 
-export function generateFormerName (): FormerName {
+export function generateFormerName(): FormerName {
     return {
         forenames: "Fore",
-        surname: "Sur"
-    }
+        surname: "Sur",
+    };
 }
 
-export function generateIdentification (): Identification {
+export function generateIdentification(): Identification {
     return {
         identificationType: "some identification type",
         legalAuthority: "some legal auth",
         legalForm: "some legal form",
         placeRegistered: "some place",
-        registrationNumber: "some reg"
-    }
+        registrationNumber: "some reg",
+    };
 }
 
-export function generateDirectorDetails (id: string = "123", name: string = "Some Director", officerRole: OfficerRole = OfficerRole.DIRECTOR): DirectorDetails {
+export function generateDirectorDetails(
+    id: string = "123",
+    name: string = "Some Director",
+    officerRole: OfficerRole = OfficerRole.DIRECTOR
+): DirectorDetails {
     return {
         id,
         name,
-        officerRole
-    }
+        officerRole,
+    };
 }
 
-export function generateSelectDirectorFormModel (director: string = "123"): SelectDirectorFormModel {
+export function generateSelectDirectorFormModel(director: string = "123"): SelectDirectorFormModel {
     return {
         director,
-        _csrf: "abc123"
-    }
+        _csrf: "abc123",
+    };
 }
 
-export function generateSelectSignatoriesFormModel (...signatories: string[]): SelectSignatoriesFormModel {
+export function generateSelectSignatoriesFormModel(...signatories: string[]): SelectSignatoriesFormModel {
     return {
         signatories: signatories || ["123"],
-        _csrf: "abc123"
-    }
+        _csrf: "abc123",
+    };
 }
 
-export function generateDefineSignatoryInfoFormModel (): DefineSignatoryInfoFormModel {
+export function generateDefineSignatoryInfoFormModel(): DefineSignatoryInfoFormModel {
     return {
         directorEmail_123abc: "director@mail.com",
         onBehalfName_456def: "Mr Accountant",
         onBehalfEmail_456def: "accountant@mail.com",
-        _csrf: "abc123"
-    }
+        _csrf: "abc123",
+    };
 }
 
-export function generateWillSignChangeDetailsFormModel (): ChangeDetailsFormModel {
+export function generateWillSignChangeDetailsFormModel(): ChangeDetailsFormModel {
     return {
         directorEmail: "director@mail.com",
-        _csrf: "abc123"
-    }
+        _csrf: "abc123",
+    };
 }
 
-export function generateOnBehalfChangeDetailsFormModel (): ChangeDetailsFormModel {
+export function generateOnBehalfChangeDetailsFormModel(): ChangeDetailsFormModel {
     return {
         onBehalfName: "Mr Accountant",
-        onBehalfEmail: "accountant@mail.com"
-    }
+        onBehalfEmail: "accountant@mail.com",
+    };
 }

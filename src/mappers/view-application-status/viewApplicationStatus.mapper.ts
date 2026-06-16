@@ -1,27 +1,34 @@
-import "reflect-metadata"
+import "reflect-metadata";
 
-import { provide } from "inversify-binding-decorators"
+import { provide } from "inversify-binding-decorators";
 
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { ViewApplicationStatus, ViewApplicationStatusSignatory } from "app/models/view/viewApplicationStatus.model"
+import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
+import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
+import DissolutionSession from "app/models/session/dissolutionSession.model";
+import { ViewApplicationStatus, ViewApplicationStatusSignatory } from "app/models/view/viewApplicationStatus.model";
 
 @provide(ViewApplicationStatusMapper)
 export default class ViewApplicationStatusMapper {
-
-    public mapToViewModel (dissolutionSession: DissolutionSession, dissolution: DissolutionGetResponse, isApplicant: boolean):
-  ViewApplicationStatus {
+    public mapToViewModel(
+        dissolutionSession: DissolutionSession,
+        dissolution: DissolutionGetResponse,
+        isApplicant: boolean
+    ): ViewApplicationStatus {
         return {
             dissolutionSession,
             showChangeColumn: isApplicant,
-            signatories: dissolution.directors.map(director => this.mapToSignatory(dissolutionSession, director, isApplicant))
-        }
+            signatories: dissolution.directors.map(director =>
+                this.mapToSignatory(dissolutionSession, director, isApplicant)
+            ),
+        };
     }
 
-    private mapToSignatory (dissolutionSession: DissolutionSession, signatory: DissolutionGetDirector, isApplicant: boolean):
-  ViewApplicationStatusSignatory {
-        const remindEntry = (dissolutionSession.remindDirectorList || []).find(r => r.id === signatory.officer_id)
+    private mapToSignatory(
+        dissolutionSession: DissolutionSession,
+        signatory: DissolutionGetDirector,
+        isApplicant: boolean
+    ): ViewApplicationStatusSignatory {
+        const remindEntry = (dissolutionSession.remindDirectorList || []).find(r => r.id === signatory.officer_id);
 
         return {
             id: signatory.officer_id,
@@ -29,13 +36,13 @@ export default class ViewApplicationStatusMapper {
             email: signatory.email,
             hasApproved: !!signatory.approved_at,
             canChange: isApplicant && !signatory.approved_at,
-            isReminded: !!remindEntry && !!remindEntry.reminderSent
-        }
+            isReminded: !!remindEntry && !!remindEntry.reminderSent,
+        };
     }
 
-    private mapToSignatoryDisplayName (signatory: DissolutionGetDirector): string {
+    private mapToSignatoryDisplayName(signatory: DissolutionGetDirector): string {
         return signatory.on_behalf_name
             ? `${signatory.on_behalf_name} signing on behalf of ${signatory.name}`
-            : signatory.name
+            : signatory.name;
     }
 }

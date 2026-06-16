@@ -1,44 +1,44 @@
-import {StatusCodes} from "http-status-codes"
-import {inject} from "inversify"
-import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
-import {RedirectResult} from "inversify-express-utils/lib/results"
-import {NotFoundError} from "app/errors/notFoundError.error"
-import ApplicationStatus from "app/models/dto/applicationStatus.enum"
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse"
-import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model"
-import Optional from "app/models/optional"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import ValidationErrors from "app/models/view/validationErrors.model"
+import { StatusCodes } from "http-status-codes";
+import { inject } from "inversify";
+import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils";
+import { RedirectResult } from "inversify-express-utils/lib/results";
+import { NotFoundError } from "app/errors/notFoundError.error";
+import ApplicationStatus from "app/models/dto/applicationStatus.enum";
+import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
+import PayByAccountDetailsFormModel from "app/models/form/payByAccountDetails.model";
+import Optional from "app/models/optional";
+import DissolutionSession from "app/models/session/dissolutionSession.model";
+import ValidationErrors from "app/models/view/validationErrors.model";
 import {
     PAY_BY_ACCOUNT_DETAILS_URI,
     PAYMENT_CALLBACK_URI,
     SEARCH_COMPANY_URI,
-    VIEW_FINAL_CONFIRMATION_URI
-} from "app/paths"
-import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema"
-import DissolutionService from "app/services/dissolution/dissolution.service"
-import PayByAccountService from "app/services/payment/payByAccount.service"
-import SessionService from "app/services/session/session.service"
-import PaymentService from "app/services/payment/payment.service"
-import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper"
-import TYPES from "app/types"
-import FormValidator from "app/utils/formValidator.util"
-import PaymentType from "app/models/dto/paymentType.enum"
-import {v4 as uuidv4} from "uuid"
+    VIEW_FINAL_CONFIRMATION_URI,
+} from "app/paths";
+import payByAccountDetailsSchema from "app/schemas/payByAccountDetails.schema";
+import DissolutionService from "app/services/dissolution/dissolution.service";
+import PayByAccountService from "app/services/payment/payByAccount.service";
+import SessionService from "app/services/session/session.service";
+import PaymentService from "app/services/payment/payment.service";
+import DissolutionSessionMapper from "app/mappers/session/dissolutionSession.mapper";
+import TYPES from "app/types";
+import FormValidator from "app/utils/formValidator.util";
+import PaymentType from "app/models/dto/paymentType.enum";
+import { v4 as uuidv4 } from "uuid";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 
 interface ViewModel {
-    data?: PayByAccountDetailsFormModel
-    errors?: ValidationErrors
+    data?: PayByAccountDetailsFormModel;
+    errors?: ValidationErrors;
 }
 
 @controller(PAY_BY_ACCOUNT_DETAILS_URI, TYPES.JourneyIdAuthMiddleware)
 export class PayByAccountDetailsController extends JourneyBaseController {
+    private readonly ERROR_INCORRECT_CREDENTIALS: string =
+        "Your Presenter ID or Presenter authentication code is incorrect";
 
-    private readonly ERROR_INCORRECT_CREDENTIALS: string = "Your Presenter ID or Presenter authentication code is incorrect"
-
-    public constructor (
+    public constructor(
         @inject(SessionService) private readonly sessionService: SessionService,
         @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
         @inject(FormValidator) private readonly validator: FormValidator,
@@ -47,107 +47,116 @@ export class PayByAccountDetailsController extends JourneyBaseController {
         @inject(PaymentService) private readonly paymentService: PaymentService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
-        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
-
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
-        super(journeyPathService)
+        super(journeyPathService);
     }
 
     @httpGet("")
-    public async get (): Promise<string | RedirectResult> {
-
+    public async get(): Promise<string | RedirectResult> {
         if (!this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-            throw new NotFoundError("Feature toggle not enabled")
+            throw new NotFoundError("Feature toggle not enabled");
         }
 
         if (await this.isAlreadyPaid()) {
-            return this.redirect(SEARCH_COMPANY_URI)
+            return this.redirect(SEARCH_COMPANY_URI);
         }
 
-        return this.renderView()
+        return this.renderView();
     }
 
     @httpGet("/change-payment-type")
-    public async changePaymentType (): Promise<string | RedirectResult> {
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
-        const paymentType: PaymentType = PaymentType.CREDIT_DEBIT_CARD
-        const redirectUrl = await this.getCreditCardPaymentUrl(dissolutionSession)
-        this.updateSessionWithPaymentType(dissolutionSession, paymentType)
+    public async changePaymentType(): Promise<string | RedirectResult> {
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
+            this.httpContext.request
+        )!;
+        const paymentType: PaymentType = PaymentType.CREDIT_DEBIT_CARD;
+        const redirectUrl = await this.getCreditCardPaymentUrl(dissolutionSession);
+        this.updateSessionWithPaymentType(dissolutionSession, paymentType);
 
-        return this.redirect(redirectUrl)
+        return this.redirect(redirectUrl);
     }
 
-    private async getCreditCardPaymentUrl (dissolutionSession: DissolutionSession): Promise<string> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
-        dissolutionSession.paymentStateUUID = uuidv4()
+    private async getCreditCardPaymentUrl(dissolutionSession: DissolutionSession): Promise<string> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+        dissolutionSession.paymentStateUUID = uuidv4();
 
-        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`;
 
-        return await this.paymentService.generatePaymentURL(token, dissolutionSession, dissolutionSession.paymentStateUUID, paymentRedirectURI)
+        return await this.paymentService.generatePaymentURL(
+            token,
+            dissolutionSession,
+            dissolutionSession.paymentStateUUID,
+            paymentRedirectURI
+        );
     }
 
-    private updateSessionWithPaymentType (
-        dissolutionSession: DissolutionSession,
-        paymentType: PaymentType
-    ): void {
+    private updateSessionWithPaymentType(dissolutionSession: DissolutionSession, paymentType: PaymentType): void {
         const updatedSession: DissolutionSession = {
             ...dissolutionSession,
-            paymentType
-        }
+            paymentType,
+        };
 
-        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession);
     }
 
     @httpPost("")
-    public async post (@requestBody() form: PayByAccountDetailsFormModel): Promise<string | RedirectResult> {
-        const errors: Optional<ValidationErrors> = this.validator.validate(form, payByAccountDetailsSchema)
+    public async post(@requestBody() form: PayByAccountDetailsFormModel): Promise<string | RedirectResult> {
+        const errors: Optional<ValidationErrors> = this.validator.validate(form, payByAccountDetailsSchema);
         if (errors) {
-            return this.renderView(form, errors)
+            return this.renderView(form, errors);
         }
 
-        const accountNumber: Optional<string> = await this.payByAccountService.getAccountNumber(form)
+        const accountNumber: Optional<string> = await this.payByAccountService.getAccountNumber(form);
         if (!accountNumber) {
-            return this.renderView(form, { presenterAuthCode: this.ERROR_INCORRECT_CREDENTIALS })
+            return this.renderView(form, { presenterAuthCode: this.ERROR_INCORRECT_CREDENTIALS });
         }
 
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
+            this.httpContext.request
+        )!;
 
-        await this.dissolutionService.addPayByAccountPaymentData(dissolutionSession, accountNumber)
-        const dissolution: DissolutionGetResponse = (await this.getDissolution(dissolutionSession))!
-        dissolutionSession.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution)
-        this.updateSession(dissolutionSession)
+        await this.dissolutionService.addPayByAccountPaymentData(dissolutionSession, accountNumber);
+        const dissolution: DissolutionGetResponse = (await this.getDissolution(dissolutionSession))!;
+        dissolutionSession.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
+        this.updateSession(dissolutionSession);
 
-        return this.redirect(this.journeyPath(VIEW_FINAL_CONFIRMATION_URI))
+        return this.redirect(this.journeyPath(VIEW_FINAL_CONFIRMATION_URI));
     }
 
-    private async renderView (data?: PayByAccountDetailsFormModel, errors?: ValidationErrors): Promise<string> {
+    private async renderView(data?: PayByAccountDetailsFormModel, errors?: ValidationErrors): Promise<string> {
         const viewModel: ViewModel = {
             data,
-            errors
-        }
+            errors,
+        };
 
-        return super.render("pay-by-account-details", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
+        return super.render("pay-by-account-details", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK);
     }
 
-    private async getDissolution (session: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
-        return this.dissolutionService.getDissolution(token, session)
+    private async getDissolution(session: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+        return this.dissolutionService.getDissolution(token, session);
     }
 
-    private updateSession (dissolutionSession: DissolutionSession): void {
+    private updateSession(dissolutionSession: DissolutionSession): void {
         const updatedSession: DissolutionSession = {
-            ...dissolutionSession
-        }
+            ...dissolutionSession,
+        };
 
-        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession)
+        this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession);
     }
 
-    private async isAlreadyPaid (): Promise<boolean> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request)
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!
+    private async isAlreadyPaid(): Promise<boolean> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
+            this.httpContext.request
+        )!;
 
-        const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(token, dissolutionSession)
+        const dissolution: Optional<DissolutionGetResponse> = await this.dissolutionService.getDissolution(
+            token,
+            dissolutionSession
+        );
 
-        return dissolution!.application_status === ApplicationStatus.PAID
+        return dissolution!.application_status === ApplicationStatus.PAID;
     }
 }

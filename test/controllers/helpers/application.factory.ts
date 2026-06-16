@@ -1,100 +1,104 @@
-import {createLogger} from "@companieshouse/structured-logging-node"
-import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger"
-import {S3Client} from "@aws-sdk/client-s3"
-import axios, {AxiosInstance} from "axios"
-import * as bodyParser from "body-parser"
-import {Application, NextFunction, Request, Response} from "express"
-import {Container} from "inversify"
-import {buildProviderModule} from "inversify-binding-decorators"
-import {InversifyExpressServer} from "inversify-express-utils"
-import JourneyPathService from "app/services/session/journeyPath.service"
-import * as nunjucks from "nunjucks"
+import { createLogger } from "@companieshouse/structured-logging-node";
+import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
+import { S3Client } from "@aws-sdk/client-s3";
+import axios, { AxiosInstance } from "axios";
+import * as bodyParser from "body-parser";
+import { Application, NextFunction, Request, Response } from "express";
+import { Container } from "inversify";
+import { buildProviderModule } from "inversify-binding-decorators";
+import { InversifyExpressServer } from "inversify-express-utils";
+import JourneyPathService from "app/services/session/journeyPath.service";
+import * as nunjucks from "nunjucks";
 
-import {APP_NAME} from "app/constants/app.const"
-import TYPES from "app/types"
-import {addFilters, addGlobals} from "app/utils/nunjucks.util"
-import AuthConfig from "app/models/authConfig"
+import { APP_NAME } from "app/constants/app.const";
+import TYPES from "app/types";
+import { addFilters, addGlobals } from "app/utils/nunjucks.util";
+import AuthConfig from "app/models/authConfig";
 
 const mockEnvVars = (container: Container): void => {
-    container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL")
-    container.bind(TYPES.CHS_URL).toConstantValue("CHS_URL")
-    container.bind(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue("CHS_COMPANY_PROFILE_API_LOCAL_URL")
-    container.bind(TYPES.DISSOLUTIONS_API_URL).toConstantValue("DISSOLUTIONS_API_URL")
-    container.bind(TYPES.CHS_API_KEY).toConstantValue("some-api-key")
-    container.bind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1)
-    container.bind(TYPES.LLDS01_AND_DS01_FEE).toConstantValue("13")
+    container.bind(TYPES.CHIPS_PRESENTER_AUTH_URL).toConstantValue("CHIPS_PRESENTER_AUTH_URL");
+    container.bind(TYPES.CHS_URL).toConstantValue("CHS_URL");
+    container.bind(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL).toConstantValue("CHS_COMPANY_PROFILE_API_LOCAL_URL");
+    container.bind(TYPES.DISSOLUTIONS_API_URL).toConstantValue("DISSOLUTIONS_API_URL");
+    container.bind(TYPES.CHS_API_KEY).toConstantValue("some-api-key");
+    container.bind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1);
+    container.bind(TYPES.LLDS01_AND_DS01_FEE).toConstantValue("13");
 
-    const logger = createLogger(APP_NAME)
-    container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
-    container.bind(TYPES.PAYMENTS_API_URL).toConstantValue("PAYMENTS_API_URL")
-    container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
-    container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client())
+    const logger = createLogger(APP_NAME);
+    container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger);
+    container.bind(TYPES.PAYMENTS_API_URL).toConstantValue("PAYMENTS_API_URL");
+    container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create());
+    container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client());
 
     const testAuthConfig: AuthConfig = {
         accountUrl: "http://account.test",
         accountRequestKey: "test-key",
         accountClientId: "test-client-id",
-        chsUrl: "http://chs.test"
-    }
-    container.bind<AuthConfig>(TYPES.AuthConfig).toConstantValue(testAuthConfig)
-}
+        chsUrl: "http://chs.test",
+    };
+    container.bind<AuthConfig>(TYPES.AuthConfig).toConstantValue(testAuthConfig);
+};
 
 const mockMiddlewares = (container: Container): void => {
-    container.bind(TYPES.SessionMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
-    container.bind(TYPES.AuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
-    container.bind(TYPES.CompanyAuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
-    container.bind(TYPES.JourneyIdAuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next())
-}
+    container.bind(TYPES.SessionMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next());
+    container.bind(TYPES.AuthMiddleware).toConstantValue((_1: Request, _2: Response, next: NextFunction) => next());
+    container
+        .bind(TYPES.CompanyAuthMiddleware)
+        .toConstantValue((_1: Request, _2: Response, next: NextFunction) => next());
+    container
+        .bind(TYPES.JourneyIdAuthMiddleware)
+        .toConstantValue((_1: Request, _2: Response, next: NextFunction) => next());
+};
 
 export const createApp = (configureBindings?: (container: Container) => void): Application => {
-    const container: Container = new Container()
+    const container: Container = new Container();
 
-    mockEnvVars(container)
-    mockMiddlewares(container)
-    container.load(buildProviderModule())
+    mockEnvVars(container);
+    mockMiddlewares(container);
+    container.load(buildProviderModule());
 
     container.rebind(JourneyPathService).toConstantValue({
-        journeyPath: (_req: any, pathTemplate: string) => pathTemplate
-    } as any)
+        journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
+    } as any);
 
-    configureBindings?.(container) // eslint-disable-line
+    configureBindings?.(container);
 
-    const journeyPathService = container.get(JourneyPathService) as any
+    const journeyPathService = container.get(JourneyPathService) as any;
 
     return new InversifyExpressServer(container)
         .setConfig(server => {
-
-            server.use(bodyParser.json())
-            server.use(bodyParser.urlencoded({extended: false}))
+            server.use(bodyParser.json());
+            server.use(bodyParser.urlencoded({ extended: false }));
 
             server.use((req: Request, res: Response, next: NextFunction) => {
+                res.locals.journeyPath = (
+                    pathTemplate: string,
+                    options?: {
+                        journeyId?: string;
+                        params?: Record<string, string | number>;
+                    }
+                ): string => journeyPathService.journeyPath(req, pathTemplate, options);
 
-                res.locals.journeyPath = (pathTemplate: string, options?: {
-                    journeyId?: string,
-                    params?: Record<string, string | number>
-                }): string => journeyPathService.journeyPath(req, pathTemplate, options)
+                next();
+            });
 
-                next()
-            })
-
-            server.set("view engine", "njk")
+            server.set("view engine", "njk");
 
             const env: nunjucks.Environment = nunjucks.configure(
                 [
                     "src/views",
                     "node_modules/govuk-frontend",
                     "node_modules/govuk-frontend/components",
-                    "node_modules/@companieshouse"
+                    "node_modules/@companieshouse",
                 ],
                 {
                     autoescape: true,
-                    express: server
+                    express: server,
                 }
-            )
+            );
 
-            addFilters(env)
-            addGlobals(env)
+            addFilters(env);
+            addGlobals(env);
         })
-        .build()
-}
-
+        .build();
+};

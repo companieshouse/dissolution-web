@@ -20,7 +20,7 @@ const TYPES = {
     UuidGenerator: "UuidGenerator",
     JourneyIdAuthMiddleware: "JourneyIdAuthMiddleware",
     JourneyPathService: "JourneyPathService",
-    AuthConfig: "AuthConfig"
-}
+    AuthConfig: "AuthConfig",
+};
 
-export default TYPES
+export default TYPES;

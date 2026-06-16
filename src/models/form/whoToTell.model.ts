@@ -1,4 +1,4 @@
 export default interface WhoToTellFormModel {
-  confirmation?: string
-  _csrf?: string
+    confirmation?: string;
+    _csrf?: string;
 }
