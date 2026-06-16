@@ -48,9 +48,6 @@ module.exports = [
             prettier: prettierPlugin || undefined
         },
         rules: {
-            indent: ["error", 4],
-            quotes: ["error", "double", { allowTemplateLiterals: true }],
-            semi: [1, "never"],
             "no-unused-vars": "off",
             "no-return-assign": "off",
             "no-useless-constructor": "off",
