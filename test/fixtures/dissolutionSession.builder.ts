@@ -1,87 +1,86 @@
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import { DirectorToSign, DirectorToRemind } from "app/models/session/directorToSign.model"
-import { DirectorToSignBuilder } from "./directorToSign.builder"
-import OfficerType from "app/models/dto/officerType.enum"
-import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model"
-import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector"
+import DissolutionSession from "app/models/session/dissolutionSession.model";
+import { DirectorToSign, DirectorToRemind } from "app/models/session/directorToSign.model";
+import { DirectorToSignBuilder } from "./directorToSign.builder";
+import OfficerType from "app/models/dto/officerType.enum";
+import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model";
+import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
 
 export class DissolutionSessionBuilder {
+    companyNumber?: string = "01777777";
+    officerType?: OfficerType = OfficerType.DIRECTOR;
+    directorsToSign: DirectorToSign[] = [];
+    defineSignatoryInfoForm?: DefineSignatoryInfoFormModel;
+    private _isMultiDirector?: boolean;
+    signatoryIdToEdit?: string;
+    signatoryToEdit?: DissolutionGetDirector;
+    journeyId?: string;
+    isFromCheckAnswers?: boolean;
+    remindDirectorList?: DirectorToRemind[];
 
-    companyNumber?: string = "01777777"
-    officerType?: OfficerType = OfficerType.DIRECTOR
-    directorsToSign: DirectorToSign[] = []
-    defineSignatoryInfoForm?: DefineSignatoryInfoFormModel
-    private _isMultiDirector?: boolean
-    signatoryIdToEdit?: string
-    signatoryToEdit?: DissolutionGetDirector
-    journeyId?: string
-    isFromCheckAnswers?: boolean
-    remindDirectorList?: DirectorToRemind[]
-
-    withDirectorsToSign (directors: DirectorToSign[]): DissolutionSessionBuilder {
-        this.directorsToSign = directors
-        return this
+    withDirectorsToSign(directors: DirectorToSign[]): DissolutionSessionBuilder {
+        this.directorsToSign = directors;
+        return this;
     }
 
-    withDirectorToSign (directorBuilder: DirectorToSignBuilder): DissolutionSessionBuilder {
-        this.directorsToSign.push(directorBuilder.build())
-        return this
+    withDirectorToSign(directorBuilder: DirectorToSignBuilder): DissolutionSessionBuilder {
+        this.directorsToSign.push(directorBuilder.build());
+        return this;
     }
 
-    withOfficerType (officerType: OfficerType) {
-        this.officerType = officerType
-        return this
+    withOfficerType(officerType: OfficerType) {
+        this.officerType = officerType;
+        return this;
     }
 
-    withDefineSignatoryInfoForm (defineSignatoryInfoForm: DefineSignatoryInfoFormModel) {
-        this.defineSignatoryInfoForm = defineSignatoryInfoForm
-        return this
+    withDefineSignatoryInfoForm(defineSignatoryInfoForm: DefineSignatoryInfoFormModel) {
+        this.defineSignatoryInfoForm = defineSignatoryInfoForm;
+        return this;
     }
 
-    public withIsMultiDirector (isMultiDirector: boolean): this {
-        this._isMultiDirector = isMultiDirector
-        return this
+    public withIsMultiDirector(isMultiDirector: boolean): this {
+        this._isMultiDirector = isMultiDirector;
+        return this;
     }
 
-    public withSignatoryIdToEdit (signatoryId?: string): this {
-        this.signatoryIdToEdit = signatoryId
-        return this
+    public withSignatoryIdToEdit(signatoryId?: string): this {
+        this.signatoryIdToEdit = signatoryId;
+        return this;
     }
 
-    public withSignatoryToEdit (signatoryBuilder: DissolutionGetDirector): this {
-        this.signatoryToEdit = signatoryBuilder
-        return this
+    public withSignatoryToEdit(signatoryBuilder: DissolutionGetDirector): this {
+        this.signatoryToEdit = signatoryBuilder;
+        return this;
     }
 
-    public withIsFromCheckAnswers (isFromCheckAnswers: boolean): this {
-        this.isFromCheckAnswers = isFromCheckAnswers
-        return this
+    public withIsFromCheckAnswers(isFromCheckAnswers: boolean): this {
+        this.isFromCheckAnswers = isFromCheckAnswers;
+        return this;
     }
 
-    public withCompanyNumber (companyNumber?: string): this {
-        this.companyNumber = companyNumber
-        return this
+    public withCompanyNumber(companyNumber?: string): this {
+        this.companyNumber = companyNumber;
+        return this;
     }
 
-    public withJourneyId (journeyId: string): this {
-        this.journeyId = journeyId
-        return this
+    public withJourneyId(journeyId: string): this {
+        this.journeyId = journeyId;
+        return this;
     }
 
-    public withRemindDirectorList (remindDirectorList?: DirectorToRemind[]): this {
-        this.remindDirectorList = remindDirectorList
-        return this
+    public withRemindDirectorList(remindDirectorList?: DirectorToRemind[]): this {
+        this.remindDirectorList = remindDirectorList;
+        return this;
     }
 
-    public withRemindDirector (id: string, reminderSent?: boolean): this {
+    public withRemindDirector(id: string, reminderSent?: boolean): this {
         if (!this.remindDirectorList) {
-            this.remindDirectorList = []
+            this.remindDirectorList = [];
         }
-        this.remindDirectorList.push({ id, reminderSent })
-        return this
+        this.remindDirectorList.push({ id, reminderSent });
+        return this;
     }
 
-    public build (): DissolutionSession {
+    public build(): DissolutionSession {
         return {
             companyNumber: this.companyNumber,
             officerType: this.officerType,
@@ -92,11 +91,11 @@ export class DissolutionSessionBuilder {
             signatoryToEdit: this.signatoryToEdit,
             isFromCheckAnswers: this.isFromCheckAnswers,
             journeyId: this.journeyId,
-            remindDirectorList: this.remindDirectorList
-        } as DissolutionSession
+            remindDirectorList: this.remindDirectorList,
+        } as DissolutionSession;
     }
 }
 
-export function aDissolutionSession (): DissolutionSessionBuilder {
-    return new DissolutionSessionBuilder()
+export function aDissolutionSession(): DissolutionSessionBuilder {
+    return new DissolutionSessionBuilder();
 }

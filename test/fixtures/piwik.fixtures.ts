@@ -1,6 +1,6 @@
-import PiwikConfig from "app/models/piwikConfig"
+import PiwikConfig from "app/models/piwikConfig";
 
-export function generatePiwikConfig (): PiwikConfig {
+export function generatePiwikConfig(): PiwikConfig {
     return {
         url: "",
         siteId: "",
@@ -11,6 +11,6 @@ export function generatePiwikConfig (): PiwikConfig {
         limitedCompanyConfirmationGoalId: 1000,
         partnershipConfirmationGoalId: 1001,
         multiDirectorConfirmationGoalId: 1002,
-        singleDirectorConfirmationGoalId: 1003
-    }
+        singleDirectorConfirmationGoalId: 1003,
+    };
 }

@@ -1,88 +1,93 @@
-import {StatusCodes} from "http-status-codes"
-import {inject} from "inversify"
-import {controller, httpGet, httpPost, requestBody} from "inversify-express-utils"
-import {RedirectResult} from "inversify-express-utils/lib/results"
+import { StatusCodes } from "http-status-codes";
+import { inject } from "inversify";
+import { controller, httpGet, httpPost, requestBody } from "inversify-express-utils";
+import { RedirectResult } from "inversify-express-utils/lib/results";
 
-import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model"
-import generateEndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel"
-import Optional from "app/models/optional"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import ValidationErrors from "app/models/view/validationErrors.model"
-import {ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI} from "app/paths"
-import createEndorseCertificateSchema from "app/schemas/endorseCertificate.schema"
-import DissolutionService from "app/services/dissolution/dissolution.service"
-import IpAddressService from "app/services/ip-address/ipAddress.service"
-import SessionService from "app/services/session/session.service"
-import FormValidator from "app/utils/formValidator.util"
+import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model";
+import generateEndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel";
+import Optional from "app/models/optional";
+import DissolutionSession from "app/models/session/dissolutionSession.model";
+import ValidationErrors from "app/models/view/validationErrors.model";
+import { ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths";
+import createEndorseCertificateSchema from "app/schemas/endorseCertificate.schema";
+import DissolutionService from "app/services/dissolution/dissolution.service";
+import IpAddressService from "app/services/ip-address/ipAddress.service";
+import SessionService from "app/services/session/session.service";
+import FormValidator from "app/utils/formValidator.util";
 import TYPES from "app/types";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 
 interface ViewModel {
-  approvalModel: DissolutionApprovalModel
-  errors?: ValidationErrors
-  backUri?: string
+    approvalModel: DissolutionApprovalModel;
+    errors?: ValidationErrors;
+    backUri?: string;
 }
 
 @controller(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, TYPES.JourneyIdAuthMiddleware)
 export class EndorseCompanyClosureCertificateController extends JourneyBaseController {
-
-    public constructor (
+    public constructor(
         @inject(SessionService) private readonly session: SessionService,
         @inject(FormValidator) private readonly validator: FormValidator,
         @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
         @inject(IpAddressService) private readonly ipAddressService: IpAddressService,
-        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
-
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
     ) {
-        super(journeyPathService)
+        super(journeyPathService);
     }
 
     @httpGet("")
-    public async get (): Promise<string> {
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const approvalModel = dissolutionSession.approval!
-        const backUri = this.getBackUri(approvalModel.companyNumber)
-        return this.renderView(approvalModel, backUri)
+    public async get(): Promise<string> {
+        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!;
+        const approvalModel = dissolutionSession.approval!;
+        const backUri = this.getBackUri(approvalModel.companyNumber);
+        return this.renderView(approvalModel, backUri);
     }
 
     @httpPost("")
-    public async post (@requestBody() body: generateEndorseCertificateFormModel): Promise<string | RedirectResult> {
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const approvalModel = dissolutionSession.approval!
-        const backUri = this.getBackUri(approvalModel.companyNumber)
+    public async post(@requestBody() body: generateEndorseCertificateFormModel): Promise<string | RedirectResult> {
+        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!;
+        const approvalModel = dissolutionSession.approval!;
+        const backUri = this.getBackUri(approvalModel.companyNumber);
 
-        const validationSchema = createEndorseCertificateSchema(approvalModel)
-        const errors: Optional<ValidationErrors> = this.validator.validate(body, validationSchema)
+        const validationSchema = createEndorseCertificateSchema(approvalModel);
+        const errors: Optional<ValidationErrors> = this.validator.validate(body, validationSchema);
 
         if (errors) {
-            return this.renderView(approvalModel, backUri, errors)
+            return this.renderView(approvalModel, backUri, errors);
         }
 
-        await this.approveDissolution()
+        await this.approveDissolution();
 
-        return this.redirect(this.journeyPath(REDIRECT_GATE_URI))
+        return this.redirect(this.journeyPath(REDIRECT_GATE_URI));
     }
 
-    private async approveDissolution (): Promise<void> {
-        const token: string = this.session.getAccessToken(this.httpContext.request)
-        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!
-        const ipAddress: string = this.ipAddressService.getIpAddress(this.httpContext.request)
+    private async approveDissolution(): Promise<void> {
+        const token: string = this.session.getAccessToken(this.httpContext.request);
+        const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!;
+        const ipAddress: string = this.ipAddressService.getIpAddress(this.httpContext.request);
 
-        await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress)
+        await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress);
     }
 
-    private getBackUri (companyNumber: string): string {
-        return VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + companyNumber
+    private getBackUri(companyNumber: string): string {
+        return VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + companyNumber;
     }
 
-    private async renderView (approvalModel: DissolutionApprovalModel, backUri: string, errors?: ValidationErrors): Promise<string> {
-
+    private async renderView(
+        approvalModel: DissolutionApprovalModel,
+        backUri: string,
+        errors?: ValidationErrors
+    ): Promise<string> {
         const viewModel: ViewModel = {
             approvalModel,
             errors,
-            backUri
-        }
-        return super.render("endorse-company-closure-certificate", viewModel, errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK)
+            backUri,
+        };
+        return super.render(
+            "endorse-company-closure-certificate",
+            viewModel,
+            errors ? StatusCodes.BAD_REQUEST : StatusCodes.OK
+        );
     }
 }

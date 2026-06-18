@@ -1,19 +1,18 @@
-import "reflect-metadata"
+import "reflect-metadata";
 
-import { provide } from "inversify-binding-decorators"
+import { provide } from "inversify-binding-decorators";
 
-import { DirectorToSign } from "app/models/session/directorToSign.model"
-import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model"
+import { DirectorToSign } from "app/models/session/directorToSign.model";
+import CheckYourAnswersDirector from "app/models/view/checkYourAnswersDirector.model";
 
 @provide(CheckYourAnswersDirectorMapper)
 export default class CheckYourAnswersDirectorMapper {
-
-    public mapToCheckYourAnswersDirector (director: DirectorToSign): CheckYourAnswersDirector {
+    public mapToCheckYourAnswersDirector(director: DirectorToSign): CheckYourAnswersDirector {
         return {
             id: director.id,
             name: director.name,
             email: director.email!,
-            onBehalfName: director.onBehalfName
-        }
+            onBehalfName: director.onBehalfName,
+        };
     }
 }

@@ -1,5 +1,5 @@
 export interface CompanyTypeList {
-  [key: string]: string
+    [key: string]: string;
 }
 
 export const companyTypeList: CompanyTypeList = {
@@ -7,7 +7,8 @@ export const companyTypeList: CompanyTypeList = {
     ltd: "Private limited company",
     plc: "Public limited company",
     "old-public-company": "Old public company",
-    "private-limited-guarant-nsc-limited-exemption": "Private Limited Company by guarantee without share capital, use of 'Limited' exemption",
+    "private-limited-guarant-nsc-limited-exemption":
+        "Private Limited Company by guarantee without share capital, use of 'Limited' exemption",
     "limited-partnership": "Limited partnership",
     "private-limited-guarant-nsc": "Private limited by guarantee without share capital",
     "converted-or-closed": "Converted / closed",
@@ -34,9 +35,9 @@ export const companyTypeList: CompanyTypeList = {
     "scottish-partnership": "Scottish qualifying partnership",
     "charitable-incorporated-organisation": "Charitable incorporated organisation",
     "scottish-charitable-incorporated-organisation": "Scottish charitable incorporated organisation",
-    "further-education-or-sixth-form-college-corporation": "Further education or sixth form college corporation"
-}
+    "further-education-or-sixth-form-college-corporation": "Further education or sixth form college corporation",
+};
 
-export function asCompanyTypeText (companyType: string): string {
-    return companyTypeList[companyType] === undefined ? companyType : companyTypeList[companyType]
+export function asCompanyTypeText(companyType: string): string {
+    return companyTypeList[companyType] === undefined ? companyType : companyTypeList[companyType];
 }

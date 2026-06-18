@@ -1,8 +1,7 @@
-export function firstParam (value?: string | string[] | null): string | undefined {
+export function firstParam(value?: string | string[] | null): string | undefined {
     if (value === undefined || value === null) {
-        return undefined
+        return undefined;
     }
 
-    return Array.isArray(value) ? value[0] : value
+    return Array.isArray(value) ? value[0] : value;
 }
-
