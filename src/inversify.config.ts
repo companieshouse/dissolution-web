@@ -37,6 +37,7 @@ export function initContainer (): Container {
     container.bind<string>(TYPES.DISSOLUTIONS_API_URL).toConstantValue(getEnvOrThrow("DISSOLUTIONS_API_URL"))
     container.bind<Optional<string>>(TYPES.NODE_ENV).toConstantValue(getEnv("NODE_ENV"))
     container.bind<string>(TYPES.PAYMENTS_API_URL).toConstantValue(getEnvOrThrow("PAYMENTS_API_URL"))
+    container.bind<string>(TYPES.TRANSACTIONS_API_URL).toConstantValue(getEnvOrThrow("TRANSACTIONS_API_URL"))
 
     const piwikConfig: PiwikConfig = {
         url: getEnvOrThrow("PIWIK_URL"),

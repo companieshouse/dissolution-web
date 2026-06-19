@@ -27,6 +27,7 @@ const mockEnvVars = (container: Container): void => {
     const logger = createLogger(APP_NAME)
     container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger)
     container.bind(TYPES.PAYMENTS_API_URL).toConstantValue("PAYMENTS_API_URL")
+    container.bind(TYPES.TRANSACTIONS_API_URL).toConstantValue("TRANSACTIONS_API_URL")
     container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create())
     container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client())
 
