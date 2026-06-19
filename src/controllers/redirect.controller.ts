@@ -26,6 +26,9 @@ import SessionService from "app/services/session/session.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import TYPES from "app/types";
+import TransactionService from "app/services/transaction/transaction.service";
+import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
+import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 
 @controller(REDIRECT_GATE_URI, TYPES.JourneyIdAuthMiddleware)
 export class RedirectController extends JourneyBaseController {
@@ -34,7 +37,9 @@ export class RedirectController extends JourneyBaseController {
         @inject(DissolutionService) private readonly service: DissolutionService,
         @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
         @inject(ApprovalService) private readonly approvalService: ApprovalService,
-        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
+        @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
+        @inject(TransactionService) private readonly transactionService: TransactionService,
+        @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean
     ) {
         super(journeyPathService);
     }
@@ -45,6 +50,10 @@ export class RedirectController extends JourneyBaseController {
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session);
 
         if (!dissolution) {
+            if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED) {
+                await this.createTransaction(session);
+            }
+
             return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI));
         }
 
@@ -173,5 +182,10 @@ export class RedirectController extends JourneyBaseController {
             default:
                 throw new Error("Unexpected payment status received");
         }
+    }
+
+    private async createTransaction({ companyNumber }: DissolutionSession): Promise<Transaction> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+        return this.transactionService.createTransaction(token, companyNumber, DESCRIPTION, REFERENCE);
     }
 }

@@ -5,12 +5,10 @@ import { StatusCodes } from "http-status-codes";
 import APIClientFactory from "app/services/clients/apiClient.factory";
 import TransactionApiClient, { TransactionApiError } from "app/services/clients/transactionApi.client";
 import TransactionService from "@companieshouse/api-sdk-node/dist/services/transaction/service";
-import { generateNewTransaction, generateTransactionApiError } from "test/fixtures/transaction.fixtures";
+import { generateCreateTransactionDTOs, generateTransactionApiError } from "test/fixtures/transaction.fixtures";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
-import { aTransaction } from "test/fixtures/transaction.builder";
 
 const COMPANY_NUMBER = "12345678";
-const TRANSACTION_ID = "2222";
 const TX_REF = "ABC123";
 const TX_DESC = "Some transaction description";
 
@@ -18,37 +16,30 @@ describe("TransactionApiClient", () => {
     let factory: APIClientFactory;
     let transactionService: TransactionService;
     let transactionApiClient: TransactionApiClient;
-    let createTransactionRequest: Transaction;
 
     beforeEach(() => {
         factory = mock(APIClientFactory);
         transactionService = mock(TransactionService);
         transactionApiClient = new TransactionApiClient(instance(factory));
-        createTransactionRequest = aTransaction()
-            .withCompanyNumber(COMPANY_NUMBER)
-            .withReference(TX_REF)
-            .withDescription(TX_DESC)
-            .build();
     });
 
     describe("createTransaction", () => {
         it("should create and return a transaction", async () => {
-            const newTx: Transaction = aTransaction()
-                .withId(TRANSACTION_ID)
-                .withCompanyNumber(COMPANY_NUMBER)
-                .withReference(TX_REF)
-                .withDescription(TX_DESC)
-                .build();
-            const result = generateNewTransaction({ resource: newTx });
+            const { createTransactionRequest, createTransactionResponse } = generateCreateTransactionDTOs(
+                COMPANY_NUMBER,
+                TX_DESC,
+                TX_REF
+            );
 
             when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
-            when(transactionService.postTransaction(createTransactionRequest)).thenResolve(result);
+            when(transactionService.postTransaction(createTransactionRequest)).thenResolve(createTransactionResponse);
 
             const response: Transaction = await transactionApiClient.postTransaction(TOKEN, createTransactionRequest);
-            assert.equal(response, result.resource);
+            assert.equal(response, createTransactionResponse.resource);
         });
 
         it("Should throw an error when transaction api returns a status greater than 400", async () => {
+            const { createTransactionRequest } = generateCreateTransactionDTOs(COMPANY_NUMBER, TX_DESC, TX_REF);
             const result = generateTransactionApiError(StatusCodes.BAD_REQUEST);
 
             when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
@@ -68,16 +59,17 @@ describe("TransactionApiClient", () => {
         });
 
         it("Should throw an error when transaction api returns a status other than 201", async () => {
-            const newTx: Transaction = aTransaction()
-                .withId(TRANSACTION_ID)
-                .withCompanyNumber(COMPANY_NUMBER)
-                .withReference(TX_REF)
-                .withDescription(TX_DESC)
-                .build();
-            const result = generateNewTransaction({ httpStatusCode: StatusCodes.OK, resource: newTx });
+            const { createTransactionRequest, createTransactionResponse } = generateCreateTransactionDTOs(
+                COMPANY_NUMBER,
+                TX_DESC,
+                TX_REF
+            );
 
             when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
-            when(transactionService.postTransaction(createTransactionRequest)).thenResolve(result);
+            when(transactionService.postTransaction(createTransactionRequest)).thenResolve({
+                ...createTransactionResponse,
+                httpStatusCode: StatusCodes.OK,
+            });
 
             try {
                 await transactionApiClient.postTransaction(TOKEN, createTransactionRequest);
@@ -90,10 +82,17 @@ describe("TransactionApiClient", () => {
         });
 
         it("Should throw an error when transaction api returns no resource", async () => {
-            const result = generateNewTransaction({ httpStatusCode: StatusCodes.CREATED, resource: undefined });
+            const { createTransactionRequest, createTransactionResponse } = generateCreateTransactionDTOs(
+                COMPANY_NUMBER,
+                TX_DESC,
+                TX_REF
+            );
 
             when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
-            when(transactionService.postTransaction(createTransactionRequest)).thenResolve(result);
+            when(transactionService.postTransaction(createTransactionRequest)).thenResolve({
+                ...createTransactionResponse,
+                resource: undefined,
+            });
 
             try {
                 await transactionApiClient.postTransaction(TOKEN, createTransactionRequest);

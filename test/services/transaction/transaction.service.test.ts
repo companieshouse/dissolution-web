@@ -1,7 +1,7 @@
 import { assert } from "chai";
 import { StatusCodes } from "http-status-codes";
 import { anything, instance, mock, verify, when } from "ts-mockito";
-import { TOKEN } from "../../fixtures/session.fixtures";
+import { TOKEN } from "test/fixtures/session.fixtures";
 import TransactionService from "app/services/transaction/transaction.service";
 import TransactionApiClient, { TransactionApiError } from "app/services/clients/transactionApi.client";
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
