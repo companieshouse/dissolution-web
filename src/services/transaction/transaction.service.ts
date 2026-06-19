@@ -24,12 +24,12 @@ export default class TransactionService {
         };
 
         try {
-            const response: Transaction = await this.client.createTransaction(token, transaction);
+            const response: Transaction = await this.client.postTransaction(token, transaction);
             this.logger.debug(`Received transaction ${JSON.stringify(response)}`);
             return response;
         } catch (err: unknown) {
             this.logger.error(JSON.stringify(err));
-            return Promise.reject(new Error("Failed to create transaction"));
+            return Promise.reject(new Error(`Failed to create transaction for company number ${companyNumber}`));
         }
     }
 }

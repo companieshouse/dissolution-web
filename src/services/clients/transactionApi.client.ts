@@ -1,40 +1,38 @@
 import "reflect-metadata";
 
-import Resource, { ApiError, ApiErrorResponse } from "@companieshouse/api-sdk-node/dist/services/resource";
+import { ApiError } from "@companieshouse/api-sdk-node/dist/services/resource";
 import { inject } from "inversify";
 import { provide } from "inversify-binding-decorators";
 import APIClientFactory from "./apiClient.factory";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
-import Optional from "app/models/optional";
 import { StatusCodes } from "http-status-codes";
+
+type TransactionApiResponse<T> = {
+    httpStatusCode?: number;
+    resource?: T;
+    errors?: ApiError[];
+};
 
 @provide(TransactionApiClient)
 export default class TransactionApiClient {
     public constructor(@inject(APIClientFactory) private readonly factory: APIClientFactory) {}
 
-    public async createTransaction(token: string, body: Transaction): Promise<Transaction> {
-        const response: Resource<Transaction> | ApiErrorResponse = await this.factory
+    public async postTransaction(token: string, body: Transaction): Promise<Transaction> {
+        const response: TransactionApiResponse<Transaction> = await this.factory
             .getTransactionService(token)
             .postTransaction(body);
 
-        if (this.isFailure(response)) {
-            throw new TransactionApiError("Failed to post transaction", response.httpStatusCode, response.errors);
-        } else if (response.httpStatusCode !== StatusCodes.CREATED) {
-            throw new TransactionApiError("Failed to create transaction", response.httpStatusCode);
+        if (response.httpStatusCode !== StatusCodes.CREATED) {
+            throw new TransactionApiError(
+                `Failed to post transaction - invalid HTTP status ${response.httpStatusCode}`,
+                response.httpStatusCode,
+                response.errors
+            );
         }
 
-        const tx: Optional<Transaction> = this.unwrapResponse(response);
-        if (!tx) {
-            throw new Error("Failed to return a transaction response");
+        if (!response.resource) {
+            throw new Error("Failed to post transaction - No transaction resource returned");
         }
-        return tx;
-    }
-
-    public isFailure(obj: any): obj is ApiErrorResponse {
-        return !obj.httpStatusCode || obj.httpStatusCode >= 400;
-    }
-
-    public unwrapResponse<T>(response: Resource<T>): Optional<T> {
         return response.resource;
     }
 }

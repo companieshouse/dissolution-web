@@ -7,6 +7,7 @@ export class TransactionBuilder {
     private companyName?: string;
     private companyNumber?: string = "01777777";
     private description: string = "Some transaction description";
+    private createdBy?: { language: string; id: string; email: string };
 
     public withId(id: string): this {
         this.id = id;
@@ -38,6 +39,11 @@ export class TransactionBuilder {
         return this;
     }
 
+    public withCreatedBy(id: string, email: string, language: string = "en"): this {
+        this.createdBy = { id, email, language };
+        return this;
+    }
+
     public build(): Transaction {
         return {
             id: this.id,
@@ -46,6 +52,7 @@ export class TransactionBuilder {
             companyName: this.companyName,
             companyNumber: this.companyNumber,
             description: this.description,
+            createdBy: this.createdBy,
         };
     }
 }
