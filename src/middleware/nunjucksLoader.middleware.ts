@@ -1,39 +1,38 @@
-import "reflect-metadata"
-import * as express from "express"
-import { inject } from "inversify"
-import { provide } from "inversify-binding-decorators"
-import nunjucks from "nunjucks"
-import * as path from "path"
-import PiwikConfig from "app/models/piwikConfig"
-import { ROOT_URI } from "app/paths"
-import TYPES from "app/types"
-import { addFilters, addGlobals } from "app/utils/nunjucks.util"
+import "reflect-metadata";
+import * as express from "express";
+import { inject } from "inversify";
+import { provide } from "inversify-binding-decorators";
+import nunjucks from "nunjucks";
+import * as path from "path";
+import PiwikConfig from "app/models/piwikConfig";
+import { ROOT_URI } from "app/paths";
+import TYPES from "app/types";
+import { addFilters, addGlobals } from "app/utils/nunjucks.util";
 
 import {
     BANNER_FEEDBACK_LINK,
     CONFIRMATION_FEEDBACK_LINK,
     PAGE_TITLE_SUFFIX,
-    SERVICE_NAME
-} from "app/constants/app.const"
+    SERVICE_NAME,
+} from "app/constants/app.const";
 import JourneyPathService from "app/services/session/journeyPath.service";
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
-
-    public constructor (
-    @inject(TYPES.CDN_HOST) private CDN_HOST: string,
-    @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
-    @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
-    @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
-    @inject(JourneyPathService) private readonly journeyPathService: JourneyPathService
+    public constructor(
+        @inject(TYPES.CDN_HOST) private CDN_HOST: string,
+        @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
+        @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
+        @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
+        @inject(JourneyPathService) private readonly journeyPathService: JourneyPathService
     ) {}
 
-    public configureNunjucks (app: express.Application, directory: string, nonce: string): void {
-        app.use(ROOT_URI, express.static(path.join(directory, "/node_modules/govuk-frontend")))
-        app.use(ROOT_URI, express.static(path.join(directory, "/node_modules/govuk-frontend/govuk")))
-        app.use("/assets", express.static(path.join(directory, "/assets")))
+    public configureNunjucks(app: express.Application, directory: string, nonce: string): void {
+        app.use(ROOT_URI, express.static(path.join(directory, "/node_modules/govuk-frontend")));
+        app.use(ROOT_URI, express.static(path.join(directory, "/node_modules/govuk-frontend/govuk")));
+        app.use("/assets", express.static(path.join(directory, "/assets")));
 
-        app.set("view engine", "njk")
+        app.set("view engine", "njk");
 
         const env: nunjucks.Environment = nunjucks.configure(
             [
@@ -41,48 +40,51 @@ export default class NunjucksLoader {
                 "dist/views",
                 "node_modules/govuk-frontend",
                 "node_modules/govuk-frontend/components",
-                "node_modules/@companieshouse"
+                "node_modules/@companieshouse",
             ],
             {
                 autoescape: true,
-                express: app
+                express: app,
             }
-        )
+        );
 
-        addFilters(env)
-        addGlobals(env)
+        addFilters(env);
+        addGlobals(env);
 
-        this.addRequestLocals(app)
-        this.addLocals(app, nonce)
+        this.addRequestLocals(app);
+        this.addLocals(app, nonce);
     }
 
-    private addLocals (app: express.Application, nonce: string): void {
+    private addLocals(app: express.Application, nonce: string): void {
         app.locals.cdn = {
-            host: this.CDN_HOST
-        }
+            host: this.CDN_HOST,
+        };
 
         app.locals.chs = {
-            url: this.CHS_URL
-        }
+            url: this.CHS_URL,
+        };
 
-        app.locals.piwik = this.PIWIK_CONFIG
-        app.locals.serviceName = SERVICE_NAME
-        app.locals.pageTitleSuffix = PAGE_TITLE_SUFFIX
-        app.locals.nonce = nonce
-        app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED
-        app.locals.bannerFeedbackLink = BANNER_FEEDBACK_LINK
-        app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK
+        app.locals.piwik = this.PIWIK_CONFIG;
+        app.locals.serviceName = SERVICE_NAME;
+        app.locals.pageTitleSuffix = PAGE_TITLE_SUFFIX;
+        app.locals.nonce = nonce;
+        app.locals.payByAccountFeatureEnabled = this.PAY_BY_ACCOUNT_FEATURE_ENABLED;
+        app.locals.bannerFeedbackLink = BANNER_FEEDBACK_LINK;
+        app.locals.confirmationFeedbackLink = CONFIRMATION_FEEDBACK_LINK;
     }
 
     private addRequestLocals(app: express.Application): void {
         app.use((req, res, next) => {
-            res.locals.journeyPath = (pathTemplate: string, options?: {
-                journeyId?: string,
-                params?: Record<string, string | number>
-            }): string => {
-                return this.journeyPathService.journeyPath(req, pathTemplate, options)
-            }
-            next()
-        })
+            res.locals.journeyPath = (
+                pathTemplate: string,
+                options?: {
+                    journeyId?: string;
+                    params?: Record<string, string | number>;
+                }
+            ): string => {
+                return this.journeyPathService.journeyPath(req, pathTemplate, options);
+            };
+            next();
+        });
     }
 }

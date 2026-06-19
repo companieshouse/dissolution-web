@@ -1,30 +1,30 @@
-import SelectedDirectorDetails from "app/models/view/selectedDirectorDetails.model"
-import OfficerRole from "app/models/dto/officerRole.enum"
+import SelectedDirectorDetails from "app/models/view/selectedDirectorDetails.model";
+import OfficerRole from "app/models/dto/officerRole.enum";
 
 export class SelectedDirectorDetailsBuilder {
-    private _id: string = "default-id"
-    private _name: string = "default-name"
-    private _officerRole: OfficerRole = OfficerRole.DIRECTOR
-    private _onBehalfName?: string
+    private _id: string = "default-id";
+    private _name: string = "default-name";
+    private _officerRole: OfficerRole = OfficerRole.DIRECTOR;
+    private _onBehalfName?: string;
 
     withId(id: string): this {
-        this._id = id
-        return this
+        this._id = id;
+        return this;
     }
 
     withName(name: string): this {
-        this._name = name
-        return this
+        this._name = name;
+        return this;
     }
 
     withOfficerRole(officerRole: OfficerRole): this {
-        this._officerRole = officerRole
-        return this
+        this._officerRole = officerRole;
+        return this;
     }
 
     withOnBehalfName(onBehalfName: string): this {
-        this._onBehalfName = onBehalfName
-        return this
+        this._onBehalfName = onBehalfName;
+        return this;
     }
 
     build(): SelectedDirectorDetails {
@@ -32,12 +32,11 @@ export class SelectedDirectorDetailsBuilder {
             id: this._id,
             name: this._name,
             officerRole: this._officerRole,
-            onBehalfName: this._onBehalfName
-        }
+            onBehalfName: this._onBehalfName,
+        };
     }
 }
 
 export function aSelectedDirectorDetails(): SelectedDirectorDetailsBuilder {
-    return new SelectedDirectorDetailsBuilder()
+    return new SelectedDirectorDetailsBuilder();
 }
-

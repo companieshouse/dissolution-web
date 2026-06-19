@@ -1,5 +1,5 @@
 export interface CompanyStatusList {
-    [key: string]: string
+    [key: string]: string;
 }
 
 export const companyStatusList: CompanyStatusList = {
@@ -12,9 +12,9 @@ export const companyStatusList: CompanyStatusList = {
     "insolvency-proceedings": "Insolvency Proceedings",
     administration: "In Administration",
     open: "Open",
-    closed: "Closed"
-}
+    closed: "Closed",
+};
 
-export function asCompanyStatusText (companyStatus: string): string {
-    return companyStatusList[companyStatus]
+export function asCompanyStatusText(companyStatus: string): string {
+    return companyStatusList[companyStatus];
 }

@@ -1,90 +1,87 @@
-import "reflect-metadata"
+import "reflect-metadata";
 
-import { assert } from "chai"
-import { Application, Request } from "express"
-import { StatusCodes } from "http-status-codes"
-import request from "supertest"
-import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito"
-import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor"
+import { assert } from "chai";
+import { Application, Request } from "express";
+import { StatusCodes } from "http-status-codes";
+import request from "supertest";
+import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito";
+import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor";
 import {
     generateDirectorDetails,
     generateSelectDirectorFormModel,
-    generateSelectSignatoriesFormModel
-} from "../fixtures/companyOfficers.fixtures"
-import { generateValidationError } from "../fixtures/error.fixtures"
-import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures"
-import { createApp } from "./helpers/application.factory"
-import HtmlAssertHelper from "./helpers/htmlAssert.helper"
+    generateSelectSignatoriesFormModel,
+} from "../fixtures/companyOfficers.fixtures";
+import { generateValidationError } from "../fixtures/error.fixtures";
+import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures";
+import { createApp } from "./helpers/application.factory";
+import HtmlAssertHelper from "./helpers/htmlAssert.helper";
 
-import "app/controllers/selectSignatories.controller"
-import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper"
-import OfficerType from "app/models/dto/officerType.enum"
-import OfficerRole from "app/models/dto/officerRole.enum"
-import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model"
-import DissolutionSession from "app/models/session/dissolutionSession.model"
-import ValidationErrors from "app/models/view/validationErrors.model"
-import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from "app/paths"
-import CompanyOfficersService from "app/services/company-officers/companyOfficers.service"
-import SessionService from "app/services/session/session.service"
-import SignatoryService from "app/services/signatories/signatory.service"
-import FormValidator from "app/utils/formValidator.util"
-import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock"
-import { aDirectorDetails } from "../fixtures/directorDetails.builder"
+import "app/controllers/selectSignatories.controller";
+import DirectorToSignMapper from "app/mappers/check-your-answers/directorToSign.mapper";
+import OfficerType from "app/models/dto/officerType.enum";
+import OfficerRole from "app/models/dto/officerRole.enum";
+import SelectSignatoriesFormModel from "app/models/form/selectSignatories.model";
+import DissolutionSession from "app/models/session/dissolutionSession.model";
+import ValidationErrors from "app/models/view/validationErrors.model";
+import { DEFINE_SIGNATORY_INFO_URI, SELECT_SIGNATORIES_URI } from "app/paths";
+import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
+import SessionService from "app/services/session/session.service";
+import SignatoryService from "app/services/signatories/signatory.service";
+import FormValidator from "app/utils/formValidator.util";
+import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import { aDirectorDetails } from "../fixtures/directorDetails.builder";
 import JourneyPathService from "app/services/session/journeyPath.service";
 
-mockCsrfMiddleware.restore()
+mockCsrfMiddleware.restore();
 
 describe("SelectSignatoriesController", () => {
+    let session: SessionService;
+    let officerService: CompanyOfficersService;
+    let signatoryService: SignatoryService;
+    let validator: FormValidator;
+    let directorToSignmapper: DirectorToSignMapper;
 
-    let session: SessionService
-    let officerService: CompanyOfficersService
-    let signatoryService: SignatoryService
-    let validator: FormValidator
-    let directorToSignmapper: DirectorToSignMapper
+    const COMPANY_NUMBER = "01777777";
 
-    const COMPANY_NUMBER = "01777777"
+    const DIRECTOR_1_ID = "123";
+    const DIRECTOR_2_ID = "456";
+    const NOT_A_DIRECTOR_ID = "other";
 
-    const DIRECTOR_1_ID = "123"
-    const DIRECTOR_2_ID = "456"
-    const NOT_A_DIRECTOR_ID = "other"
-
-    let dissolutionSession: DissolutionSession
+    let dissolutionSession: DissolutionSession;
 
     beforeEach(() => {
-        session = mock(SessionService)
-        officerService = mock(CompanyOfficersService)
-        signatoryService = mock(SignatoryService)
-        validator = mock(FormValidator)
-        directorToSignmapper = new DirectorToSignMapper()
+        session = mock(SessionService);
+        officerService = mock(CompanyOfficersService);
+        signatoryService = mock(SignatoryService);
+        validator = mock(FormValidator);
+        directorToSignmapper = new DirectorToSignMapper();
 
-        when(session.getAccessToken(anything())).thenReturn(TOKEN)
+        when(session.getAccessToken(anything())).thenReturn(TOKEN);
 
-        dissolutionSession = generateDissolutionSession(COMPANY_NUMBER)
-        dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID)
-    })
+        dissolutionSession = generateDissolutionSession(COMPANY_NUMBER);
+        dissolutionSession.selectDirectorForm = generateSelectDirectorFormModel(NOT_A_DIRECTOR_ID);
+    });
 
     describe("GET - ensure that page loads correctly", () => {
         it("should render the select signatories page with the relevant options", async () => {
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
                 { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-            ])
+                { ...generateDirectorDetails(), id: DIRECTOR_2_ID },
+            ]);
 
             const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-            })
+                container.rebind(SessionService).toConstantValue(instance(session));
+                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
+            });
 
-            const res = await request(app)
-                .get(SELECT_SIGNATORIES_URI)
-                .expect(StatusCodes.OK)
+            const res = await request(app).get(SELECT_SIGNATORIES_URI).expect(StatusCodes.OK);
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-            assert.equal(htmlAssertHelper.getValue("#signatories"), DIRECTOR_1_ID)
-            assert.equal(htmlAssertHelper.getValue("#signatories-2"), DIRECTOR_2_ID)
-        })
+            assert.equal(htmlAssertHelper.getValue("#signatories"), DIRECTOR_1_ID);
+            assert.equal(htmlAssertHelper.getValue("#signatories-2"), DIRECTOR_2_ID);
+        });
 
         const expectedContentCases = [
             {
@@ -93,8 +90,10 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: false,
                 expectedPageHeading: "Which directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
-                explanatory1: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
-                explanatory2: "If this list of directors is incorrect or out of date, you need to inform us about changes to directors (opens in new tab) before continuing with this application.",
+                explanatory1:
+                    "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2:
+                    "If this list of directors is incorrect or out of date, you need to inform us about changes to directors (opens in new tab) before continuing with this application.",
             },
             {
                 description: "DS01 journey (applicant is a director)",
@@ -102,8 +101,10 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: true,
                 expectedPageHeading: "Which other directors will sign the application?",
                 hint: "More than half of the directors must sign, so you must select 2 or more of these directors.",
-                explanatory1: "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
-                explanatory2: "If this list of directors is incorrect or out of date, you need to inform us about changes to directors (opens in new tab) before continuing with this application."
+                explanatory1:
+                    "Directors who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2:
+                    "If this list of directors is incorrect or out of date, you need to inform us about changes to directors (opens in new tab) before continuing with this application.",
             },
             {
                 description: "LLDS01 journey (applicant is not a member)",
@@ -111,8 +112,10 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: false,
                 expectedPageHeading: "Which members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
-                explanatory1: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
-                explanatory2: "If this list of members is incorrect or out of date, you need to inform us about changes to members (opens in new tab) before continuing with this application."
+                explanatory1:
+                    "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2:
+                    "If this list of members is incorrect or out of date, you need to inform us about changes to members (opens in new tab) before continuing with this application.",
             },
             {
                 description: "LLDS01 journey (applicant is a member)",
@@ -120,182 +123,192 @@ describe("SelectSignatoriesController", () => {
                 isApplicantADirector: true,
                 expectedPageHeading: "Which other members will sign the application?",
                 hint: "More than half of the members must sign, so you must select 2 or more of these members.",
-                explanatory1: "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
-                explanatory2: "If this list of members is incorrect or out of date, you need to inform us about changes to members (opens in new tab) before continuing with this application."
-            }
-        ]
+                explanatory1:
+                    "Members who are people must sign the application themselves. Nobody can sign on their behalf.",
+                explanatory2:
+                    "If this list of members is incorrect or out of date, you need to inform us about changes to members (opens in new tab) before continuing with this application.",
+            },
+        ];
 
         expectedContentCases.forEach(testCase => {
             it(`should render the select signatories page with correct static content for ${testCase.description}`, async () => {
-                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2 } = testCase
-                dissolutionSession.officerType = officerType
-                dissolutionSession.isApplicantADirector = isApplicantADirector
+                const { officerType, isApplicantADirector, expectedPageHeading, hint, explanatory1, explanatory2 } =
+                    testCase;
+                dissolutionSession.officerType = officerType;
+                dissolutionSession.isApplicantADirector = isApplicantADirector;
 
-                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                    { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-                ])
-                when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve(
+                    [
+                        { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
+                        { ...generateDirectorDetails(), id: DIRECTOR_2_ID },
+                    ]
+                );
+                when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2);
 
                 const app = createApp(container => {
-                    container.rebind(SessionService).toConstantValue(instance(session))
-                    container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-                    container.rebind(SignatoryService).toConstantValue(instance(signatoryService))
-                })
+                    container.rebind(SessionService).toConstantValue(instance(session));
+                    container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
+                    container.rebind(SignatoryService).toConstantValue(instance(signatoryService));
+                });
 
-                const res = await request(app)
-                    .get(SELECT_SIGNATORIES_URI)
-                    .expect(StatusCodes.OK)
+                const res = await request(app).get(SELECT_SIGNATORIES_URI).expect(StatusCodes.OK);
 
-                const htmlAssertHelper = new HtmlAssertHelper(res.text)
+                const htmlAssertHelper = new HtmlAssertHelper(res.text);
 
-                assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading))
-                assert.isTrue(htmlAssertHelper.hasText("h1", expectedPageHeading))
-                assert.equal(htmlAssertHelper.getText("#signatories-hint"), hint)
-                assert.isTrue(htmlAssertHelper.containsRawText(explanatory1))
-                assert.isTrue(htmlAssertHelper.containsRawText(explanatory2))
-            })
-        })
+                assert.isTrue(htmlAssertHelper.containsText("title", expectedPageHeading));
+                assert.isTrue(htmlAssertHelper.hasText("h1", expectedPageHeading));
+                assert.equal(htmlAssertHelper.getText("#signatories-hint"), hint);
+                assert.isTrue(htmlAssertHelper.containsRawText(explanatory1));
+                assert.isTrue(htmlAssertHelper.containsRawText(explanatory2));
+            });
+        });
 
         it("should prepopulate the select signatories page with the selected signatories from session", async () => {
-            dissolutionSession.selectSignatoriesForm = generateSelectSignatoriesFormModel(DIRECTOR_2_ID)
+            dissolutionSession.selectSignatoriesForm = generateSelectSignatoriesFormModel(DIRECTOR_2_ID);
 
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
                 { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-            ])
+                { ...generateDirectorDetails(), id: DIRECTOR_2_ID },
+            ]);
 
             const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-            })
+                container.rebind(SessionService).toConstantValue(instance(session));
+                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
+            });
 
-            const res = await request(app)
-                .get(SELECT_SIGNATORIES_URI)
-                .expect(StatusCodes.OK)
+            const res = await request(app).get(SELECT_SIGNATORIES_URI).expect(StatusCodes.OK);
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-            assert.isFalse(htmlAssertHelper.hasAttribute("#signatories", "checked"))
-            assert.isTrue(htmlAssertHelper.hasAttribute("#signatories-2", "checked"))
-        })
-    })
+            assert.isFalse(htmlAssertHelper.hasAttribute("#signatories", "checked"));
+            assert.isTrue(htmlAssertHelper.hasAttribute("#signatories-2", "checked"));
+        });
+    });
 
     describe("POST - ensure form submission is handled correctly", () => {
-        function initApp (): Application {
+        function initApp(): Application {
             return createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(session))
-                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService))
-                container.rebind(FormValidator).toConstantValue(instance(validator))
-                container.rebind(DirectorToSignMapper).toConstantValue(directorToSignmapper)
+                container.rebind(SessionService).toConstantValue(instance(session));
+                container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
+                container.rebind(FormValidator).toConstantValue(instance(validator));
+                container.rebind(DirectorToSignMapper).toConstantValue(directorToSignmapper);
                 container.rebind(JourneyPathService).toConstantValue({
-                    journeyPath: (_req: any, pathTemplate: string) => pathTemplate
-                } as any)
-            })
+                    journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
+                } as any);
+            });
         }
 
         beforeEach(() => {
-            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession)
-            when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2)
-        })
+            when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(signatoryService.getMinimumNumberOfSignatories(2, NOT_A_DIRECTOR_ID)).thenReturn(2);
+        });
 
         it("should re-render the view with an error if validation fails", async () => {
-            const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel()
-            const error: ValidationErrors = generateValidationError("signatories", "some signatories error")
+            const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel();
+            const error: ValidationErrors = generateValidationError("signatories", "some signatories error");
 
             when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
                 { ...generateDirectorDetails(), id: DIRECTOR_1_ID },
-                { ...generateDirectorDetails(), id: DIRECTOR_2_ID }
-            ])
-            when(validator.validate(deepEqual(form), anything())).thenReturn(error)
+                { ...generateDirectorDetails(), id: DIRECTOR_2_ID },
+            ]);
+            when(validator.validate(deepEqual(form), anything())).thenReturn(error);
 
-            const app = initApp()
+            const app = initApp();
 
-            const res = await request(app)
-                .post(SELECT_SIGNATORIES_URI)
-                .send(form)
-                .expect(StatusCodes.BAD_REQUEST)
+            const res = await request(app).post(SELECT_SIGNATORIES_URI).send(form).expect(StatusCodes.BAD_REQUEST);
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text)
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
-            assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"))
-            assert.isTrue(htmlAssertHelper.containsText("#signatories-error", "some signatories error"))
-        })
+            assert.isTrue(htmlAssertHelper.selectorExists(".govuk-error-summary"));
+            assert.isTrue(htmlAssertHelper.containsText("#signatories-error", "some signatories error"));
+        });
 
         describe("session", () => {
-
             it("should store the form in session if validation passes", async () => {
-                const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
+                const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID);
 
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
-                    aDirectorDetails().withId(DIRECTOR_1_ID).withOfficerRole(OfficerRole.DIRECTOR).build(),
-                    aDirectorDetails().withId(DIRECTOR_2_ID).withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
-                ])
-                when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve(
+                    [
+                        aDirectorDetails().withId(DIRECTOR_1_ID).withOfficerRole(OfficerRole.DIRECTOR).build(),
+                        aDirectorDetails()
+                            .withId(DIRECTOR_2_ID)
+                            .withOfficerRole(OfficerRole.CORPORATE_DIRECTOR)
+                            .build(),
+                    ]
+                );
+                when(validator.validate(deepEqual(form), anything())).thenReturn(null);
 
-                const app = initApp()
+                const app = initApp();
 
-                await request(app)
-                    .post(SELECT_SIGNATORIES_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                await request(app).post(SELECT_SIGNATORIES_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
 
-                verify(session.setDissolutionSession(anything(), anything())).once()
+                verify(session.setDissolutionSession(anything(), anything())).once();
 
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
+                    session.setDissolutionSession
+                );
+                const updatedSession: DissolutionSession = sessionCaptor.last()[1];
 
-                assert.deepEqual(updatedSession.selectSignatoriesForm, form)
-                assert.isArray(updatedSession.directorsToSign, "directorsToSign should be an array")
-            })
+                assert.deepEqual(updatedSession.selectSignatoriesForm, form);
+                assert.isArray(updatedSession.directorsToSign, "directorsToSign should be an array");
+            });
 
             it("should clear the existing signatories and save the new selection", async () => {
-                const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
+                const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID);
 
-                const director1 = aDirectorDetails().withId(DIRECTOR_1_ID).withName("Signatory 1").withOfficerRole(OfficerRole.DIRECTOR).build()
-                const director2 = aDirectorDetails().withId(DIRECTOR_2_ID).withName("Signatory 2").withOfficerRole(OfficerRole.CORPORATE_DIRECTOR).build()
+                const director1 = aDirectorDetails()
+                    .withId(DIRECTOR_1_ID)
+                    .withName("Signatory 1")
+                    .withOfficerRole(OfficerRole.DIRECTOR)
+                    .build();
+                const director2 = aDirectorDetails()
+                    .withId(DIRECTOR_2_ID)
+                    .withName("Signatory 2")
+                    .withOfficerRole(OfficerRole.CORPORATE_DIRECTOR)
+                    .build();
 
-                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([director1, director2])
-                when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+                when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve(
+                    [director1, director2]
+                );
+                when(validator.validate(deepEqual(form), anything())).thenReturn(null);
 
-                const app = initApp()
+                const app = initApp();
 
-                await request(app)
-                    .post(SELECT_SIGNATORIES_URI)
-                    .send(form)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                await request(app).post(SELECT_SIGNATORIES_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
 
-                verify(session.setDissolutionSession(anything(), anything())).once()
+                verify(session.setDissolutionSession(anything(), anything())).once();
 
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(session.setDissolutionSession)
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1]
+                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
+                    session.setDissolutionSession
+                );
+                const updatedSession: DissolutionSession = sessionCaptor.last()[1];
 
-                assert.equal(updatedSession.directorsToSign!.length, 1)
-                const directorToSign = updatedSession.directorsToSign![0]
-                assert.equal(directorToSign.id, director1.id)
-                assert.equal(directorToSign.name, director1.name)
-                assert.equal(directorToSign.officerRole, director1.officerRole)
-            })
-        })
+                assert.equal(updatedSession.directorsToSign!.length, 1);
+                const directorToSign = updatedSession.directorsToSign![0];
+                assert.equal(directorToSign.id, director1.id);
+                assert.equal(directorToSign.name, director1.name);
+                assert.equal(directorToSign.officerRole, director1.officerRole);
+            });
+        });
 
         it("should redirect to the define signatories info screen if validation passes", async () => {
-            const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID)
+            const form: SelectSignatoriesFormModel = generateSelectSignatoriesFormModel(DIRECTOR_1_ID);
 
             when(officerService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER, NOT_A_DIRECTOR_ID)).thenResolve([
                 aDirectorDetails().withId(DIRECTOR_1_ID).build(),
-                aDirectorDetails().withId(DIRECTOR_2_ID).build()
-            ])
-            when(validator.validate(deepEqual(form), anything())).thenReturn(null)
+                aDirectorDetails().withId(DIRECTOR_2_ID).build(),
+            ]);
+            when(validator.validate(deepEqual(form), anything())).thenReturn(null);
 
-            const app = initApp()
+            const app = initApp();
 
             await request(app)
                 .post(SELECT_SIGNATORIES_URI)
                 .send(form)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", DEFINE_SIGNATORY_INFO_URI)
-        })
-    })
-})
+                .expect("Location", DEFINE_SIGNATORY_INFO_URI);
+        });
+    });
+});

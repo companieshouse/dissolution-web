@@ -1,4 +1,4 @@
-import { fluentProvide } from "inversify-binding-decorators"
+import { fluentProvide } from "inversify-binding-decorators";
 
 /**
  * A small helper to create an inversify-binding-decorators provider
@@ -8,5 +8,4 @@ import { fluentProvide } from "inversify-binding-decorators"
  *  @provideSingleton(TYPES.SomeService)
  *  export default class SomeService { ... }
  */
-export const provideSingleton = (identifier: any) => fluentProvide(identifier).inSingletonScope().done()
-
+export const provideSingleton = (identifier: any) => fluentProvide(identifier).inSingletonScope().done();
