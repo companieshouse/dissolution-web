@@ -61,8 +61,8 @@ export function initContainer(): Container {
         .bind<number>(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED)
         .toConstantValue(Number(getEnvOrThrow("PAY_BY_ACCOUNT_FEATURE_ENABLED")));
     container
-        .bind<number>(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED)
-        .toConstantValue(Number(getEnvOrThrow("FEATURE_FLAG_TRANSACTIONS_ENABLED")));
+        .bind<boolean>(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED)
+        .toConstantValue(Boolean(getEnvOrThrow("FEATURE_FLAG_TRANSACTIONS_ENABLED")));
 
     // AWS
     container.bind<S3Client>(TYPES.S3).toConstantValue(new S3Client({ region: getEnvOrThrow("ENV_REGION_AWS") }));

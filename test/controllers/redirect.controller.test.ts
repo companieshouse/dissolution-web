@@ -150,6 +150,21 @@ describe("RedirectController", () => {
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
         });
 
+        it("should throw an error if create transaction failed when feature toggle is enabled", async () => {
+            const COMPANY_NUMBER = dissolutionSession.companyNumber;
+
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(null);
+            when(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).thenReject(
+                new Error("Failed to create transaction")
+            );
+
+            await request(initApp({ isTransactionsEnabled: true }))
+                .get(REDIRECT_GATE_URI)
+                .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+        });
+
         describe("Pending Approval", () => {
             let dissolution: DissolutionGetResponse;
 
