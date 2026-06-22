@@ -20,6 +20,14 @@ export function getEnvOrDefault(name: string, defaultValue: string): string {
 
 export function getEnvOrThrow(name: string): string {
     return getEnvOr(name, () => {
-        throw Error(`Variable ${name} was not found`);
+        throw new Error(`Variable ${name} was not found`);
     });
 }
+
+export const parseFeatureFlag = (flag: string | undefined): boolean => {
+    if (flag === undefined) {
+        return false;
+    }
+    const featureFlag = flag.toLowerCase();
+    return featureFlag === "true" || featureFlag === "1" || featureFlag === "on" || featureFlag === "yes";
+};
