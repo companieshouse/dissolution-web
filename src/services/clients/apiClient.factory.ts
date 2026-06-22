@@ -13,9 +13,9 @@ import TYPES from "app/types";
 @provide(APIClientFactory)
 export default class APIClientFactory {
     public constructor(
-        @inject(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL) private COMPANY_PROFILE_API_URL: string,
-        @inject(TYPES.PAYMENTS_API_URL) private PAYMENTS_API_URL: string,
-        @inject(TYPES.TRANSACTIONS_API_URL) private TRANSACTIONS_API_URL: string
+        @inject(TYPES.CHS_COMPANY_PROFILE_API_LOCAL_URL) private readonly COMPANY_PROFILE_API_URL: string,
+        @inject(TYPES.PAYMENTS_API_URL) private readonly PAYMENTS_API_URL: string,
+        @inject(TYPES.TRANSACTIONS_API_URL) private readonly TRANSACTIONS_API_URL: string
     ) {}
 
     public getCompanyProfileService(token: string): CompanyProfileService {
