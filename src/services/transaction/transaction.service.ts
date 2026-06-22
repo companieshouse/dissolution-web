@@ -28,8 +28,10 @@ export default class TransactionService {
             this.logger.debug(`Received transaction ${JSON.stringify(response)}`);
             return response;
         } catch (err: unknown) {
-            this.logger.error(JSON.stringify(err));
-            return Promise.reject(new Error(`Failed to create transaction for company number ${companyNumber}`));
+            this.logger.error(
+                `Failed to create transaction for company number ${companyNumber}: ${err instanceof Error ? err.message : JSON.stringify(err)}`
+            );
+            throw new Error(`Failed to create transaction for company number ${companyNumber}`);
         }
     }
 }

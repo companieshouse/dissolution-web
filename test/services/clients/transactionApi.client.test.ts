@@ -23,7 +23,7 @@ describe("TransactionApiClient", () => {
         transactionApiClient = new TransactionApiClient(instance(factory));
     });
 
-    describe("createTransaction", () => {
+    describe("postTransaction", () => {
         it("should create and return a transaction", async () => {
             const { createTransactionRequest, createTransactionResponse } = generateCreateTransactionDTOs(
                 COMPANY_NUMBER,
@@ -38,7 +38,7 @@ describe("TransactionApiClient", () => {
             assert.equal(response, createTransactionResponse.resource);
         });
 
-        it("Should throw an error when transaction api returns a status greater than 400", async () => {
+        it("Should throw an error when transaction api returns a non-201 status", async () => {
             const { createTransactionRequest } = generateCreateTransactionDTOs(COMPANY_NUMBER, TX_DESC, TX_REF);
             const result = generateTransactionApiError(StatusCodes.BAD_REQUEST);
 

@@ -63,7 +63,7 @@ export const createApp = (configureBindings?: (container: Container) => void): A
         journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
     } as any);
 
-    configureBindings?.(container); // eslint-disable-line
+    configureBindings?.(container);
 
     const journeyPathService = container.get(JourneyPathService) as any;
 
