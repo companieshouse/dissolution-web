@@ -5,15 +5,17 @@ import { assert } from "chai";
 import { TOKEN } from "../../fixtures/session.fixtures";
 
 import APIClientFactory from "app/services/clients/apiClient.factory";
+import TransactionService from "@companieshouse/api-sdk-node/dist/services/transaction/service";
 
 describe("APIClientFactory", () => {
     let factory: APIClientFactory;
 
     const COMPANY_PROFILE_API_URL = "http://some-company-profile-url";
     const PAYMENTS_API_URL = "http://some-payments-api-url";
+    const TRANSACTIONS_API_URL = "http://some-transactions-api-url";
 
     beforeEach(() => {
-        factory = new APIClientFactory(COMPANY_PROFILE_API_URL, PAYMENTS_API_URL);
+        factory = new APIClientFactory(COMPANY_PROFILE_API_URL, PAYMENTS_API_URL, TRANSACTIONS_API_URL);
     });
 
     describe("getCompanyProfileService", () => {
@@ -37,6 +39,14 @@ describe("APIClientFactory", () => {
             const result: PaymentService = factory.getPaymentService(TOKEN);
 
             assert.instanceOf(result, PaymentService);
+        });
+    });
+
+    describe("getTransactionService", () => {
+        it("should return an instance of the CH transaction service", () => {
+            const result: TransactionService = factory.getTransactionService(TOKEN);
+
+            assert.instanceOf(result, TransactionService);
         });
     });
 });

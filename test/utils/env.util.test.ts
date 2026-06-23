@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { getEnv, getEnvOr, getEnvOrDefault, getEnvOrThrow } from "app/utils/env.util";
+import { getEnv, getEnvOr, getEnvOrDefault, getEnvOrThrow, parseFeatureFlag } from "app/utils/env.util";
 
 describe("Env Util", () => {
     const testVariable = "TEST_VAR";
@@ -60,6 +60,64 @@ describe("Env Util", () => {
                 Error,
                 `Variable ${testValue} was not found`
             );
+        });
+    });
+
+    describe("parseFeatureFlag", () => {
+        it("should return true if variable is 'on'", function () {
+            assert.isTrue(parseFeatureFlag("on"));
+        });
+
+        it("should return true if variable is 'ON'", function () {
+            assert.isTrue(parseFeatureFlag("ON"));
+        });
+
+        it("should return true if variable is 'true'", function () {
+            assert.isTrue(parseFeatureFlag("true"));
+        });
+
+        it("should return true if variable is 'TRUE'", function () {
+            assert.isTrue(parseFeatureFlag("TRUE"));
+        });
+
+        it("should return true if variable is '1'", function () {
+            assert.isTrue(parseFeatureFlag("1"));
+        });
+
+        it("should return true if variable is 'yes'", function () {
+            assert.isTrue(parseFeatureFlag("yes"));
+        });
+
+        it("should return true if variable is 'YES'", function () {
+            assert.isTrue(parseFeatureFlag("YES"));
+        });
+
+        it("should return false if variable is 'false'", function () {
+            assert.isFalse(parseFeatureFlag("false"));
+        });
+
+        it("should return false if variable is '0'", function () {
+            assert.isFalse(parseFeatureFlag("0"));
+        });
+
+        it("should return false if variable is empty string", function () {
+            assert.isFalse(parseFeatureFlag(""));
+        });
+
+        it("should return false if variable is undefined", function () {
+            assert.isFalse(parseFeatureFlag(undefined));
+        });
+
+        it("should return false if variable is random string", function () {
+            assert.isFalse(parseFeatureFlag("asdfghjkl"));
+        });
+
+        it("should return false if variable is 'off'", function () {
+            assert.isFalse(parseFeatureFlag("off"));
+        });
+
+        it("should return false if variable is 'OFF'", function () {
+            assert.isFalse(parseFeatureFlag("OFF"));
         });
     });
 });

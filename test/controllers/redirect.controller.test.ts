@@ -42,14 +42,22 @@ import {
 import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import TransactionService from "app/services/transaction/transaction.service";
+import TYPES from "app/types";
+import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
+import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
+import { aTransaction } from "test/fixtures/transaction.builder";
 
 mockCsrfMiddleware.restore();
+
+type AppOverrides = Partial<{ isTransactionsEnabled: boolean }>;
 
 describe("RedirectController", () => {
     let session: SessionService;
     let service: DissolutionService;
     let mapper: DissolutionSessionMapper;
     let approvalService: ApprovalService;
+    let transactionService: TransactionService;
 
     const USER_EMAIL = "myemail@mail.com";
     const OTHER_USER_EMAIL = "another@mail.com";
@@ -59,11 +67,12 @@ describe("RedirectController", () => {
         service = mock(DissolutionService);
         mapper = mock(DissolutionSessionMapper);
         approvalService = mock(ApprovalService);
+        transactionService = mock(TransactionService);
 
         when(session.getAccessToken(anything())).thenReturn(TOKEN);
     });
 
-    function initApp(): Application {
+    function initApp({ isTransactionsEnabled }: AppOverrides = {}): Application {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session));
             container.rebind(DissolutionService).toConstantValue(instance(service));
@@ -72,6 +81,8 @@ describe("RedirectController", () => {
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
             } as any);
+            container.rebind(TransactionService).toConstantValue(instance(transactionService));
+            container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(isTransactionsEnabled ?? false);
         });
     }
 
@@ -112,6 +123,46 @@ describe("RedirectController", () => {
                 .get(REDIRECT_GATE_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", SELECT_DIRECTOR_URI);
+
+            verify(transactionService.createTransaction(TOKEN, anything(), anything(), anything())).never();
+        });
+
+        it("should create transaction if feature toggle is enabled and dissolution has not yet been created", async () => {
+            const TRANSACTION_ID = "2222";
+            const COMPANY_NUMBER = dissolutionSession.companyNumber;
+            const newTx: Transaction = aTransaction()
+                .withId(TRANSACTION_ID)
+                .withCompanyNumber(COMPANY_NUMBER)
+                .withReference(REFERENCE)
+                .withDescription(DESCRIPTION)
+                .build();
+
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(null);
+            when(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).thenResolve(
+                newTx
+            );
+
+            await request(initApp({ isTransactionsEnabled: true }))
+                .get(REDIRECT_GATE_URI)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", SELECT_DIRECTOR_URI);
+
+            verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+        });
+
+        it("should throw an error if create transaction failed when feature toggle is enabled", async () => {
+            const COMPANY_NUMBER = dissolutionSession.companyNumber;
+
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(null);
+            when(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).thenReject(
+                new Error("Failed to create transaction")
+            );
+
+            await request(initApp({ isTransactionsEnabled: true }))
+                .get(REDIRECT_GATE_URI)
+                .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
         });
 
         describe("Pending Approval", () => {
