@@ -6,6 +6,7 @@ import SessionService from "app/services/session/session.service";
 import {
     ACCESSIBILITY_STATEMENT_URI,
     BOOTSTRAP_JOURNEY_URI,
+    DIRECT_CERTIFICATE_DOWNLOAD_URI,
     HEALTHCHECK_URI,
     ROOT_URI,
     SEARCH_COMPANY_URI,
@@ -28,6 +29,8 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     `${ACCESSIBILITY_STATEMENT_URI}/`,
     BOOTSTRAP_JOURNEY_URI,
     `${BOOTSTRAP_JOURNEY_URI}/`,
+    DIRECT_CERTIFICATE_DOWNLOAD_URI,
+    `${DIRECT_CERTIFICATE_DOWNLOAD_URI}/`,
 ];
 
 export default function CompanyAuthMiddleware(
