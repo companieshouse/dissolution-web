@@ -4,6 +4,7 @@ export const JOURNEY_PATH_PREFIX = `${ROOT_URI}/:journeyId`;
 export const HEALTHCHECK_URI = `${ROOT_URI}/healthcheck`;
 
 export const BOOTSTRAP_JOURNEY_URI = `${ROOT_URI}/bootstrap-journey`;
+export const DIRECT_CERTIFICATE_DOWNLOAD_URI = `${ROOT_URI}/direct-certificate-download`;
 
 // Redirection
 export const REDIRECT_GATE_URI = `${JOURNEY_PATH_PREFIX}/redirect`;
@@ -41,6 +42,9 @@ export const PAY_BY_ACCOUNT_URI = `${PAYMENT_URI}/pay-by-account`;
 
 export const COMPANY_LOOKUP =
     "/company-lookup/search?forward=/close-a-company/bootstrap-journey?companyNumber={companyNumber}";
+
+export const COMPANY_LOOKUP_DOWNLOAD =
+    "/company-lookup/search?forward=/close-a-company/bootstrap-journey?companyNumber=%7BcompanyNumber%7D%26certificateDownload=true";
 
 // External
 export const CONTACT_US_URI = `${GOV_UK_URI}/find-contact-details-companies-house`;

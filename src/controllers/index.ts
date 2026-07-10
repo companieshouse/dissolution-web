@@ -22,3 +22,4 @@ import "app/controllers/viewFinalConfirmation.controller";
 import "app/controllers/waitForOthersToSign.controller";
 import "app/controllers/whoToTell.controller";
 import "app/controllers/stopScreenBankAccount.controller";
+import "app/controllers/directDownload.controller";
