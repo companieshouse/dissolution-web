@@ -14,6 +14,7 @@ import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths";
 import CompanyService from "app/services/company/company.service";
+import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
 import SessionService from "app/services/session/session.service";
 
 import { generateCompanyDetails } from "test/fixtures/companyProfile.fixtures";
@@ -27,6 +28,7 @@ mockCsrfMiddleware.restore();
 describe("ViewCompanyInformationController", () => {
     let session: SessionService;
     let companyService: CompanyService;
+    let companyOfficersService: CompanyOfficersService;
 
     const COMPANY_NUMBER = "01777777";
 
@@ -35,6 +37,7 @@ describe("ViewCompanyInformationController", () => {
     beforeEach(() => {
         session = mock(SessionService);
         companyService = mock(CompanyService);
+        companyOfficersService = mock(CompanyOfficersService);
 
         dissolutionSession = generateDissolutionSession(COMPANY_NUMBER);
 
@@ -46,6 +49,7 @@ describe("ViewCompanyInformationController", () => {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session));
             container.rebind(CompanyService).toConstantValue(instance(companyService));
+            container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService));
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
             } as any);
@@ -62,6 +66,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -85,6 +91,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -121,6 +129,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -143,6 +153,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve("error message");
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -168,6 +180,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
