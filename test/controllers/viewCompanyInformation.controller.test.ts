@@ -12,7 +12,12 @@ import "app/controllers/viewCompanyInformation.controller";
 import CompanyDetails from "app/models/companyDetails.model";
 import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths";
+import {
+    REDIRECT_GATE_URI,
+    VIEW_COMPANY_INFORMATION_URI,
+    APPLY_USING_PAPER_FORM_DIRECTORS_URI,
+    APPLY_USING_PAPER_FORM_MEMBERS_URI,
+} from "app/paths";
 import CompanyService from "app/services/company/company.service";
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
 import SessionService from "app/services/session/session.service";
@@ -194,6 +199,50 @@ describe("ViewCompanyInformationController", () => {
             // Check that the address value contains <br> tags
             const addressHtml = htmlAssertHelper.getInnerHTML("#company-address-value");
             assert.include(addressHtml, "Line1,<br>Line2,<br>Line3");
+        });
+
+        it("should redirect to paper form directors page when company has more than 150 directors", async () => {
+            const company: CompanyDetails = generateCompanyDetails();
+            company.companyNumber = COMPANY_NUMBER;
+            company.companyName = "Some company name";
+            company.companyStatus = "active";
+            company.companyType = ClosableCompanyType.LTD;
+
+            when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
+            when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(151)).thenReturn(true);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve(
+                Array(151).fill({} as any)
+            );
+
+            const app = initApp();
+
+            await request(app)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", APPLY_USING_PAPER_FORM_DIRECTORS_URI);
+        });
+
+        it("should redirect to paper form members page when LLP has more than 150 members", async () => {
+            const company: CompanyDetails = generateCompanyDetails();
+            company.companyNumber = COMPANY_NUMBER;
+            company.companyName = "Some LLP name";
+            company.companyStatus = "active";
+            company.companyType = ClosableCompanyType.LLP;
+
+            when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
+            when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(200)).thenReturn(true);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve(
+                Array(200).fill({} as any)
+            );
+
+            const app = initApp();
+
+            await request(app)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", APPLY_USING_PAPER_FORM_MEMBERS_URI);
         });
     });
 
