@@ -7,8 +7,8 @@ import {
     generateCompanyDetails,
     generateCompanyProfile,
     generateCompanyProfileResource,
-} from "../../fixtures/companyProfile.fixtures";
-import { TOKEN } from "../../fixtures/session.fixtures";
+} from "test/fixtures/companyProfile.fixtures";
+import { TOKEN } from "test/fixtures/session.fixtures";
 
 import CompanyDetailsMapper from "app/mappers/company/companyDetails.mapper";
 import CompanyDetails from "app/models/companyDetails.model";
@@ -186,6 +186,50 @@ describe("CompanyService", () => {
             const error: Optional<string> = await service.validateCompanyDetails(company, TOKEN);
 
             assert.equal(error, "The company has no active directors.");
+        });
+    });
+
+    describe("hasTooManyDirectorsOrMembers", () => {
+        it("should return false when officer count is exactly 150", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(150);
+
+            assert.isFalse(result);
+        });
+
+        it("should return false when officer count is below 150", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(100);
+
+            assert.isFalse(result);
+        });
+
+        it("should return false when officer count is 1", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(1);
+
+            assert.isFalse(result);
+        });
+
+        it("should return false when officer count is 0", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(0);
+
+            assert.isFalse(result);
+        });
+
+        it("should return true when officer count is 151", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(151);
+
+            assert.isTrue(result);
+        });
+
+        it("should return true when officer count is above 150", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(200);
+
+            assert.isTrue(result);
+        });
+
+        it("should return true when officer count is significantly above 150", () => {
+            const result: boolean = service.hasTooManyDirectorsOrMembers(500);
+
+            assert.isTrue(result);
         });
     });
 });
