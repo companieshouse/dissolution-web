@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { controller, httpGet } from "inversify-express-utils";
 import BaseController from "app/controllers/base.controller";
-import { APPLY_USING_PAPER_FORM_DIRECTORS_URI, SEARCH_COMPANY_URI } from "app/paths";
+import { SEARCH_COMPANY_URI } from "app/paths";
 
 interface ViewModel {
     backUri?: string;
