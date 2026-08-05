@@ -12,12 +12,7 @@ import "app/controllers/viewCompanyInformation.controller";
 import CompanyDetails from "app/models/companyDetails.model";
 import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import {
-    REDIRECT_GATE_URI,
-    VIEW_COMPANY_INFORMATION_URI,
-    APPLY_USING_PAPER_FORM_DIRECTORS_URI,
-    APPLY_USING_PAPER_FORM_MEMBERS_URI,
-} from "app/paths";
+import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI, APPLY_USING_PAPER_FORM_BASE_URI } from "app/paths";
 import CompanyService from "app/services/company/company.service";
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
 import SessionService from "app/services/session/session.service";
@@ -220,7 +215,7 @@ describe("ViewCompanyInformationController", () => {
             await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", APPLY_USING_PAPER_FORM_DIRECTORS_URI);
+                .expect("Location", `${APPLY_USING_PAPER_FORM_BASE_URI}-directors`);
         });
 
         it("should redirect to paper form members page when LLP has more than 150 members", async () => {
@@ -242,7 +237,7 @@ describe("ViewCompanyInformationController", () => {
             await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", APPLY_USING_PAPER_FORM_MEMBERS_URI);
+                .expect("Location", `${APPLY_USING_PAPER_FORM_BASE_URI}-members`);
         });
     });
 
