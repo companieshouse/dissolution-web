@@ -7,13 +7,16 @@ import { createApp } from "./helpers/application.factory";
 import HtmlAssertHelper from "./helpers/htmlAssert.helper";
 
 import "app/controllers/applyUsingPaperForm.controller";
-import { APPLY_USING_PAPER_FORM_DIRECTORS_URI, APPLY_USING_PAPER_FORM_MEMBERS_URI } from "app/paths";
+import { APPLY_USING_PAPER_FORM_BASE_URI } from "app/paths";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import { Application } from "express";
 
 mockCsrfMiddleware.restore();
 
 describe("ApplyUsingPaperFormController", () => {
+    const DIRECTORS_URI = `${APPLY_USING_PAPER_FORM_BASE_URI}-directors`;
+    const MEMBERS_URI = `${APPLY_USING_PAPER_FORM_BASE_URI}-members`;
+
     function initApp(): Application {
         return createApp();
     }
@@ -22,7 +25,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should render the apply using paper form directors page", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -37,7 +40,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display the download DS01 form link", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -54,7 +57,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display paper application cost information", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -68,7 +71,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display back link to search company", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -78,7 +81,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should have Matomo tracking for download link", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             assert.include(
                 res.text,
@@ -90,7 +93,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should set page title correctly", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             assert.isTrue(
@@ -104,7 +107,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should render the apply using paper form members page", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_MEMBERS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(MEMBERS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -123,7 +126,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display the download DS01 form link", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_MEMBERS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(MEMBERS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -136,7 +139,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should have Matomo tracking with member officer type", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_MEMBERS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(MEMBERS_URI).expect(StatusCodes.OK);
 
             assert.include(res.text, "member", "Should pass 'member' as officerType to Matomo tracking");
         });
@@ -144,7 +147,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should set page title correctly", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_MEMBERS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(MEMBERS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             assert.isTrue(
@@ -158,7 +161,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should use GovUK styling classes", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_DIRECTORS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(DIRECTORS_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
