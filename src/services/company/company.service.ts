@@ -11,6 +11,7 @@ import {
     COMPANY_OVERSEAS_ERROR_MSG,
     NO_ACTIVE_DIRECTORS_ERROR_MSG,
     NO_ACTIVE_MEMBERS_ERROR_MSG,
+    MAX_OFFICERS_FOR_DISSOLUTION_SERVICE,
 } from "app/constants/app.const";
 import { asCompanyTypeText } from "app/filters/asCompanyTypeText.filter";
 import CompanyDetailsMapper from "app/mappers/company/companyDetails.mapper";
@@ -76,6 +77,6 @@ export default class CompanyService {
     }
 
     public hasTooManyDirectorsOrMembers(officerCount: number): boolean {
-        return officerCount > 150;
+        return officerCount > MAX_OFFICERS_FOR_DISSOLUTION_SERVICE;
     }
 }
