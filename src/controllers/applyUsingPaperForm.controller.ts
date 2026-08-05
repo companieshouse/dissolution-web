@@ -3,6 +3,11 @@ import { controller, httpGet } from "inversify-express-utils";
 import BaseController from "app/controllers/base.controller";
 import { SEARCH_COMPANY_URI, APPLY_USING_PAPER_FORM_BASE_URI } from "app/paths";
 
+enum OfficerType {
+    DIRECTOR = "director",
+    MEMBER = "member",
+}
+
 interface ViewModel {
     backUri?: string;
     officerType: string;
@@ -10,16 +15,12 @@ interface ViewModel {
 
 @controller(`${APPLY_USING_PAPER_FORM_BASE_URI}-directors`)
 export class ApplyUsingPaperFormDirectorsController extends BaseController {
-    public constructor() {
-        super();
-    }
-
     @httpGet("")
     public async get(): Promise<string> {
-        return this.renderView("director");
+        return this.renderView(OfficerType.DIRECTOR);
     }
 
-    private async renderView(officerType: string): Promise<string> {
+    private async renderView(officerType: OfficerType): Promise<string> {
         const viewModel: ViewModel = {
             backUri: SEARCH_COMPANY_URI,
             officerType,
@@ -31,16 +32,12 @@ export class ApplyUsingPaperFormDirectorsController extends BaseController {
 
 @controller(`${APPLY_USING_PAPER_FORM_BASE_URI}-members`)
 export class ApplyUsingPaperFormMembersController extends BaseController {
-    public constructor() {
-        super();
-    }
-
     @httpGet("")
     public async get(): Promise<string> {
-        return this.renderView("member");
+        return this.renderView(OfficerType.MEMBER);
     }
 
-    private async renderView(officerType: string): Promise<string> {
+    private async renderView(officerType: OfficerType): Promise<string> {
         const viewModel: ViewModel = {
             backUri: SEARCH_COMPANY_URI,
             officerType,
