@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { controller, httpGet } from "inversify-express-utils";
+import { controller, httpGet, requestParam } from "inversify-express-utils";
 import BaseController from "app/controllers/base.controller";
 import { SEARCH_COMPANY_URI, APPLY_USING_PAPER_FORM_BASE_URI } from "app/paths";
 
@@ -13,28 +13,12 @@ interface ViewModel {
     officerType: string;
 }
 
-@controller(`${APPLY_USING_PAPER_FORM_BASE_URI}-directors`)
-export class ApplyUsingPaperFormDirectorsController extends BaseController {
+@controller(`${APPLY_USING_PAPER_FORM_BASE_URI}-:companyType`)
+export class ApplyUsingPaperFormController extends BaseController {
     @httpGet("")
-    public async get(): Promise<string> {
-        return this.renderView(OfficerType.DIRECTOR);
-    }
-
-    private async renderView(officerType: OfficerType): Promise<string> {
-        const viewModel: ViewModel = {
-            backUri: SEARCH_COMPANY_URI,
-            officerType,
-        };
-
-        return super.render("apply-using-paper-form", viewModel, StatusCodes.OK);
-    }
-}
-
-@controller(`${APPLY_USING_PAPER_FORM_BASE_URI}-members`)
-export class ApplyUsingPaperFormMembersController extends BaseController {
-    @httpGet("")
-    public async get(): Promise<string> {
-        return this.renderView(OfficerType.MEMBER);
+    public async get(@requestParam("companyType") companyType: string): Promise<string> {
+        const officerType = companyType === "members" ? OfficerType.MEMBER : OfficerType.DIRECTOR;
+        return this.renderView(officerType);
     }
 
     private async renderView(officerType: OfficerType): Promise<string> {
