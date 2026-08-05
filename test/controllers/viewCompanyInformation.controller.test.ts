@@ -12,8 +12,14 @@ import "app/controllers/viewCompanyInformation.controller";
 import CompanyDetails from "app/models/companyDetails.model";
 import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths";
+import {
+    REDIRECT_GATE_URI,
+    VIEW_COMPANY_INFORMATION_URI,
+    APPLY_USING_PAPER_FORM_DIRECTORS_URI,
+    APPLY_USING_PAPER_FORM_MEMBERS_URI,
+} from "app/paths";
 import CompanyService from "app/services/company/company.service";
+import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
 import SessionService from "app/services/session/session.service";
 
 import { generateCompanyDetails } from "test/fixtures/companyProfile.fixtures";
@@ -27,6 +33,7 @@ mockCsrfMiddleware.restore();
 describe("ViewCompanyInformationController", () => {
     let session: SessionService;
     let companyService: CompanyService;
+    let companyOfficersService: CompanyOfficersService;
 
     const COMPANY_NUMBER = "01777777";
 
@@ -35,6 +42,7 @@ describe("ViewCompanyInformationController", () => {
     beforeEach(() => {
         session = mock(SessionService);
         companyService = mock(CompanyService);
+        companyOfficersService = mock(CompanyOfficersService);
 
         dissolutionSession = generateDissolutionSession(COMPANY_NUMBER);
 
@@ -46,6 +54,7 @@ describe("ViewCompanyInformationController", () => {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(session));
             container.rebind(CompanyService).toConstantValue(instance(companyService));
+            container.rebind(CompanyOfficersService).toConstantValue(instance(companyOfficersService));
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
             } as any);
@@ -62,6 +71,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -85,6 +96,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -121,6 +134,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -143,6 +158,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve("error message");
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -168,6 +185,8 @@ describe("ViewCompanyInformationController", () => {
 
             when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
             when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(anything())).thenReturn(false);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve([]);
 
             const app = initApp();
 
@@ -180,6 +199,50 @@ describe("ViewCompanyInformationController", () => {
             // Check that the address value contains <br> tags
             const addressHtml = htmlAssertHelper.getInnerHTML("#company-address-value");
             assert.include(addressHtml, "Line1,<br>Line2,<br>Line3");
+        });
+
+        it("should redirect to paper form directors page when company has more than 150 directors", async () => {
+            const company: CompanyDetails = generateCompanyDetails();
+            company.companyNumber = COMPANY_NUMBER;
+            company.companyName = "Some company name";
+            company.companyStatus = "active";
+            company.companyType = ClosableCompanyType.LTD;
+
+            when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
+            when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(151)).thenReturn(true);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve(
+                Array(151).fill({} as any)
+            );
+
+            const app = initApp();
+
+            await request(app)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", APPLY_USING_PAPER_FORM_DIRECTORS_URI);
+        });
+
+        it("should redirect to paper form members page when LLP has more than 150 members", async () => {
+            const company: CompanyDetails = generateCompanyDetails();
+            company.companyNumber = COMPANY_NUMBER;
+            company.companyName = "Some LLP name";
+            company.companyStatus = "active";
+            company.companyType = ClosableCompanyType.LLP;
+
+            when(companyService.getCompanyDetails(TOKEN, COMPANY_NUMBER)).thenResolve(company);
+            when(companyService.validateCompanyDetails(company, TOKEN)).thenResolve(null);
+            when(companyService.hasTooManyDirectorsOrMembers(200)).thenReturn(true);
+            when(companyOfficersService.getActiveDirectorsForCompany(TOKEN, COMPANY_NUMBER)).thenResolve(
+                Array(200).fill({} as any)
+            );
+
+            const app = initApp();
+
+            await request(app)
+                .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", APPLY_USING_PAPER_FORM_MEMBERS_URI);
         });
     });
 

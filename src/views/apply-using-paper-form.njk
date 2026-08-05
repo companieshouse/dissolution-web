@@ -1,0 +1,48 @@
+{% extends 'layout.njk' %}
+
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% if officerType == "member" %}
+  {% set title = "You'll need to apply using a paper form (DS01) - " + pageTitleSuffix %}
+  {% set heading = "You'll need to apply using a paper form (DS01)" %}
+  {% set companyTypeText = "limited liability partnership (LLP)" %}
+  {% set officerPluralText = "members" %}
+{% else %}
+  {% set title = "You'll need to apply using a paper form (DS01) - " + pageTitleSuffix %}
+  {% set heading = "You'll need to apply using a paper form (DS01)" %}
+  {% set companyTypeText = "company" %}
+  {% set officerPluralText = "directors" %}
+{% endif %}
+
+{% block content %}
+  {{ govukBackLink({
+      text: "Back",
+      href: backUri
+    })
+  }}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ heading }}</h1>
+
+      {% if officerType == "member" %}
+        <p class="govuk-body">This limited liability partnership (LLP) has over 150 members, which means you cannot use this online service.</p>
+      {% else %}
+        <p class="govuk-body">This company has over 150 directors, which means you cannot use this online service.</p>
+      {% endif %}
+
+      <p class="govuk-body">
+        <a id="download-ds01-form" href="https://www.gov.uk/government/publications/strike-off-a-company-from-the-register-ds01" class="govuk-link piwik-event" data-event-id="download-ds01-form-link" target="_blank">Download a DS01 paper form</a>.
+        A paper application costs £18 and you'll need to pay by cheque or postal order.
+      </p>
+    </div>
+  </div>
+  {% if piwik %}
+    <script nonce={{ nonce | dump | safe }}>
+      $(document).ready(() => {
+        $('#download-ds01-form').on('click', () => {
+          _paq.push(["trackEvent", "Apply using paper form", "Download DS01 form link", "{{ officerType }}"]);
+        });
+      })
+    </script>
+  {% endif %}
+{% endblock %}

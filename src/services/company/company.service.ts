@@ -74,4 +74,8 @@ export default class CompanyService {
 
         return null;
     }
+
+    public hasTooManyDirectorsOrMembers(officerCount: number): boolean {
+        return officerCount > 150;
+    }
 }
