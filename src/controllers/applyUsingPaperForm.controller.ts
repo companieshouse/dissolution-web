@@ -7,9 +7,8 @@ import { APPLY_USING_PAPER_FORM_URI } from "app/paths";
 import OfficerType from "app/models/dto/officerType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import SessionService from "app/services/session/session.service";
-import CompanyDetails from "app/models/companyDetails.model";
-import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 import CompanyService from "app/services/company/company.service";
+import Optional from "app/models/optional";
 
 interface ViewModel {
     officerType: string;
@@ -39,18 +38,13 @@ export class ApplyUsingPaperFormController extends BaseController {
     }
 
     private async getOfficerType(): Promise<OfficerType> {
-        const session: DissolutionSession = this.session.requireDissolutionSession(this.httpContext.request);
-        if (session?.officerType) {
-            return session.officerType;
+        let officerType: OfficerType = OfficerType.DIRECTOR;
+        if (this.httpContext.request.session) {
+            const session: Optional<DissolutionSession> = this.session.getDissolutionSession(this.httpContext.request);
+            if (session?.officerType) {
+                officerType = session.officerType;
+            }
         }
-
-        const token: string = this.session.getAccessToken(this.httpContext.request);
-        const companyNumber = this.session.requireDissolutionCompanyNumber(this.httpContext.request);
-        const company: CompanyDetails = await this.getCompanyInfo(token, companyNumber);
-        return company.companyType === ClosableCompanyType.LLP ? OfficerType.MEMBER : OfficerType.DIRECTOR;
-    }
-
-    private async getCompanyInfo(token: string, companyNumber: string): Promise<CompanyDetails> {
-        return this.companyService.getCompanyDetails(token, companyNumber);
+        return officerType;
     }
 }
