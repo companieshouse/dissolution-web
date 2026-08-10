@@ -215,7 +215,7 @@ describe("ViewCompanyInformationController", () => {
             await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", `${APPLY_USING_PAPER_FORM_URI}`);
+                .expect("Location", APPLY_USING_PAPER_FORM_URI);
         });
 
         it("should redirect to paper form page when LLP has more than 150 members", async () => {
@@ -237,7 +237,7 @@ describe("ViewCompanyInformationController", () => {
             await request(app)
                 .get(VIEW_COMPANY_INFORMATION_URI + "?companyNumber=" + COMPANY_NUMBER)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", `${APPLY_USING_PAPER_FORM_URI}`);
+                .expect("Location", APPLY_USING_PAPER_FORM_URI);
         });
     });
 
