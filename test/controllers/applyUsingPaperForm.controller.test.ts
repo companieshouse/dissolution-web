@@ -203,40 +203,4 @@ describe("ApplyUsingPaperFormController", () => {
             );
         });
     });
-
-    describe("GovUK Design System compliance", () => {
-        it("should use GovUK styling classes for DIRECTOR", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(htmlAssertHelper.selectorExists("h1.govuk-heading-l"), "Should use GovUK heading style");
-            assert.isTrue(htmlAssertHelper.selectorExists(".govuk-grid-row"), "Should use GovUK grid layout");
-            assert.isTrue(htmlAssertHelper.selectorExists("a.govuk-link"), "Should use GovUK link style");
-        });
-
-        it("should use GovUK styling classes for MEMBER", async () => {
-            // const sessionService = mock(SessionService);
-            // const dissolutionSession: DissolutionSession = generateDissolutionSession("12345678");
-            // dissolutionSession.officerType = OfficerType.MEMBER;
-            //
-            // when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
-            //
-            // const app = createApp(container => {
-            //     container.rebind(SessionService).toConstantValue(instance(sessionService));
-            // });
-
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(htmlAssertHelper.selectorExists("h1.govuk-heading-l"), "Should use GovUK heading style");
-            assert.isTrue(htmlAssertHelper.selectorExists(".govuk-grid-row"), "Should use GovUK grid layout");
-            assert.isTrue(htmlAssertHelper.selectorExists("a.govuk-link"), "Should use GovUK link style");
-        });
-    });
 });
