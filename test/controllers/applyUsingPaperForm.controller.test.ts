@@ -19,13 +19,20 @@ import { generateDissolutionSession } from "test/fixtures/session.fixtures";
 mockCsrfMiddleware.restore();
 
 describe("ApplyUsingPaperFormController", () => {
-    function initApp(): Application {
-        return createApp();
+    function initApp(officerType: OfficerType): Application {
+        const sessionService = mock(SessionService);
+        const dissolutionSession: DissolutionSession = generateDissolutionSession("12345678");
+        dissolutionSession.officerType = officerType;
+        when(sessionService.requireOfficerType(anything())).thenReturn(officerType);
+
+        return createApp(container => {
+            container.rebind(SessionService).toConstantValue(instance(sessionService));
+        });
     }
 
     describe("GET /apply-using-paper-form - DIRECTOR (DS01)", () => {
         it("should render the apply using paper form page", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -38,7 +45,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should display the download DS01 form link", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -51,7 +58,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should display paper application cost information", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -65,7 +72,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should have Matomo tracking for download link", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -77,7 +84,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should set page title correctly", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -89,7 +96,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should mention company and directors for DS01", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -102,7 +109,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should have DS01 download link ID", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -111,20 +118,8 @@ describe("ApplyUsingPaperFormController", () => {
     });
 
     describe("GET /apply-using-paper-form - MEMBER (LLDS01)", () => {
-        function initAppWithMember(): Application {
-            const sessionService = mock(SessionService);
-            const dissolutionSession: DissolutionSession = generateDissolutionSession("12345678");
-            dissolutionSession.officerType = OfficerType.MEMBER;
-
-            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
-
-            return createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(sessionService));
-            });
-        }
-
         it("should render the apply using paper form page with LLDS01 heading", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -137,7 +132,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should display the download LLDS01 form link", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -150,7 +145,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should mention limited liability partnership and members", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -163,7 +158,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should display paper application cost information for LLDS01", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -177,7 +172,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should have LLDS01 download link with correct ID", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -185,7 +180,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should reference correct LLDS01 form URL", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -197,7 +192,7 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should have Matomo tracking for LLDS01 download link", async () => {
-            const app = initAppWithMember();
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -211,7 +206,7 @@ describe("ApplyUsingPaperFormController", () => {
 
     describe("GovUK Design System compliance", () => {
         it("should use GovUK styling classes for DIRECTOR", async () => {
-            const app = initApp();
+            const app = initApp(OfficerType.DIRECTOR);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
@@ -223,15 +218,17 @@ describe("ApplyUsingPaperFormController", () => {
         });
 
         it("should use GovUK styling classes for MEMBER", async () => {
-            const sessionService = mock(SessionService);
-            const dissolutionSession: DissolutionSession = generateDissolutionSession("12345678");
-            dissolutionSession.officerType = OfficerType.MEMBER;
+            // const sessionService = mock(SessionService);
+            // const dissolutionSession: DissolutionSession = generateDissolutionSession("12345678");
+            // dissolutionSession.officerType = OfficerType.MEMBER;
+            //
+            // when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            //
+            // const app = createApp(container => {
+            //     container.rebind(SessionService).toConstantValue(instance(sessionService));
+            // });
 
-            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
-
-            const app = createApp(container => {
-                container.rebind(SessionService).toConstantValue(instance(sessionService));
-            });
+            const app = initApp(OfficerType.MEMBER);
 
             const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
