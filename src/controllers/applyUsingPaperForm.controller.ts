@@ -13,7 +13,7 @@ interface ViewModel {
 
 @controller(APPLY_USING_PAPER_FORM_URI)
 export class ApplyUsingPaperFormController extends BaseController {
-    public constructor(@inject(SessionService) private session: SessionService) {
+    public constructor(@inject(SessionService) private readonly session: SessionService) {
         super();
     }
 
