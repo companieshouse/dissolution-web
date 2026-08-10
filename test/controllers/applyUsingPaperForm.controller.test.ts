@@ -19,8 +19,6 @@ import { generateDissolutionSession } from "test/fixtures/session.fixtures";
 mockCsrfMiddleware.restore();
 
 describe("ApplyUsingPaperFormController", () => {
-    const APPLY_URI = `${APPLY_USING_PAPER_FORM_URI}`;
-
     function initApp(): Application {
         return createApp();
     }
@@ -29,7 +27,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should render the apply using paper form page", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -42,7 +40,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display the download DS01 form link", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -55,7 +53,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display paper application cost information", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -69,7 +67,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should have Matomo tracking for download link", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             assert.include(
                 res.text,
@@ -81,7 +79,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should set page title correctly", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             assert.isTrue(
@@ -93,7 +91,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should mention company and directors for DS01", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -106,7 +104,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should have DS01 download link ID", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             assert.include(res.text, 'id="download-ds01-form"', "Should have DS01 download link with correct ID");
         });
@@ -128,7 +126,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should render the apply using paper form page with LLDS01 heading", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -141,7 +139,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display the download LLDS01 form link", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -154,7 +152,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should mention limited liability partnership and members", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -167,7 +165,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should display paper application cost information for LLDS01", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -181,7 +179,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should have LLDS01 download link with correct ID", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             assert.include(res.text, 'id="download-ll-ds01-form"', "Should have LLDS01 download link with correct ID");
         });
@@ -189,7 +187,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should reference correct LLDS01 form URL", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             assert.include(
                 res.text,
@@ -201,7 +199,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should have Matomo tracking for LLDS01 download link", async () => {
             const app = initAppWithMember();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             assert.include(
                 res.text,
@@ -215,7 +213,7 @@ describe("ApplyUsingPaperFormController", () => {
         it("should use GovUK styling classes for DIRECTOR", async () => {
             const app = initApp();
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -235,7 +233,7 @@ describe("ApplyUsingPaperFormController", () => {
                 container.rebind(SessionService).toConstantValue(instance(sessionService));
             });
 
-            const res = await request(app).get(APPLY_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
