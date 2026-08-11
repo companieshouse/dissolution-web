@@ -45,6 +45,10 @@ export default class HtmlAssertHelper {
         return this.getElement(selector)?.textContent?.trim();
     }
 
+    public getBodyText(): string {
+        return this.getText("body") ?? "";
+    }
+
     public getInnerHTML(selector: string): Optional<string> {
         return this.getElement(selector)?.innerHTML || null;
     }

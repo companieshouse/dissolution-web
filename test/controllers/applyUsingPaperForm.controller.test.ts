@@ -10,197 +10,81 @@ import HtmlAssertHelper from "./helpers/htmlAssert.helper";
 import "app/controllers/applyUsingPaperForm.controller";
 import { APPLY_USING_PAPER_FORM_URI } from "app/paths";
 import OfficerType from "app/models/dto/officerType.enum";
-import DissolutionSession from "app/models/session/dissolutionSession.model";
 import SessionService from "app/services/session/session.service";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import { Application } from "express";
-import { generateDissolutionSession } from "test/fixtures/session.fixtures";
 
 mockCsrfMiddleware.restore();
 
 describe("ApplyUsingPaperFormController", () => {
-    function initApp(officerType: OfficerType): Application {
-        const sessionService = mock(SessionService);
-        const dissolutionSession: DissolutionSession = generateDissolutionSession("12345678");
-        dissolutionSession.officerType = officerType;
-        when(sessionService.requireOfficerType(anything())).thenReturn(officerType);
+    let sessionService: SessionService;
 
+    function initApp(): Application {
         return createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(sessionService));
         });
     }
 
-    describe("GET /apply-using-paper-form - DIRECTOR (DS01)", () => {
-        it("should render the apply using paper form page", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(
-                htmlAssertHelper.hasText("h1", "You'll need to apply using a paper form (DS01)"),
-                "Should have correct heading"
-            );
-        });
-
-        it("should display the download DS01 form link", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(
-                htmlAssertHelper.containsText("body", "Download a DS01 paper form"),
-                "Should have download link text"
-            );
-        });
-
-        it("should display paper application cost information", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(htmlAssertHelper.containsText("body", "£18"), "Should mention application cost");
-            assert.isTrue(
-                htmlAssertHelper.containsText("body", "cheque or postal order"),
-                "Should mention payment methods"
-            );
-        });
-
-        it("should have Matomo tracking for download link", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            assert.include(
-                res.text,
-                "download-ds01-form-link",
-                "Should have download-ds01-form-link event ID for tracking"
-            );
-        });
-
-        it("should set page title correctly", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-            assert.isTrue(
-                htmlAssertHelper.hasText("h1", "You'll need to apply using a paper form (DS01)"),
-                "Page heading should be correct"
-            );
-        });
-
-        it("should mention company and directors for DS01", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(
-                htmlAssertHelper.containsText("body", "This company has over 150 directors"),
-                "Should mention company and directors"
-            );
-        });
-
-        it("should have DS01 download link ID", async () => {
-            const app = initApp(OfficerType.DIRECTOR);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            assert.include(res.text, 'id="download-ds01-form"', "Should have DS01 download link with correct ID");
-        });
+    beforeEach(() => {
+        sessionService = mock(SessionService);
     });
 
-    describe("GET /apply-using-paper-form - MEMBER (LLDS01)", () => {
-        it("should render the apply using paper form page with LLDS01 heading", async () => {
-            const app = initApp(OfficerType.MEMBER);
+    const expectedContentCases = [
+        {
+            description: "DIRECTOR (DS01)",
+            officerType: OfficerType.DIRECTOR,
+            expectedHeading: "You'll need to apply using a paper form (DS01)",
+            expectedDownloadLinkText: "Download a DS01 paper form",
+            expectedDownloadLinkSelector: "#download-ds01-form",
+            expectedMentionText: "This company has over 150 directors",
+            expectedFormUrl: "https://www.gov.uk/government/publications/strike-off-a-company-from-the-register-ds01",
+        },
+        {
+            description: "MEMBER (LLDS01)",
+            officerType: OfficerType.MEMBER,
+            expectedHeading: "You'll need to apply using a paper form (LLDS01)",
+            expectedDownloadLinkText: "Download an LLDS01 paper form",
+            expectedDownloadLinkSelector: "#download-ll-ds01-form",
+            expectedMentionText: "This limited liability partnership (LLP) has over 150 members",
+            expectedFormUrl:
+                "https://www.gov.uk/government/publications/strike-off-application-by-limited-liability-partnership-ll-ds01",
+        },
+    ];
 
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
+    expectedContentCases.forEach(tc => {
+        describe(`GET /apply-using-paper-form - ${tc.description}`, () => {
+            it("should render the apply using paper form page with the correct content", async () => {
+                when(sessionService.requireOfficerType(anything())).thenReturn(tc.officerType);
 
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
+                const res = await request(initApp()).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
-            assert.isTrue(
-                htmlAssertHelper.hasText("h1", "You'll need to apply using a paper form (LLDS01)"),
-                "Should have LLDS01 heading for LLP"
-            );
-        });
+                const assertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
+                const bodyText = assertHelper.getBodyText();
 
-        it("should display the download LLDS01 form link", async () => {
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(
-                htmlAssertHelper.containsText("body", "Download an LLDS01 paper form"),
-                "Should have LLDS01 download link text"
-            );
-        });
-
-        it("should mention limited liability partnership and members", async () => {
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(
-                htmlAssertHelper.containsText("body", "This limited liability partnership (LLP) has over 150 members"),
-                "Should mention limited liability partnership and members"
-            );
-        });
-
-        it("should display paper application cost information for LLDS01", async () => {
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
-
-            assert.isTrue(htmlAssertHelper.containsText("body", "£18"), "Should mention application cost");
-            assert.isTrue(
-                htmlAssertHelper.containsText("body", "cheque or postal order"),
-                "Should mention payment methods"
-            );
-        });
-
-        it("should have LLDS01 download link with correct ID", async () => {
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            assert.include(res.text, 'id="download-ll-ds01-form"', "Should have LLDS01 download link with correct ID");
-        });
-
-        it("should reference correct LLDS01 form URL", async () => {
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            assert.include(
-                res.text,
-                "strike-off-application-by-limited-liability-partnership-ll-ds01",
-                "Should reference LLDS01 form URL"
-            );
-        });
-
-        it("should have Matomo tracking for LLDS01 download link", async () => {
-            const app = initApp(OfficerType.MEMBER);
-
-            const res = await request(app).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
-
-            assert.include(
-                res.text,
-                "download-ds01-form-link",
-                "Should have download-ds01-form-link event ID for tracking"
-            );
+                assert.equal(assertHelper.getText("h1"), tc.expectedHeading, "Should have correct heading");
+                assert.include(bodyText, tc.expectedMentionText, "Should mention correct company/officer type text");
+                assert.include(bodyText, "£18", "Should mention application cost");
+                assert.include(bodyText, "cheque or postal order", "Should mention payment methods");
+                assert.isTrue(
+                    assertHelper.selectorExists(tc.expectedDownloadLinkSelector),
+                    "Should have download link with correct ID"
+                );
+                assert.equal(
+                    assertHelper.getText(tc.expectedDownloadLinkSelector),
+                    tc.expectedDownloadLinkText,
+                    "Should have download link text"
+                );
+                assert.equal(
+                    assertHelper.getAttributeValue(tc.expectedDownloadLinkSelector, "href"),
+                    tc.expectedFormUrl,
+                    "Should reference correct form URL"
+                );
+                assert.equal(
+                    assertHelper.getAttributeValue(tc.expectedDownloadLinkSelector, "data-event-id"),
+                    "download-ds01-form-link",
+                    "Should have Matomo tracking event ID"
+                );
+            });
         });
     });
 });
