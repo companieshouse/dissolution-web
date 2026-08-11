@@ -17,16 +17,16 @@ import { Application } from "express";
 mockCsrfMiddleware.restore();
 
 describe("ApplyUsingPaperFormController", () => {
-    let session: SessionService;
+    let sessionService: SessionService;
 
     function initApp(): Application {
         return createApp(container => {
-            container.rebind(SessionService).toConstantValue(instance(session));
+            container.rebind(SessionService).toConstantValue(instance(sessionService));
         });
     }
 
     beforeEach(() => {
-        session = mock(SessionService);
+        sessionService = mock(SessionService);
     });
 
     const expectedContentCases = [
@@ -54,7 +54,7 @@ describe("ApplyUsingPaperFormController", () => {
     expectedContentCases.forEach(tc => {
         describe(`GET /apply-using-paper-form - ${tc.description}`, () => {
             it("should render the apply using paper form page with the correct content", async () => {
-                when(session.requireOfficerType(anything())).thenReturn(tc.officerType);
+                when(sessionService.requireOfficerType(anything())).thenReturn(tc.officerType);
 
                 const res = await request(initApp()).get(APPLY_USING_PAPER_FORM_URI).expect(StatusCodes.OK);
 
