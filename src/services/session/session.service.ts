@@ -12,6 +12,7 @@ import { DISSOLUTION_SESSION_KEY } from "app/constants/app.const";
 import { Mutable } from "app/models/mutable";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
+import OfficerType from "app/models/dto/officerType.enum";
 
 @provide(SessionService)
 export default class SessionService {
@@ -100,5 +101,13 @@ export default class SessionService {
         const mutableSession = req.session as Mutable<Session>;
         mutableSession.data[SessionKey.OAuth2Nonce] = nonce;
         req.session = mutableSession as Session;
+    }
+
+    public requireOfficerType(req: Request): OfficerType {
+        const officerType = this.getDissolutionSession(req)?.officerType;
+        if (!officerType) {
+            throw new Error("No officer type in dissolution session");
+        }
+        return officerType;
     }
 }

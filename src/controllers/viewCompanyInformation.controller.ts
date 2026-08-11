@@ -8,12 +8,7 @@ import OfficerType from "app/models/dto/officerType.enum";
 import ClosableCompanyType from "app/models/mapper/closableCompanyType.enum";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import {
-    REDIRECT_GATE_URI,
-    VIEW_COMPANY_INFORMATION_URI,
-    APPLY_USING_PAPER_FORM_DIRECTORS_URI,
-    APPLY_USING_PAPER_FORM_MEMBERS_URI,
-} from "app/paths";
+import { REDIRECT_GATE_URI, VIEW_COMPANY_INFORMATION_URI, APPLY_USING_PAPER_FORM_URI } from "app/paths";
 import CompanyService from "app/services/company/company.service";
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
 import SessionService from "app/services/session/session.service";
@@ -52,15 +47,11 @@ export class ViewCompanyInformationController extends JourneyBaseController {
             company.companyNumber
         );
 
-        if (this.companyService.hasTooManyDirectorsOrMembers(companyOfficers.length)) {
-            const redirectUrl =
-                company.companyType === ClosableCompanyType.LLP
-                    ? APPLY_USING_PAPER_FORM_MEMBERS_URI
-                    : APPLY_USING_PAPER_FORM_DIRECTORS_URI;
-            return this.redirect(redirectUrl);
-        }
-
         this.updateSession(session, company);
+
+        if (this.companyService.hasTooManyDirectorsOrMembers(companyOfficers.length)) {
+            return this.redirect(APPLY_USING_PAPER_FORM_URI);
+        }
 
         const viewModel: ViewModel = {
             company,

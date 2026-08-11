@@ -1,3 +1,4 @@
+import { Session } from "@companieshouse/node-session-handler";
 import { SessionKey } from "@companieshouse/node-session-handler/lib/session/keys/SessionKey";
 import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces";
 import { assert } from "chai";
@@ -8,6 +9,7 @@ import { generateDissolutionSession, generateISignInInfo, TOKEN } from "test/fix
 
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
+import OfficerType from "app/models/dto/officerType.enum";
 import SessionService from "app/services/session/session.service";
 import { aDissolutionSession } from "test/fixtures/dissolutionSession.builder";
 
@@ -283,6 +285,90 @@ describe("SessionService", () => {
             assert.deepEqual(Object.keys(savedSession).sort(), ["companyNumber", "journeyId"]);
             assert.equal(savedSession.journeyId, journeyId);
             assert.equal(savedSession.companyNumber, companyNumber);
+        });
+    });
+
+    describe("getJourneyId", () => {
+        it("should return the journeyId when present", () => {
+            const journeyId = "journey-123";
+            const dissolutionSession = aDissolutionSession().withJourneyId(journeyId).build();
+
+            const req: Request = generateRequest();
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession);
+
+            const result: Optional<string> = sessionService.getJourneyId(req);
+
+            assert.equal(result, journeyId);
+        });
+
+        it("should return undefined when there is no journeyId", () => {
+            const req: Request = generateRequest();
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(undefined);
+
+            const result: Optional<string> = sessionService.getJourneyId(req);
+
+            assert.isUndefined(result);
+        });
+    });
+
+    describe("getSession", () => {
+        it("should return the session object", () => {
+            const req: Request = generateRequest();
+
+            const result: Session = sessionService.getSession(req);
+
+            assert.equal(result, req.session);
+        });
+    });
+
+    describe("getSignInInfo", () => {
+        it("should retrieve the sign in info from the session", () => {
+            const signInInfo: ISignInInfo = generateISignInInfo();
+
+            const req: Request = generateRequest();
+            req.session!.get = getSessionStub.withArgs(SessionKey.SignInInfo).returns(signInInfo);
+
+            const result: ISignInInfo = sessionService.getSignInInfo(req);
+
+            assert.equal(result, signInInfo);
+        });
+    });
+
+    describe("setCompanyAuthNonce", () => {
+        it("should set the company auth nonce in the session", () => {
+            const req: Request = generateRequest();
+            const nonce = "nonce-123";
+
+            sessionService.setCompanyAuthNonce(req, nonce);
+
+            assert.equal(req.session!.data[SessionKey.OAuth2Nonce], nonce);
+        });
+    });
+
+    describe("requireOfficerType", () => {
+        it("should return the officer type when present", () => {
+            const dissolutionSession = aDissolutionSession().withOfficerType(OfficerType.DIRECTOR).build();
+
+            const req: Request = generateRequest();
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession);
+
+            const result: OfficerType = sessionService.requireOfficerType(req);
+
+            assert.equal(result, OfficerType.DIRECTOR);
+        });
+
+        it("should throw an Error when there is no officer type", () => {
+            const dissolutionSession: any = generateDissolutionSession();
+            dissolutionSession.officerType = undefined;
+
+            const req: Request = generateRequest();
+            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession);
+
+            assert.throws(
+                () => sessionService.requireOfficerType(req),
+                Error,
+                "No officer type in dissolution session"
+            );
         });
     });
 });

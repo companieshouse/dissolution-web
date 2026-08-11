@@ -3,8 +3,8 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
 {% if officerType == "member" %}
-  {% set title = "You'll need to apply using a paper form (DS01) - " + pageTitleSuffix %}
-  {% set heading = "You'll need to apply using a paper form (DS01)" %}
+  {% set title = "You'll need to apply using a paper form (LLDS01) - " + pageTitleSuffix %}
+  {% set heading = "You'll need to apply using a paper form (LLDS01)" %}
   {% set companyTypeText = "limited liability partnership (LLP)" %}
   {% set officerPluralText = "members" %}
 {% else %}
@@ -15,11 +15,6 @@
 {% endif %}
 
 {% block content %}
-  {{ govukBackLink({
-      text: "Back",
-      href: backUri
-    })
-  }}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">{{ heading }}</h1>
@@ -31,7 +26,11 @@
       {% endif %}
 
       <p class="govuk-body">
-        <a id="download-ds01-form" href="https://www.gov.uk/government/publications/strike-off-a-company-from-the-register-ds01" class="govuk-link piwik-event" data-event-id="download-ds01-form-link" target="_blank">Download a DS01 paper form</a>.
+        {% if officerType == "member" %}
+          <a id="download-ll-ds01-form" href="https://www.gov.uk/government/publications/strike-off-application-by-limited-liability-partnership-ll-ds01" class="govuk-link piwik-event" data-event-id="download-ds01-form-link" target="_blank">Download an LLDS01 paper form</a>.
+        {% else %}
+          <a id="download-ds01-form" href="https://www.gov.uk/government/publications/strike-off-a-company-from-the-register-ds01" class="govuk-link piwik-event" data-event-id="download-ds01-form-link" target="_blank">Download a DS01 paper form</a>.
+        {% endif %}
         A paper application costs £18 and you'll need to pay by cheque or postal order.
       </p>
     </div>

@@ -1,32 +1,30 @@
 import { StatusCodes } from "http-status-codes";
 import { controller, httpGet } from "inversify-express-utils";
+import { inject } from "inversify";
+
 import BaseController from "app/controllers/base.controller";
-import { SEARCH_COMPANY_URI } from "app/paths";
+import { APPLY_USING_PAPER_FORM_URI } from "app/paths";
+import OfficerType from "app/models/dto/officerType.enum";
+import SessionService from "app/services/session/session.service";
 
 interface ViewModel {
-    backUri?: string;
     officerType: string;
 }
 
-@controller("")
-export class ApplyUsingPaperFormDirectorsController extends BaseController {
-    public constructor() {
+@controller(APPLY_USING_PAPER_FORM_URI)
+export class ApplyUsingPaperFormController extends BaseController {
+    public constructor(@inject(SessionService) private readonly session: SessionService) {
         super();
     }
 
-    @httpGet("/close-a-company/apply-using-paper-form-directors")
-    public async getDirectors(): Promise<string> {
-        return this.renderView("director");
+    @httpGet("")
+    public async get(): Promise<string> {
+        const officerType = this.session.requireOfficerType(this.httpContext.request);
+        return this.renderView(officerType);
     }
 
-    @httpGet("/close-a-company/apply-using-paper-form-members")
-    public async getMembers(): Promise<string> {
-        return this.renderView("member");
-    }
-
-    private async renderView(officerType: string): Promise<string> {
+    private async renderView(officerType: OfficerType): Promise<string> {
         const viewModel: ViewModel = {
-            backUri: SEARCH_COMPANY_URI,
             officerType,
         };
 
