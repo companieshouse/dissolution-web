@@ -12,3 +12,4 @@ export const CSRF_ENABLED = true;
 export const DESCRIPTION = "Dissolution Transaction";
 export const REFERENCE = "DissolutionReference";
 export const MAX_OFFICERS_FOR_DISSOLUTION_SERVICE = 150;
+export const MAX_OFFICERS_PER_PAGE = 151;
