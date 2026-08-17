@@ -5,7 +5,7 @@ import Resource from "@companieshouse/api-sdk-node/dist/services/resource";
 import { inject } from "inversify";
 import { provide } from "inversify-binding-decorators";
 import APIClientFactory from "./apiClient.factory";
-import { MAX_OFFICERS_FOR_DISSOLUTION_SERVICE, MAX_OFFICERS_PER_PAGE } from "app/constants/app.const";
+import { MAX_OFFICERS_PER_PAGE } from "app/constants/app.const";
 
 @provide(CompanyOfficersClient)
 export default class CompanyOfficersClient {
