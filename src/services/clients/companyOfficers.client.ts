@@ -5,12 +5,13 @@ import Resource from "@companieshouse/api-sdk-node/dist/services/resource";
 import { inject } from "inversify";
 import { provide } from "inversify-binding-decorators";
 import APIClientFactory from "./apiClient.factory";
+import { MAX_OFFICERS_FOR_DISSOLUTION_SERVICE, MAX_OFFICERS_PER_PAGE } from "app/constants/app.const";
 
 @provide(CompanyOfficersClient)
 export default class CompanyOfficersClient {
     public constructor(@inject(APIClientFactory) private factory: APIClientFactory) {}
 
     public async getCompanyOfficers(token: string, companyNumber: string): Promise<Resource<CompanyOfficers>> {
-        return this.factory.getCompanyOfficersService(token).getCompanyOfficers(companyNumber, 150);
+        return this.factory.getCompanyOfficersService(token).getCompanyOfficers(companyNumber, MAX_OFFICERS_PER_PAGE);
     }
 }

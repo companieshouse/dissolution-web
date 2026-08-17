@@ -8,6 +8,7 @@ import { TOKEN } from "../../fixtures/session.fixtures";
 
 import APIClientFactory from "app/services/clients/apiClient.factory";
 import CompanyOfficersClient from "app/services/clients/companyOfficers.client";
+import { MAX_OFFICERS_PER_PAGE } from "app/constants/app.const";
 
 describe("CompanyOfficersClient", () => {
     let companyOfficersClient: CompanyOfficersClient;
@@ -28,7 +29,9 @@ describe("CompanyOfficersClient", () => {
         it("should fetch and return the company officers for the provided company number", async () => {
             const response: Resource<CompanyOfficers> = generateCompanyOfficersResource();
 
-            when(companyOfficersService.getCompanyOfficers(COMPANY_NUMBER, 150)).thenResolve(response);
+            when(companyOfficersService.getCompanyOfficers(COMPANY_NUMBER, MAX_OFFICERS_PER_PAGE)).thenResolve(
+                response
+            );
             when(factory.getCompanyOfficersService(TOKEN)).thenReturn(instance(companyOfficersService));
 
             const result: Resource<CompanyOfficers> = await companyOfficersClient.getCompanyOfficers(
