@@ -2,7 +2,13 @@ import { AuthOptions } from "@companieshouse/web-security-node";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import UriFactory from "app/utils/uri.factory";
 
-import { ROOT_URI, HEALTHCHECK_URI, WHO_TO_TELL_URI, ACCESSIBILITY_STATEMENT_URI } from "app/paths";
+import {
+    ROOT_URI,
+    HEALTHCHECK_URI,
+    WHO_TO_TELL_URI,
+    ACCESSIBILITY_STATEMENT_URI,
+    DIRECT_CERTIFICATE_DOWNLOAD_URI,
+} from "app/paths";
 
 const USER_AUTH_WHITELISTED_URLS: string[] = [
     ROOT_URI,
@@ -13,6 +19,8 @@ const USER_AUTH_WHITELISTED_URLS: string[] = [
     `${ACCESSIBILITY_STATEMENT_URI}/`,
 ];
 
+const AUTH_RETURN_PATHS = new Set([WHO_TO_TELL_URI, DIRECT_CERTIFICATE_DOWNLOAD_URI]);
+
 export default function AuthMiddleware(
     accountWebUrl: string,
     uriFactory: UriFactory,
@@ -22,8 +30,9 @@ export default function AuthMiddleware(
         if (isWhitelistedUrl(req.url)) {
             return next();
         }
+        const returnPath = AUTH_RETURN_PATHS.has(req.url) ? req.url : WHO_TO_TELL_URI;
         const authOptions: AuthOptions = {
-            returnUrl: uriFactory.createAbsoluteUri(req, WHO_TO_TELL_URI),
+            returnUrl: uriFactory.createAbsoluteUri(req, returnPath),
             chsWebUrl: accountWebUrl,
         };
         return commonAuthMiddleware(authOptions)(req, res, next);

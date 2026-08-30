@@ -32,9 +32,11 @@ export default class CompanyAuthService {
 
     public async buildAuthRedirectUri(
         req: Request,
-        companyNumber: string
+        companyNumber: string,
+        certificateDownload?: boolean
     ): Promise<{ redirectUri: string; nonce: string; state: string }> {
-        const originalUrl = `${BOOTSTRAP_JOURNEY_URI}?companyNumber=${encodeURIComponent(companyNumber)}`;
+        const originalUrl = `${BOOTSTRAP_JOURNEY_URI}?companyNumber=${encodeURIComponent(companyNumber)}${certificateDownload ? "&certificateDownload=true" : ""}`;
+
         const scope = `${OAUTH_USER_SCOPE} ${OAUTH_COMPANY_SCOPE_PREFIX}${companyNumber}`;
 
         const nonce: string = this.encryptionService.generateNonce();
@@ -52,8 +54,12 @@ export default class CompanyAuthService {
         return { redirectUri, nonce, state: encodedState };
     }
 
-    public async issueAuthRedirectUri(req: Request, companyNumber: string): Promise<string> {
-        const { redirectUri, nonce } = await this.buildAuthRedirectUri(req, companyNumber);
+    public async issueAuthRedirectUri(
+        req: Request,
+        companyNumber: string,
+        certificateDownload?: boolean
+    ): Promise<string> {
+        const { redirectUri, nonce } = await this.buildAuthRedirectUri(req, companyNumber, certificateDownload);
         this.sessionService.setCompanyAuthNonce(req, nonce);
         return redirectUri;
     }

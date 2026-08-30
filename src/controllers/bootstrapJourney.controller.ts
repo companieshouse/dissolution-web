@@ -4,7 +4,7 @@ import SessionService from "app/services/session/session.service";
 import CompanyAuthService from "app/services/auth/companyAuth.service";
 import UuidGenerator from "app/utils/uuidGenerator";
 import TYPES from "app/types";
-import { BOOTSTRAP_JOURNEY_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths";
+import { BOOTSTRAP_JOURNEY_URI, CERTIFICATE_DOWNLOAD_URI, VIEW_COMPANY_INFORMATION_URI } from "app/paths";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import companyNumberSchema from "app/schemas/companyNumber.schema";
@@ -24,9 +24,11 @@ export class BootstrapJourneyController extends JourneyBaseController {
 
     @httpGet("")
     public async get(
-        @queryParam("companyNumber") rawCompanyNumber?: string | string[]
+        @queryParam("companyNumber") rawCompanyNumber?: string | string[],
+        @queryParam("certificateDownload") download?: string
     ): Promise<string | RedirectResult> {
         const { companyNumber, error } = this.validate(rawCompanyNumber);
+        const certificateDownload: boolean = download === "true";
 
         if (error || !companyNumber) {
             throw new Error("Invalid company number");
@@ -35,7 +37,8 @@ export class BootstrapJourneyController extends JourneyBaseController {
         if (!this.companyAuthService.isAuthorisedForCompany(this.httpContext.request, companyNumber)) {
             const redirectUri = await this.companyAuthService.issueAuthRedirectUri(
                 this.httpContext.request,
-                companyNumber
+                companyNumber,
+                certificateDownload
             );
             return this.redirect(redirectUri);
         }
@@ -44,6 +47,9 @@ export class BootstrapJourneyController extends JourneyBaseController {
 
         this.sessionService.initDissolutionSession(this.httpContext.request, journeyId, companyNumber);
 
+        if (certificateDownload) {
+            return this.redirect(this.journeyPath(CERTIFICATE_DOWNLOAD_URI, { journeyId }));
+        }
         return this.redirect(this.journeyPath(VIEW_COMPANY_INFORMATION_URI, { journeyId }));
     }
     private validate(companyNumber?: string | string[]): { companyNumber?: string; error?: any } {
