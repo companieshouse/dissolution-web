@@ -44,7 +44,7 @@ export class BootstrapJourneyController extends JourneyBaseController {
 
         this.sessionService.initDissolutionSession(this.httpContext.request, journeyId, companyNumber);
 
-        return this.redirect(this.journeyPath(VIEW_COMPANY_INFORMATION_URI, { journeyId }));
+        return this.redirect(this.journeyPath(VIEW_COMPANY_INFORMATION_URI, { journeyId, companyNumber }));
     }
     private validate(companyNumber?: string | string[]): { companyNumber?: string; error?: any } {
         const rawCompanyNumber = firstParam(companyNumber);

@@ -10,6 +10,7 @@ export default abstract class JourneyBaseController extends BaseController {
         pathTemplate: string,
         options?: {
             journeyId?: string;
+            companyNumber?: string;
             params?: Record<string, string | number>;
         }
     ): string {

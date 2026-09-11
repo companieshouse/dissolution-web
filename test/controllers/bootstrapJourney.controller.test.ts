@@ -29,7 +29,11 @@ describe("BootstrapJourneyController", () => {
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string, options?: any) => {
                     if (options && options.journeyId) {
-                        return pathTemplate.replace(":journeyId", options.journeyId);
+                        pathTemplate = pathTemplate.replace(":journeyId", options.journeyId);
+                    }
+
+                    if (options && options.companyNumber) {
+                        pathTemplate = pathTemplate.replace(":companyNumber", options.companyNumber);
                     }
                     return pathTemplate;
                 },
@@ -64,7 +68,10 @@ describe("BootstrapJourneyController", () => {
         const res = await request(app).get(BOOTSTRAP_JOURNEY_URI).query({ companyNumber });
 
         assert.equal(res.status, 302);
-        assert.equal(res.headers.location, VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", journeyId));
+        assert.equal(
+            res.headers.location,
+            VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", journeyId).replace(":companyNumber", companyNumber)
+        );
 
         verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).once();
         const [, savedJourneyId, savedCompanyNumber] = capture(sessionServiceMock.initDissolutionSession).last();
@@ -105,7 +112,10 @@ describe("BootstrapJourneyController", () => {
             assert.equal(res.status, 302);
             assert.equal(
                 res.headers.location,
-                VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "e1101f0a-5121-4429-acee-a817c5cAAAAA")
+                VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "e1101f0a-5121-4429-acee-a817c5cAAAAA").replace(
+                    ":companyNumber",
+                    tc.expected
+                )
             );
             verify(sessionServiceMock.initDissolutionSession(anything(), anything(), anything())).once();
             const [, , savedCompanyNumber] = capture(sessionServiceMock.initDissolutionSession).last();

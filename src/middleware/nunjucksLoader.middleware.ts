@@ -79,6 +79,7 @@ export default class NunjucksLoader {
                 pathTemplate: string,
                 options?: {
                     journeyId?: string;
+                    companyNumber?: string;
                     params?: Record<string, string | number>;
                 }
             ): string => {
