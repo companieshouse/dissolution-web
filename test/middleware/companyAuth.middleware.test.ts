@@ -36,6 +36,9 @@ describe("AuthMiddleware", () => {
     let logger: ApplicationLogger;
     let session: Session;
 
+    const COMPANY_NUMBER = "12345678";
+    const INVALID_COMPANY_NUMBER = "87654321";
+
     beforeEach(() => {
         companyAuthService = mock(CompanyAuthService);
         sessionService = mock(SessionService);
@@ -96,7 +99,7 @@ describe("AuthMiddleware", () => {
 
     nonWhitelistedUrls.forEach(path => {
         it(`none whitelisted urls are processed: ${path}`, () => {
-            const req = { path: path } as any;
+            const req = { path: path, params: { companyNumber: "" } } as any;
             const res = {} as Response;
             const next = sinon.stub();
 
@@ -112,8 +115,40 @@ describe("AuthMiddleware", () => {
         });
     });
 
-    it("when no companyNumber is present the next called WITH error", () => {
-        const req = { path: "/some-path" } as any;
+    it("when no COMPANY_NUMBER is present in path the next called WITH error", () => {
+        const req = { path: "/some-path", params: { companyNumber: "" } } as any;
+        const res = {} as Response;
+        const next = sinon.stub();
+
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
+
+        middleware(req, res, next);
+
+        verify(sessionService.getDissolutionCompanyNumber(req)).once();
+        assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${req.path}`);
+        const err = next.args[0][0];
+        assert.instanceOf(err, Error);
+        assert.equal(err.message, "No Company Number in path");
+    });
+
+    it("when mismatching company numbers in path and session the next called WITH error", () => {
+        const req = { path: "/some-path", params: { companyNumber: INVALID_COMPANY_NUMBER } } as any;
+        const res = {} as Response;
+        const next = sinon.stub();
+
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
+
+        middleware(req, res, next);
+
+        verify(sessionService.getDissolutionCompanyNumber(req)).once();
+        assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${req.path}`);
+        const err = next.args[0][0];
+        assert.instanceOf(err, Error);
+        assert.equal(err.message, "Company Number in path does not match Company Number in session");
+    });
+
+    it("when no COMPANY_NUMBER is present the next called WITH error", () => {
+        const req = { path: "/some-path", params: { companyNumber: COMPANY_NUMBER } } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
@@ -128,13 +163,13 @@ describe("AuthMiddleware", () => {
 
     it("when authenticated user is authorized for company number then next called WITHOUT error", () => {
         const signInInfo: ISignInInfo = {
-            company_number: "12345678",
+            company_number: COMPANY_NUMBER,
         };
-        const req = { path: "/some-path" } as any;
+        const req = { path: "/some-path", params: { companyNumber: COMPANY_NUMBER } } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678");
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
         when(sessionService.getSignInInfo(req)).thenReturn(signInInfo);
 
         when(companyAuthService.isAuthorisedForCompany(anything(), anything())).thenReturn(true);
@@ -150,13 +185,13 @@ describe("AuthMiddleware", () => {
             company_number: "XXXXXXXXXX",
         };
 
-        const req = {} as any;
+        const req = { params: { companyNumber: COMPANY_NUMBER } } as any;
         const res = {} as Response;
         const redirectStub: sinon.SinonStub = sinon.stub();
         res.redirect = redirectStub;
         const next = sinon.stub();
 
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678");
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
         when(sessionService.getSignInInfo(req)).thenReturn(signInInfo as any);
         when(companyAuthService.issueAuthRedirectUri(anything(), anything())).thenResolve(
             "http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678"
