@@ -37,7 +37,7 @@ describe("AuthMiddleware", () => {
     let session: Session;
 
     const COMPANY_NUMBER = "12345678";
-    const INVALID_COMPANY_NUMBER = `87654321`;
+    const INVALID_COMPANY_NUMBER = "87654321";
 
     beforeEach(() => {
         companyAuthService = mock(CompanyAuthService);
