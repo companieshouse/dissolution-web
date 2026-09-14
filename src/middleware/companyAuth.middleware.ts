@@ -41,20 +41,11 @@ export default function CompanyAuthMiddleware(
             return next();
         }
 
-        const companyNumber = sessionService.getDissolutionCompanyNumber(req);
-        let companyNumberFromPath: string;
+        let companyNumber: string;
         try {
-            companyNumberFromPath = extractCompanyNumberFromPath(req.path);
+            companyNumber = getCompanyNumber(req, sessionService);
         } catch (error) {
             return next(error);
-        }
-
-        if (!companyNumber) {
-            return next(new Error("No Company Number in session"));
-        }
-
-        if (companyNumberFromPath !== companyNumber) {
-            return next(new Error("Company Number in path does not match Company Number in session"));
         }
 
         if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
@@ -68,6 +59,21 @@ export default function CompanyAuthMiddleware(
             return res.redirect(redirectUri);
         }
     };
+}
+
+function getCompanyNumber(req: Request, sessionService: SessionService) {
+    const companyNumber = sessionService.getDissolutionCompanyNumber(req);
+    const companyNumberFromPath = extractCompanyNumberFromPath(req.path);
+
+    if (!companyNumber) {
+        throw new Error("No Company Number in session");
+    }
+
+    if (companyNumberFromPath !== companyNumber) {
+        throw new Error("Company Number in path does not match Company Number in session");
+    }
+
+    return companyNumber;
 }
 
 export function isWhitelistedUrl(url: string): boolean {
