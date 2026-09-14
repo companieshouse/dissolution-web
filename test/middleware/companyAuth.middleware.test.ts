@@ -37,6 +37,7 @@ describe("AuthMiddleware", () => {
     let session: Session;
 
     const COMPANY_NUMBER = "12345678";
+    const INVALID_COMPANY_NUMBER = `87654321`;
 
     beforeEach(() => {
         companyAuthService = mock(CompanyAuthService);
@@ -163,7 +164,7 @@ describe("AuthMiddleware", () => {
     });
 
     it("when mismatching company numbers in path and session the next called WITH error", () => {
-        const req = { path: "/some-path/company/87654321/" } as any;
+        const req = { path: `/some-path/company/${INVALID_COMPANY_NUMBER}/` } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
