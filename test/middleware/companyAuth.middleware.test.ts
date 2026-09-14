@@ -132,7 +132,7 @@ describe("AuthMiddleware", () => {
     });
 
     it("when mismatching company numbers in path and session the next called WITH error", () => {
-        const req = { path: "/some-path", params: { companyNumber: INVALID_COMPANY_NUMBER } } as any;
+        const req = { path: "/some-path/company/87654321/" } as any;
         const res = {} as Response;
         const next = sinon.stub();
 

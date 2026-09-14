@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
 import CompanyAuthService from "app/services/auth/companyAuth.service";
 import SessionService from "app/services/session/session.service";
+import { extractCompanyNumberFromPath } from "app/utils/companyNumber.util";
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
@@ -41,7 +42,7 @@ export default function CompanyAuthMiddleware(
         }
 
         const companyNumber = sessionService.getDissolutionCompanyNumber(req);
-        const reqParamCompanyNumber = req.params.companyNumber;
+        const reqParamCompanyNumber = extractCompanyNumberFromPath(req.path);
 
         if (!companyNumber) {
             return next(new Error("No Company Number in session"));
