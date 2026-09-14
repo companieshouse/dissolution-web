@@ -42,17 +42,18 @@ export default function CompanyAuthMiddleware(
         }
 
         const companyNumber = sessionService.getDissolutionCompanyNumber(req);
-        const reqParamCompanyNumber = extractCompanyNumberFromPath(req.path);
+        let companyNumberFromPath: string;
+        try {
+            companyNumberFromPath = extractCompanyNumberFromPath(req.path);
+        } catch (error) {
+            return next(error);
+        }
 
         if (!companyNumber) {
             return next(new Error("No Company Number in session"));
         }
 
-        if (!reqParamCompanyNumber) {
-            return next(new Error("No Company Number in path"));
-        }
-
-        if (reqParamCompanyNumber !== companyNumber) {
+        if (companyNumberFromPath !== companyNumber) {
             return next(new Error("Company Number in path does not match Company Number in session"));
         }
 

@@ -37,7 +37,6 @@ describe("AuthMiddleware", () => {
     let session: Session;
 
     const COMPANY_NUMBER = "12345678";
-    const INVALID_COMPANY_NUMBER = "87654321";
 
     beforeEach(() => {
         companyAuthService = mock(CompanyAuthService);
@@ -97,9 +96,23 @@ describe("AuthMiddleware", () => {
         `${BOOTSTRAP_JOURNEY_URI}/subpath`,
     ];
 
-    nonWhitelistedUrls.forEach(path => {
+    const nonWhitelistedUrlsWithCompanyNumber = [
+        VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
+        SELECT_DIRECTOR_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
+        SELECT_SIGNATORIES_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
+        DEFINE_SIGNATORY_INFO_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
+        CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
+        `${CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER)}/subpath`,
+        `${ROOT_URI}/company/${COMPANY_NUMBER}/not-whitelisted`,
+        `${ROOT_URI}/company/${COMPANY_NUMBER}/abc/view-company-information/extra`,
+        `/company/${COMPANY_NUMBER}/random-path`,
+        `${ROOT_URI}/company/${COMPANY_NUMBER}/abc%2Fview-company-information/extra`,
+        `${BOOTSTRAP_JOURNEY_URI}/company/${COMPANY_NUMBER}/subpath`,
+    ];
+
+    nonWhitelistedUrlsWithCompanyNumber.forEach(path => {
         it(`none whitelisted urls are processed: ${path}`, () => {
-            const req = { path: path, params: { companyNumber: "" } } as any;
+            const req = { path: path } as any;
             const res = {} as Response;
             const next = sinon.stub();
 
@@ -115,8 +128,26 @@ describe("AuthMiddleware", () => {
         });
     });
 
+    nonWhitelistedUrls.forEach(path => {
+        it(`none whitelisted urls are processed: ${path}`, () => {
+            const req = { path: path } as any;
+            const res = {} as Response;
+            const next = sinon.stub();
+
+            when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(undefined);
+
+            middleware(req, res, next);
+
+            verify(sessionService.getDissolutionCompanyNumber(req)).once();
+            assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${path}`);
+            const err = next.args[0][0];
+            assert.instanceOf(err, Error);
+            assert.equal(err.message, "No company number found in path");
+        });
+    });
+
     it("when no COMPANY_NUMBER is present in path the next called WITH error", () => {
-        const req = { path: "/some-path", params: { companyNumber: "" } } as any;
+        const req = { path: "/some-path" } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
@@ -128,7 +159,7 @@ describe("AuthMiddleware", () => {
         assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${req.path}`);
         const err = next.args[0][0];
         assert.instanceOf(err, Error);
-        assert.equal(err.message, "No Company Number in path");
+        assert.equal(err.message, "No company number found in path");
     });
 
     it("when mismatching company numbers in path and session the next called WITH error", () => {
@@ -148,7 +179,7 @@ describe("AuthMiddleware", () => {
     });
 
     it("when no COMPANY_NUMBER is present the next called WITH error", () => {
-        const req = { path: "/some-path", params: { companyNumber: COMPANY_NUMBER } } as any;
+        const req = { path: `/some-path/company/${COMPANY_NUMBER}/` } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
@@ -165,7 +196,7 @@ describe("AuthMiddleware", () => {
         const signInInfo: ISignInInfo = {
             company_number: COMPANY_NUMBER,
         };
-        const req = { path: "/some-path", params: { companyNumber: COMPANY_NUMBER } } as any;
+        const req = { path: `/some-path/company/${COMPANY_NUMBER}/` } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
@@ -185,7 +216,7 @@ describe("AuthMiddleware", () => {
             company_number: "XXXXXXXXXX",
         };
 
-        const req = { params: { companyNumber: COMPANY_NUMBER } } as any;
+        const req = { path: `/some-path/company/${COMPANY_NUMBER}/` } as any;
         const res = {} as Response;
         const redirectStub: sinon.SinonStub = sinon.stub();
         res.redirect = redirectStub;

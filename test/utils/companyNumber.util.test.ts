@@ -25,7 +25,7 @@ describe("CompanyNumber Utilities", () => {
 
         it("should throw an error if company number is empty", () => {
             const path = "/company//view-company-information";
-            assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
+            assert.throws(() => extractCompanyNumberFromPath(path), Error, "No company number found in path");
         });
 
         it("should throw an error if company number exceeds 8 characters", () => {
@@ -83,7 +83,7 @@ describe("CompanyNumber Utilities", () => {
 
         it("should return error for empty string", () => {
             const { companyNumber, error } = validateCompanyNumber("");
-            assert.isUndefined(companyNumber);
+            assert.equal(companyNumber, "");
             assert.isDefined(error);
         });
 

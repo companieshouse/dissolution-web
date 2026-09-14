@@ -10,7 +10,7 @@ export function validateCompanyNumber(companyNumber?: string | string[]): { comp
 /**
  * This regex will capture a company number, that is an alphanumeric string which is 8 characters long
  */
-const COMPANY_NUMBER_REGEX = new RegExp(/\/company\/([A-Za-z0-9]{1,8})/);
+const COMPANY_NUMBER_REGEX = new RegExp(/\/company\/([A-Za-z0-9]+)/);
 
 export function extractCompanyNumberFromPath(path: string): string {
     const match = COMPANY_NUMBER_REGEX.exec(path);
