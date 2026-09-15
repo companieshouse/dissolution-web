@@ -8,10 +8,16 @@ export function validateCompanyNumber(companyNumber?: string | string[]): { comp
 }
 
 /**
- * This regex will capture a company number, that is an alphanumeric string which is 8 characters long
+ * Captures company number from `/company/{number}` segment.
+ * Excludes query strings (?), fragments (#), and matrix params (;).
+ * Uses lookahead to match valid terminators.
  */
-const COMPANY_NUMBER_REGEX = new RegExp(/\/company\/([A-Za-z0-9]+)/);
+const COMPANY_NUMBER_REGEX = new RegExp(/\/company\/([^/?#;]+)(?=\/|$|[?#;])/i);
 
+/**
+ * Extracts and validates a company number from a URL path.
+ * Throws if no valid company number segment is found.
+ */
 export function extractCompanyNumberFromPath(path: string): string {
     const match = COMPANY_NUMBER_REGEX.exec(path);
 

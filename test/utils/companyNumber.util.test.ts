@@ -33,6 +33,11 @@ describe("CompanyNumber Utilities", () => {
             assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
         });
 
+        it("should throw an error if company number contains an invalid character", () => {
+            const path = "/company/1234-567/view-company-information";
+            assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
+        });
+
         it("should throw an error for empty path", () => {
             assert.throws(() => extractCompanyNumberFromPath(""), Error, "No company number found in path");
         });
@@ -53,6 +58,50 @@ describe("CompanyNumber Utilities", () => {
             const path = "/company/12345678/company/87654321/page";
             const result = extractCompanyNumberFromPath(path);
             assert.equal(result, "12345678");
+        });
+
+        it("should extract company number with query string", () => {
+            const path = "/company/12345678?query=value";
+            const result = extractCompanyNumberFromPath(path);
+            assert.equal(result, "12345678");
+        });
+
+        it("should extract company number with hash fragment", () => {
+            const path = "/company/12345678#section";
+            const result = extractCompanyNumberFromPath(path);
+            assert.equal(result, "12345678");
+        });
+
+        it("should extract company number with query string and hash", () => {
+            const path = "/company/NI123456?id=1#top";
+            const result = extractCompanyNumberFromPath(path);
+            assert.equal(result, "NI123456");
+        });
+
+        it("should extract company number if company number is in query string", () => {
+            const path = "/search?redirect=/company/00006400";
+            const result = extractCompanyNumberFromPath(path);
+            assert.equal(result, "00006400");
+        });
+
+        it("should throw error if company number contains dot", () => {
+            const path = "/company/1234.567/view-company-information";
+            assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
+        });
+
+        it("should throw error if company number contains underscore", () => {
+            const path = "/company/1234_567/view-company-information";
+            assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
+        });
+
+        it("should throw error if company number contains plus sign", () => {
+            const path = "/company/1234+567/view-company-information";
+            assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
+        });
+
+        it("should throw error if company number contains URL-encoded characters", () => {
+            const path = "/company/1234%20567/view-company-information";
+            assert.throws(() => extractCompanyNumberFromPath(path), Error, "Invalid company number");
         });
     });
 

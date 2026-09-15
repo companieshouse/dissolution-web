@@ -6,6 +6,7 @@ import { extractCompanyNumberFromPath } from "app/utils/companyNumber.util";
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
+    APPLY_USING_PAPER_FORM_URI,
     BOOTSTRAP_JOURNEY_URI,
     HEALTHCHECK_URI,
     ROOT_URI,
@@ -29,6 +30,8 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     `${ACCESSIBILITY_STATEMENT_URI}/`,
     BOOTSTRAP_JOURNEY_URI,
     `${BOOTSTRAP_JOURNEY_URI}/`,
+    APPLY_USING_PAPER_FORM_URI,
+    `${APPLY_USING_PAPER_FORM_URI}/`,
 ];
 
 export default function CompanyAuthMiddleware(
