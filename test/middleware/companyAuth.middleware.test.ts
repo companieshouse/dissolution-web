@@ -84,20 +84,6 @@ describe("AuthMiddleware", () => {
     });
 
     const nonWhitelistedUrls = [
-        VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "test-uuid"),
-        SELECT_DIRECTOR_URI.replace(":journeyId", "test-uuid"),
-        SELECT_SIGNATORIES_URI.replace(":journeyId", "test-uuid"),
-        DEFINE_SIGNATORY_INFO_URI.replace(":journeyId", "test-uuid"),
-        CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid"),
-        `${CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid")}/subpath`,
-        `${ROOT_URI}/not-whitelisted`,
-        `${ROOT_URI}/abc/view-company-information/extra`,
-        "/random-path",
-        `${ROOT_URI}/abc%2Fview-company-information/extra`,
-        `${BOOTSTRAP_JOURNEY_URI}/subpath`,
-    ];
-
-    const nonWhitelistedUrlsWithCompanyNumber = [
         VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
         SELECT_DIRECTOR_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
         SELECT_SIGNATORIES_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
@@ -111,8 +97,8 @@ describe("AuthMiddleware", () => {
         `${BOOTSTRAP_JOURNEY_URI}/company/${COMPANY_NUMBER}/subpath`,
     ];
 
-    nonWhitelistedUrlsWithCompanyNumber.forEach(path => {
-        it(`none whitelisted urls are processed: ${path}`, () => {
+    nonWhitelistedUrls.forEach(path => {
+        it(`non-whitelisted urls are processed: ${path}`, () => {
             const req = { path: path } as any;
             const res = {} as Response;
             const next = sinon.stub();
@@ -129,8 +115,16 @@ describe("AuthMiddleware", () => {
         });
     });
 
-    nonWhitelistedUrls.forEach(path => {
-        it(`none whitelisted urls are processed: ${path}`, () => {
+    const nonWhitelistedUrlsWithoutCompanyNumberInPath = [
+        `${ROOT_URI}/not-whitelisted`,
+        `${ROOT_URI}/abc/view-company-information/extra`,
+        "/random-path",
+        `${ROOT_URI}/abc%2Fview-company-information/extra`,
+        `${BOOTSTRAP_JOURNEY_URI}/subpath`,
+    ];
+
+    nonWhitelistedUrlsWithoutCompanyNumberInPath.forEach(path => {
+        it(`non-whitelisted urls without company number in path are processed: ${path}`, () => {
             const req = { path: path } as any;
             const res = {} as Response;
             const next = sinon.stub();
