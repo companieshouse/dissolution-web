@@ -10,11 +10,11 @@ import { COMPANY_PATH_PREFIX } from "app/paths";
 @provide(CustomServerMiddlewareLoader)
 export default class CustomServerMiddlewareLoader {
     public constructor(
-        @inject(TYPES.SessionMiddleware) private sessionMiddleware: RequestHandler,
-        @inject(TYPES.SaveUserEmailToLocals) private saveUserEmailToLocals: RequestHandler,
-        @inject(TYPES.AuthMiddleware) private authMiddleware: RequestHandler,
-        @inject(TYPES.CompanyAuthMiddleware) private companyAuthMiddleware: RequestHandler,
-        @inject(TYPES.CompanyNumberAuthMiddleware) private companyNumberAuthMiddleware: RequestHandler
+        @inject(TYPES.SessionMiddleware) private readonly sessionMiddleware: RequestHandler,
+        @inject(TYPES.SaveUserEmailToLocals) private readonly saveUserEmailToLocals: RequestHandler,
+        @inject(TYPES.AuthMiddleware) private readonly authMiddleware: RequestHandler,
+        @inject(TYPES.CompanyAuthMiddleware) private readonly companyAuthMiddleware: RequestHandler,
+        @inject(TYPES.CompanyNumberAuthMiddleware) private readonly companyNumberAuthMiddleware: RequestHandler
     ) {}
 
     public loadCustomServerMiddleware(app: Application): void {

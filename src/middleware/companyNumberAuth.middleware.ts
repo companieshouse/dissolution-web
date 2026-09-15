@@ -7,7 +7,7 @@ export default function CompanyNumberAuthMiddleware(
     companyAuthService: CompanyAuthService,
     logger: ApplicationLogger
 ): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         const { companyNumber: companyNumberFromPath } = req.params;
 
         if (!companyNumberFromPath) {
@@ -27,8 +27,10 @@ export default function CompanyNumberAuthMiddleware(
             logger.info(
                 `Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
             );
-            const redirectUri = await companyAuthService.issueAuthRedirectUri(req, companyNumber);
-            return res.redirect(redirectUri);
+            companyAuthService
+                .issueAuthRedirectUri(req, companyNumber)
+                .then(redirectUri => res.redirect(redirectUri))
+                .catch(next);
         }
     };
 }
