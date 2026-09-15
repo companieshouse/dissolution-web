@@ -36,9 +36,6 @@ describe("AuthMiddleware", () => {
     let logger: ApplicationLogger;
     let session: Session;
 
-    const COMPANY_NUMBER = "12345678";
-    const INVALID_COMPANY_NUMBER = "87654321";
-
     beforeEach(() => {
         companyAuthService = mock(CompanyAuthService);
         sessionService = mock(SessionService);
@@ -84,21 +81,21 @@ describe("AuthMiddleware", () => {
     });
 
     const nonWhitelistedUrls = [
-        VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
-        SELECT_DIRECTOR_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
-        SELECT_SIGNATORIES_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
-        DEFINE_SIGNATORY_INFO_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
-        CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER),
-        `${CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid").replace(":companyNumber", COMPANY_NUMBER)}/subpath`,
-        `${ROOT_URI}/company/${COMPANY_NUMBER}/not-whitelisted`,
-        `${ROOT_URI}/company/${COMPANY_NUMBER}/abc/view-company-information/extra`,
-        `/company/${COMPANY_NUMBER}/random-path`,
-        `${ROOT_URI}/company/${COMPANY_NUMBER}/abc%2Fview-company-information/extra`,
-        `${BOOTSTRAP_JOURNEY_URI}/company/${COMPANY_NUMBER}/subpath`,
+        VIEW_COMPANY_INFORMATION_URI.replace(":journeyId", "test-uuid"),
+        SELECT_DIRECTOR_URI.replace(":journeyId", "test-uuid"),
+        SELECT_SIGNATORIES_URI.replace(":journeyId", "test-uuid"),
+        DEFINE_SIGNATORY_INFO_URI.replace(":journeyId", "test-uuid"),
+        CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid"),
+        `${CHECK_YOUR_ANSWERS_URI.replace(":journeyId", "test-uuid")}/subpath`,
+        `${ROOT_URI}/not-whitelisted`,
+        `${ROOT_URI}/abc/view-company-information/extra`,
+        "/random-path",
+        `${ROOT_URI}/abc%2Fview-company-information/extra`,
+        `${BOOTSTRAP_JOURNEY_URI}/subpath`,
     ];
 
     nonWhitelistedUrls.forEach(path => {
-        it(`non-whitelisted urls are processed: ${path}`, () => {
+        it(`none whitelisted urls are processed: ${path}`, () => {
             const req = { path: path } as any;
             const res = {} as Response;
             const next = sinon.stub();
@@ -115,66 +112,8 @@ describe("AuthMiddleware", () => {
         });
     });
 
-    const nonWhitelistedUrlsWithoutCompanyNumberInPath = [
-        `${ROOT_URI}/not-whitelisted`,
-        `${ROOT_URI}/abc/view-company-information/extra`,
-        "/random-path",
-        `${ROOT_URI}/abc%2Fview-company-information/extra`,
-        `${BOOTSTRAP_JOURNEY_URI}/subpath`,
-    ];
-
-    nonWhitelistedUrlsWithoutCompanyNumberInPath.forEach(path => {
-        it(`non-whitelisted urls without company number in path are processed: ${path}`, () => {
-            const req = { path: path } as any;
-            const res = {} as Response;
-            const next = sinon.stub();
-
-            when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(undefined);
-
-            middleware(req, res, next);
-
-            verify(sessionService.getDissolutionCompanyNumber(req)).once();
-            assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${path}`);
-            const err = next.args[0][0];
-            assert.instanceOf(err, Error);
-            assert.equal(err.message, "No company number found in path");
-        });
-    });
-
-    it("when no COMPANY_NUMBER is present in path the next called WITH error", () => {
+    it("when no companyNumber is present the next called WITH error", () => {
         const req = { path: "/some-path" } as any;
-        const res = {} as Response;
-        const next = sinon.stub();
-
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
-
-        middleware(req, res, next);
-
-        verify(sessionService.getDissolutionCompanyNumber(req)).once();
-        assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${req.path}`);
-        const err = next.args[0][0];
-        assert.instanceOf(err, Error);
-        assert.equal(err.message, "No company number found in path");
-    });
-
-    it("when mismatching company numbers in path and session the next called WITH error", () => {
-        const req = { path: `/some-path/company/${INVALID_COMPANY_NUMBER}/` } as any;
-        const res = {} as Response;
-        const next = sinon.stub();
-
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
-
-        middleware(req, res, next);
-
-        verify(sessionService.getDissolutionCompanyNumber(req)).once();
-        assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${req.path}`);
-        const err = next.args[0][0];
-        assert.instanceOf(err, Error);
-        assert.equal(err.message, "Company Number in path does not match Company Number in session");
-    });
-
-    it("when no COMPANY_NUMBER is present the next called WITH error", () => {
-        const req = { path: `/some-path/company/${COMPANY_NUMBER}/` } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
@@ -189,13 +128,13 @@ describe("AuthMiddleware", () => {
 
     it("when authenticated user is authorized for company number then next called WITHOUT error", () => {
         const signInInfo: ISignInInfo = {
-            company_number: COMPANY_NUMBER,
+            company_number: "12345678",
         };
-        const req = { path: `/some-path/company/${COMPANY_NUMBER}/` } as any;
+        const req = { path: "/some-path" } as any;
         const res = {} as Response;
         const next = sinon.stub();
 
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678");
         when(sessionService.getSignInInfo(req)).thenReturn(signInInfo);
 
         when(companyAuthService.isAuthorisedForCompany(anything(), anything())).thenReturn(true);
@@ -211,13 +150,13 @@ describe("AuthMiddleware", () => {
             company_number: "XXXXXXXXXX",
         };
 
-        const req = { path: `/some-path/company/${COMPANY_NUMBER}/` } as any;
+        const req = {} as any;
         const res = {} as Response;
         const redirectStub: sinon.SinonStub = sinon.stub();
         res.redirect = redirectStub;
         const next = sinon.stub();
 
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678");
         when(sessionService.getSignInInfo(req)).thenReturn(signInInfo as any);
         when(companyAuthService.issueAuthRedirectUri(anything(), anything())).thenResolve(
             "http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678"

@@ -2,11 +2,9 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
 import CompanyAuthService from "app/services/auth/companyAuth.service";
 import SessionService from "app/services/session/session.service";
-import { extractCompanyNumberFromPath } from "app/utils/companyNumber.util";
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
-    APPLY_USING_PAPER_FORM_URI,
     BOOTSTRAP_JOURNEY_URI,
     HEALTHCHECK_URI,
     ROOT_URI,
@@ -30,8 +28,6 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
     `${ACCESSIBILITY_STATEMENT_URI}/`,
     BOOTSTRAP_JOURNEY_URI,
     `${BOOTSTRAP_JOURNEY_URI}/`,
-    APPLY_USING_PAPER_FORM_URI,
-    `${APPLY_USING_PAPER_FORM_URI}/`,
 ];
 
 export default function CompanyAuthMiddleware(
@@ -44,11 +40,10 @@ export default function CompanyAuthMiddleware(
             return next();
         }
 
-        let companyNumber: string;
-        try {
-            companyNumber = getCompanyNumber(req, sessionService);
-        } catch (error) {
-            return next(error);
+        const companyNumber = sessionService.getDissolutionCompanyNumber(req);
+
+        if (!companyNumber) {
+            return next(new Error("No Company Number in session"));
         }
 
         if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
@@ -62,21 +57,6 @@ export default function CompanyAuthMiddleware(
             return res.redirect(redirectUri);
         }
     };
-}
-
-function getCompanyNumber(req: Request, sessionService: SessionService) {
-    const companyNumber = sessionService.getDissolutionCompanyNumber(req);
-    const companyNumberFromPath = extractCompanyNumberFromPath(req.path);
-
-    if (!companyNumber) {
-        throw new Error("No Company Number in session");
-    }
-
-    if (companyNumberFromPath !== companyNumber) {
-        throw new Error("Company Number in path does not match Company Number in session");
-    }
-
-    return companyNumber;
 }
 
 export function isWhitelistedUrl(url: string): boolean {

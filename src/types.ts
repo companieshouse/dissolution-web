@@ -23,6 +23,7 @@ const TYPES = {
     JourneyIdAuthMiddleware: "JourneyIdAuthMiddleware",
     JourneyPathService: "JourneyPathService",
     AuthConfig: "AuthConfig",
+    CompanyNumberAuthMiddleware: "CompanyNumberAuthMiddleware",
 };
 
 export default TYPES;
