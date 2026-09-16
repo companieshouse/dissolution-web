@@ -11,7 +11,7 @@ export default function CompanyNumberAuthMiddleware(
         const { companyNumber: companyNumberFromPath } = req.params;
 
         if (!companyNumberFromPath) {
-            return next(new Error("No company Number in path"));
+            return next(new Error("No company number in path"));
         }
 
         const { companyNumber, error } = validateCompanyNumber(companyNumberFromPath);
@@ -21,11 +21,11 @@ export default function CompanyNumberAuthMiddleware(
         }
 
         if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
-            logger.info(`Authenticated user is authorized for ${companyNumber}`);
+            logger.info(`[CompanyNumberAuthMiddleware] Authenticated user is authorized for ${companyNumber}`);
             return next();
         } else {
             logger.info(
-                `Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
+                `[CompanyNumberAuthMiddleware] Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
             );
             companyAuthService
                 .issueAuthRedirectUri(req, companyNumber)

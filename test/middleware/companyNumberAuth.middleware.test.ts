@@ -38,7 +38,7 @@ describe("CompanyNumberAuthMiddleware", () => {
         assert.isTrue(next.calledOnce);
         const err = next.args[0][0];
         assert.instanceOf(err, Error);
-        assert.equal(err.message, "No company Number in path");
+        assert.equal(err.message, "No company number in path");
     });
 
     it("when company number is invalid then throws error", () => {
