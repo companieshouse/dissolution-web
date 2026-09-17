@@ -100,31 +100,6 @@ describe("SessionService", () => {
         });
     });
 
-    describe("requireJourneyId", () => {
-        it("should return the journeyId when present", () => {
-            const journeyId = "journey-123";
-            const dissolutionSession = aDissolutionSession().withJourneyId(journeyId).build();
-
-            const req: Request = generateRequest();
-            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession);
-
-            const result: string = sessionService.requireJourneyId(req);
-
-            assert.equal(result, journeyId);
-        });
-
-        it("should throw an Error when there is no journeyId", () => {
-            // Create a session object without a journeyId (or with a falsy journeyId)
-            const dissolutionSession: any = generateDissolutionSession();
-            dissolutionSession.journeyId = undefined;
-
-            const req: Request = generateRequest();
-            req.session!.getExtraData = getSessionStub.withArgs("dissolution").returns(dissolutionSession);
-
-            assert.throws(() => sessionService.requireJourneyId(req), Error, "No journeyId in session");
-        });
-    });
-
     describe("getDissolutionCompanyNumber", () => {
         it("should return the company number when present", () => {
             const companyNumber = "COMP-123";

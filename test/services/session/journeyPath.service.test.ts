@@ -1,30 +1,21 @@
 import { assert } from "chai";
-import { anything, instance, mock, when } from "ts-mockito";
 import { generateRequest } from "test/fixtures/http.fixtures";
 import { Request } from "express";
 import JourneyPathService from "app/services/session/journeyPath.service";
-import SessionService from "app/services/session/session.service";
 
 describe("JourneyPathService", () => {
     let journeyPathService: JourneyPathService;
-    let sessionServiceMock: SessionService;
-    let sessionService: SessionService;
 
     beforeEach(() => {
-        sessionServiceMock = mock(SessionService);
-        sessionService = instance(sessionServiceMock);
-        journeyPathService = new JourneyPathService(sessionService);
+        journeyPathService = new JourneyPathService();
     });
 
     describe("journeyPath", () => {
-        it("should build path with journeyId and companyNumber from session when not provided", () => {
+        it("should build path with journeyId and companyNumber from path params when not provided", () => {
             const req: Request = generateRequest();
-            const journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA";
-            const companyNumber = "12345678";
+            req.params.journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA";
+            req.params.companyNumber = "12345678";
             const pathTemplate = "/close-a-company/:journeyId/company/:companyNumber/view-company-information";
-
-            when(sessionServiceMock.requireJourneyId(anything())).thenReturn(journeyId);
-            when(sessionServiceMock.requireDissolutionCompanyNumber(anything())).thenReturn(companyNumber);
 
             const result = journeyPathService.journeyPath(req, pathTemplate);
 
@@ -48,41 +39,28 @@ describe("JourneyPathService", () => {
             );
         });
 
-        it("should throw error when journeyId is missing from session", () => {
+        it("should throw error when journeyId is missing from path params", () => {
             const req: Request = generateRequest();
+            req.params.companyNumber = "12345678";
             const pathTemplate = "/close-a-company/:journeyId/company/:companyNumber/view-company-information";
 
-            when(sessionServiceMock.requireJourneyId(anything())).thenThrow(new Error("No journeyId in session"));
-
-            assert.throws(() => journeyPathService.journeyPath(req, pathTemplate), Error, "No journeyId in session");
+            assert.throws(() => journeyPathService.journeyPath(req, pathTemplate), Error, "No journeyId");
         });
 
-        it("should throw error when companyNumber is missing from session", () => {
+        it("should throw error when companyNumber is missing from path params", () => {
             const req: Request = generateRequest();
-            const journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA";
+            req.params.journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA";
             const pathTemplate = "/close-a-company/:journeyId/company/:companyNumber/view-company-information";
 
-            when(sessionServiceMock.requireJourneyId(anything())).thenReturn(journeyId);
-            when(sessionServiceMock.requireDissolutionCompanyNumber(anything())).thenThrow(
-                new Error("No company number in dissolution session")
-            );
-
-            assert.throws(
-                () => journeyPathService.journeyPath(req, pathTemplate),
-                Error,
-                "No company number in dissolution session"
-            );
+            assert.throws(() => journeyPathService.journeyPath(req, pathTemplate), Error, "No companyNumber");
         });
 
         it("should merge additional params with journeyId and companyNumber", () => {
             const req: Request = generateRequest();
-            const journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA";
-            const companyNumber = "12345678";
+            req.params.journeyId = "e1101f0a-5121-4429-acee-a817c5cAAAAA";
+            req.params.companyNumber = "12345678";
             const pathTemplate =
                 "/close-a-company/:journeyId/company/:companyNumber/application-status/:signatoryId/change";
-
-            when(sessionServiceMock.requireJourneyId(anything())).thenReturn(journeyId);
-            when(sessionServiceMock.requireDissolutionCompanyNumber(anything())).thenReturn(companyNumber);
 
             const result = journeyPathService.journeyPath(req, pathTemplate, {
                 params: { signatoryId: "sig-123" },

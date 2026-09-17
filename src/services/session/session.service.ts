@@ -48,14 +48,6 @@ export default class SessionService {
         return this.getDissolutionSession(req)?.companyNumber;
     }
 
-    public requireJourneyId(req: Request): string {
-        const journeyId = this.getJourneyId(req);
-        if (!journeyId) {
-            throw new Error("No journeyId in session");
-        }
-        return journeyId;
-    }
-
     public setDissolutionSession(req: Request, updatedSession: DissolutionSession): void {
         req.session!.setExtraData(DISSOLUTION_SESSION_KEY, updatedSession);
     }
