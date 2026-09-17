@@ -1,4 +1,4 @@
-import { ValidationResult } from "@hapi/joi";
+import { ValidationResult } from "joi";
 import { assert } from "chai";
 import { generateSelectSignatoriesFormModel } from "../fixtures/companyOfficers.fixtures";
 

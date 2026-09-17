@@ -1,4 +1,4 @@
-import { ValidationResult } from "@hapi/joi";
+import { ValidationResult } from "joi";
 import { assert } from "chai";
 import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInfo.model";
 import { DirectorToSign } from "app/models/session/directorToSign.model";

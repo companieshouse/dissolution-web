@@ -1,4 +1,4 @@
-import Joi from "@hapi/joi";
+import Joi from "joi";
 import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model";
 
 export default function createEndorseCertificateSchema(approval?: DissolutionApprovalModel): Joi.ObjectSchema {

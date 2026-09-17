@@ -1,6 +1,6 @@
 // noinspection DuplicatedCode
 
-import { ValidationResult } from "@hapi/joi";
+import { ValidationResult } from "joi";
 import { assert } from "chai";
 import { generatePayByAccountDetailsForm } from "../fixtures/payment.fixtures";
 

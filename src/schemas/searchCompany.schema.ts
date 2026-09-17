@@ -1,4 +1,4 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "joi";
 
 const emptyCompanyNumberError: string = "You must enter a Company Number";
 const formSchema = Joi.object({

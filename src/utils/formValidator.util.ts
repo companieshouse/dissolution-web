@@ -1,4 +1,4 @@
-import { AnySchema, ValidationErrorItem, ValidationOptions, ValidationResult } from "@hapi/joi";
+import { AnySchema, ValidationErrorItem, ValidationOptions, ValidationResult } from "joi";
 import { provide } from "inversify-binding-decorators";
 
 import Optional from "app/models/optional";

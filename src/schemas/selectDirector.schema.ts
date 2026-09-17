@@ -1,4 +1,4 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "joi";
 
 import OfficerType from "app/models/dto/officerType.enum";
 import DirectorDetails from "app/models/view/directorDetails.model";

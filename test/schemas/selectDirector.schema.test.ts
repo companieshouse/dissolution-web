@@ -1,4 +1,4 @@
-import { ValidationResult } from "@hapi/joi";
+import { ValidationResult } from "joi";
 import { assert } from "chai";
 import { aSelectDirectorFormModel } from "../fixtures/selectDirectorForm.builder";
 import { aDirectorDetails } from "../fixtures/directorDetails.builder";
