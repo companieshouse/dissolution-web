@@ -5,5 +5,6 @@ export function generateRequest(): Request {
     return {
         session: generateSession(),
         headers: {},
+        params: {},
     } as Request;
 }

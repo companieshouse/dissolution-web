@@ -23,6 +23,7 @@ import CompanyAuthService from "app/services/auth/companyAuth.service";
 import TYPES from "app/types";
 import { getEnv, getEnvOrDefault, getEnvOrThrow, parseFeatureFlag } from "app/utils/env.util";
 import UriFactory from "app/utils/uri.factory";
+import CompanyNumberAuthMiddleware from "app/middleware/companyNumberAuth.middleware";
 
 export function initContainer(): Container {
     const container: Container = new Container();
@@ -108,6 +109,10 @@ export function initContainer(): Container {
     container
         .bind(TYPES.CompanyAuthMiddleware)
         .toConstantValue(CompanyAuthMiddleware(companyAuthService, sessionService, logger));
+
+    container
+        .bind(TYPES.CompanyNumberAuthMiddleware)
+        .toConstantValue(CompanyNumberAuthMiddleware(companyAuthService, logger));
 
     container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(SaveUserEmailToLocals(sessionService));
 
