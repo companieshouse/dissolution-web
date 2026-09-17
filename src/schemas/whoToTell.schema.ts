@@ -1,4 +1,4 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "joi";
 
 const formSchema = Joi.object({
     confirmation: Joi.string().required().messages({

@@ -1,4 +1,4 @@
-import * as Joi from "@hapi/joi";
+import * as Joi from "joi";
 
 const emptyPresenterIdError: string = "Enter your presenter ID";
 const invalidPresenterIdError: string = "Presenter ID must only include numbers";

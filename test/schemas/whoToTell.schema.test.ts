@@ -1,4 +1,4 @@
-import { ValidationResult } from "@hapi/joi";
+import { ValidationResult } from "joi";
 import { assert } from "chai";
 
 import WhoToTellFormModel from "app/models/form/whoToTell.model";

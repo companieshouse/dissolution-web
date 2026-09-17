@@ -1,5 +1,5 @@
 import FormValidator from "./formValidator.util";
-import { ValidationErrorItem } from "@hapi/joi";
+import { ValidationErrorItem } from "joi";
 import { provide } from "inversify-binding-decorators";
 import validationErrorCodeMap from "./validationErrorCodes";
 

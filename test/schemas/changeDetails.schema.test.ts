@@ -1,4 +1,4 @@
-import { ValidationResult } from "@hapi/joi";
+import { ValidationResult } from "joi";
 import { assert } from "chai";
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model";
 import changeDetailsSchema from "app/schemas/changeDetails.schema";

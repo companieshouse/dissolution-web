@@ -1,4 +1,4 @@
-import { ValidationResult, ValidationOptions } from "@hapi/joi";
+import { ValidationResult, ValidationOptions } from "joi";
 import { assert } from "chai";
 
 import EndorseCertificateFormModel from "app/models/form/endorseCertificateFormModel";

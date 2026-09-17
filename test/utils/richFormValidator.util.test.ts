@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import Joi from "@hapi/joi";
+import Joi from "joi";
 import { assert } from "chai";
 
 import Optional from "app/models/optional";
