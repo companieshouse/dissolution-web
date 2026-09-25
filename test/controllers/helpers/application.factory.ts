@@ -7,7 +7,7 @@ import { Application, NextFunction, Request, Response } from "express";
 import { Container } from "inversify";
 import { buildProviderModule } from "inversify-binding-decorators";
 import { InversifyExpressServer } from "inversify-express-utils";
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService, { JourneyPathOptions } from "app/services/session/journeyPath.service";
 import * as nunjucks from "nunjucks";
 
 import { APP_NAME } from "app/constants/app.const";
@@ -76,13 +76,8 @@ export const createApp = (configureBindings?: (container: Container) => void): A
             server.use(bodyParser.urlencoded({ extended: false }));
 
             server.use((req: Request, res: Response, next: NextFunction) => {
-                res.locals.journeyPath = (
-                    pathTemplate: string,
-                    options?: {
-                        journeyId?: string;
-                        params?: Record<string, string | number>;
-                    }
-                ): string => journeyPathService.journeyPath(req, pathTemplate, options);
+                res.locals.journeyPath = (pathTemplate: string, options?: JourneyPathOptions): string =>
+                    journeyPathService.journeyPath(req, pathTemplate, options);
 
                 next();
             });
