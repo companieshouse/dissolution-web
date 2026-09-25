@@ -15,7 +15,7 @@ import {
     PAGE_TITLE_SUFFIX,
     SERVICE_NAME,
 } from "app/constants/app.const";
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService, { JourneyPathOptions } from "app/services/session/journeyPath.service";
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
@@ -75,14 +75,7 @@ export default class NunjucksLoader {
 
     private addRequestLocals(app: express.Application): void {
         app.use((req, res, next) => {
-            res.locals.journeyPath = (
-                pathTemplate: string,
-                options?: {
-                    journeyId?: string;
-                    companyNumber?: string;
-                    params?: Record<string, string | number>;
-                }
-            ): string => {
+            res.locals.journeyPath = (pathTemplate: string, options?: JourneyPathOptions): string => {
                 return this.journeyPathService.journeyPath(req, pathTemplate, options);
             };
             next();
