@@ -24,6 +24,7 @@ import {
     generateViewApplicationStatusSignatory,
 } from "test/fixtures/viewApplicationStatus.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -65,7 +66,7 @@ beforeEach(() => {
 describe("NotSelectedSignatoryController", () => {
     describe("GET request", () => {
         it("should render the NotSelectedSignatory page", async () => {
-            const res = await request(app).get(NOT_SELECTED_SIGNATORY).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(NOT_SELECTED_SIGNATORY)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -80,7 +81,7 @@ describe("NotSelectedSignatoryController", () => {
                 generateViewApplicationStatusSignatory(),
             ];
 
-            const res = await request(app).get(NOT_SELECTED_SIGNATORY).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(NOT_SELECTED_SIGNATORY)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -95,7 +96,7 @@ describe("NotSelectedSignatoryController", () => {
                 { ...generateViewApplicationStatusSignatory(), name: "John Doe", email: "john@mail.com" },
             ];
 
-            const res = await request(app).get(NOT_SELECTED_SIGNATORY).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(NOT_SELECTED_SIGNATORY)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -112,7 +113,7 @@ describe("NotSelectedSignatoryController", () => {
                 { ...generateViewApplicationStatusSignatory(), hasApproved: false },
             ];
 
-            const res = await request(app).get(NOT_SELECTED_SIGNATORY).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(NOT_SELECTED_SIGNATORY)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -124,7 +125,7 @@ describe("NotSelectedSignatoryController", () => {
             it("should not display the change column", async () => {
                 viewApplicationStatus.showChangeColumn = false;
 
-                const res = await request(app).get(NOT_SELECTED_SIGNATORY).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(NOT_SELECTED_SIGNATORY)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -138,7 +139,7 @@ describe("NotSelectedSignatoryController", () => {
                     { ...generateViewApplicationStatusSignatory(), canChange: false },
                 ];
 
-                const res = await request(app).get(NOT_SELECTED_SIGNATORY).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(NOT_SELECTED_SIGNATORY)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 

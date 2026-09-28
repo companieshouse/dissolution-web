@@ -19,6 +19,7 @@ import { VIEW_FINAL_CONFIRMATION_URI } from "app/paths";
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import SessionService from "app/services/session/session.service";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -78,7 +79,7 @@ describe("ViewFinalConfirmationController", () => {
 
     describe("GET request", () => {
         it("should render the ViewFinalConfirmation page with correct reference number and panel title", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Panel title
@@ -88,7 +89,7 @@ describe("ViewFinalConfirmationController", () => {
         });
 
         it("should render the ViewFinalConfirmation page with company number and name in summary list", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Company number and name in summary list (target dt and dd directly for specificity)
@@ -100,7 +101,7 @@ describe("ViewFinalConfirmationController", () => {
 
         it("should render the ViewFinalConfirmation page with officerType-specific headings and instructions for DIRECTOR", async () => {
             dissolutionSession.officerType = OfficerType.DIRECTOR;
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Use h2 for heading specificity
             assert.isTrue(htmlAssertHelper.anyTagHasText("h2", DIRECTORS_HEADING));
@@ -109,7 +110,7 @@ describe("ViewFinalConfirmationController", () => {
 
         it("should render the ViewFinalConfirmation page with officerType-specific headings and instructions for MEMBER", async () => {
             dissolutionSession.officerType = OfficerType.MEMBER;
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Use h2 for heading specificity
             assert.isTrue(htmlAssertHelper.anyTagHasText("h2", MEMBERS_HEADING));
@@ -117,7 +118,7 @@ describe("ViewFinalConfirmationController", () => {
         });
 
         it("should render the ViewFinalConfirmation page with updated guidance and feedback links", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Guidance link
@@ -127,21 +128,21 @@ describe("ViewFinalConfirmationController", () => {
         });
 
         it("should render the ViewFinalConfirmation page with warning text", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             assert.isTrue(htmlAssertHelper.containsRawText(WARNING_TEXT));
         });
 
         it("should render the ViewFinalConfirmation page with email notification text", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             assert.isTrue(htmlAssertHelper.containsRawText(EMAIL_CONFIRM_TEXT));
             assert.isTrue(htmlAssertHelper.containsRawText(EMAIL_RESULT_TEXT));
         });
 
         it("should render the ViewFinalConfirmation page with 'What happens next' section", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Use h2 for heading specificity
             assert.isTrue(htmlAssertHelper.anyTagHasText("h2", WHAT_NEXT_HEADING));
@@ -150,7 +151,7 @@ describe("ViewFinalConfirmationController", () => {
         });
 
         it("should render the ViewFinalConfirmation page with download link and correct attributes", async () => {
-            const res = await request(app).get(VIEW_FINAL_CONFIRMATION_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
             // Download link present
             assert.isTrue(htmlAssertHelper.selectorExists(DOWNLOAD_LINK_ID));

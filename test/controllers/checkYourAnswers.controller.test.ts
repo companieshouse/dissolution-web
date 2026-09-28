@@ -27,6 +27,7 @@ import { generateDirectorToSign, generateDissolutionSession } from "test/fixture
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import { Application } from "express";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -75,7 +76,7 @@ describe("CheckYourAnswersController", () => {
 
             const app = initApp();
 
-            const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CHECK_YOUR_ANSWERS_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -106,7 +107,7 @@ describe("CheckYourAnswersController", () => {
 
             const app = initApp();
 
-            const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CHECK_YOUR_ANSWERS_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -135,7 +136,7 @@ describe("CheckYourAnswersController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CHECK_YOUR_ANSWERS_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -151,7 +152,7 @@ describe("CheckYourAnswersController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CHECK_YOUR_ANSWERS_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -167,7 +168,7 @@ describe("CheckYourAnswersController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CHECK_YOUR_ANSWERS_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -183,7 +184,7 @@ describe("CheckYourAnswersController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(CHECK_YOUR_ANSWERS_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CHECK_YOUR_ANSWERS_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -199,7 +200,7 @@ describe("CheckYourAnswersController", () => {
             const app = initApp();
 
             await request(app)
-                .post(CHECK_YOUR_ANSWERS_URI)
+                .post(buildTestUrl(CHECK_YOUR_ANSWERS_URI))
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_GATE_URI);
 

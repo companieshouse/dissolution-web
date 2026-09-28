@@ -22,6 +22,7 @@ import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.bu
 import { aDirectorToSign } from "test/fixtures/directorToSign.builder";
 import { aDissolutionSession } from "test/fixtures/dissolutionSession.builder";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -56,7 +57,7 @@ describe("ChangeDetailsController", () => {
 
             const app: Application = initApp();
 
-            const res = await request(app).get(CHANGE_DETAILS_URI).expect(StatusCodes.NOT_FOUND);
+            const res = await request(app).get(buildTestUrl(CHANGE_DETAILS_URI)).expect(StatusCodes.NOT_FOUND);
 
             assert.equal(res.status, StatusCodes.NOT_FOUND);
         });
@@ -82,7 +83,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             const app: Application = initApp();
 
-            const res = await request(app).get(CHANGE_DETAILS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CHANGE_DETAILS_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -115,7 +116,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             const app: Application = initApp();
 
-            const res = await request(app).get(CHANGE_DETAILS_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CHANGE_DETAILS_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -137,7 +138,7 @@ describe("ChangeDetailsController", () => {
 
             const app: Application = initApp();
 
-            const res = await request(app).get(CHANGE_DETAILS_URI).expect(StatusCodes.NOT_FOUND);
+            const res = await request(app).get(buildTestUrl(CHANGE_DETAILS_URI)).expect(StatusCodes.NOT_FOUND);
 
             assert.equal(res.status, StatusCodes.NOT_FOUND);
         });
@@ -173,7 +174,7 @@ describe("ChangeDetailsController", () => {
 
                 const app: Application = initApp();
 
-                const res = await request(app).get(CHANGE_DETAILS_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CHANGE_DETAILS_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -219,7 +220,7 @@ describe("ChangeDetailsController", () => {
 
                 const app: Application = initApp();
 
-                const res = await request(app).get(CHANGE_DETAILS_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CHANGE_DETAILS_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -241,7 +242,10 @@ describe("ChangeDetailsController", () => {
                 .build();
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             const app: Application = initApp();
-            const res = await request(app).post(CHANGE_DETAILS_URI).send(updatedDetails).expect(StatusCodes.NOT_FOUND);
+            const res = await request(app)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
+                .send(updatedDetails)
+                .expect(StatusCodes.NOT_FOUND);
 
             assert.equal(res.status, StatusCodes.NOT_FOUND);
         });
@@ -281,7 +285,7 @@ describe("ChangeDetailsController", () => {
                     when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
                     const res = await request(initApp())
-                        .post(CHANGE_DETAILS_URI)
+                        .post(buildTestUrl(CHANGE_DETAILS_URI))
                         .send(formDetails)
                         .expect(StatusCodes.MOVED_TEMPORARILY);
 
@@ -314,7 +318,7 @@ describe("ChangeDetailsController", () => {
             const app = initApp();
 
             const res = await request(app)
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.BAD_REQUEST);
 
@@ -348,7 +352,7 @@ describe("ChangeDetailsController", () => {
             const app = initApp();
 
             const res = await request(app)
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.BAD_REQUEST);
 
@@ -377,7 +381,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             const res = await request(initApp())
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
@@ -408,7 +412,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             const res = await request(initApp())
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
@@ -446,7 +450,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             const res = await request(initApp())
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHECK_YOUR_ANSWERS_URI);
@@ -491,7 +495,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             const res = await request(initApp())
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHECK_YOUR_ANSWERS_URI);
@@ -529,7 +533,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             const res = await request(initApp())
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.NOT_FOUND);
 
@@ -565,7 +569,7 @@ describe("ChangeDetailsController", () => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             const res = await request(initApp())
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.NOT_FOUND);
 
@@ -594,7 +598,7 @@ describe("ChangeDetailsController", () => {
             const app = initApp();
 
             const res = await request(app)
-                .post(CHANGE_DETAILS_URI)
+                .post(buildTestUrl(CHANGE_DETAILS_URI))
                 .send(updatedDetails)
                 .expect(StatusCodes.BAD_REQUEST);
 
