@@ -9,7 +9,7 @@ import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transact
 import { aTransaction } from "test/fixtures/transaction.builder";
 
 const COMPANY_NUMBER = "12345678";
-const TRANSACTION_ID = "2222";
+const TRANSACTION_ID = "123456-123456-123456";
 const TX_REF = "ABC123";
 const TX_DESC = "Some transaction description";
 
@@ -67,6 +67,61 @@ describe("TransactionService", () => {
                 assert.fail();
             } catch (err: any) {
                 assert.equal(err.message, `Failed to create transaction for company number ${COMPANY_NUMBER}`);
+            }
+        });
+    });
+
+    describe("getTransaction", () => {
+        it("should call the transaction api client and return the transaction", async () => {
+            const tx: Transaction = aTransaction()
+                .withId(TRANSACTION_ID)
+                .withCompanyNumber(COMPANY_NUMBER)
+                .withReference(TX_REF)
+                .withDescription(TX_DESC)
+                .withStatus("open")
+                .build();
+
+            when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenResolve(tx);
+
+            const result: Transaction = await service.getTransaction(TOKEN, TRANSACTION_ID);
+
+            verify(client.getTransaction(TOKEN, TRANSACTION_ID)).once();
+
+            assert.deepEqual(result, tx);
+        });
+
+        it("should reject with an error when fetching the transaction failed", async () => {
+            when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenReject(new Error("Some Client Error"));
+
+            try {
+                await service.getTransaction(TOKEN, TRANSACTION_ID);
+                assert.fail();
+            } catch (err: any) {
+                assert.equal(err.message, `Failed to get transaction for transaction id ${TRANSACTION_ID}`);
+            }
+        });
+
+        it("should reject with an error when TransactionApiError is caught", async () => {
+            when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenReject(
+                new TransactionApiError("some api error", StatusCodes.NOT_FOUND, [])
+            );
+
+            try {
+                await service.getTransaction(TOKEN, TRANSACTION_ID);
+                assert.fail();
+            } catch (err: any) {
+                assert.equal(err.message, `Failed to get transaction for transaction id ${TRANSACTION_ID}`);
+            }
+        });
+
+        it("should reject with an error when a non-Error value is thrown", async () => {
+            when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenReject({ some: "object" } as any);
+
+            try {
+                await service.getTransaction(TOKEN, TRANSACTION_ID);
+                assert.fail();
+            } catch (err: any) {
+                assert.equal(err.message, `Failed to get transaction for transaction id ${TRANSACTION_ID}`);
             }
         });
     });

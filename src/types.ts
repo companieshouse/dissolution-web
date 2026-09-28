@@ -24,6 +24,7 @@ const TYPES = {
     JourneyPathService: "JourneyPathService",
     AuthConfig: "AuthConfig",
     CompanyNumberAuthMiddleware: "CompanyNumberAuthMiddleware",
+    TransactionMiddleware: "TransactionMiddleware",
 };
 
 export default TYPES;

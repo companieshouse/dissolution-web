@@ -35,6 +35,34 @@ export default class TransactionApiClient {
         }
         return response.resource;
     }
+
+    public async getTransaction(token: string, transactionId: string): Promise<Transaction> {
+        const response: TransactionApiResponse<Transaction> = await this.factory
+            .getTransactionService(token)
+            .getTransaction(transactionId);
+
+        if (!response?.httpStatusCode) {
+            throw new TransactionApiError(
+                `Failed to get transaction for transaction id '${transactionId}' - returned incorrect response`,
+                response.httpStatusCode
+            );
+        }
+
+        if (response.httpStatusCode >= StatusCodes.BAD_REQUEST) {
+            throw new TransactionApiError(
+                `Failed to get transaction for transaction id '${transactionId}' - invalid HTTP status ${response.httpStatusCode}`,
+                response.httpStatusCode,
+                response.errors
+            );
+        }
+
+        if (!response.resource) {
+            throw new Error(
+                `Failed to get transaction for transaction id '${transactionId}' - No transaction resource returned`
+            );
+        }
+        return response.resource;
+    }
 }
 
 export class TransactionApiError extends Error {

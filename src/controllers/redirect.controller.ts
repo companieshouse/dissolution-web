@@ -52,8 +52,9 @@ export class RedirectController extends JourneyBaseController {
         if (!dissolution) {
             const options: JourneyPathOptions = {};
             if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED) {
-                const transaction = await this.createTransaction(session);
-                options.transactionId = transaction.id;
+                const { id: transactionId } = await this.createTransaction(session);
+                this.sessionService.setDissolutionSession(this.httpContext.request, { ...session, transactionId });
+                options.transactionId = transactionId;
             }
 
             return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI, options));

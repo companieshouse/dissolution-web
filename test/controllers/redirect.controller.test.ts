@@ -134,10 +134,11 @@ describe("RedirectController", () => {
                 .expect("Location", buildTestUrl(SELECT_DIRECTOR_URI));
 
             verify(transactionService.createTransaction(TOKEN, anything(), anything(), anything())).never();
+            verify(session.setDissolutionSession(anything(), anything())).never();
         });
 
         it("should create transaction if feature toggle is enabled and dissolution has not yet been created", async () => {
-            const TRANSACTION_ID = "2222";
+            const TRANSACTION_ID = "123456-123456-123456";
             const COMPANY_NUMBER = dissolutionSession.companyNumber;
             const newTx: Transaction = aTransaction()
                 .withId(TRANSACTION_ID)
@@ -157,6 +158,14 @@ describe("RedirectController", () => {
                 .expect("Location", buildTestUrl(SELECT_DIRECTOR_URI, { transactionId: TRANSACTION_ID }));
 
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+            verify(session.setDissolutionSession(anything(), anything())).once();
+
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
+                session.setDissolutionSession
+            );
+            const updatedSession: DissolutionSession = sessionCaptor.last()[1];
+
+            assert.equal(updatedSession.transactionId, TRANSACTION_ID);
         });
 
         it("should throw an error if create transaction failed when feature toggle is enabled", async () => {
@@ -172,6 +181,7 @@ describe("RedirectController", () => {
                 .expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+            verify(session.setDissolutionSession(anything(), anything())).never();
         });
 
         describe("Pending Approval", () => {
