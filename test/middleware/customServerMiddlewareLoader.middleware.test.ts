@@ -5,7 +5,7 @@ import { Application, RequestHandler } from "express";
 import * as sinon from "sinon";
 
 import CustomServerMiddlewareLoader from "app/middleware/customServerMiddlewareLoader.middleware";
-import { COMPANY_PATH_PREFIX, TRANSACTION_PATH_PREFIX } from "app/paths";
+import { COMPANY_PATH_PREFIX } from "app/paths";
 
 describe("CustomServerMiddlewareLoader", () => {
     let loader: CustomServerMiddlewareLoader;
@@ -52,7 +52,7 @@ describe("CustomServerMiddlewareLoader", () => {
 
             assert.equal(appUseSpy.args[4][0], COMPANY_PATH_PREFIX);
             assert.equal(appUseSpy.args[4][1], companyNumberAuthMiddleware);
-            assert.equal(appUseSpy.args[5][0], TRANSACTION_PATH_PREFIX);
+            assert.equal(appUseSpy.args[5][0], `${COMPANY_PATH_PREFIX}/transactions/:transactionId`);
             assert.equal(appUseSpy.args[5][1], transactionMiddleware);
         });
     });
