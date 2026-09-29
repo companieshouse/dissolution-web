@@ -44,7 +44,7 @@ export default class TransactionApiClient {
         if (!response?.httpStatusCode) {
             throw new TransactionApiError(
                 `Failed to get transaction for transaction id '${transactionId}' - returned incorrect response`,
-                response.httpStatusCode
+                response?.httpStatusCode
             );
         }
 
