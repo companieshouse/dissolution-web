@@ -1,7 +1,7 @@
 type PathParams = Record<string, string | number | undefined>;
 
 /*
- * Regex to matches a route param placeholder, e.g. ":journeyId"
+ * Regex to match a route param placeholder, e.g. ":journeyId"
  */
 const PATH_PARAM_REGEX = /:(\w+)/g;
 

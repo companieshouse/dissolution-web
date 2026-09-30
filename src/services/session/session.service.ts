@@ -81,6 +81,14 @@ export default class SessionService {
         return companyNumber;
     }
 
+    public requireDissolutionTransactionId(req: Request): string {
+        const transactionId = this.getDissolutionSession(req)?.transactionId;
+        if (!transactionId) {
+            throw new Error("No transaction ID in dissolution session");
+        }
+        return transactionId;
+    }
+
     public getSession(req: Request): Session {
         return req.session!;
     }

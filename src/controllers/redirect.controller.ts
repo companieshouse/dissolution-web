@@ -29,6 +29,13 @@ import TYPES from "app/types";
 import TransactionService from "app/services/transaction/transaction.service";
 import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
+import DissolutionStatus from "app/models/dto/dissolutionStatus.enum";
+
+type SessionRedirectOptions = {
+    session: DissolutionSession;
+    redirectUri: string;
+    options?: JourneyPathOptions;
+};
 
 @controller(REDIRECT_GATE_URI, TYPES.JourneyIdAuthMiddleware)
 export class RedirectController extends JourneyBaseController {
@@ -50,29 +57,14 @@ export class RedirectController extends JourneyBaseController {
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session);
 
         if (!dissolution) {
-            const options: JourneyPathOptions = {};
-            if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED) {
-                const { id: transactionId } = await this.createTransaction(session);
-                this.sessionService.setDissolutionSession(this.httpContext.request, { ...session, transactionId });
-                options.transactionId = transactionId;
-            }
-
-            return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI, options));
+            return this.handleNewApplication(session);
         }
 
-        session.applicationReferenceNumber = dissolution.application_reference;
+        const opts: SessionRedirectOptions = dissolution.transaction_id
+            ? await this.handleTransactionModelDissolution(dissolution, session)
+            : await this.handleDissolutionApplication(dissolution, session);
 
-        switch (dissolution.application_status) {
-            case ApplicationStatus.PAID:
-                session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
-                return this.saveSessionAndRedirect(session, VIEW_FINAL_CONFIRMATION_URI);
-            case ApplicationStatus.PENDING_PAYMENT:
-                return this.handlePendingPaymentRedirect(dissolution, session);
-            case ApplicationStatus.PENDING_APPROVAL:
-                return await this.handlePendingApprovalRedirect(dissolution, session);
-            default:
-                return Promise.reject("Unexpected application status received");
-        }
+        return this.saveSessionAndRedirect(opts);
     }
 
     @httpGet("/payment-callback")
@@ -98,7 +90,58 @@ export class RedirectController extends JourneyBaseController {
             session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
         }
 
-        return this.saveSessionAndRedirect(session, redirectUri);
+        return this.saveSessionAndRedirect({ session, redirectUri });
+    }
+
+    private async handleNewApplication(session: DissolutionSession): Promise<RedirectResult> {
+        const options: JourneyPathOptions = {};
+        if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED) {
+            const { id: transactionId } = await this.createTransaction(session);
+            session.transactionId = transactionId;
+            options.transactionId = transactionId;
+        }
+        return this.saveSessionAndRedirect({ session, redirectUri: SELECT_DIRECTOR_URI, options });
+    }
+
+    private async handleTransactionModelDissolution(
+        dissolution: DissolutionGetResponse,
+        session: DissolutionSession
+    ): Promise<SessionRedirectOptions> {
+        session.transactionId = dissolution.transaction_id;
+        const options: JourneyPathOptions = { transactionId: dissolution.transaction_id };
+
+        switch (dissolution.status) {
+            case DissolutionStatus.DRAFT:
+                return { session, redirectUri: SELECT_DIRECTOR_URI, options };
+            case DissolutionStatus.PENDING:
+                return {
+                    ...(await this.handlePendingApprovalRedirect(dissolution, session)),
+                    options,
+                };
+            case DissolutionStatus.SUBMITTED:
+                return { ...this.handlePendingPaymentRedirect(dissolution, session), options };
+            default:
+                throw new Error(`Unexpected dissolution status received ${dissolution.status}`);
+        }
+    }
+
+    private async handleDissolutionApplication(
+        dissolution: DissolutionGetResponse,
+        session: DissolutionSession
+    ): Promise<SessionRedirectOptions> {
+        session.applicationReferenceNumber = dissolution.application_reference;
+
+        switch (dissolution.application_status) {
+            case ApplicationStatus.PAID:
+                session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
+                return { session, redirectUri: VIEW_FINAL_CONFIRMATION_URI };
+            case ApplicationStatus.PENDING_PAYMENT:
+                return this.handlePendingPaymentRedirect(dissolution, session);
+            case ApplicationStatus.PENDING_APPROVAL:
+                return await this.handlePendingApprovalRedirect(dissolution, session);
+            default:
+                throw new Error(`Unexpected application status received ${dissolution.application_status}`);
+        }
     }
 
     private async getDissolution(session: DissolutionSession): Promise<Optional<DissolutionGetResponse>> {
@@ -109,17 +152,24 @@ export class RedirectController extends JourneyBaseController {
     private handlePendingPaymentRedirect(
         dissolution: DissolutionGetResponse,
         session: DissolutionSession
-    ): RedirectResult {
+    ): SessionRedirectOptions {
         const userEmail: string = this.sessionService.getUserEmail(this.httpContext.request)!;
-        const redirectUri: string = this.getPendingPaymentRedirectUri(dissolution, userEmail);
 
-        return this.saveSessionAndRedirect(session, redirectUri);
+        if (this.isApplicant(dissolution, userEmail)) {
+            return { session, redirectUri: PAYMENT_REVIEW_URI };
+        }
+
+        if (this.getSignatoriesForUser(dissolution, userEmail).length > 0) {
+            return { session, redirectUri: CERTIFICATE_SIGNED_URI };
+        }
+
+        return { session, redirectUri: NOT_SELECTED_SIGNATORY };
     }
 
     private async handlePendingApprovalRedirect(
         dissolution: DissolutionGetResponse,
         session: DissolutionSession
-    ): Promise<RedirectResult> {
+    ): Promise<SessionRedirectOptions> {
         const userEmail: string = this.sessionService.getUserEmail(this.httpContext.request)!;
         const signatoriesForUser: DissolutionGetDirector[] = this.getSignatoriesForUser(dissolution, userEmail);
         const signatoryPendingApproval: Optional<DissolutionGetDirector> = signatoriesForUser.find(
@@ -128,18 +178,18 @@ export class RedirectController extends JourneyBaseController {
 
         if (signatoryPendingApproval) {
             session.approval = await this.setupDissolutionApproval(session, dissolution, signatoryPendingApproval);
-            return this.saveSessionAndRedirect(session, ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI);
+            return { session, redirectUri: ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI };
         }
 
         if (this.isApplicant(dissolution, userEmail)) {
-            return this.saveSessionAndRedirect(session, WAIT_FOR_OTHERS_TO_SIGN_URI);
+            return { session, redirectUri: WAIT_FOR_OTHERS_TO_SIGN_URI };
         }
 
         if (signatoriesForUser.length > 0) {
-            return this.saveSessionAndRedirect(session, CERTIFICATE_SIGNED_URI);
+            return { session, redirectUri: CERTIFICATE_SIGNED_URI };
         }
 
-        return this.saveSessionAndRedirect(session, NOT_SELECTED_SIGNATORY);
+        return { session, redirectUri: NOT_SELECTED_SIGNATORY };
     }
 
     private getSignatoriesForUser(dissolution: DissolutionGetResponse, userEmail: string): DissolutionGetDirector[] {
@@ -150,9 +200,9 @@ export class RedirectController extends JourneyBaseController {
         return dissolution.created_by === userEmail;
     }
 
-    private saveSessionAndRedirect(session: DissolutionSession, redirectUri: string): RedirectResult {
+    private saveSessionAndRedirect({ session, redirectUri, options }: SessionRedirectOptions): RedirectResult {
         this.sessionService.setDissolutionSession(this.httpContext.request, session);
-        return this.redirect(this.journeyPath(redirectUri));
+        return this.redirect(this.journeyPath(redirectUri, options));
     }
 
     private async setupDissolutionApproval(
@@ -162,16 +212,6 @@ export class RedirectController extends JourneyBaseController {
     ): Promise<DissolutionApprovalModel> {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request);
         return await this.approvalService.getApprovalModel(token, dissolution, signatory, session.directorsToSign);
-    }
-
-    private getPendingPaymentRedirectUri(dissolution: DissolutionGetResponse, userEmail: string): string {
-        if (this.isApplicant(dissolution, userEmail)) {
-            return PAYMENT_REVIEW_URI;
-        } else if (this.getSignatoriesForUser(dissolution, userEmail).length > 0) {
-            return CERTIFICATE_SIGNED_URI;
-        } else {
-            return NOT_SELECTED_SIGNATORY;
-        }
     }
 
     private getPaymentCallbackRedirectUri(status: PaymentStatus): string {
