@@ -26,6 +26,7 @@ import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
 import { Application } from "express";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -138,7 +139,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true;
 
             return request(initApp())
-                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .expect(StatusCodes.OK)
                 .then(res => {
                     assert.isTrue(
@@ -152,7 +153,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             configureApprovalModel({ isCorporateOfficer: false });
 
             return request(initApp())
-                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .expect(StatusCodes.OK)
                 .then(res => {
                     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
@@ -176,7 +177,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             configureApprovalModel({ isCorporateOfficer: false });
 
             return request(initApp())
-                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .expect(StatusCodes.OK)
                 .then(res => {
                     // The hint text should not appear
@@ -192,7 +193,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true;
 
             return request(initApp())
-                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .expect(StatusCodes.OK)
                 .then(res => {
                     // The hint text should appear
@@ -207,7 +208,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false;
 
             return request(initApp())
-                .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .expect(StatusCodes.OK)
                 .then(res => {
                     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
@@ -235,7 +236,9 @@ describe("EndorseCompanyClosureCertificateController", () => {
             const app = createApp(async container => {
                 container.rebind(SessionService).toConstantValue(instance(session));
                 container.rebind(CompanyOfficersService).toConstantValue(mockedCompanyOfficersService);
-                const res = await request(app).get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI).expect(StatusCodes.OK);
+                const res = await request(app)
+                    .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
+                    .expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
                 // Confirmation label for corporate officer
@@ -248,7 +251,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 dissolutionSession.approval!.officerType = OfficerType.DIRECTOR;
 
                 const res = await request(initApp())
-                    .get(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                    .get(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                     .expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
@@ -301,7 +304,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
                 when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS);
 
                 await request(initApp())
-                    .post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                    .post(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                     .send(testObject)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", REDIRECT_GATE_URI)
@@ -323,7 +326,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS);
 
             await request(initApp())
-                .post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .post(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .send(testObject)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_GATE_URI)
@@ -343,7 +346,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
-                .post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .post(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .send(testObject)
                 .expect(StatusCodes.BAD_REQUEST);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
@@ -363,7 +366,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
-                .post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .post(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .send(testObject)
                 .expect(StatusCodes.BAD_REQUEST);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
@@ -384,7 +387,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
-                .post(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI)
+                .post(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
                 .send(testObject)
                 .expect(StatusCodes.BAD_REQUEST);
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);

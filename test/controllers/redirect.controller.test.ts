@@ -41,12 +41,13 @@ import {
 } from "test/fixtures/dissolutionApi.fixtures";
 import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService, { JourneyPathOptions } from "app/services/session/journeyPath.service";
 import TransactionService from "app/services/transaction/transaction.service";
 import TYPES from "app/types";
 import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 import { aTransaction } from "test/fixtures/transaction.builder";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -79,7 +80,15 @@ describe("RedirectController", () => {
             container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper));
             container.rebind(ApprovalService).toConstantValue(instance(approvalService));
             container.rebind(JourneyPathService).toConstantValue({
-                journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
+                journeyPath: (_req: any, pathTemplate: string, options?: JourneyPathOptions) => {
+                    if (!options) {
+                        return pathTemplate;
+                    }
+                    return buildTestUrl(pathTemplate, {
+                        ...options?.params,
+                        ...(options?.transactionId ? { transactionId: options.transactionId } : {}),
+                    });
+                },
             } as any);
             container.rebind(TransactionService).toConstantValue(instance(transactionService));
             container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(isTransactionsEnabled ?? false);
@@ -122,13 +131,14 @@ describe("RedirectController", () => {
             await request(initApp())
                 .get(REDIRECT_GATE_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", SELECT_DIRECTOR_URI);
+                .expect("Location", buildTestUrl(SELECT_DIRECTOR_URI));
 
             verify(transactionService.createTransaction(TOKEN, anything(), anything(), anything())).never();
+            verify(session.setDissolutionSession(anything(), anything())).never();
         });
 
         it("should create transaction if feature toggle is enabled and dissolution has not yet been created", async () => {
-            const TRANSACTION_ID = "2222";
+            const TRANSACTION_ID = "123456-123456-123456";
             const COMPANY_NUMBER = dissolutionSession.companyNumber;
             const newTx: Transaction = aTransaction()
                 .withId(TRANSACTION_ID)
@@ -145,9 +155,17 @@ describe("RedirectController", () => {
             await request(initApp({ isTransactionsEnabled: true }))
                 .get(REDIRECT_GATE_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", SELECT_DIRECTOR_URI);
+                .expect("Location", buildTestUrl(SELECT_DIRECTOR_URI, { transactionId: TRANSACTION_ID }));
 
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+            verify(session.setDissolutionSession(anything(), anything())).once();
+
+            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
+                session.setDissolutionSession
+            );
+            const updatedSession: DissolutionSession = sessionCaptor.last()[1];
+
+            assert.equal(updatedSession.transactionId, TRANSACTION_ID);
         });
 
         it("should throw an error if create transaction failed when feature toggle is enabled", async () => {
@@ -163,6 +181,7 @@ describe("RedirectController", () => {
                 .expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+            verify(session.setDissolutionSession(anything(), anything())).never();
         });
 
         describe("Pending Approval", () => {

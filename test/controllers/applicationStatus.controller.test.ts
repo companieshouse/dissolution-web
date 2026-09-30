@@ -21,6 +21,7 @@ import DissolutionService from "app/services/dissolution/dissolution.service";
 import SessionService from "app/services/session/session.service";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -58,7 +59,7 @@ describe("ApplicationStatusController", () => {
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             await request(app)
-                .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change`)
+                .get(buildTestUrl(`${APPLICATION_STATUS_URI}/${signatoryId}/change`))
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHANGE_DETAILS_URI);
 
@@ -82,7 +83,7 @@ describe("ApplicationStatusController", () => {
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
             await request(app)
-                .get(`${APPLICATION_STATUS_URI}/${signatoryId}/change?check_answers=true`)
+                .get(buildTestUrl(`${APPLICATION_STATUS_URI}/${signatoryId}/change?check_answers=true`))
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHANGE_DETAILS_URI);
 
@@ -128,7 +129,7 @@ describe("ApplicationStatusController", () => {
                 ).thenResolve(testCase.reminderSent);
 
                 await request(app)
-                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
                     .send({ signatoryId: signatoryId })
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
@@ -167,7 +168,7 @@ describe("ApplicationStatusController", () => {
                 ).thenResolve(true);
 
                 await request(app)
-                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
                     .send(body)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
@@ -192,7 +193,7 @@ describe("ApplicationStatusController", () => {
                 // NOSONAR
 
                 await request(app)
-                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
                     .send(body)
                     .expect(StatusCodes.BAD_REQUEST);
 
@@ -231,7 +232,7 @@ describe("ApplicationStatusController", () => {
                 ).thenResolve(undefined);
 
                 await request(app)
-                    .post(`${APPLICATION_STATUS_URI}/send-email`)
+                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
                     .send({ signatoryId: "a-valid-id" })
                     .expect(StatusCodes.NOT_FOUND);
 

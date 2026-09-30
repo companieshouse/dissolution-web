@@ -24,7 +24,7 @@ import {
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import SessionService from "app/services/session/session.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService, { JourneyPathOptions } from "app/services/session/journeyPath.service";
 import TYPES from "app/types";
 import TransactionService from "app/services/transaction/transaction.service";
 import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
@@ -50,11 +50,14 @@ export class RedirectController extends JourneyBaseController {
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session);
 
         if (!dissolution) {
+            const options: JourneyPathOptions = {};
             if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED) {
-                await this.createTransaction(session);
+                const { id: transactionId } = await this.createTransaction(session);
+                this.sessionService.setDissolutionSession(this.httpContext.request, { ...session, transactionId });
+                options.transactionId = transactionId;
             }
 
-            return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI));
+            return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI, options));
         }
 
         session.applicationReferenceNumber = dissolution.application_reference;

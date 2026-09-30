@@ -25,6 +25,7 @@ import {
     generateViewApplicationStatusSignatory,
 } from "test/fixtures/viewApplicationStatus.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -69,7 +70,7 @@ describe("CertificateSignedController", () => {
         it("should render the CertificateSigned page with director text when the company is plc", async () => {
             dissolutionSession.officerType = OfficerType.DIRECTOR;
 
-            const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -91,7 +92,7 @@ describe("CertificateSignedController", () => {
         it("should render the CertificateSigned page with member text if the company is LLP", async () => {
             dissolutionSession.officerType = OfficerType.MEMBER;
 
-            const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -118,7 +119,7 @@ describe("CertificateSignedController", () => {
                 generateViewApplicationStatusSignatory(),
             ];
 
-            const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -133,7 +134,7 @@ describe("CertificateSignedController", () => {
                 { ...generateViewApplicationStatusSignatory(), name: "John Doe", email: "john@mail.com" },
             ];
 
-            const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -150,7 +151,7 @@ describe("CertificateSignedController", () => {
                 { ...generateViewApplicationStatusSignatory(), hasApproved: false },
             ];
 
-            const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -162,7 +163,7 @@ describe("CertificateSignedController", () => {
             it("should not display the change column", async () => {
                 viewApplicationStatus.showChangeColumn = false;
 
-                const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -176,7 +177,7 @@ describe("CertificateSignedController", () => {
                     { ...generateViewApplicationStatusSignatory(), canChange: false },
                 ];
 
-                const res = await request(app).get(CERTIFICATE_SIGNED_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(CERTIFICATE_SIGNED_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 

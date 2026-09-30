@@ -35,6 +35,7 @@ import OfficerRole from "app/models/dto/officerRole.enum";
 import { aDissolutionSession } from "../fixtures/dissolutionSession.builder";
 import { aSelectDirectorFormModel } from "test/fixtures/selectDirectorForm.builder";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -87,7 +88,7 @@ describe("SelectDirectorController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             });
 
-            const res = await request(app).get(SELECT_DIRECTOR_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_DIRECTOR_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -110,7 +111,7 @@ describe("SelectDirectorController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             });
 
-            const res = await request(app).get(SELECT_DIRECTOR_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_DIRECTOR_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -131,7 +132,7 @@ describe("SelectDirectorController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             });
 
-            const res = await request(app).get(SELECT_DIRECTOR_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_DIRECTOR_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -152,7 +153,7 @@ describe("SelectDirectorController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             });
 
-            const res = await request(app).get(SELECT_DIRECTOR_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_DIRECTOR_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -170,7 +171,7 @@ describe("SelectDirectorController", () => {
 
             const app = initApp();
 
-            const res = await request(app).get(SELECT_DIRECTOR_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_DIRECTOR_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -188,7 +189,7 @@ describe("SelectDirectorController", () => {
 
             const app = initApp();
 
-            const res = await request(app).get(SELECT_DIRECTOR_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_DIRECTOR_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -224,7 +225,10 @@ describe("SelectDirectorController", () => {
 
             const app = initApp();
 
-            const res = await request(app).post(SELECT_DIRECTOR_URI).send(form).expect(StatusCodes.BAD_REQUEST);
+            const res = await request(app)
+                .post(buildTestUrl(SELECT_DIRECTOR_URI))
+                .send(form)
+                .expect(StatusCodes.BAD_REQUEST);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -251,7 +255,10 @@ describe("SelectDirectorController", () => {
 
                 const app = initApp();
 
-                await request(app).post(SELECT_DIRECTOR_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                await request(app)
+                    .post(buildTestUrl(SELECT_DIRECTOR_URI))
+                    .send(form)
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
 
                 verify(session.setDissolutionSession(anything(), anything())).once();
 
@@ -286,7 +293,10 @@ describe("SelectDirectorController", () => {
 
                     const app = initApp();
 
-                    await request(app).post(SELECT_DIRECTOR_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                    await request(app)
+                        .post(buildTestUrl(SELECT_DIRECTOR_URI))
+                        .send(form)
+                        .expect(StatusCodes.MOVED_TEMPORARILY);
 
                     const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
                         session.setDissolutionSession
@@ -327,7 +337,10 @@ describe("SelectDirectorController", () => {
                     when(validator.validate(anything(), anything())).thenReturn(null);
                     when(session.getUserEmail(anything())).thenReturn(directorEmail);
 
-                    await request(initApp()).post(SELECT_DIRECTOR_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                    await request(initApp())
+                        .post(buildTestUrl(SELECT_DIRECTOR_URI))
+                        .send(form)
+                        .expect(StatusCodes.MOVED_TEMPORARILY);
 
                     const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
                         session.setDissolutionSession
@@ -362,7 +375,10 @@ describe("SelectDirectorController", () => {
                         )
                     ).thenReturn(null);
 
-                    await request(initApp()).post(SELECT_DIRECTOR_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                    await request(initApp())
+                        .post(buildTestUrl(SELECT_DIRECTOR_URI))
+                        .send(form)
+                        .expect(StatusCodes.MOVED_TEMPORARILY);
 
                     const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
                         session.setDissolutionSession
@@ -396,7 +412,10 @@ describe("SelectDirectorController", () => {
 
                     const app = initApp();
 
-                    await request(app).post(SELECT_DIRECTOR_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                    await request(app)
+                        .post(buildTestUrl(SELECT_DIRECTOR_URI))
+                        .send(form)
+                        .expect(StatusCodes.MOVED_TEMPORARILY);
 
                     verify(session.setDissolutionSession(anything(), anything())).once();
 
@@ -429,7 +448,7 @@ describe("SelectDirectorController", () => {
                 const app = initApp();
 
                 await request(app)
-                    .post(SELECT_DIRECTOR_URI)
+                    .post(buildTestUrl(SELECT_DIRECTOR_URI))
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", CHECK_YOUR_ANSWERS_URI);
@@ -451,7 +470,7 @@ describe("SelectDirectorController", () => {
                 const app = initApp();
 
                 await request(app)
-                    .post(SELECT_DIRECTOR_URI)
+                    .post(buildTestUrl(SELECT_DIRECTOR_URI))
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", DEFINE_SIGNATORY_INFO_URI);
@@ -474,7 +493,7 @@ describe("SelectDirectorController", () => {
                 const app = initApp();
 
                 await request(app)
-                    .post(SELECT_DIRECTOR_URI)
+                    .post(buildTestUrl(SELECT_DIRECTOR_URI))
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", SELECT_SIGNATORIES_URI);
@@ -497,7 +516,7 @@ describe("SelectDirectorController", () => {
                 const app = initApp();
 
                 await request(app)
-                    .post(SELECT_DIRECTOR_URI)
+                    .post(buildTestUrl(SELECT_DIRECTOR_URI))
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", SELECT_SIGNATORIES_URI);

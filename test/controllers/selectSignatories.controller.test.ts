@@ -31,6 +31,7 @@ import FormValidator from "app/utils/formValidator.util";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import { aDirectorDetails } from "../fixtures/directorDetails.builder";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -75,7 +76,7 @@ describe("SelectSignatoriesController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             });
 
-            const res = await request(app).get(SELECT_SIGNATORIES_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_SIGNATORIES_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -152,7 +153,7 @@ describe("SelectSignatoriesController", () => {
                     container.rebind(SignatoryService).toConstantValue(instance(signatoryService));
                 });
 
-                const res = await request(app).get(SELECT_SIGNATORIES_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(SELECT_SIGNATORIES_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -178,7 +179,7 @@ describe("SelectSignatoriesController", () => {
                 container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             });
 
-            const res = await request(app).get(SELECT_SIGNATORIES_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(SELECT_SIGNATORIES_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -217,7 +218,10 @@ describe("SelectSignatoriesController", () => {
 
             const app = initApp();
 
-            const res = await request(app).post(SELECT_SIGNATORIES_URI).send(form).expect(StatusCodes.BAD_REQUEST);
+            const res = await request(app)
+                .post(buildTestUrl(SELECT_SIGNATORIES_URI))
+                .send(form)
+                .expect(StatusCodes.BAD_REQUEST);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -242,7 +246,10 @@ describe("SelectSignatoriesController", () => {
 
                 const app = initApp();
 
-                await request(app).post(SELECT_SIGNATORIES_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                await request(app)
+                    .post(buildTestUrl(SELECT_SIGNATORIES_URI))
+                    .send(form)
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
 
                 verify(session.setDissolutionSession(anything(), anything())).once();
 
@@ -276,7 +283,10 @@ describe("SelectSignatoriesController", () => {
 
                 const app = initApp();
 
-                await request(app).post(SELECT_SIGNATORIES_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                await request(app)
+                    .post(buildTestUrl(SELECT_SIGNATORIES_URI))
+                    .send(form)
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
 
                 verify(session.setDissolutionSession(anything(), anything())).once();
 
@@ -305,7 +315,7 @@ describe("SelectSignatoriesController", () => {
             const app = initApp();
 
             await request(app)
-                .post(SELECT_SIGNATORIES_URI)
+                .post(buildTestUrl(SELECT_SIGNATORIES_URI))
                 .send(form)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", DEFINE_SIGNATORY_INFO_URI);

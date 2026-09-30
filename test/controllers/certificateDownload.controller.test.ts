@@ -13,6 +13,7 @@ import { CERTIFICATE_DOWNLOAD_URI } from "app/paths";
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import SessionService from "app/services/session/session.service";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -43,7 +44,7 @@ describe("CertificateDownloadController", () => {
             });
 
             await request(app)
-                .get(CERTIFICATE_DOWNLOAD_URI)
+                .get(buildTestUrl(CERTIFICATE_DOWNLOAD_URI))
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_URL);
 

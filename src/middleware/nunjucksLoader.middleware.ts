@@ -15,14 +15,14 @@ import {
     PAGE_TITLE_SUFFIX,
     SERVICE_NAME,
 } from "app/constants/app.const";
-import JourneyPathService from "app/services/session/journeyPath.service";
+import JourneyPathService, { JourneyPathOptions } from "app/services/session/journeyPath.service";
 
 @provide(NunjucksLoader)
 export default class NunjucksLoader {
     public constructor(
-        @inject(TYPES.CDN_HOST) private CDN_HOST: string,
+        @inject(TYPES.CDN_HOST) private readonly CDN_HOST: string,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
-        @inject(TYPES.PIWIK_CONFIG) private PIWIK_CONFIG: PiwikConfig,
+        @inject(TYPES.PIWIK_CONFIG) private readonly PIWIK_CONFIG: PiwikConfig,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(JourneyPathService) private readonly journeyPathService: JourneyPathService
     ) {}
@@ -75,14 +75,7 @@ export default class NunjucksLoader {
 
     private addRequestLocals(app: express.Application): void {
         app.use((req, res, next) => {
-            res.locals.journeyPath = (
-                pathTemplate: string,
-                options?: {
-                    journeyId?: string;
-                    companyNumber?: string;
-                    params?: Record<string, string | number>;
-                }
-            ): string => {
+            res.locals.journeyPath = (pathTemplate: string, options?: JourneyPathOptions): string => {
                 return this.journeyPathService.journeyPath(req, pathTemplate, options);
             };
             next();

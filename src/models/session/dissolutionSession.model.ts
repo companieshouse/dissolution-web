@@ -12,6 +12,7 @@ import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
 export default interface DissolutionSession {
     journeyId: string;
     companyNumber: string;
+    transactionId?: string;
     officerType?: OfficerType;
     selectDirectorForm?: SelectDirectorFormModel;
     selectSignatoriesForm?: SelectSignatoriesFormModel;

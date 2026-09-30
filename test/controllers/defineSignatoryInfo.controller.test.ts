@@ -25,6 +25,7 @@ import OfficerRole from "app/models/dto/officerRole.enum";
 import { aDirectorToSign } from "test/fixtures/directorToSign.builder";
 import { aDefineSignatoryInfoForm } from "test/fixtures/defineSignatoryInfoForm.builder";
 import { Application } from "express";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -76,7 +77,7 @@ describe("DefineSignatoryInfoController", () => {
 
             const app = initApp();
 
-            const res = await request(app).get(DEFINE_SIGNATORY_INFO_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(DEFINE_SIGNATORY_INFO_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -134,7 +135,7 @@ describe("DefineSignatoryInfoController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(DEFINE_SIGNATORY_INFO_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(DEFINE_SIGNATORY_INFO_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -171,7 +172,7 @@ describe("DefineSignatoryInfoController", () => {
 
             const app = initApp();
 
-            const res = await request(app).get(DEFINE_SIGNATORY_INFO_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(DEFINE_SIGNATORY_INFO_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -196,7 +197,7 @@ describe("DefineSignatoryInfoController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(DEFINE_SIGNATORY_INFO_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(DEFINE_SIGNATORY_INFO_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -218,7 +219,7 @@ describe("DefineSignatoryInfoController", () => {
 
                 const app = initApp();
 
-                const res = await request(app).get(DEFINE_SIGNATORY_INFO_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(DEFINE_SIGNATORY_INFO_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -245,7 +246,10 @@ describe("DefineSignatoryInfoController", () => {
 
             const app = initApp();
 
-            const res = await request(app).post(DEFINE_SIGNATORY_INFO_URI).send(form).expect(StatusCodes.BAD_REQUEST);
+            const res = await request(app)
+                .post(buildTestUrl(DEFINE_SIGNATORY_INFO_URI))
+                .send(form)
+                .expect(StatusCodes.BAD_REQUEST);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -278,7 +282,10 @@ describe("DefineSignatoryInfoController", () => {
 
                 const app = initApp();
 
-                await request(app).post(DEFINE_SIGNATORY_INFO_URI).send(form).expect(StatusCodes.MOVED_TEMPORARILY);
+                await request(app)
+                    .post(buildTestUrl(DEFINE_SIGNATORY_INFO_URI))
+                    .send(form)
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
 
                 verify(session.setDissolutionSession(anything(), anything())).once();
 
@@ -308,7 +315,7 @@ describe("DefineSignatoryInfoController", () => {
                 );
 
                 await request(initApp())
-                    .post(DEFINE_SIGNATORY_INFO_URI)
+                    .post(buildTestUrl(DEFINE_SIGNATORY_INFO_URI))
                     .send(form)
                     .expect(StatusCodes.MOVED_TEMPORARILY);
 
@@ -345,7 +352,7 @@ describe("DefineSignatoryInfoController", () => {
             const app = initApp();
 
             await request(app)
-                .post(DEFINE_SIGNATORY_INFO_URI)
+                .post(buildTestUrl(DEFINE_SIGNATORY_INFO_URI))
                 .send(form)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", CHECK_YOUR_ANSWERS_URI);

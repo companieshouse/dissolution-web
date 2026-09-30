@@ -27,6 +27,7 @@ import SessionService from "app/services/session/session.service";
 
 import { generateDissolutionSession } from "test/fixtures/session.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
+import { buildTestUrl } from "test/controllers/helpers/paths.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -71,7 +72,7 @@ describe("WaitForOthersToSignController", () => {
             dissolutionSession.officerType = OfficerType.DIRECTOR;
             dissolutionSession.isMultiDirector = true;
 
-            const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -96,7 +97,7 @@ describe("WaitForOthersToSignController", () => {
             dissolutionSession.officerType = OfficerType.DIRECTOR;
             dissolutionSession.isMultiDirector = false;
 
-            const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -121,7 +122,7 @@ describe("WaitForOthersToSignController", () => {
             dissolutionSession.officerType = OfficerType.MEMBER;
             dissolutionSession.isMultiDirector = true;
 
-            const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -146,7 +147,7 @@ describe("WaitForOthersToSignController", () => {
             dissolutionSession.officerType = OfficerType.MEMBER;
             dissolutionSession.isMultiDirector = false;
 
-            const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+            const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
             const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -171,7 +172,7 @@ describe("WaitForOthersToSignController", () => {
             dissolution.application_status = ApplicationStatus.PENDING_PAYMENT;
 
             await request(app)
-                .get(WAIT_FOR_OTHERS_TO_SIGN_URI)
+                .get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI))
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", PAYMENT_REVIEW_URI);
         });
@@ -183,7 +184,7 @@ describe("WaitForOthersToSignController", () => {
                     generateViewApplicationStatusSignatory(),
                 ];
 
-                const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -198,7 +199,7 @@ describe("WaitForOthersToSignController", () => {
                     { ...generateViewApplicationStatusSignatory(), name: "John Doe", email: "john@mail.com" },
                 ];
 
-                const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -215,7 +216,7 @@ describe("WaitForOthersToSignController", () => {
                     { ...generateViewApplicationStatusSignatory(), hasApproved: false },
                 ];
 
-                const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+                const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI)).expect(StatusCodes.OK);
 
                 const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
@@ -231,7 +232,9 @@ describe("WaitForOthersToSignController", () => {
                         { ...generateViewApplicationStatusSignatory(), canChange: false },
                     ];
 
-                    const res = await request(app).get(WAIT_FOR_OTHERS_TO_SIGN_URI).expect(StatusCodes.OK);
+                    const res = await request(app)
+                        .get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI))
+                        .expect(StatusCodes.OK);
 
                     const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
 
