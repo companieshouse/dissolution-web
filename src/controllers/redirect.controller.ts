@@ -99,8 +99,9 @@ export class RedirectController extends JourneyBaseController {
             const { id: transactionId } = await this.createTransaction(session);
             session.transactionId = transactionId;
             options.transactionId = transactionId;
+            return this.saveSessionAndRedirect({ session, redirectUri: SELECT_DIRECTOR_URI, options });
         }
-        return this.saveSessionAndRedirect({ session, redirectUri: SELECT_DIRECTOR_URI, options });
+        return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI, options));
     }
 
     private async handleTransactionModelDissolution(
