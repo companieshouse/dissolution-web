@@ -19,5 +19,5 @@ export default interface DissolutionGetResponse {
     certificate_bucket: string;
     certificate_key: string;
     transaction_id?: string;
-    status?: DissolutionStatus;
+    dissolution_status?: DissolutionStatus;
 }

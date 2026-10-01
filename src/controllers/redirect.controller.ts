@@ -111,7 +111,7 @@ export class RedirectController extends JourneyBaseController {
         session.transactionId = dissolution.transaction_id;
         const options: JourneyPathOptions = { transactionId: dissolution.transaction_id };
 
-        switch (dissolution.status) {
+        switch (dissolution.dissolution_status) {
             case DissolutionStatus.DRAFT:
                 return { session, redirectUri: SELECT_DIRECTOR_URI, options };
             case DissolutionStatus.PENDING:
@@ -122,7 +122,7 @@ export class RedirectController extends JourneyBaseController {
             case DissolutionStatus.SUBMITTED:
                 return { ...this.handlePendingPaymentRedirect(dissolution, session), options };
             default:
-                throw new Error(`Unexpected dissolution status received ${dissolution.status}`);
+                throw new Error(`Unexpected dissolution status received ${dissolution.dissolution_status}`);
         }
     }
 

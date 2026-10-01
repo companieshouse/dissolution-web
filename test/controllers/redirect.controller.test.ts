@@ -380,7 +380,7 @@ describe("RedirectController", () => {
 
         describe("Transaction model dissolution", () => {
             const TX_ID = "tx-123456-123456";
-            const txUrl = (uri: string): string => buildTestUrl(uri, { transactionId: TX_ID });
+            const withTransactionIdInPath = (uri: string): string => buildTestUrl(uri, { transactionId: TX_ID });
 
             let dissolution: DissolutionGetResponse;
 
@@ -400,7 +400,7 @@ describe("RedirectController", () => {
 
                     describe("Draft", () => {
                         beforeEach(() => {
-                            dissolution.status = DissolutionStatus.DRAFT;
+                            dissolution.dissolution_status = DissolutionStatus.DRAFT;
                             dissolution.created_by = USER_EMAIL;
                         });
 
@@ -408,7 +408,7 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(SELECT_DIRECTOR_URI));
+                                .expect("Location", withTransactionIdInPath(SELECT_DIRECTOR_URI));
                         });
 
                         it("should save the existing transaction id to the session and not create a new transaction", async () => {
@@ -424,7 +424,7 @@ describe("RedirectController", () => {
 
                     describe("Pending", () => {
                         beforeEach(() => {
-                            dissolution.status = DissolutionStatus.PENDING;
+                            dissolution.dissolution_status = DissolutionStatus.PENDING;
                         });
 
                         it("should redirect to sign certificate page with transaction id if user is pending signatory", async () => {
@@ -448,7 +448,7 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI));
+                                .expect("Location", withTransactionIdInPath(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI));
 
                             verify(approvalService.getApprovalModel(TOKEN, dissolution, pending, anything())).once();
 
@@ -466,7 +466,7 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(WAIT_FOR_OTHERS_TO_SIGN_URI));
+                                .expect("Location", withTransactionIdInPath(WAIT_FOR_OTHERS_TO_SIGN_URI));
                         });
 
                         it("should redirect to certificate signed page with transaction id if user is not the applicant but has signed", async () => {
@@ -477,7 +477,7 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(CERTIFICATE_SIGNED_URI));
+                                .expect("Location", withTransactionIdInPath(CERTIFICATE_SIGNED_URI));
                         });
 
                         it("should redirect to not selected signatory page with transaction id if user is not the applicant and not a signatory", async () => {
@@ -488,13 +488,13 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(NOT_SELECTED_SIGNATORY));
+                                .expect("Location", withTransactionIdInPath(NOT_SELECTED_SIGNATORY));
                         });
                     });
 
                     describe("Submitted", () => {
                         beforeEach(() => {
-                            dissolution.status = DissolutionStatus.SUBMITTED;
+                            dissolution.dissolution_status = DissolutionStatus.SUBMITTED;
                         });
 
                         it("should redirect to payment review if user is the applicant", async () => {
@@ -517,7 +517,7 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(CERTIFICATE_SIGNED_URI));
+                                .expect("Location", withTransactionIdInPath(CERTIFICATE_SIGNED_URI));
                         });
 
                         it("should redirect to not selected signatory page with transaction id if user is not the applicant and not a signatory", async () => {
@@ -528,7 +528,7 @@ describe("RedirectController", () => {
                             await request(app())
                                 .get(REDIRECT_GATE_URI)
                                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                                .expect("Location", txUrl(NOT_SELECTED_SIGNATORY));
+                                .expect("Location", withTransactionIdInPath(NOT_SELECTED_SIGNATORY));
                         });
                     });
                 });
@@ -536,31 +536,31 @@ describe("RedirectController", () => {
 
             it("should use the transaction id from the backend over any transaction id already in the session", async () => {
                 dissolutionSession.transactionId = "stale-transaction-id";
-                dissolution.status = DissolutionStatus.DRAFT;
+                dissolution.dissolution_status = DissolutionStatus.DRAFT;
 
                 await request(initApp({ isTransactionsEnabled: true }))
                     .get(REDIRECT_GATE_URI)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
-                    .expect("Location", txUrl(SELECT_DIRECTOR_URI));
+                    .expect("Location", withTransactionIdInPath(SELECT_DIRECTOR_URI));
 
                 assert.equal(getSavedSession(session).transactionId, TX_ID);
             });
 
             it("should route on dissolution status rather than application status", async () => {
-                dissolution.status = DissolutionStatus.DRAFT;
+                dissolution.dissolution_status = DissolutionStatus.DRAFT;
                 dissolution.application_status = ApplicationStatus.PAID;
 
                 await request(initApp())
                     .get(REDIRECT_GATE_URI)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
-                    .expect("Location", txUrl(SELECT_DIRECTOR_URI));
+                    .expect("Location", withTransactionIdInPath(SELECT_DIRECTOR_URI));
 
                 verify(mapper.mapToDissolutionConfirmation(anything())).never();
             });
 
             [undefined, "unknown" as DissolutionStatus].forEach(status => {
                 it(`should return an error and not save the session if dissolution status is ${status}`, async () => {
-                    dissolution.status = status;
+                    dissolution.dissolution_status = status;
 
                     await request(initApp()).get(REDIRECT_GATE_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
