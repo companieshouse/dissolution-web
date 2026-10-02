@@ -34,17 +34,4 @@ export default class TransactionService {
             throw new Error(`Failed to create transaction for company number ${companyNumber}`);
         }
     }
-
-    public async getTransaction(token: string, transactionId: string): Promise<Transaction> {
-        try {
-            const response: Transaction = await this.client.getTransaction(token, transactionId);
-            this.logger.debug(`Received transaction ${JSON.stringify(response)}`);
-            return response;
-        } catch (err: unknown) {
-            this.logger.error(
-                `Failed to get transaction for transaction id ${transactionId}: ${err instanceof Error ? err.message : JSON.stringify(err)}`
-            );
-            throw new Error(`Failed to get transaction for transaction id ${transactionId}`);
-        }
-    }
 }

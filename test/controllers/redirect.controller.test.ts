@@ -33,6 +33,7 @@ import {
 } from "app/paths";
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import SessionService from "app/services/session/session.service";
+import DissolutionStatus from "app/models/dto/dissolutionStatus.enum";
 
 import {
     generateApprovalModel,
@@ -48,6 +49,7 @@ import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 import { aTransaction } from "test/fixtures/transaction.builder";
 import { buildTestUrl } from "test/controllers/helpers/paths.helper";
+import { getSavedSession } from "test/controllers/helpers/session.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -117,11 +119,7 @@ describe("RedirectController", () => {
 
             verify(session.setDissolutionSession(anything(), anything())).once();
 
-            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
-                session.setDissolutionSession
-            );
-            const updatedSession: DissolutionSession = sessionCaptor.last()[1];
-
+            const updatedSession: DissolutionSession = getSavedSession(session);
             assert.equal(updatedSession.applicationReferenceNumber, referenceNumber);
         });
 
@@ -160,11 +158,7 @@ describe("RedirectController", () => {
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
             verify(session.setDissolutionSession(anything(), anything())).once();
 
-            const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
-                session.setDissolutionSession
-            );
-            const updatedSession: DissolutionSession = sessionCaptor.last()[1];
-
+            const updatedSession: DissolutionSession = getSavedSession(session);
             assert.equal(updatedSession.transactionId, TRANSACTION_ID);
         });
 
@@ -220,11 +214,7 @@ describe("RedirectController", () => {
                 verify(approvalService.getApprovalModel(TOKEN, dissolution, approved, anything())).never();
                 verify(session.setDissolutionSession(anything(), anything())).once();
 
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
-                    session.setDissolutionSession
-                );
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1];
-
+                const updatedSession: DissolutionSession = getSavedSession(session);
                 assert.equal(updatedSession.approval, approval);
             });
 
@@ -350,12 +340,232 @@ describe("RedirectController", () => {
                 verify(mapper.mapToDissolutionConfirmation(dissolution)).once();
                 verify(session.setDissolutionSession(anything(), anything())).once();
 
-                const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
-                    session.setDissolutionSession
-                );
-                const updatedSession: DissolutionSession = sessionCaptor.last()[1];
-
+                const updatedSession: DissolutionSession = getSavedSession(session);
                 assert.equal(updatedSession.confirmation, confirmation);
+            });
+        });
+
+        describe("When user has a legacy dissolution (no transaction id)", () => {
+            it("should not create a transaction or add a transaction id to the path when FEATURE_FLAG_TRANSACTIONS_ENABLED is enabled", async () => {
+                const dissolution: DissolutionGetResponse = {
+                    ...generateDissolutionGetResponse(),
+                    application_status: ApplicationStatus.PENDING_APPROVAL,
+                    created_by: USER_EMAIL,
+                };
+
+                when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+                await request(initApp({ isTransactionsEnabled: true }))
+                    .get(REDIRECT_GATE_URI)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
+
+                verify(transactionService.createTransaction(anything(), anything(), anything(), anything())).never();
+                assert.isUndefined(getSavedSession(session).transactionId);
+            });
+
+            it("should return an error and not save the session if the application status is unexpected", async () => {
+                const dissolution: DissolutionGetResponse = {
+                    ...generateDissolutionGetResponse(),
+                    application_status: "unknown" as ApplicationStatus,
+                };
+
+                when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+                await request(initApp()).get(REDIRECT_GATE_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                verify(session.setDissolutionSession(anything(), anything())).never();
+            });
+        });
+
+        describe("Transaction model dissolution", () => {
+            const TX_ID = "tx-123456-123456";
+            const withTransactionIdInPath = (uri: string): string => buildTestUrl(uri, { transactionId: TX_ID });
+
+            let dissolution: DissolutionGetResponse;
+
+            beforeEach(() => {
+                dissolution = {
+                    ...generateDissolutionGetResponse(),
+                    transaction_id: TX_ID,
+                    created_by: OTHER_USER_EMAIL,
+                };
+
+                when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+            });
+
+            [false, true].forEach(isTransactionsEnabled => {
+                describe(`with FEATURE_FLAG_TRANSACTIONS_ENABLED ${isTransactionsEnabled ? "enabled" : "disabled"}`, () => {
+                    const app = (): Application => initApp({ isTransactionsEnabled });
+
+                    describe("Draft", () => {
+                        beforeEach(() => {
+                            dissolution.dissolution_status = DissolutionStatus.DRAFT;
+                            dissolution.created_by = USER_EMAIL;
+                        });
+
+                        it("should redirect to select director page with the existing transaction id", async () => {
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(SELECT_DIRECTOR_URI));
+                        });
+
+                        it("should save the existing transaction id to the session and not create a new transaction", async () => {
+                            await request(app()).get(REDIRECT_GATE_URI).expect(StatusCodes.MOVED_TEMPORARILY);
+
+                            verify(
+                                transactionService.createTransaction(anything(), anything(), anything(), anything())
+                            ).never();
+                            verify(session.setDissolutionSession(anything(), anything())).once();
+                            assert.equal(getSavedSession(session).transactionId, TX_ID);
+                        });
+                    });
+
+                    describe("Pending", () => {
+                        beforeEach(() => {
+                            dissolution.dissolution_status = DissolutionStatus.PENDING;
+                        });
+
+                        it("should redirect to sign certificate page with transaction id if user is pending signatory", async () => {
+                            const approved: DissolutionGetDirector = {
+                                ...generateGetDirector(),
+                                email: USER_EMAIL,
+                                approved_at: new Date().toISOString(),
+                            };
+                            const pending: DissolutionGetDirector = {
+                                ...generateGetDirector(),
+                                email: USER_EMAIL,
+                                approved_at: undefined,
+                            };
+                            dissolution.directors = [approved, pending];
+
+                            const approval: DissolutionApprovalModel = generateApprovalModel();
+                            when(approvalService.getApprovalModel(TOKEN, dissolution, pending, anything())).thenResolve(
+                                approval
+                            );
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI));
+
+                            verify(approvalService.getApprovalModel(TOKEN, dissolution, pending, anything())).once();
+
+                            const savedSession: DissolutionSession = getSavedSession(session);
+                            assert.equal(savedSession.approval, approval);
+                            assert.equal(savedSession.transactionId, TX_ID);
+                        });
+
+                        it("should redirect to wait for others to sign page with transaction id if user is the applicant", async () => {
+                            dissolution.created_by = USER_EMAIL;
+                            dissolution.directors = [
+                                { ...generateGetDirector(), email: USER_EMAIL, approved_at: "2020-07-01" },
+                            ];
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(WAIT_FOR_OTHERS_TO_SIGN_URI));
+                        });
+
+                        it("should redirect to certificate signed page with transaction id if user is not the applicant but has signed", async () => {
+                            dissolution.directors = [
+                                { ...generateGetDirector(), email: USER_EMAIL, approved_at: "2020-07-01" },
+                            ];
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(CERTIFICATE_SIGNED_URI));
+                        });
+
+                        it("should redirect to not selected signatory page with transaction id if user is not the applicant and not a signatory", async () => {
+                            dissolution.directors = [
+                                { ...generateGetDirector(), email: "random email", approved_at: "2020-07-01" },
+                            ];
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(NOT_SELECTED_SIGNATORY));
+                        });
+                    });
+
+                    describe("Submitted", () => {
+                        beforeEach(() => {
+                            dissolution.dissolution_status = DissolutionStatus.SUBMITTED;
+                        });
+
+                        it("should redirect to payment review if user is the applicant", async () => {
+                            dissolution.created_by = USER_EMAIL;
+
+                            // PAYMENT_REVIEW_URI has no transaction segment yet, so the transaction id is not in the path
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", buildTestUrl(PAYMENT_REVIEW_URI));
+
+                            assert.equal(getSavedSession(session).transactionId, TX_ID);
+                        });
+
+                        it("should redirect to certificate signed page with transaction id if user is not the applicant but is a signatory", async () => {
+                            dissolution.directors = [
+                                { ...generateGetDirector(), email: USER_EMAIL, approved_at: "2020-07-01" },
+                            ];
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(CERTIFICATE_SIGNED_URI));
+                        });
+
+                        it("should redirect to not selected signatory page with transaction id if user is not the applicant and not a signatory", async () => {
+                            dissolution.directors = [
+                                { ...generateGetDirector(), email: "random email", approved_at: "2020-07-01" },
+                            ];
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(NOT_SELECTED_SIGNATORY));
+                        });
+                    });
+                });
+            });
+
+            it("should use the transaction id from the backend over any transaction id already in the session", async () => {
+                dissolutionSession.transactionId = "stale-transaction-id";
+                dissolution.dissolution_status = DissolutionStatus.DRAFT;
+
+                await request(initApp({ isTransactionsEnabled: true }))
+                    .get(REDIRECT_GATE_URI)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", withTransactionIdInPath(SELECT_DIRECTOR_URI));
+
+                assert.equal(getSavedSession(session).transactionId, TX_ID);
+            });
+
+            it("should route on dissolution status rather than application status", async () => {
+                dissolution.dissolution_status = DissolutionStatus.DRAFT;
+                dissolution.application_status = ApplicationStatus.PAID;
+
+                await request(initApp())
+                    .get(REDIRECT_GATE_URI)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", withTransactionIdInPath(SELECT_DIRECTOR_URI));
+
+                verify(mapper.mapToDissolutionConfirmation(anything())).never();
+            });
+
+            [undefined, "unknown" as DissolutionStatus].forEach(status => {
+                it(`should return an error and not save the session if dissolution status is ${status}`, async () => {
+                    dissolution.dissolution_status = status;
+
+                    await request(initApp()).get(REDIRECT_GATE_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                    verify(session.setDissolutionSession(anything(), anything())).never();
+                });
             });
         });
     });
@@ -400,7 +610,7 @@ describe("RedirectController", () => {
             const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
                 session.setDissolutionSession
             );
-            const updatedSession: DissolutionSession = sessionCaptor.last()[1];
+            const updatedSession: DissolutionSession = getSavedSession(session);
 
             assert.equal(updatedSession.applicationReferenceNumber, REF);
         });
@@ -428,7 +638,7 @@ describe("RedirectController", () => {
             const sessionCaptor: ArgCaptor2<Request, DissolutionSession> = capture<Request, DissolutionSession>(
                 session.setDissolutionSession
             );
-            const updatedSession: DissolutionSession = sessionCaptor.last()[1];
+            const updatedSession: DissolutionSession = getSavedSession(session);
 
             assert.equal(updatedSession.confirmation, confirmation);
         });

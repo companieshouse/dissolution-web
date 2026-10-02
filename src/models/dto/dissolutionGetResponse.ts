@@ -2,6 +2,7 @@ import ApplicationStatus from "app/models/dto/applicationStatus.enum";
 import ApplicationType from "app/models/dto/applicationType.enum";
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
 import DissolutionLinks from "app/models/dto/dissolutionLinks";
+import DissolutionStatus from "app/models/dto/dissolutionStatus.enum";
 
 export default interface DissolutionGetResponse {
     ETag: string;
@@ -17,4 +18,6 @@ export default interface DissolutionGetResponse {
     directors: DissolutionGetDirector[];
     certificate_bucket: string;
     certificate_key: string;
+    transaction_id?: string;
+    dissolution_status?: DissolutionStatus;
 }
