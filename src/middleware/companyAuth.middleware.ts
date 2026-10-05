@@ -48,16 +48,20 @@ export default function CompanyAuthMiddleware(
             return next(new Error("No Company Number in session"));
         }
 
-        if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
-            logger.info(`Authenticated user is authorized for ${companyNumber}`);
-            return next();
-        }
+        try {
+            if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
+                logger.info(`Authenticated user is authorized for ${companyNumber}`);
+                return next();
+            }
 
-        logger.info(
-            `Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
-        );
-        const authOptions: AuthOptions = companyAuthService.configureAuthRedirect(req, companyNumber);
-        return commonAuthMiddleware(authOptions)(req, res, next);
+            logger.info(
+                `Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
+            );
+            const authOptions: AuthOptions = companyAuthService.configureAuthRedirect(req, companyNumber);
+            return commonAuthMiddleware(authOptions)(req, res, next);
+        } catch (error) {
+            return next(error);
+        }
     };
 }
 

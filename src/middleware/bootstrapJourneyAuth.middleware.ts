@@ -14,10 +14,14 @@ export default function BootstrapJourneyAuthMiddleware(
             return next(new Error("Invalid company number"));
         }
 
-        if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
-            return next();
+        try {
+            if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
+                return next();
+            }
+            const authOptions: AuthOptions = companyAuthService.configureAuthRedirect(req, companyNumber);
+            return commonAuthMiddleware(authOptions)(req, res, next);
+        } catch (error) {
+            return next(error);
         }
-        const authOptions: AuthOptions = companyAuthService.configureAuthRedirect(req, companyNumber);
-        return commonAuthMiddleware(authOptions)(req, res, next);
     };
 }
