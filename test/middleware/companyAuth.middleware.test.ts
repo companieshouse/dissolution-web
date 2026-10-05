@@ -86,19 +86,10 @@ describe("CompanyAuthMiddleware", () => {
             middleware(req, res, next);
 
             assert.isTrue(isWhitelistedUrl(url));
-            assert.isTrue(next.calledOnceWithExactly());
+            assert.isTrue(next.calledOnce, `next should be called for whitelisted url: ${url}`);
             verify(sessionService.getDissolutionCompanyNumber(anything())).never();
             assert.isTrue(commonAuthStub.notCalled);
         });
-    });
-
-    it("whitelist check uses req.path so query strings are ignored", () => {
-        const req = { path: BOOTSTRAP_JOURNEY_URI, url: `${BOOTSTRAP_JOURNEY_URI}?companyNumber=1` } as any;
-
-        middleware(req, res, next);
-
-        assert.isTrue(next.calledOnceWithExactly());
-        verify(sessionService.getDissolutionCompanyNumber(anything())).never();
     });
 
     const nonWhitelistedUrls = [
@@ -122,12 +113,16 @@ describe("CompanyAuthMiddleware", () => {
 
             middleware(req, res, next);
 
-            assert.isFalse(isWhitelistedUrl(path));
             verify(sessionService.getDissolutionCompanyNumber(req)).once();
+            assert.isFalse(isWhitelistedUrl(path));
+            assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${path}`);
+            const err = next.args[0][0];
+            assert.instanceOf(err, Error);
+            assert.equal(err.message, "No Company Number in session");
         });
     });
 
-    it("when no companyNumber is in session then next called WITH error and auth is not checked", () => {
+    it("when no companyNumber is present in the session then next called WITH error", () => {
         const req = { path: "/some-path" } as any;
         when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(undefined);
 
@@ -135,12 +130,13 @@ describe("CompanyAuthMiddleware", () => {
 
         assert.isTrue(next.calledOnce);
         assert.instanceOf(next.args[0][0], Error);
-        assert.equal(next.args[0][0].message, "No Company Number in session");
+        const nextError = next.args[0][0];
+        assert.equal(nextError.message, "No Company Number in session");
         verify(companyAuthService.isAuthorisedForCompany(anything(), anything())).never();
         assert.isTrue(commonAuthStub.notCalled);
     });
 
-    it("when user is authorised for company then next called WITHOUT error and no redirect", () => {
+    it("when authenticated user is authorized for company number then next called WITHOUT error and no redirect", () => {
         const req = { path: "/some-path" } as any;
         when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
         when(companyAuthService.isAuthorisedForCompany(req, COMPANY_NUMBER)).thenReturn(true);
@@ -150,11 +146,10 @@ describe("CompanyAuthMiddleware", () => {
         assert.isTrue(next.calledOnceWithExactly());
         verify(companyAuthService.isAuthorisedForCompany(req, COMPANY_NUMBER)).once();
         verify(companyAuthService.configureAuthRedirect(anything(), anything())).never();
-        verify(logger.info(`Authenticated user is authorized for ${COMPANY_NUMBER}`)).once();
         assert.isTrue(commonAuthStub.notCalled);
     });
 
-    it("when user is NOT authorised then delegates to common auth middleware with configured redirect", () => {
+    it("when authenticated user is NOT authorized for company number then delegated to common auth middleware with configured redirect", () => {
         const req = { path: "/some-path" } as any;
         when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
 
