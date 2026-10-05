@@ -25,6 +25,7 @@ import { getEnv, getEnvOrDefault, getEnvOrThrow, parseFeatureFlag } from "app/ut
 import UriFactory from "app/utils/uri.factory";
 import CompanyNumberAuthMiddleware from "app/middleware/companyNumberAuth.middleware";
 import TransactionMiddleware from "app/middleware/transaction.middleware";
+import BootstrapJourneyAuthMiddleware from "app/middleware/bootstrapJourneyAuth.middleware";
 
 export function initContainer(): Container {
     const container: Container = new Container();
@@ -109,17 +110,21 @@ export function initContainer(): Container {
 
     container
         .bind(TYPES.CompanyAuthMiddleware)
-        .toConstantValue(CompanyAuthMiddleware(companyAuthService, sessionService, logger));
+        .toConstantValue(CompanyAuthMiddleware(companyAuthService, sessionService, commonAuthMiddleware, logger));
 
     container
         .bind(TYPES.CompanyNumberAuthMiddleware)
-        .toConstantValue(CompanyNumberAuthMiddleware(companyAuthService, logger));
+        .toConstantValue(CompanyNumberAuthMiddleware(companyAuthService, commonAuthMiddleware, logger));
 
     container.bind(TYPES.TransactionMiddleware).toConstantValue(TransactionMiddleware(sessionService, logger));
 
     container.bind(TYPES.SaveUserEmailToLocals).toConstantValue(SaveUserEmailToLocals(sessionService));
 
     container.bind(TYPES.JourneyIdAuthMiddleware).toConstantValue(JourneyIdAuthMiddleware(sessionService));
+
+    container
+        .bind(TYPES.BootstrapJourneyAuthMiddleware)
+        .toConstantValue(BootstrapJourneyAuthMiddleware(companyAuthService, commonAuthMiddleware));
 
     return container;
 }

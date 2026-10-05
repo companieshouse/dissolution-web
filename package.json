@@ -38,7 +38,7 @@
     "@companieshouse/api-sdk-node": "^2.0.360",
     "@companieshouse/node-session-handler": "^5.2.16",
     "@companieshouse/structured-logging-node": "^2.0.15",
-    "@companieshouse/web-security-node": "^4.4.24",
+    "@companieshouse/web-security-node": "^4.4.30",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/api-logs": "^0.221.0",
     "@opentelemetry/auto-instrumentations-node": "^0.79.0",
