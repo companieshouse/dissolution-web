@@ -73,7 +73,6 @@ export function initContainer(): Container {
     // Utils
     const logger = createLogger(APP_NAME);
     container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger);
-    container.bind<UriFactory>(UriFactory).toConstantValue(new UriFactory());
     container.bind<AxiosInstance>(TYPES.AxiosInstance).toConstantValue(axios.create());
 
     // Fee

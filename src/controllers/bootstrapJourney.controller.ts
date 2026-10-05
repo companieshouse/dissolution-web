@@ -9,7 +9,7 @@ import JourneyPathService from "app/services/session/journeyPath.service";
 import { RedirectResult } from "inversify-express-utils/lib/results";
 import { validateCompanyNumber } from "app/utils/companyNumber.util";
 
-@controller(BOOTSTRAP_JOURNEY_URI, TYPES.BootstrapJourneyAuthMiddleware)
+@controller(BOOTSTRAP_JOURNEY_URI)
 export class BootstrapJourneyController extends JourneyBaseController {
     public constructor(
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService,
@@ -19,7 +19,7 @@ export class BootstrapJourneyController extends JourneyBaseController {
         super(journeyPathService);
     }
 
-    @httpGet("")
+    @httpGet("", TYPES.BootstrapJourneyAuthMiddleware)
     public async get(@queryParam("companyNumber") rawCompanyNumber?: string | string[]): Promise<RedirectResult> {
         const { companyNumber, error } = validateCompanyNumber(rawCompanyNumber);
 
