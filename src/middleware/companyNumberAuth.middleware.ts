@@ -3,7 +3,7 @@ import ApplicationLogger from "@companieshouse/structured-logging-node/lib/Appli
 import CompanyAuthService from "app/services/auth/companyAuth.service";
 import { validateCompanyNumber } from "app/utils/companyNumber.util";
 import { runAsync } from "app/utils/asyncHandler";
-import { authMiddleware, AuthOptions } from "@companieshouse/web-security-node";
+import { AuthOptions } from "@companieshouse/web-security-node";
 
 export default function CompanyNumberAuthMiddleware(
     companyAuthService: CompanyAuthService,

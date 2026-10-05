@@ -43,31 +43,27 @@ describe("CompanyNumberAuthMiddleware", () => {
         middleware = CompanyNumberAuthMiddleware(instance(companyAuthService), commonAuthStub, instance(logger));
     });
 
-    const assertNextCalledWithError = (message: string): void => {
-        assert.isTrue(next.calledOnce);
-        const err = next.args[0][0];
-        assert.instanceOf(err, Error);
-        assert.equal(err.message, message);
-    };
-
-    const assertAuthNotChecked = (): void => {
-        verify(companyAuthService.isAuthorisedForCompany(anything(), anything())).never();
-        assert.isTrue(commonAuthStub.notCalled);
-    };
-
     it("when company number is missing from params then next called WITH error", () => {
         middleware({ params: {} } as any, res, next);
 
-        assertNextCalledWithError("No company number in path");
-        assertAuthNotChecked();
+        assert.isTrue(next.calledOnce);
+        const err = next.args[0][0];
+        assert.instanceOf(err, Error);
+        assert.equal(err.message, "No company number in path");
+        verify(companyAuthService.isAuthorisedForCompany(anything(), anything())).never();
+        assert.isTrue(commonAuthStub.notCalled);
     });
 
     ["invalid-123!", "123456789", "abc def"].forEach(companyNumber => {
         it(`when company number is invalid (${companyNumber}) then next called WITH error`, () => {
             middleware({ params: { companyNumber } } as any, res, next);
 
-            assertNextCalledWithError("Invalid company number in path");
-            assertAuthNotChecked();
+            assert.isTrue(next.calledOnce);
+            const err = next.args[0][0];
+            assert.instanceOf(err, Error);
+            assert.equal(err.message, "Invalid company number in path");
+            verify(companyAuthService.isAuthorisedForCompany(anything(), anything())).never();
+            assert.isTrue(commonAuthStub.notCalled);
         });
     });
 

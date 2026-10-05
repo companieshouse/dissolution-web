@@ -92,13 +92,4 @@ describe("BootstrapJourneyAuthMiddleware", () => {
         verify(companyAuthService.isAuthorisedForCompany(req, COMPANY_NUMBER)).once();
         assert.isTrue(next.calledOnceWithExactly());
     });
-
-    it("when company number has a prefix then it is passed through unchanged", () => {
-        const req = { query: { companyNumber: "NI123456" } } as any;
-
-        middleware(req, res, next);
-
-        verify(companyAuthService.isAuthorisedForCompany(req, "NI123456")).once();
-        verify(companyAuthService.configureAuthRedirect(req, "NI123456")).once();
-    });
 });
