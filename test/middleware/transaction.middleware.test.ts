@@ -7,162 +7,137 @@ import sinon from "sinon";
 import { anything, instance, mock, verify, when } from "ts-mockito";
 
 import TransactionMiddleware from "app/middleware/transaction.middleware";
-import DissolutionSession from "app/models/session/dissolutionSession.model";
+import { BOOTSTRAP_JOURNEY_URI } from "app/paths";
 import SessionService from "app/services/session/session.service";
-import TransactionService from "app/services/transaction/transaction.service";
-
-import { aDissolutionSession } from "test/fixtures/dissolutionSession.builder";
-import { aTransaction } from "test/fixtures/transaction.builder";
 
 describe("TransactionMiddleware", () => {
     let middleware: RequestHandler;
-    let transactionService: TransactionService;
     let sessionService: SessionService;
     let logger: ApplicationLogger;
+    let res: Response;
+    let redirect: sinon.SinonStub;
+    let next: sinon.SinonStub;
 
-    const TOKEN = "some-access-token";
     const COMPANY_NUMBER = "12345678";
     const SESSION_TRANSACTION_ID = "111111-111111-111111";
     const OTHER_TRANSACTION_ID = "222222-222222-222222";
-    const res = {} as Response;
 
-    const aSessionWith = (transactionId?: string, companyNumber: string = COMPANY_NUMBER): DissolutionSession =>
-        ({
-            ...aDissolutionSession().withCompanyNumber(companyNumber).build(),
-            transactionId,
-        }) as DissolutionSession;
+    const aRequestWith = (params: Record<string, string>): Request => ({ params }) as any as Request;
+
+    const assertNextCalledWithoutError = (): void => {
+        assert.isTrue(next.calledOnce);
+        assert.isUndefined(next.args[0][0]);
+    };
+
+    const assertNextCalledWithError = (message: string): void => {
+        assert.isTrue(next.calledOnce);
+        const err = next.args[0][0];
+        assert.instanceOf(err, Error);
+        assert.equal(err.message, message);
+    };
 
     beforeEach(() => {
-        transactionService = mock(TransactionService);
         sessionService = mock(SessionService);
         logger = mock(ApplicationLogger);
+        redirect = sinon.stub();
+        res = { redirect } as any as Response;
+        next = sinon.stub();
 
-        when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
-        when(sessionService.getDissolutionSession(anything())).thenReturn(aSessionWith(SESSION_TRANSACTION_ID));
+        when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(COMPANY_NUMBER);
+        when(sessionService.requireDissolutionTransactionId(anything())).thenReturn(SESSION_TRANSACTION_ID);
 
-        middleware = TransactionMiddleware(instance(transactionService), instance(sessionService), instance(logger));
+        middleware = TransactionMiddleware(instance(sessionService), instance(logger));
     });
 
-    it("when transactionId is missing from params then next called and checks are skipped", () => {
-        const req = { params: {} } as any as Request;
-        const next = sinon.stub();
+    describe("when transactionId is not present in path", () => {
+        const tests: Record<string, string>[] = [{}, { transactionId: "" }];
+        tests.forEach(params => {
+            it(`should call next and skip checks for params ${JSON.stringify(params)}`, () => {
+                middleware(aRequestWith(params), res, next);
 
-        middleware(req, res, next);
-
-        assert.isTrue(next.calledOnce);
-        assert.isUndefined(next.args[0][0]);
-        verify(sessionService.getDissolutionSession(anything())).never();
-        verify(transactionService.getTransaction(anything(), anything())).never();
-    });
-
-    ["invalid", "123456-123456", "12345-123456-123456", "abcdef-123456-123456", "123456-123456-123456-123456"].forEach(
-        transactionId => {
-            it(`when transactionId is invalid (${transactionId}) then next called WITH error`, () => {
-                const req = { params: { transactionId } } as any as Request;
-                const next = sinon.stub();
-
-                middleware(req, res, next);
-
-                assert.isTrue(next.calledOnce);
-                const err = next.args[0][0];
-                assert.instanceOf(err, Error);
-                assert.equal(err.message, "Invalid transaction ID in path");
-                verify(sessionService.getDissolutionSession(anything())).never();
+                assertNextCalledWithoutError();
+                assert.isTrue(redirect.notCalled);
+                verify(sessionService.requireDissolutionCompanyNumber(anything())).never();
+                verify(sessionService.requireDissolutionTransactionId(anything())).never();
             });
-        }
-    );
-
-    it("when no dissolution session exists then next called WITH error", () => {
-        const req = { params: { transactionId: SESSION_TRANSACTION_ID } } as any as Request;
-        const next = sinon.stub();
-
-        when(sessionService.getDissolutionSession(anything())).thenReturn(undefined);
-
-        middleware(req, res, next);
-
-        assert.isTrue(next.calledOnce);
-        const err = next.args[0][0];
-        assert.instanceOf(err, Error);
-        assert.equal(err.message, "No transactionId in session");
+        });
     });
 
-    it("when no transactionId in session then next called WITH error", () => {
-        const req = { params: { transactionId: SESSION_TRANSACTION_ID } } as any as Request;
-        const next = sinon.stub();
+    describe("when transactionId in path is invalid", () => {
+        [
+            "invalid",
+            "   ",
+            "123456-123456",
+            "12345-123456-123456",
+            "abcdef-123456-123456",
+            "123456-123456-123456-123456",
+        ].forEach(transactionId => {
+            it(`should call next WITH error for "${transactionId}" without reading the session`, () => {
+                middleware(aRequestWith({ transactionId }), res, next);
 
-        when(sessionService.getDissolutionSession(anything())).thenReturn(aSessionWith(undefined));
-
-        middleware(req, res, next);
-
-        assert.isTrue(next.calledOnce);
-        const err = next.args[0][0];
-        assert.instanceOf(err, Error);
-        assert.equal(err.message, "No transactionId in session");
+                assertNextCalledWithError("Invalid transaction ID in path");
+                assert.isTrue(redirect.notCalled);
+                verify(sessionService.requireDissolutionCompanyNumber(anything())).never();
+                verify(sessionService.requireDissolutionTransactionId(anything())).never();
+            });
+        });
     });
 
-    it("when transactionId matches session transactionId then next called and transaction is not fetched", () => {
-        const req = { params: { transactionId: SESSION_TRANSACTION_ID } } as any as Request;
-        const next = sinon.stub();
+    describe("when session data is missing", () => {
+        it("should call next WITH error when there is no company number in session", () => {
+            when(sessionService.requireDissolutionCompanyNumber(anything())).thenThrow(
+                new Error("No company number in dissolution session")
+            );
 
-        middleware(req, res, next);
+            middleware(aRequestWith({ transactionId: SESSION_TRANSACTION_ID }), res, next);
 
-        assert.isTrue(next.calledOnce);
-        assert.isUndefined(next.args[0][0]);
-        verify(transactionService.getTransaction(anything(), anything())).never();
+            assertNextCalledWithError("No company number in dissolution session");
+            assert.isTrue(redirect.notCalled);
+        });
+
+        it("should call next WITH error when there is no transaction ID in session", () => {
+            when(sessionService.requireDissolutionTransactionId(anything())).thenThrow(
+                new Error("No transaction ID in dissolution session")
+            );
+
+            middleware(aRequestWith({ transactionId: SESSION_TRANSACTION_ID }), res, next);
+
+            assertNextCalledWithError("No transaction ID in dissolution session");
+            assert.isTrue(redirect.notCalled);
+        });
     });
 
-    it("when transactionId has surrounding whitespace and matches session then next called and transaction is not fetched", () => {
-        const req = { params: { transactionId: `  ${SESSION_TRANSACTION_ID}  ` } } as any as Request;
-        const next = sinon.stub();
+    describe("when transactionId in path matches session", () => {
+        it("should call next without redirecting or logging", () => {
+            middleware(aRequestWith({ transactionId: SESSION_TRANSACTION_ID }), res, next);
 
-        middleware(req, res, next);
+            assertNextCalledWithoutError();
+            assert.isTrue(redirect.notCalled);
+        });
 
-        assert.isTrue(next.calledOnce);
-        assert.isUndefined(next.args[0][0]);
-        verify(transactionService.getTransaction(anything(), anything())).never();
+        it("should call next when transactionId has surrounding whitespace", () => {
+            middleware(aRequestWith({ transactionId: `  ${SESSION_TRANSACTION_ID}  ` }), res, next);
+
+            assertNextCalledWithoutError();
+            assert.isTrue(redirect.notCalled);
+        });
     });
 
-    it("when transactionId differs from session and transaction company matches session company then next called WITHOUT error", async () => {
-        const req = { params: { transactionId: OTHER_TRANSACTION_ID } } as any as Request;
-        const next = sinon.stub();
+    describe("when transactionId in path does not match session", () => {
+        it("should redirect to the bootstrap journey with the session company number and not call next", () => {
+            middleware(aRequestWith({ transactionId: OTHER_TRANSACTION_ID }), res, next);
 
-        when(transactionService.getTransaction(TOKEN, OTHER_TRANSACTION_ID)).thenResolve(
-            aTransaction().withId(OTHER_TRANSACTION_ID).withCompanyNumber(COMPANY_NUMBER).build()
-        );
+            assert.isTrue(redirect.calledOnceWithExactly(`${BOOTSTRAP_JOURNEY_URI}?companyNumber=${COMPANY_NUMBER}`));
+            assert.isTrue(next.notCalled);
+        });
 
-        await middleware(req, res, next);
+        it("should URL-encode the company number in the redirect URI", () => {
+            when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn("SC/12 34&5");
 
-        verify(transactionService.getTransaction(TOKEN, OTHER_TRANSACTION_ID)).once();
-        assert.isTrue(next.calledOnce);
-        assert.isUndefined(next.args[0][0]);
-    });
+            middleware(aRequestWith({ transactionId: OTHER_TRANSACTION_ID }), res, next);
 
-    it("when transactionId differs from session and transaction company does NOT match session company then next called WITH error", async () => {
-        const req = { params: { transactionId: OTHER_TRANSACTION_ID } } as any as Request;
-        const next = sinon.stub();
-
-        when(transactionService.getTransaction(TOKEN, OTHER_TRANSACTION_ID)).thenResolve(
-            aTransaction().withId(OTHER_TRANSACTION_ID).withCompanyNumber("87654321").build()
-        );
-
-        await middleware(req, res, next);
-
-        assert.isTrue(next.calledOnce);
-        const err = next.args[0][0];
-        assert.instanceOf(err, Error);
-        assert.equal(err.message, "Transaction company number does not match session company number");
-    });
-
-    it("when transactionId differs from session and fetching the transaction fails then next called WITH error", async () => {
-        const req = { params: { transactionId: OTHER_TRANSACTION_ID } } as any as Request;
-        const next = sinon.stub();
-        const error = new Error(`Failed to get transaction for transaction id ${OTHER_TRANSACTION_ID}`);
-
-        when(transactionService.getTransaction(TOKEN, OTHER_TRANSACTION_ID)).thenReject(error);
-
-        await middleware(req, res, next);
-
-        assert.isTrue(next.calledOnce);
-        assert.equal(next.args[0][0], error);
+            assert.isTrue(redirect.calledOnceWithExactly(`${BOOTSTRAP_JOURNEY_URI}?companyNumber=SC%2F12%2034%265`));
+            assert.isTrue(next.notCalled);
+        });
     });
 });
