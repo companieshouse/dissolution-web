@@ -309,17 +309,6 @@ describe("SessionService", () => {
         });
     });
 
-    describe("setCompanyAuthNonce", () => {
-        it("should set the company auth nonce in the session", () => {
-            const req: Request = generateRequest();
-            const nonce = "nonce-123";
-
-            sessionService.setCompanyAuthNonce(req, nonce);
-
-            assert.equal(req.session!.data[SessionKey.OAuth2Nonce], nonce);
-        });
-    });
-
     describe("requireOfficerType", () => {
         it("should return the officer type when present", () => {
             const dissolutionSession = aDissolutionSession().withOfficerType(OfficerType.DIRECTOR).build();

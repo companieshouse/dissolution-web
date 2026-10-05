@@ -9,7 +9,6 @@ import { provide } from "inversify-binding-decorators";
 
 import { DISSOLUTION_SESSION_KEY } from "app/constants/app.const";
 
-import { Mutable } from "app/models/mutable";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import OfficerType from "app/models/dto/officerType.enum";
@@ -100,12 +99,6 @@ export default class SessionService {
 
     public getSignInInfo(req: Request): ISignInInfo {
         return req.session!.get<ISignInInfo>(SessionKey.SignInInfo)!;
-    }
-
-    public setCompanyAuthNonce(req: Request, nonce: string): void {
-        const mutableSession = req.session as Mutable<Session>;
-        mutableSession.data[SessionKey.OAuth2Nonce] = nonce;
-        req.session = mutableSession as Session;
     }
 
     public requireOfficerType(req: Request): OfficerType {
