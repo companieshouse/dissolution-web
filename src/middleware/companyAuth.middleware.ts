@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
 import CompanyAuthService from "app/services/auth/companyAuth.service";
 import SessionService from "app/services/session/session.service";
+import { AuthOptions } from "@companieshouse/web-security-node";
 
 import {
     ACCESSIBILITY_STATEMENT_URI,
@@ -33,6 +34,7 @@ const COMPANY_AUTH_WHITELISTED_URLS: string[] = [
 export default function CompanyAuthMiddleware(
     companyAuthService: CompanyAuthService,
     sessionService: SessionService,
+    commonAuthMiddleware: (opts: AuthOptions) => RequestHandler,
     logger: ApplicationLogger
 ): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -46,15 +48,19 @@ export default function CompanyAuthMiddleware(
             return next(new Error("No Company Number in session"));
         }
 
-        if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
-            logger.info(`Authenticated user is authorized for ${companyNumber}`);
-            return next();
-        } else {
+        try {
+            if (companyAuthService.isAuthorisedForCompany(req, companyNumber)) {
+                logger.info(`Authenticated user is authorized for ${companyNumber}`);
+                return next();
+            }
+
             logger.info(
                 `Authenticated user is not authorized for ${companyNumber}, redirecting to Enter Company Auth Code page`
             );
-            const redirectUri = await companyAuthService.issueAuthRedirectUri(req, companyNumber);
-            return res.redirect(redirectUri);
+            const authOptions: AuthOptions = companyAuthService.configureAuthRedirect(req, companyNumber);
+            return commonAuthMiddleware(authOptions)(req, res, next);
+        } catch (error) {
+            return next(error);
         }
     };
 }

@@ -1,16 +1,15 @@
 import "reflect-metadata";
 
-import { Session } from "@companieshouse/node-session-handler";
-import { ISignInInfo } from "@companieshouse/node-session-handler/lib/session/model/SessionInterfaces";
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
+import { AuthOptions } from "@companieshouse/web-security-node";
 import { assert } from "chai";
 import { RequestHandler, Response } from "express";
 import sinon from "sinon";
 import { anything, instance, mock, verify, when } from "ts-mockito";
 
-import CompanyAuthMiddleware from "app/middleware/companyAuth.middleware";
-import SessionService from "app/services/session/session.service";
+import CompanyAuthMiddleware, { isWhitelistedUrl } from "app/middleware/companyAuth.middleware";
 import CompanyAuthService from "app/services/auth/companyAuth.service";
+import SessionService from "app/services/session/session.service";
 import {
     ACCESSIBILITY_STATEMENT_URI,
     BOOTSTRAP_JOURNEY_URI,
@@ -26,29 +25,41 @@ import {
     WHO_TO_TELL_URI,
 } from "app/paths";
 
-import { generateSession } from "test/fixtures/session.fixtures";
+const COMPANY_NUMBER = "12345678";
+const AUTH_OPTIONS: AuthOptions = {
+    chsWebUrl: "http://chs.test",
+    returnUrl: `http://dissolution.test${BOOTSTRAP_JOURNEY_URI}?companyNumber=${COMPANY_NUMBER}`,
+    companyNumber: COMPANY_NUMBER,
+};
 
-describe("AuthMiddleware", () => {
+describe("CompanyAuthMiddleware", () => {
     let middleware: RequestHandler;
-
     let companyAuthService: CompanyAuthService;
     let sessionService: SessionService;
     let logger: ApplicationLogger;
-    let session: Session;
+    let commonAuthStub: sinon.SinonStub;
+    let authHandlerStub: sinon.SinonStub;
+    let res: Response;
+    let next: sinon.SinonStub;
 
     beforeEach(() => {
         companyAuthService = mock(CompanyAuthService);
         sessionService = mock(SessionService);
         logger = mock(ApplicationLogger);
-        session = generateSession();
+        authHandlerStub = sinon.stub();
+        commonAuthStub = sinon.stub().returns(authHandlerStub);
+        res = {} as Response;
+        next = sinon.stub();
 
-        when(sessionService.getSession(anything())).thenReturn(session);
         when(companyAuthService.isAuthorisedForCompany(anything(), anything())).thenReturn(false);
-        when(companyAuthService.issueAuthRedirectUri(anything(), anything())).thenResolve(
-            "http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678"
-        );
+        when(companyAuthService.configureAuthRedirect(anything(), anything())).thenReturn(AUTH_OPTIONS);
 
-        middleware = CompanyAuthMiddleware(instance(companyAuthService), instance(sessionService), logger);
+        middleware = CompanyAuthMiddleware(
+            instance(companyAuthService),
+            instance(sessionService),
+            commonAuthStub,
+            instance(logger)
+        );
     });
 
     const whitelistedUrls = [
@@ -59,8 +70,9 @@ describe("AuthMiddleware", () => {
         HEALTHCHECK_URI,
         `${HEALTHCHECK_URI}/`,
         SEARCH_COMPANY_URI,
-        STOP_SCREEN_BANK_ACCOUNT_URI,
         `${SEARCH_COMPANY_URI}/`,
+        STOP_SCREEN_BANK_ACCOUNT_URI,
+        `${STOP_SCREEN_BANK_ACCOUNT_URI}/`,
         ACCESSIBILITY_STATEMENT_URI,
         `${ACCESSIBILITY_STATEMENT_URI}/`,
         BOOTSTRAP_JOURNEY_URI,
@@ -70,13 +82,13 @@ describe("AuthMiddleware", () => {
     whitelistedUrls.forEach(url => {
         it(`whitelisted urls are ignored: ${url}`, () => {
             const req = { path: url } as any;
-            const res = {} as Response;
-            const next = sinon.stub();
 
             middleware(req, res, next);
 
+            assert.isTrue(isWhitelistedUrl(url));
             assert.isTrue(next.calledOnce, `next should be called for whitelisted url: ${url}`);
             verify(sessionService.getDissolutionCompanyNumber(anything())).never();
+            assert.isTrue(commonAuthStub.notCalled);
         });
     });
 
@@ -95,16 +107,14 @@ describe("AuthMiddleware", () => {
     ];
 
     nonWhitelistedUrls.forEach(path => {
-        it(`none whitelisted urls are processed: ${path}`, () => {
-            const req = { path: path } as any;
-            const res = {} as Response;
-            const next = sinon.stub();
-
+        it(`non-whitelisted urls are processed: ${path}`, () => {
+            const req = { path } as any;
             when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(undefined);
 
             middleware(req, res, next);
 
             verify(sessionService.getDissolutionCompanyNumber(req)).once();
+            assert.isFalse(isWhitelistedUrl(path));
             assert.isTrue(next.calledOnce, `next should be called for non-whitelisted url: ${path}`);
             const err = next.args[0][0];
             assert.instanceOf(err, Error);
@@ -112,63 +122,42 @@ describe("AuthMiddleware", () => {
         });
     });
 
-    it("when no companyNumber is present the next called WITH error", () => {
+    it("when no companyNumber is present in the session then next called WITH error", () => {
         const req = { path: "/some-path" } as any;
-        const res = {} as Response;
-        const next = sinon.stub();
-
         when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(undefined);
 
         middleware(req, res, next);
 
-        const nextError = next.args[0][0];
         assert.isTrue(next.calledOnce);
+        assert.instanceOf(next.args[0][0], Error);
+        const nextError = next.args[0][0];
         assert.equal(nextError.message, "No Company Number in session");
+        verify(companyAuthService.isAuthorisedForCompany(anything(), anything())).never();
+        assert.isTrue(commonAuthStub.notCalled);
     });
 
-    it("when authenticated user is authorized for company number then next called WITHOUT error", () => {
-        const signInInfo: ISignInInfo = {
-            company_number: "12345678",
-        };
+    it("when authenticated user is authorized for company number then next called WITHOUT error and no redirect", () => {
         const req = { path: "/some-path" } as any;
-        const res = {} as Response;
-        const next = sinon.stub();
-
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678");
-        when(sessionService.getSignInInfo(req)).thenReturn(signInInfo);
-
-        when(companyAuthService.isAuthorisedForCompany(anything(), anything())).thenReturn(true);
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
+        when(companyAuthService.isAuthorisedForCompany(req, COMPANY_NUMBER)).thenReturn(true);
 
         middleware(req, res, next);
 
-        assert.isTrue(next.calledOnce);
-        assert.isUndefined(next.args[0][0]);
+        assert.isTrue(next.calledOnceWithExactly());
+        verify(companyAuthService.isAuthorisedForCompany(req, COMPANY_NUMBER)).once();
+        verify(companyAuthService.configureAuthRedirect(anything(), anything())).never();
+        assert.isTrue(commonAuthStub.notCalled);
     });
 
-    it("when authenticated user is NOT authorized for company number then redirect to Enter company auth code page", async () => {
-        const signInInfo: ISignInInfo = {
-            company_number: "XXXXXXXXXX",
-        };
+    it("when authenticated user is NOT authorized for company number then delegated to common auth middleware with configured redirect", () => {
+        const req = { path: "/some-path" } as any;
+        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn(COMPANY_NUMBER);
 
-        const req = {} as any;
-        const res = {} as Response;
-        const redirectStub: sinon.SinonStub = sinon.stub();
-        res.redirect = redirectStub;
-        const next = sinon.stub();
+        middleware(req, res, next);
 
-        when(sessionService.getDissolutionCompanyNumber(req)).thenReturn("12345678");
-        when(sessionService.getSignInInfo(req)).thenReturn(signInInfo as any);
-        when(companyAuthService.issueAuthRedirectUri(anything(), anything())).thenResolve(
-            "http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678"
-        );
-
-        await middleware(req, res, next);
-
-        assert.isTrue(redirectStub.calledOnce);
-        const redirectUrl: string = redirectStub.args[0][0];
-        assert.include(
-            redirectUrl,
-            "http://account.chs-dev/oauth2/authorise?client_id=123456.gov.uk&redirect_uri=http://chs-dev/oauth2/user/callback&response_type=code&scope=https://account.companieshouse.gov.uk/user.write-full https://api.companieshouse.gov.uk/company/12345678"
-        );
+        verify(companyAuthService.configureAuthRedirect(req, COMPANY_NUMBER)).once();
+        assert.isTrue(commonAuthStub.calledOnceWithExactly(AUTH_OPTIONS));
+        assert.isTrue(authHandlerStub.calledOnceWithExactly(req, res, next));
+        assert.isTrue(next.notCalled);
     });
 });
