@@ -19,6 +19,7 @@ import PaymentType from "app/models/dto/paymentType.enum";
 import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model";
 
 import { generateEmail } from "test/fixtures/util.fixtures";
+import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
 
 export function generateDissolutionCreateRequest(): DissolutionCreateRequest {
     return {
@@ -33,6 +34,15 @@ export function generateDissolutionCreateRequest(): DissolutionCreateRequest {
 export function generateDissolutionCreateResponse(referenceNumber: string = "123ABC"): DissolutionCreateResponse {
     return {
         application_reference_number: referenceNumber,
+        links: generateDissolutionLinks(),
+    };
+}
+
+export function generateDissolutionCreateDraftResponse(
+    dissolutionId: string = "123ABC"
+): DissolutionCreateDraftResponse {
+    return {
+        dissolution_id: dissolutionId,
         links: generateDissolutionLinks(),
     };
 }

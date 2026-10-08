@@ -16,6 +16,7 @@ import { DissolutionApiClient } from "app/services/clients/dissolutionApi.client
 
 import { generateAxiosError, generateAxiosResponse } from "test/fixtures/axios.fixtures";
 import {
+    generateDissolutionCreateDraftResponse,
     generateDissolutionCreateRequest,
     generateDissolutionCreateResponse,
     generateDissolutionDirectorPatchRequest,
@@ -26,6 +27,7 @@ import {
     generateDissolutionPatchResponse,
     generateDissolutionPaymentPatchRequest,
 } from "test/fixtures/dissolutionApi.fixtures";
+import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
 
 describe("DissolutionApiClient", () => {
     let axiosInstance: AxiosInstance;
@@ -38,10 +40,15 @@ describe("DissolutionApiClient", () => {
     const API_KEY = "some-api-key";
     const APPLICATION_REFERENCE = "ABC123";
     const COMPANY_NUMBER = "12345678";
+    const TRANSACTION_ID = "111111-222222-333333";
+    const OFFICER_ID = "123";
     const BODY = generateDissolutionCreateRequest();
     const GET_RESPONSE: AxiosResponse<DissolutionGetResponse> = generateAxiosResponse(generateDissolutionGetResponse());
     const CREATE_RESPONSE: AxiosResponse<DissolutionCreateResponse> = generateAxiosResponse(
         generateDissolutionCreateResponse()
+    );
+    const CREATE_DRAFT_RESPONSE: AxiosResponse<DissolutionCreateDraftResponse> = generateAxiosResponse(
+        generateDissolutionCreateDraftResponse()
     );
     const PATCH_RESPONSE: AxiosResponse<DissolutionPatchResponse> = generateAxiosResponse(
         generateDissolutionPatchResponse()
@@ -270,6 +277,225 @@ describe("DissolutionApiClient", () => {
             }
 
             assert.isTrue(patchStub.called);
+        });
+    });
+
+    describe("transaction dissolution API", () => {
+        const BASE_URL: string = `${DISSOLUTION_API_URL}/company/${COMPANY_NUMBER}/transactions/${TRANSACTION_ID}/dissolution`;
+
+        const assertOAuthConfig = (config: any): void => {
+            assert.equal(config.headers.Authorization, "Bearer " + TOKEN);
+            assert.equal(config.headers["Content-Type"], "application/json");
+            assert.equal(config.headers.Accept, "application/json");
+        };
+
+        const generateStatusError = (status: number): AxiosError => {
+            const error: AxiosError = generateAxiosError({});
+            error.response!.status = status;
+            return error;
+        };
+
+        describe("createDraftDissolution", () => {
+            it("should create a draft dissolution in the api and return dissolution id", async () => {
+                postStub = sinon.stub().resolves(CREATE_DRAFT_RESPONSE);
+                axiosInstance.post = postStub;
+
+                const response = await client.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID);
+
+                assert.isTrue(postStub.called);
+
+                const [url, body, config] = postStub.args[0];
+                assert.equal(url, BASE_URL);
+                assert.isUndefined(body);
+                assert.equal(response, CREATE_DRAFT_RESPONSE.data);
+                assertOAuthConfig(config);
+            });
+
+            const failureCases = [
+                StatusCodes.BAD_REQUEST,
+                StatusCodes.NOT_FOUND,
+                StatusCodes.CONFLICT,
+                StatusCodes.INTERNAL_SERVER_ERROR,
+            ];
+
+            failureCases.forEach(status => {
+                it(`should propagate a ${status} error from the API when create a draft dissolution fails`, async () => {
+                    postStub = sinon.stub().rejects(generateStatusError(status));
+                    axiosInstance.post = postStub;
+                    try {
+                        await client.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID);
+                        assert.fail();
+                    } catch (e: any) {
+                        assert.equal(e.response.status, status);
+                    }
+                });
+            });
+        });
+
+        describe("initiateDissolution", () => {
+            it("should POST the initiation request to the initiation endpoint", async () => {
+                postStub = sinon.stub().resolves(generateAxiosResponse(undefined));
+                axiosInstance.post = postStub;
+
+                await client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, BODY);
+
+                const [url, body, config] = postStub.args[0];
+                assert.equal(url, `${BASE_URL}/initiation`);
+                assert.equal(body, BODY);
+                assertOAuthConfig(config);
+            });
+
+            const failureCases = [
+                StatusCodes.BAD_REQUEST,
+                StatusCodes.NOT_FOUND,
+                StatusCodes.CONFLICT,
+                StatusCodes.UNPROCESSABLE_ENTITY,
+                StatusCodes.INTERNAL_SERVER_ERROR,
+            ];
+
+            failureCases.forEach(status => {
+                it(`should propagate a ${status} error from the API when initiate dissolution fails`, async () => {
+                    postStub = sinon.stub().rejects(generateStatusError(status));
+                    axiosInstance.post = postStub;
+                    try {
+                        await client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, BODY);
+                        assert.fail();
+                    } catch (e: any) {
+                        assert.equal(e.response.status, status);
+                    }
+                });
+            });
+        });
+
+        describe("patchDissolutionApproval", () => {
+            const request: DissolutionPatchRequest = generateDissolutionPatchRequest();
+
+            it("should PATCH the approval to the approve endpoint", async () => {
+                patchStub = sinon.stub().resolves(generateAxiosResponse(undefined));
+                axiosInstance.patch = patchStub;
+
+                await client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, request);
+
+                const [url, body, config] = patchStub.args[0];
+                assert.equal(url, `${BASE_URL}/approve`);
+                assert.equal(body, request);
+                assertOAuthConfig(config);
+            });
+
+            const failureCases = [
+                StatusCodes.BAD_REQUEST,
+                StatusCodes.NOT_FOUND,
+                StatusCodes.CONFLICT,
+                StatusCodes.INTERNAL_SERVER_ERROR,
+            ];
+
+            failureCases.forEach(status => {
+                it(`should propagate a ${status} error from the API when patch dissolution approval fails`, async () => {
+                    patchStub = sinon.stub().rejects(generateStatusError(status));
+                    axiosInstance.patch = patchStub;
+                    try {
+                        await client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, request);
+                        assert.fail();
+                    } catch (e: any) {
+                        assert.equal(e.response.status, status);
+                    }
+                });
+            });
+        });
+
+        describe("resendSignatoryNotification", () => {
+            it("should POST to the signature-notification endpoint and return reminderSent true on success", async () => {
+                const apiResponse = generateAxiosResponse(undefined);
+                apiResponse.status = StatusCodes.OK;
+                postStub = sinon.stub().resolves(apiResponse);
+                axiosInstance.post = postStub;
+
+                const response = await client.resendSignatoryNotification(
+                    TOKEN,
+                    COMPANY_NUMBER,
+                    TRANSACTION_ID,
+                    OFFICER_ID
+                );
+
+                const [url, body, config] = postStub.args[0];
+                assert.equal(url, `${BASE_URL}/signatories/${OFFICER_ID}/signature-notification`);
+                assert.isUndefined(body);
+                assertOAuthConfig(config);
+                assert.isTrue(response.reminderSent);
+            });
+
+            it("should return reminderSent false when the status is not 200", async () => {
+                const apiResponse = generateAxiosResponse(undefined);
+                apiResponse.status = StatusCodes.NO_CONTENT;
+                postStub = sinon.stub().resolves(apiResponse);
+                axiosInstance.post = postStub;
+
+                const response = await client.resendSignatoryNotification(
+                    TOKEN,
+                    COMPANY_NUMBER,
+                    TRANSACTION_ID,
+                    OFFICER_ID
+                );
+
+                assert.isFalse(response.reminderSent);
+            });
+
+            const failureCases = [
+                StatusCodes.BAD_REQUEST,
+                StatusCodes.NOT_FOUND,
+                StatusCodes.CONFLICT,
+                StatusCodes.INTERNAL_SERVER_ERROR,
+            ];
+
+            failureCases.forEach(status => {
+                it(`should return reminderSent false when API returns a ${status}`, async () => {
+                    postStub = sinon.stub().rejects(generateStatusError(status));
+                    axiosInstance.post = postStub;
+                    const response = await client.resendSignatoryNotification(
+                        TOKEN,
+                        COMPANY_NUMBER,
+                        TRANSACTION_ID,
+                        OFFICER_ID
+                    );
+                    assert.isFalse(response.reminderSent);
+                });
+            });
+        });
+
+        describe("updateSignatoryDetails", () => {
+            const request: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
+
+            it("should PATCH the signatory details to the signatory endpoint", async () => {
+                patchStub = sinon.stub().resolves(generateAxiosResponse(undefined));
+                axiosInstance.patch = patchStub;
+
+                await client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID, request);
+
+                const [url, body, config] = patchStub.args[0];
+                assert.equal(url, `${BASE_URL}/signatories/${OFFICER_ID}`);
+                assert.equal(body, request);
+                assertOAuthConfig(config);
+            });
+
+            const failureCases = [
+                StatusCodes.BAD_REQUEST,
+                StatusCodes.NOT_FOUND,
+                StatusCodes.CONFLICT,
+                StatusCodes.INTERNAL_SERVER_ERROR,
+            ];
+
+            failureCases.forEach(status => {
+                it(`should propagate a ${status} error from the API when updating a signatory's details fails`, async () => {
+                    patchStub = sinon.stub().rejects(generateStatusError(status));
+                    axiosInstance.patch = patchStub;
+                    try {
+                        await client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID, request);
+                        assert.fail();
+                    } catch (e: any) {
+                        assert.equal(e.response.status, status);
+                    }
+                });
+            });
         });
     });
 });
