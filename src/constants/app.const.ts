@@ -13,3 +13,5 @@ export const DESCRIPTION = "Dissolution Transaction";
 export const REFERENCE = "DissolutionReference";
 export const MAX_OFFICERS_FOR_DISSOLUTION_SERVICE = 150;
 export const MAX_OFFICERS_PER_PAGE = 151;
+export const ROUTE_PARAM_TRANSACTION_ID = "transactionId";
+export const ROUTE_PARAM_COMPANY_NUMBER = "companyNumber";

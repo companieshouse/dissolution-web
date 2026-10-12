@@ -9,6 +9,7 @@ import { anything, instance, mock, verify, when } from "ts-mockito";
 import TransactionMiddleware from "app/middleware/transaction.middleware";
 import { BOOTSTRAP_JOURNEY_URI } from "app/paths";
 import SessionService from "app/services/session/session.service";
+import { aRequestWith } from "test/fixtures/http.fixtures";
 
 describe("TransactionMiddleware", () => {
     let middleware: RequestHandler;
@@ -21,8 +22,6 @@ describe("TransactionMiddleware", () => {
     const COMPANY_NUMBER = "12345678";
     const SESSION_TRANSACTION_ID = "111111-111111-111111";
     const OTHER_TRANSACTION_ID = "222222-222222-222222";
-
-    const aRequestWith = (params: Record<string, string>): Request => ({ params }) as any as Request;
 
     const assertNextCalledWithoutError = (): void => {
         assert.isTrue(next.calledOnce);
