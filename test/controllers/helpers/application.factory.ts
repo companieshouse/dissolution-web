@@ -53,6 +53,9 @@ const mockMiddlewares = (container: Container): void => {
     container
         .bind(TYPES.CompanyNumberAuthMiddleware)
         .toConstantValue((_1: Request, _2: Response, next: NextFunction) => next());
+    container
+        .bind(TYPES.BootstrapJourneyAuthMiddleware)
+        .toConstantValue((_1: Request, _2: Response, next: NextFunction) => next());
 };
 
 export const createApp = (configureBindings?: (container: Container) => void): Application => {

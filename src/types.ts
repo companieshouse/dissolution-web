@@ -25,6 +25,7 @@ const TYPES = {
     AuthConfig: "AuthConfig",
     CompanyNumberAuthMiddleware: "CompanyNumberAuthMiddleware",
     TransactionMiddleware: "TransactionMiddleware",
+    BootstrapJourneyAuthMiddleware: "BootstrapJourneyAuthMiddleware",
 };
 
 export default TYPES;
