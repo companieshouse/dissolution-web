@@ -22,6 +22,7 @@ import { DefineSignatoryInfoFormModel } from "app/models/form/defineSignatoryInf
 import TYPES from "app/types";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
+import { hasCompanyNumberAndTransactionIdInRequest } from "app/utils/transaction.util";
 
 interface ViewModel {
     officerType: OfficerType;
@@ -93,7 +94,13 @@ export class ChangeDetailsController extends JourneyBaseController {
             return this.redirect(this.journeyPath(CHECK_YOUR_ANSWERS_URI));
         } else {
             const token: string = this.session.getAccessToken(this.httpContext.request);
-            await this.directorService.updateSignatory(token, session, form);
+
+            if (hasCompanyNumberAndTransactionIdInRequest(this.httpContext.request)) {
+                await this.directorService.updateSignatoryDetails(this.httpContext.request, signatory.officer_id, form);
+            } else {
+                await this.directorService.updateSignatory(token, session, form);
+            }
+
             this.cleanUpSession(session);
             this.session.setDissolutionSession(this.httpContext.request, session);
             return this.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI));

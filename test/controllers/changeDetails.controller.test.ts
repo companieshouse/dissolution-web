@@ -393,6 +393,7 @@ describe("ChangeDetailsController", () => {
                     deepEqual({ ...updatedDetails, onBehalfEmail: undefined })
                 )
             ).once();
+            verify(directorService.updateSignatoryDetails(anything(), anything(), anything())).never();
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY);
             assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI);
         });
@@ -424,6 +425,7 @@ describe("ChangeDetailsController", () => {
                     deepEqual({ ...updatedDetails, directorEmail: undefined })
                 )
             ).once();
+            verify(directorService.updateSignatoryDetails(anything(), anything(), anything())).never();
             assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY);
             assert.equal(res.header.location, WAIT_FOR_OTHERS_TO_SIGN_URI);
         });
@@ -613,6 +615,133 @@ describe("ChangeDetailsController", () => {
             );
             const altErrorText = htmlAssertHelper.getAttributeValue(".govuk-error-summary__list li a", "data-alt-text");
             assert.equal(altErrorText, "invalid-email");
+        });
+
+        describe("Updating the signatory details for a transaction model dissolution", () => {
+            const TRANSACTION_ID = "123456-123456-123456";
+
+            it("should update the signatory details and redirect to wait for others to sign", async () => {
+                const signatoryToEdit = aDissolutionGetDirector()
+                    .withOfficerId(SIGNATORY_ID)
+                    .withName("Mr Standard Director")
+                    .withOnBehalfName(null)
+                    .build();
+                const dissolutionSession = aDissolutionSession()
+                    .withSignatoryIdToEdit(SIGNATORY_ID)
+                    .withSignatoryToEdit(signatoryToEdit)
+                    .build();
+                const updatedDetails: ChangeDetailsFormModel = aChangeDetailsFormModel()
+                    .withDirectorEmail("updated.email@mail.com")
+                    .build();
+
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+
+                await request(initApp())
+                    .post(buildTestUrl(CHANGE_DETAILS_URI, { transactionId: TRANSACTION_ID }))
+                    .send(updatedDetails)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
+
+                verify(
+                    directorService.updateSignatoryDetails(
+                        anything(),
+                        SIGNATORY_ID,
+                        deepEqual({ ...updatedDetails, onBehalfEmail: undefined })
+                    )
+                ).once();
+                verify(directorService.updateSignatory(anything(), anything(), anything())).never();
+            });
+
+            it("should normalize the email before updating the signatory details", async () => {
+                const signatoryToEdit = aDissolutionGetDirector()
+                    .withOfficerId(SIGNATORY_ID)
+                    .withOnBehalfName(null)
+                    .build();
+                const dissolutionSession = aDissolutionSession()
+                    .withSignatoryIdToEdit(SIGNATORY_ID)
+                    .withSignatoryToEdit(signatoryToEdit)
+                    .build();
+                const formDetails = aChangeDetailsFormModel().withDirectorEmail("  Updated.Email@MAIL.COM  ").build();
+
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+
+                await request(initApp())
+                    .post(buildTestUrl(CHANGE_DETAILS_URI, { transactionId: TRANSACTION_ID }))
+                    .send(formDetails)
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
+
+                const [, officerId, actualForm] = capture(directorService.updateSignatoryDetails).last();
+                assert.equal(officerId, SIGNATORY_ID);
+                assert.equal(actualForm.directorEmail, "updated.email@mail.com");
+            });
+
+            it("should clean up the session after updating the signatory details", async () => {
+                const signatoryToEdit = aDissolutionGetDirector()
+                    .withOfficerId(SIGNATORY_ID)
+                    .withOnBehalfName(null)
+                    .build();
+                const dissolutionSession = aDissolutionSession()
+                    .withSignatoryIdToEdit(SIGNATORY_ID)
+                    .withSignatoryToEdit(signatoryToEdit)
+                    .withIsFromCheckAnswers(false)
+                    .build();
+
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+
+                await request(initApp())
+                    .post(buildTestUrl(CHANGE_DETAILS_URI, { transactionId: TRANSACTION_ID }))
+                    .send(aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build())
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
+
+                verify(session.setDissolutionSession(anything(), dissolutionSession)).once();
+                assert.isUndefined(dissolutionSession.signatoryToEdit);
+                assert.isUndefined(dissolutionSession.isFromCheckAnswers);
+            });
+
+            it("should return an error and not clean up the session if updating the signatory details fails", async () => {
+                const signatoryToEdit = aDissolutionGetDirector()
+                    .withOfficerId(SIGNATORY_ID)
+                    .withOnBehalfName(null)
+                    .build();
+                const dissolutionSession = aDissolutionSession()
+                    .withSignatoryIdToEdit(SIGNATORY_ID)
+                    .withSignatoryToEdit(signatoryToEdit)
+                    .build();
+
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(directorService.updateSignatoryDetails(anything(), SIGNATORY_ID, anything())).thenReject(
+                    new Error("Failed to update signatory details")
+                );
+
+                await request(initApp())
+                    .post(buildTestUrl(CHANGE_DETAILS_URI, { transactionId: TRANSACTION_ID }))
+                    .send(aChangeDetailsFormModel().withDirectorEmail("updated.email@mail.com").build())
+                    .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                verify(directorService.updateSignatoryDetails(anything(), SIGNATORY_ID, anything())).once();
+                verify(session.setDissolutionSession(anything(), anything())).never();
+                assert.isDefined(dissolutionSession.signatoryToEdit);
+            });
+
+            it("should not call the service if validation fails", async () => {
+                const signatoryToEdit = aDissolutionGetDirector()
+                    .withOfficerId(SIGNATORY_ID)
+                    .withOnBehalfName(null)
+                    .build();
+                const dissolutionSession = aDissolutionSession()
+                    .withSignatoryIdToEdit(SIGNATORY_ID)
+                    .withSignatoryToEdit(signatoryToEdit)
+                    .build();
+
+                when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+
+                await request(initApp())
+                    .post(buildTestUrl(CHANGE_DETAILS_URI, { transactionId: TRANSACTION_ID }))
+                    .send(aChangeDetailsFormModel().withDirectorEmail("an invalid email").build())
+                    .expect(StatusCodes.BAD_REQUEST);
+
+                verify(directorService.updateSignatoryDetails(anything(), anything(), anything())).never();
+            });
         });
     });
 });
