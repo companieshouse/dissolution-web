@@ -106,9 +106,7 @@ export default class DissolutionService {
         return this.certificateService.generateDissolutionCertificateUrl(confirmation);
     }
 
-    public async createDraftDissolution(req: Request): Promise<string> {
-        const token: string = this.session.getAccessToken(req);
-        const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+    public async createDraftDissolution(token: string, companyNumber: string, transactionId: string): Promise<string> {
         const response: DissolutionCreateDraftResponse = await this.client.createDraftDissolution(
             token,
             companyNumber,
@@ -126,15 +124,11 @@ export default class DissolutionService {
         await this.client.initiateDissolution(token, companyNumber, transactionId, body);
     }
 
-    public async approveDissolutionForTransaction(
-        req: Request,
-        dissolution: DissolutionSession,
-        ipAddress: string
-    ): Promise<void> {
+    public async approveDissolutionForTransaction(req: Request, officerId: string, ipAddress: string): Promise<void> {
         const token: string = this.session.getAccessToken(req);
         const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
         const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(
-            dissolution.approval!.officerId,
+            officerId,
             ipAddress
         );
 

@@ -4,14 +4,14 @@ import { ROUTE_PARAM_COMPANY_NUMBER, ROUTE_PARAM_TRANSACTION_ID } from "app/cons
 export const getTransactionIdFromRequestParams = (req: Request): string => req.params[ROUTE_PARAM_TRANSACTION_ID];
 export const getCompanyNumberFromRequestParams = (req: Request): string => req.params[ROUTE_PARAM_COMPANY_NUMBER];
 
-export const companyNumberAndTransactionIdExistInRequest = (req: Request): boolean => {
+export const hasCompanyNumberAndTransactionIdInRequest = (req: Request): boolean => {
     return getTransactionIdFromRequestParams(req) !== undefined && getCompanyNumberFromRequestParams(req) !== undefined;
 };
 
 export const getCompanyNumberAndTransactionIdFromRequest = (
     req: Request
 ): { companyNumber: string; transactionId: string } => {
-    if (!companyNumberAndTransactionIdExistInRequest(req)) {
+    if (!hasCompanyNumberAndTransactionIdInRequest(req)) {
         throw new Error("Company number and transaction ID are required");
     }
 

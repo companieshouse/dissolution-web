@@ -53,13 +53,10 @@ export default class DissolutionDirectorService {
         return this.client.patchDissolutionDirector(token, session.companyNumber!, session.signatoryIdToEdit!, request);
     }
 
-    public async updateSignatoryDetails(
-        req: Request,
-        officerId: string,
-        body: DissolutionDirectorPatchRequest
-    ): Promise<void> {
+    public async updateSignatoryDetails(req: Request, officerId: string, form: ChangeDetailsFormModel): Promise<void> {
         const token: string = this.session.getAccessToken(req);
         const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+        const body: DissolutionDirectorPatchRequest = this.mapper.mapToDissolutionDirectorPatchRequest(form);
 
         await this.client.updateSignatoryDetails(token, companyNumber, transactionId, officerId, body);
     }

@@ -1,7 +1,12 @@
 import { assert } from "chai";
 import { anything, instance, mock, verify, when } from "ts-mockito";
-import { generatePaymentSummary } from "../../fixtures/payment.fixtures";
-import { EMAIL, TOKEN } from "../../fixtures/session.fixtures";
+import { generatePaymentSummary } from "test/fixtures/payment.fixtures";
+import {
+    EMAIL,
+    generateDissolutionConfirmation,
+    generateDissolutionSession,
+    TOKEN,
+} from "test/fixtures/session.fixtures";
 
 import DissolutionRequestMapper from "app/mappers/dissolution/dissolutionRequest.mapper";
 import PaymentMapper from "app/mappers/payment/payment.mapper";
@@ -31,7 +36,6 @@ import {
     generateDissolutionPatchRequest,
     generateDissolutionPaymentPatchRequest,
 } from "test/fixtures/dissolutionApi.fixtures";
-import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures";
 import { aDissolutionGetResponse } from "test/fixtures/dissolutionGetResponse.builder";
 import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.builder";
 import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
@@ -281,23 +285,21 @@ describe("DissolutionService", () => {
             });
 
             it("should call dissolution api client and return dissolution id", async () => {
-                const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
                 when(client.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).thenResolve(
                     dissolutionCreateDraftResponse
                 );
-                const res = await dissolutionService.createDraftDissolution(req);
+                const res = await dissolutionService.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID);
 
                 assert.equal(res, DISSOLUTION_ID);
             });
 
             it("should propagate errors from the api client", async () => {
-                const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
                 when(client.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).thenReject(
                     new Error("api failure")
                 );
 
                 try {
-                    await dissolutionService.createDraftDissolution(req);
+                    await dissolutionService.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID);
                     assert.fail();
                 } catch (e: any) {
                     assert.equal(e.message, "api failure");
@@ -306,8 +308,9 @@ describe("DissolutionService", () => {
         });
 
         describe("initiateDissolution", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+
             it("should call dissolution api client and initiate dissolution", async () => {
-                const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
                 when(dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)).thenReturn(MAPPED_BODY);
                 when(client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, MAPPED_BODY)).thenResolve();
 
@@ -317,7 +320,6 @@ describe("DissolutionService", () => {
             });
 
             it("should propagate errors from the api client", async () => {
-                const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
                 when(dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)).thenReturn(MAPPED_BODY);
                 when(client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, MAPPED_BODY)).thenReject(
                     new Error("api failure")
@@ -334,23 +336,24 @@ describe("DissolutionService", () => {
 
         describe("approveDissolutionForTransaction", () => {
             const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+            const OFFICER_ID = "abc123";
+            const IP_ADDRESS = "127.0.0.1";
+
             it("should map the approval and call the api client to patch the dissolution approval", async () => {
-                const officerId = "abc123";
-                const ipAddress = "127.0.0.1";
-                dissolutionSession.approval = { ...generateApprovalModel(), officerId };
+                dissolutionSession.approval = { ...generateApprovalModel(), officerId: OFFICER_ID };
 
                 const body: DissolutionPatchRequest = generateDissolutionPatchRequest();
 
-                when(dissolutionRequestMapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body);
+                when(dissolutionRequestMapper.mapToDissolutionPatchRequest(OFFICER_ID, IP_ADDRESS)).thenReturn(body);
                 when(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).thenResolve();
 
-                await dissolutionService.approveDissolutionForTransaction(req, dissolutionSession, ipAddress);
+                await dissolutionService.approveDissolutionForTransaction(req, OFFICER_ID, IP_ADDRESS);
 
                 verify(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).once();
             });
 
             it("should propagate errors from the api client", async () => {
-                dissolutionSession.approval = { ...generateApprovalModel(), officerId: "abc123" };
+                dissolutionSession.approval = { ...generateApprovalModel(), officerId: OFFICER_ID };
                 const body: DissolutionPatchRequest = generateDissolutionPatchRequest();
 
                 when(dissolutionRequestMapper.mapToDissolutionPatchRequest(anything(), anything())).thenReturn(body);
@@ -359,7 +362,7 @@ describe("DissolutionService", () => {
                 );
 
                 try {
-                    await dissolutionService.approveDissolutionForTransaction(req, dissolutionSession, "127.0.0.1");
+                    await dissolutionService.approveDissolutionForTransaction(req, OFFICER_ID, IP_ADDRESS);
                     assert.fail();
                 } catch (e: any) {
                     assert.equal(e.message, "api failure");

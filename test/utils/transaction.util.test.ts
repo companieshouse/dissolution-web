@@ -2,7 +2,7 @@ import { assert } from "chai";
 
 import { ROUTE_PARAM_COMPANY_NUMBER, ROUTE_PARAM_TRANSACTION_ID } from "app/constants/app.const";
 import {
-    companyNumberAndTransactionIdExistInRequest,
+    hasCompanyNumberAndTransactionIdInRequest,
     getCompanyNumberAndTransactionIdFromRequest,
     getCompanyNumberFromRequestParams,
     getTransactionIdFromRequestParams,
@@ -52,7 +52,7 @@ describe("transaction.util", () => {
     describe("companyNumberAndTransactionIdExistInRequest", () => {
         it("should return true when both params are present", () => {
             assert.isTrue(
-                companyNumberAndTransactionIdExistInRequest(
+                hasCompanyNumberAndTransactionIdInRequest(
                     aRequestWith({
                         [ROUTE_PARAM_COMPANY_NUMBER]: COMPANY_NUMBER,
                         [ROUTE_PARAM_TRANSACTION_ID]: TRANSACTION_ID,
@@ -63,16 +63,16 @@ describe("transaction.util", () => {
 
         it("should return false when only the company number is present", () => {
             const req = aRequestWith({ [ROUTE_PARAM_COMPANY_NUMBER]: COMPANY_NUMBER });
-            assert.isFalse(companyNumberAndTransactionIdExistInRequest(req));
+            assert.isFalse(hasCompanyNumberAndTransactionIdInRequest(req));
         });
 
         it("should return false when only the transaction id is present", () => {
             const req = aRequestWith({ [ROUTE_PARAM_TRANSACTION_ID]: TRANSACTION_ID });
-            assert.isFalse(companyNumberAndTransactionIdExistInRequest(req));
+            assert.isFalse(hasCompanyNumberAndTransactionIdInRequest(req));
         });
 
         it("should return false when neither param is present", () => {
-            assert.isFalse(companyNumberAndTransactionIdExistInRequest(aRequestWith({})));
+            assert.isFalse(hasCompanyNumberAndTransactionIdInRequest(aRequestWith({})));
         });
     });
 

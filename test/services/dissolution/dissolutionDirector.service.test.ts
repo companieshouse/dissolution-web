@@ -119,21 +119,27 @@ describe("DissolutionDirectorService", () => {
         });
 
         it("should send the signatory details to the API for the transaction", async () => {
+            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
             const body: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
 
-            await service.updateSignatoryDetails(req, OFFICER_ID, body);
+            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(body);
+
+            await service.updateSignatoryDetails(req, OFFICER_ID, form);
 
             verify(client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID, body)).once();
         });
 
         it("should propagate errors from the api client", async () => {
+            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
             const body: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
+
+            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(body);
             when(client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID, body)).thenReject(
                 new Error("api failure")
             );
 
             try {
-                await service.updateSignatoryDetails(req, OFFICER_ID, body);
+                await service.updateSignatoryDetails(req, OFFICER_ID, form);
                 assert.fail();
             } catch (e: any) {
                 assert.equal(e.message, "api failure");
