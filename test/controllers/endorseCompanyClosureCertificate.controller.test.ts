@@ -341,7 +341,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true;
             configureApprovalModel({ isCorporateOfficer: true });
 
-            when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve();
+            when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve();
             // Dynamic validation schema
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
@@ -362,7 +362,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false;
             configureApprovalModel({ isCorporateOfficer: false });
 
-            when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve();
+            when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve();
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
@@ -383,7 +383,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false;
             configureApprovalModel({ isCorporateOfficer: false });
 
-            when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve();
+            when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve();
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
@@ -399,7 +399,6 @@ describe("EndorseCompanyClosureCertificateController", () => {
 
     describe("POST - approve dissolution", () => {
         const TRANSACTION_ID = "123456-123456-123456";
-        const OFFICER_ID = "abc123";
         let formBody: EndorseCertificateFormModel;
 
         beforeEach(() => {
@@ -409,78 +408,52 @@ describe("EndorseCompanyClosureCertificateController", () => {
             when(mockedFormValidator.validate(deepEqual(formBody), anything())).thenReturn(null);
         });
 
-        describe("when there is no transaction id in the url", () => {
-            it("should approve the dissolution using the legacy flow", async () => {
-                await request(initApp())
-                    .post(buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI))
-                    .send(formBody)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
-                    .expect("Location", REDIRECT_GATE_URI);
+        const testParams = [
+            { testDesc: "without a transaction", uri: buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI) },
+            {
+                testDesc: "with a transaction",
+                uri: buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, { transactionId: TRANSACTION_ID }),
+            },
+        ];
 
-                verify(mockedDissolutionService.approveDissolution(TOKEN, dissolutionSession, IP_ADDRESS)).once();
-                verify(
-                    mockedDissolutionService.approveDissolutionForTransaction(anything(), anything(), anything())
-                ).never();
-            });
-        });
+        testParams.forEach(({ testDesc, uri }) =>
+            describe(`approving a dissolution ${testDesc}`, () => {
+                it("should approve the dissolution and redirect to the redirect gate", async () => {
+                    await request(initApp())
+                        .post(uri)
+                        .send(formBody)
+                        .expect(StatusCodes.MOVED_TEMPORARILY)
+                        .expect("Location", REDIRECT_GATE_URI);
 
-        describe("when there is a transaction id in the url", () => {
-            const URI = buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, { transactionId: TRANSACTION_ID });
+                    verify(
+                        mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
+                    ).once();
+                });
 
-            it("should approve the dissolution via the transaction flow and redirect to the redirect gate", async () => {
-                await request(initApp())
-                    .post(URI)
-                    .send(formBody)
-                    .expect(StatusCodes.MOVED_TEMPORARILY)
-                    .expect("Location", REDIRECT_GATE_URI);
+                it("should not approve and should re-render with errors if validation fails", async () => {
+                    const invalidBody: EndorseCertificateFormModel = { confirmation: "understood" };
+                    const mockError = generateValidationError("declaration", DECLARATION_ERROR);
 
-                verify(
-                    mockedDissolutionService.approveDissolutionForTransaction(anything(), OFFICER_ID, IP_ADDRESS)
-                ).once();
-                verify(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).never();
-            });
+                    when(mockedFormValidator.validate(deepEqual(invalidBody), anything())).thenReturn(mockError);
 
-            it("should approve using the officer id from the approval model in session", async () => {
-                configureApprovalModel({ officerId: "another-officer-id" });
+                    const res = await request(initApp()).post(uri).send(invalidBody).expect(StatusCodes.BAD_REQUEST);
 
-                await request(initApp()).post(URI).send(formBody).expect(StatusCodes.MOVED_TEMPORARILY);
+                    assert.isTrue(res.text.includes(DECLARATION_ERROR));
+                    verify(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).never();
+                });
 
-                verify(
-                    mockedDissolutionService.approveDissolutionForTransaction(
-                        anything(),
-                        "another-officer-id",
-                        IP_ADDRESS
-                    )
-                ).once();
-            });
+                it("should return an error and not redirect if approving the dissolution fails", async () => {
+                    when(
+                        mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
+                    ).thenReject(new Error("Failed to approve dissolution"));
 
-            it("should not approve and should re-render with errors if validation fails", async () => {
-                const invalidBody: EndorseCertificateFormModel = { confirmation: "understood" };
-                const mockError = generateValidationError("declaration", DECLARATION_ERROR);
+                    await request(initApp()).post(uri).send(formBody).expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
-                when(mockedFormValidator.validate(deepEqual(invalidBody), anything())).thenReturn(mockError);
-
-                const res = await request(initApp()).post(URI).send(invalidBody).expect(StatusCodes.BAD_REQUEST);
-
-                assert.isTrue(res.text.includes(DECLARATION_ERROR));
-                verify(
-                    mockedDissolutionService.approveDissolutionForTransaction(anything(), anything(), anything())
-                ).never();
-                verify(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).never();
-            });
-
-            it("should return an error and not redirect if approving the dissolution fails", async () => {
-                when(
-                    mockedDissolutionService.approveDissolutionForTransaction(anything(), OFFICER_ID, IP_ADDRESS)
-                ).thenReject(new Error("Failed to approve dissolution"));
-
-                await request(initApp()).post(URI).send(formBody).expect(StatusCodes.INTERNAL_SERVER_ERROR);
-
-                verify(
-                    mockedDissolutionService.approveDissolutionForTransaction(anything(), OFFICER_ID, IP_ADDRESS)
-                ).once();
-                verify(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).never();
-            });
-        });
+                    verify(
+                        mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
+                    ).once();
+                });
+            })
+        );
     });
 });

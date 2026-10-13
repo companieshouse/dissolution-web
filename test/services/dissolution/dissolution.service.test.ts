@@ -178,18 +178,79 @@ describe("DissolutionService", () => {
     });
 
     describe("approveDissolution", () => {
-        it("should call dissolution api client to approve the dissolution for the provided email", async () => {
-            const officerId: string = "abc123";
-            const ipAddress: string = "127.0.0.1";
-            dissolutionSession.approval = { ...generateApprovalModel(), officerId };
+        const OFFICER_ID = "abc123";
+        const IP_ADDRESS = "127.0.0.1";
+        const COMPANY_NUMBER = "12345678";
+        const TRANSACTION_ID = "111111-222222-333333";
 
-            const body: DissolutionPatchRequest = generateDissolutionPatchRequest();
+        let body: DissolutionPatchRequest;
 
-            when(dissolutionRequestMapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body);
+        beforeEach(() => {
+            dissolutionSession.companyNumber = COMPANY_NUMBER;
+            dissolutionSession.approval = { ...generateApprovalModel(), officerId: OFFICER_ID };
+            body = generateDissolutionPatchRequest();
 
-            await dissolutionService.approveDissolution(TOKEN, dissolutionSession, ipAddress);
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(dissolutionRequestMapper.mapToDissolutionPatchRequest(OFFICER_ID, IP_ADDRESS)).thenReturn(body);
+        });
 
-            verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once();
+        describe("for a dissolution without a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER } } as any;
+
+            it("should map the approval and call the api client to approve the dissolution", async () => {
+                await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+
+                verify(client.patchDissolution(TOKEN, COMPANY_NUMBER, body)).once();
+                verify(client.patchDissolutionApproval(anything(), anything(), anything(), anything())).never();
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(client.patchDissolution(TOKEN, COMPANY_NUMBER, body)).thenReject(new Error("api failure"));
+
+                try {
+                    await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
+        });
+
+        describe("for a dissolution with a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+
+            it("should map the approval and call the api client to patch the dissolution approval", async () => {
+                await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+
+                verify(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).once();
+                verify(client.patchDissolution(anything(), anything(), anything())).never();
+            });
+
+            it("should use the officer id from the approval model in session", async () => {
+                const otherOfficerId = "another-officer-id";
+                dissolutionSession.approval = { ...generateApprovalModel(), officerId: otherOfficerId };
+                const otherBody = generateDissolutionPatchRequest();
+                when(dissolutionRequestMapper.mapToDissolutionPatchRequest(otherOfficerId, IP_ADDRESS)).thenReturn(
+                    otherBody
+                );
+
+                await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+
+                verify(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, otherBody)).once();
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).thenReject(
+                    new Error("api failure")
+                );
+
+                try {
+                    await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
         });
     });
 
@@ -327,42 +388,6 @@ describe("DissolutionService", () => {
 
                 try {
                     await dissolutionService.initiateDissolution(req, dissolutionSession);
-                    assert.fail();
-                } catch (e: any) {
-                    assert.equal(e.message, "api failure");
-                }
-            });
-        });
-
-        describe("approveDissolutionForTransaction", () => {
-            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
-            const OFFICER_ID = "abc123";
-            const IP_ADDRESS = "127.0.0.1";
-
-            it("should map the approval and call the api client to patch the dissolution approval", async () => {
-                dissolutionSession.approval = { ...generateApprovalModel(), officerId: OFFICER_ID };
-
-                const body: DissolutionPatchRequest = generateDissolutionPatchRequest();
-
-                when(dissolutionRequestMapper.mapToDissolutionPatchRequest(OFFICER_ID, IP_ADDRESS)).thenReturn(body);
-                when(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).thenResolve();
-
-                await dissolutionService.approveDissolutionForTransaction(req, OFFICER_ID, IP_ADDRESS);
-
-                verify(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).once();
-            });
-
-            it("should propagate errors from the api client", async () => {
-                dissolutionSession.approval = { ...generateApprovalModel(), officerId: OFFICER_ID };
-                const body: DissolutionPatchRequest = generateDissolutionPatchRequest();
-
-                when(dissolutionRequestMapper.mapToDissolutionPatchRequest(anything(), anything())).thenReturn(body);
-                when(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).thenReject(
-                    new Error("api failure")
-                );
-
-                try {
-                    await dissolutionService.approveDissolutionForTransaction(req, OFFICER_ID, IP_ADDRESS);
                     assert.fail();
                 } catch (e: any) {
                     assert.equal(e.message, "api failure");

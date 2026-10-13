@@ -21,7 +21,10 @@ import { DissolutionApiClient } from "app/services/clients/dissolutionApi.client
 import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
 import { Request } from "express";
 import SessionService from "app/services/session/session.service";
-import { getCompanyNumberAndTransactionIdFromRequest } from "app/utils/transaction.util";
+import {
+    getCompanyNumberAndTransactionIdFromRequest,
+    hasCompanyNumberAndTransactionIdInRequest,
+} from "app/utils/transaction.util";
 
 @provide(DissolutionService)
 export default class DissolutionService {
@@ -92,14 +95,18 @@ export default class DissolutionService {
         return await this.client.patchDissolutionPaymentData(applicationReference, dissolutionPaymentPatchRequest);
     }
 
-    public async approveDissolution(token: string, dissolution: DissolutionSession, ipAddress: string): Promise<void> {
+    public async approveDissolution(req: Request, dissolution: DissolutionSession, ipAddress: string): Promise<void> {
+        const token: string = this.session.getAccessToken(req);
         const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(
             dissolution.approval!.officerId,
             ipAddress
         );
-        const companyNumber: string = dissolution.companyNumber!;
 
-        await this.client.patchDissolution(token, companyNumber, body);
+        if (hasCompanyNumberAndTransactionIdInRequest(req)) {
+            const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+            return this.client.patchDissolutionApproval(token, companyNumber, transactionId, body);
+        }
+        await this.client.patchDissolution(token, dissolution.companyNumber!, body);
     }
 
     public async generateDissolutionCertificateUrl(confirmation: DissolutionConfirmation): Promise<string> {
@@ -122,17 +129,6 @@ export default class DissolutionService {
             this.dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession);
 
         await this.client.initiateDissolution(token, companyNumber, transactionId, body);
-    }
-
-    public async approveDissolutionForTransaction(req: Request, officerId: string, ipAddress: string): Promise<void> {
-        const token: string = this.session.getAccessToken(req);
-        const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
-        const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(
-            officerId,
-            ipAddress
-        );
-
-        await this.client.patchDissolutionApproval(token, companyNumber, transactionId, body);
     }
 
     public async resendSignatoryNotification(req: Request, officerId: string): Promise<boolean> {

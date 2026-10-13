@@ -17,7 +17,6 @@ import FormValidator from "app/utils/formValidator.util";
 import TYPES from "app/types";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
-import { hasCompanyNumberAndTransactionIdInRequest } from "app/utils/transaction.util";
 
 interface ViewModel {
     approvalModel: DissolutionApprovalModel;
@@ -64,20 +63,10 @@ export class EndorseCompanyClosureCertificateController extends JourneyBaseContr
     }
 
     private async approveDissolution(): Promise<void> {
-        const token: string = this.session.getAccessToken(this.httpContext.request);
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!;
         const ipAddress: string = this.ipAddressService.getIpAddress(this.httpContext.request);
 
-        // todo: check feature flag?
-        if (hasCompanyNumberAndTransactionIdInRequest(this.httpContext.request)) {
-            await this.dissolutionService.approveDissolutionForTransaction(
-                this.httpContext.request,
-                dissolutionSession.approval!.officerId,
-                ipAddress
-            );
-        } else {
-            await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress);
-        }
+        await this.dissolutionService.approveDissolution(this.httpContext.request, dissolutionSession, ipAddress);
     }
 
     private getBackUri(companyNumber: string): string {
