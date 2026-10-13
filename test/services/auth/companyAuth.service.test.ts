@@ -2,22 +2,20 @@ import "reflect-metadata";
 import { assert } from "chai";
 import sinon from "sinon";
 import CompanyAuthService from "app/services/auth/companyAuth.service";
-import JwtEncryptionService from "app/services/encryption/jwtEncryption.service";
+import UriFactory from "app/utils/uri.factory";
+import { BOOTSTRAP_JOURNEY_URI } from "app/paths";
 import SessionService from "app/services/session/session.service";
 import AuthConfig from "app/models/authConfig";
 import { Request } from "express";
 
 describe("CompanyAuthService", () => {
-    let encryptionService: any;
     let sessionService: any;
     let authConfig: AuthConfig;
     let service: CompanyAuthService;
+    let createAbsoluteUriStub: sinon.SinonStub;
 
     beforeEach(() => {
-        encryptionService = {
-            generateNonce: sinon.stub().returns("nonce-123"),
-            jweEncodeWithNonce: sinon.stub().resolves("encoded-state"),
-        };
+        createAbsoluteUriStub = sinon.stub().returns("http://dissolution.test/return");
 
         sessionService = {
             getSignInInfo: sinon.stub(),
@@ -32,9 +30,9 @@ describe("CompanyAuthService", () => {
         };
 
         service = new CompanyAuthService(
-            authConfig as any,
-            encryptionService as JwtEncryptionService,
-            sessionService as SessionService
+            authConfig,
+            sessionService as SessionService,
+            { createAbsoluteUri: createAbsoluteUriStub } as UriFactory
         );
     });
 
@@ -62,19 +60,30 @@ describe("CompanyAuthService", () => {
         });
     });
 
-    describe("issueAuthRedirectUri", () => {
-        it("composes the auth url and stores nonce in session", async () => {
+    describe("configureAuthRedirect", () => {
+        it("returns auth options with chs url, absolute bootstrap return url and company number", () => {
             const req = {} as Request;
-            const companyNumber = "12345678";
 
-            const url = await service.issueAuthRedirectUri(req, companyNumber);
+            const result = service.configureAuthRedirect(req, "12345678");
 
-            assert.include(url, "http://account.chs-dev/oauth2/authorise?");
-            assert.include(url, "client_id=client-id");
-            assert.include(url, "response_type=code");
-            assert.include(url, encodeURIComponent(`https://api.companieshouse.gov.uk/company/${companyNumber}`));
-            sinon.assert.calledOnce(sessionService.setCompanyAuthNonce);
-            sinon.assert.calledWith(sessionService.setCompanyAuthNonce, req, "nonce-123");
+            assert.deepEqual(result, {
+                chsWebUrl: "http://chs-dev",
+                returnUrl: "http://dissolution.test/return",
+                companyNumber: "12345678",
+            });
+            sinon.assert.calledOnceWithExactly(
+                createAbsoluteUriStub,
+                req,
+                `${BOOTSTRAP_JOURNEY_URI}?companyNumber=12345678`
+            );
+        });
+
+        it("URI-encodes the company number in the return url", () => {
+            const req = {} as Request;
+
+            service.configureAuthRedirect(req, "NI 12/34");
+
+            sinon.assert.calledWith(createAbsoluteUriStub, req, `${BOOTSTRAP_JOURNEY_URI}?companyNumber=NI%2012%2F34`);
         });
     });
 });
