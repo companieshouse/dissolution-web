@@ -86,64 +86,73 @@ describe("DissolutionDirectorService", () => {
 
     describe("updateSignatory", () => {
         const COMPANY_NUMBER = "0177777";
+        const TRANSACTION_ID = "111111-222222-333333";
         const SIGNATORY_ID = "abc123";
 
         let dissolutionSession: DissolutionSession;
+        let form: ChangeDetailsFormModel;
+        let body: DissolutionDirectorPatchRequest;
 
         beforeEach(() => {
             dissolutionSession = generateDissolutionSession();
             dissolutionSession.companyNumber = COMPANY_NUMBER;
             dissolutionSession.signatoryIdToEdit = SIGNATORY_ID;
-        });
 
-        it("should map the form data to a director patch request and send it to the API", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
-            const request: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
+            form = generateWillSignChangeDetailsFormModel();
+            body = generateDissolutionDirectorPatchRequest();
 
-            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(request);
-
-            await service.updateSignatory(TOKEN, dissolutionSession, form);
-
-            verify(client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, SIGNATORY_ID, request)).once();
-        });
-    });
-
-    describe("updateSignatoryDetails", () => {
-        const COMPANY_NUMBER = "0177777";
-        const TRANSACTION_ID = "111111-222222-333333";
-        const OFFICER_ID = "abc123";
-        const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
-
-        beforeEach(() => {
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(body);
         });
 
-        it("should send the signatory details to the API for the transaction", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
-            const body: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
+        describe("for a dissolution without a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER } } as any;
 
-            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(body);
+            it("should map the form data to a director patch request and send it to the API", async () => {
+                await service.updateSignatory(req, dissolutionSession, form);
 
-            await service.updateSignatoryDetails(req, OFFICER_ID, form);
+                verify(client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, SIGNATORY_ID, body)).once();
+                verify(
+                    client.updateSignatoryDetails(anything(), anything(), anything(), anything(), anything())
+                ).never();
+            });
 
-            verify(client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID, body)).once();
+            it("should propagate errors from the api client", async () => {
+                when(client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, SIGNATORY_ID, body)).thenReject(
+                    new Error("api failure")
+                );
+
+                try {
+                    await service.updateSignatory(req, dissolutionSession, form);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
         });
 
-        it("should propagate errors from the api client", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
-            const body: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
+        describe("for a dissolution with a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
 
-            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(body);
-            when(client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID, body)).thenReject(
-                new Error("api failure")
-            );
+            it("should map the form data and send the signatory details to the API for the transaction", async () => {
+                await service.updateSignatory(req, dissolutionSession, form);
 
-            try {
-                await service.updateSignatoryDetails(req, OFFICER_ID, form);
-                assert.fail();
-            } catch (e: any) {
-                assert.equal(e.message, "api failure");
-            }
+                verify(client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, SIGNATORY_ID, body)).once();
+                verify(client.patchDissolutionDirector(anything(), anything(), anything(), anything())).never();
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(
+                    client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, SIGNATORY_ID, body)
+                ).thenReject(new Error("api failure"));
+
+                try {
+                    await service.updateSignatory(req, dissolutionSession, form);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
         });
     });
 });

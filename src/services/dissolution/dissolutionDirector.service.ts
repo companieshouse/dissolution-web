@@ -13,7 +13,10 @@ import ChangeDetailsFormModel from "app/models/form/changeDetails.model";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import { Request } from "express";
-import { getCompanyNumberAndTransactionIdFromRequest } from "app/utils/transaction.util";
+import {
+    getCompanyNumberAndTransactionIdFromRequest,
+    hasCompanyNumberAndTransactionIdInRequest,
+} from "app/utils/transaction.util";
 import SessionService from "app/services/session/session.service";
 
 @provide(DissolutionDirectorService)
@@ -45,19 +48,19 @@ export default class DissolutionDirectorService {
     }
 
     public async updateSignatory(
-        token: string,
+        req: Request,
         session: DissolutionSession,
         form: ChangeDetailsFormModel
     ): Promise<void> {
-        const request: DissolutionDirectorPatchRequest = this.mapper.mapToDissolutionDirectorPatchRequest(form);
-        return this.client.patchDissolutionDirector(token, session.companyNumber!, session.signatoryIdToEdit!, request);
-    }
-
-    public async updateSignatoryDetails(req: Request, officerId: string, form: ChangeDetailsFormModel): Promise<void> {
         const token: string = this.session.getAccessToken(req);
-        const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+        const officerId: string = session.signatoryIdToEdit!;
         const body: DissolutionDirectorPatchRequest = this.mapper.mapToDissolutionDirectorPatchRequest(form);
 
-        await this.client.updateSignatoryDetails(token, companyNumber, transactionId, officerId, body);
+        if (hasCompanyNumberAndTransactionIdInRequest(req)) {
+            const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+            return this.client.updateSignatoryDetails(token, companyNumber, transactionId, officerId, body);
+        }
+
+        return this.client.patchDissolutionDirector(token, session.companyNumber!, officerId, body);
     }
 }
