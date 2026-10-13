@@ -10,6 +10,7 @@ import SessionService from "app/services/session/session.service";
 import TYPES from "app/types";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import { hasCompanyNumberAndTransactionIdInRequest } from "app/utils/transaction.util";
 
 interface ViewModel {
     backUri: string;
@@ -52,7 +53,12 @@ export class CheckYourAnswersController extends JourneyBaseController {
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!;
         delete dissolutionSession.isFromCheckAnswers;
         this.session.setDissolutionSession(this.httpContext.request, dissolutionSession);
-        await this.dissolutionService.createDissolution(token, dissolutionSession);
+
+        if (hasCompanyNumberAndTransactionIdInRequest(this.httpContext.request)) {
+            await this.dissolutionService.initiateDissolution(this.httpContext.request, dissolutionSession);
+        } else {
+            await this.dissolutionService.createDissolution(token, dissolutionSession);
+        }
 
         return this.redirect(this.journeyPath(REDIRECT_GATE_URI));
     }

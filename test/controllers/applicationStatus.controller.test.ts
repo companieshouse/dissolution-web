@@ -13,9 +13,7 @@ import { aDissolutionGetDirector } from "../fixtures/dissolutionGetDirector.buil
 
 import "app/controllers/applicationStatus.controller";
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper";
-import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import { ViewApplicationStatus } from "app/models/view/viewApplicationStatus.model";
 import { APPLICATION_STATUS_URI, CHANGE_DETAILS_URI, WAIT_FOR_OTHERS_TO_SIGN_URI } from "app/paths";
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import SessionService from "app/services/session/session.service";
@@ -29,16 +27,20 @@ describe("ApplicationStatusController", () => {
     let sessionService: SessionService;
     let dissolutionService: DissolutionService;
     let dissolutionSession: DissolutionSession;
-    let viewApplicationStatus: ViewApplicationStatus;
-    let dissolutionGetResponse: DissolutionGetResponse;
     let viewApplicationStatusMapper: ViewApplicationStatusMapper;
     let app: Application;
+
+    const sendEmailCases = [
+        { name: "reminder email sent successfully", reminderSent: true },
+        { name: "reminder email NOT sent successfully", reminderSent: false },
+    ];
+
+    const URI = `${APPLICATION_STATUS_URI}/send-email`;
 
     beforeEach(() => {
         sessionService = mock(SessionService);
         dissolutionService = mock(DissolutionService);
         viewApplicationStatusMapper = mock(ViewApplicationStatusMapper);
-        dissolutionGetResponse = aDissolutionGetResponse().build();
         dissolutionSession = aDissolutionSession().build();
         app = createApp(container => {
             container.rebind(SessionService).toConstantValue(instance(sessionService));
@@ -100,11 +102,6 @@ describe("ApplicationStatusController", () => {
     });
 
     describe("Send-email", () => {
-        const sendEmailCases = [
-            { name: "reminder email sent successfully", reminderSent: true },
-            { name: "reminder email NOT sent successfully", reminderSent: false },
-        ];
-
         sendEmailCases.forEach(testCase => {
             it(`attempts to send email and records reminder attempt - ${testCase.name}`, async () => {
                 // NOSONAR
@@ -129,7 +126,7 @@ describe("ApplicationStatusController", () => {
                 ).thenResolve(testCase.reminderSent);
 
                 await request(app)
-                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
+                    .post(buildTestUrl(URI))
                     .send({ signatoryId: signatoryId })
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
@@ -138,6 +135,7 @@ describe("ApplicationStatusController", () => {
                     dissolutionService.sendEmailNotification(dissolutionSession.companyNumber!, signatoryEmail)
                 ).once();
                 verify(sessionService.updateRemindDirectorList(anything(), signatoryId, testCase.reminderSent)).once();
+                verify(dissolutionService.resendSignatoryNotification(anything(), anything())).never();
             });
         });
 
@@ -168,7 +166,7 @@ describe("ApplicationStatusController", () => {
                 ).thenResolve(true);
 
                 await request(app)
-                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
+                    .post(buildTestUrl(URI))
                     .send(body)
                     .expect(StatusCodes.MOVED_TEMPORARILY)
                     .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
@@ -192,10 +190,7 @@ describe("ApplicationStatusController", () => {
             it(`when invalid signatory id then error returned: ${JSON.stringify(body)}`, async () => {
                 // NOSONAR
 
-                await request(app)
-                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
-                    .send(body)
-                    .expect(StatusCodes.BAD_REQUEST);
+                await request(app).post(buildTestUrl(URI)).send(body).expect(StatusCodes.BAD_REQUEST);
 
                 verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
                 verify(dissolutionService.sendEmailNotification(anything(), anything())).never();
@@ -232,13 +227,86 @@ describe("ApplicationStatusController", () => {
                 ).thenResolve(undefined);
 
                 await request(app)
-                    .post(buildTestUrl(`${APPLICATION_STATUS_URI}/send-email`))
+                    .post(buildTestUrl(URI))
                     .send({ signatoryId: "a-valid-id" })
                     .expect(StatusCodes.NOT_FOUND);
 
                 verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
                 verify(dissolutionService.sendEmailNotification(anything(), anything())).never();
             });
+        });
+    });
+
+    describe("Resend signatory notification for a transaction", () => {
+        const TRANSACTION_ID = "123456-123456-123456";
+        const signatoryId = "valid-signatory-id";
+        const signatoryEmail = "signatory@mail.com";
+        let companyNumber: string;
+
+        beforeEach(() => {
+            companyNumber = aDissolutionSession().build().companyNumber!;
+
+            when(sessionService.requireDissolutionCompanyNumber(anything())).thenReturn(companyNumber);
+            when(dissolutionService.getDissolutionSignatoryEmail(anything(), companyNumber, signatoryId)).thenResolve(
+                signatoryEmail
+            );
+        });
+
+        sendEmailCases.forEach(testCase => {
+            it(`resends the signatory notification using the transaction flow - ${testCase.name}`, async () => {
+                when(dissolutionService.resendSignatoryNotification(anything(), signatoryId)).thenResolve(
+                    testCase.reminderSent
+                );
+
+                await request(app)
+                    .post(buildTestUrl(URI, { transactionId: TRANSACTION_ID }))
+                    .send({ signatoryId })
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", WAIT_FOR_OTHERS_TO_SIGN_URI);
+
+                verify(dissolutionService.resendSignatoryNotification(anything(), signatoryId)).once();
+                verify(dissolutionService.sendEmailNotification(anything(), anything())).never();
+                verify(sessionService.updateRemindDirectorList(anything(), signatoryId, testCase.reminderSent)).once();
+            });
+        });
+
+        it("should return an error and not update the remind list if resending the notification fails", async () => {
+            when(dissolutionService.resendSignatoryNotification(anything(), signatoryId)).thenReject(
+                new Error("Failed to resend notification")
+            );
+
+            await request(app)
+                .post(buildTestUrl(URI, { transactionId: TRANSACTION_ID }))
+                .send({ signatoryId })
+                .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(dissolutionService.resendSignatoryNotification(anything(), signatoryId)).once();
+            verify(dissolutionService.sendEmailNotification(anything(), anything())).never();
+            verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
+        });
+
+        it("should return not found and not resend the notification if no signatory email is found", async () => {
+            when(dissolutionService.getDissolutionSignatoryEmail(anything(), companyNumber, "unknown-id")).thenResolve(
+                undefined
+            );
+
+            await request(app)
+                .post(buildTestUrl(URI, { transactionId: TRANSACTION_ID }))
+                .send({ signatoryId: "unknown-id" })
+                .expect(StatusCodes.NOT_FOUND);
+
+            verify(dissolutionService.resendSignatoryNotification(anything(), anything())).never();
+            verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
+        });
+
+        it("should return bad request and not resend the notification if the signatory id is invalid", async () => {
+            await request(app)
+                .post(buildTestUrl(URI, { transactionId: TRANSACTION_ID }))
+                .send({ signatoryId: "@@@" })
+                .expect(StatusCodes.BAD_REQUEST);
+
+            verify(dissolutionService.resendSignatoryNotification(anything(), anything())).never();
+            verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
         });
     });
 });
