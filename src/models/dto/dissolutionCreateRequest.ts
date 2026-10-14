@@ -8,4 +8,4 @@ export interface DirectorRequest {
     on_behalf_name?: string;
 }
 
-export interface DissolutionInitiationRequest extends DissolutionCreateRequest {}
+export type DissolutionInitiationRequest = DissolutionCreateRequest;

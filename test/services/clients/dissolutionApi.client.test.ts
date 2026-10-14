@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { assert } from "chai";
 import { StatusCodes } from "http-status-codes";
 import sinon from "sinon";
-import { EMAIL, TOKEN } from "../../fixtures/session.fixtures";
+import { EMAIL, TOKEN } from "test/fixtures/session.fixtures";
 
 import DissolutionCreateResponse from "app/models/dto/dissolutionCreateResponse";
 import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest";
@@ -28,6 +28,8 @@ import {
     generateDissolutionPaymentPatchRequest,
 } from "test/fixtures/dissolutionApi.fixtures";
 import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
+import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
+import { instance, mock } from "ts-mockito";
 
 describe("DissolutionApiClient", () => {
     let axiosInstance: AxiosInstance;
@@ -35,6 +37,7 @@ describe("DissolutionApiClient", () => {
     let getStub: sinon.SinonStub;
     let postStub: sinon.SinonStub;
     let patchStub: sinon.SinonStub;
+    let logger: ApplicationLogger;
 
     const DISSOLUTION_API_URL = "http://apiurl.com";
     const API_KEY = "some-api-key";
@@ -56,8 +59,9 @@ describe("DissolutionApiClient", () => {
 
     beforeEach(() => {
         axiosInstance = axios.create();
+        logger = mock(ApplicationLogger);
 
-        client = new DissolutionApiClient(DISSOLUTION_API_URL, API_KEY, axiosInstance);
+        client = new DissolutionApiClient(DISSOLUTION_API_URL, API_KEY, axiosInstance, instance(logger));
     });
 
     describe("createDissolution", () => {
@@ -295,6 +299,13 @@ describe("DissolutionApiClient", () => {
             return error;
         };
 
+        const generateNetworkError = (code: string = "ERR_NETWORK"): AxiosError => {
+            const error: AxiosError = generateAxiosError({});
+            error.response = undefined;
+            error.code = code;
+            return error;
+        };
+
         describe("createDraftDissolution", () => {
             it("should create a draft dissolution in the api and return dissolution id", async () => {
                 postStub = sinon.stub().resolves(CREATE_DRAFT_RESPONSE);
@@ -440,17 +451,35 @@ describe("DissolutionApiClient", () => {
                 assert.isFalse(response.reminderSent);
             });
 
-            const failureCases = [
-                StatusCodes.BAD_REQUEST,
-                StatusCodes.NOT_FOUND,
-                StatusCodes.CONFLICT,
-                StatusCodes.INTERNAL_SERVER_ERROR,
-            ];
+            const failureCases = [StatusCodes.BAD_REQUEST, StatusCodes.NOT_FOUND, StatusCodes.CONFLICT];
 
             failureCases.forEach(status => {
                 it(`should return reminderSent false when API returns a ${status}`, async () => {
-                    postStub = sinon.stub().rejects(generateStatusError(status));
-                    axiosInstance.post = postStub;
+                    const error = generateStatusError(status);
+                    axiosInstance.post = sinon.stub().rejects(error);
+                    try {
+                        await client.resendSignatoryNotification(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID);
+                        assert.fail("Expected error to be thrown");
+                    } catch (e) {
+                        assert.equal(e, error);
+                    }
+                });
+            });
+
+            it("should return reminderSent false when API returns a 500", async () => {
+                axiosInstance.post = sinon.stub().rejects(generateStatusError(StatusCodes.INTERNAL_SERVER_ERROR));
+                const response = await client.resendSignatoryNotification(
+                    TOKEN,
+                    COMPANY_NUMBER,
+                    TRANSACTION_ID,
+                    OFFICER_ID
+                );
+                assert.isFalse(response.reminderSent);
+            });
+
+            ["ERR_NETWORK", "ECONNABORTED", "ECONNRESET"].forEach(code => {
+                it(`should return reminderSent false on a network error (${code})`, async () => {
+                    axiosInstance.post = sinon.stub().rejects(generateNetworkError(code));
                     const response = await client.resendSignatoryNotification(
                         TOKEN,
                         COMPANY_NUMBER,
@@ -459,6 +488,17 @@ describe("DissolutionApiClient", () => {
                     );
                     assert.isFalse(response.reminderSent);
                 });
+            });
+
+            it("should rethrow non-Axios errors", async () => {
+                const error = new Error("boom");
+                axiosInstance.post = sinon.stub().rejects(error);
+                try {
+                    await client.resendSignatoryNotification(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID);
+                    assert.fail("Expected error to be thrown");
+                } catch (e) {
+                    assert.equal(e, error);
+                }
             });
         });
 
