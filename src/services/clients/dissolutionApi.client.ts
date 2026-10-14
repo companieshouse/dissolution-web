@@ -4,7 +4,7 @@ import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { inject } from "inversify";
 import { provide } from "inversify-binding-decorators";
 
-import { DissolutionCreateRequest } from "app/models/dto/dissolutionCreateRequest";
+import { DissolutionCreateRequest, DissolutionInitiationRequest } from "app/models/dto/dissolutionCreateRequest";
 import DissolutionCreateResponse from "app/models/dto/dissolutionCreateResponse";
 import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest";
 import DissolutionGetPaymentUIData from "app/models/dto/dissolutionGetPaymentUIData";
@@ -16,12 +16,15 @@ import DissolutionPaymentPatchRequest from "app/models/dto/dissolutionPaymentPat
 import Optional from "app/models/optional";
 import TYPES from "app/types";
 
+import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
+import { StatusCodes } from "http-status-codes";
+
 @provide(DissolutionApiClient)
 export class DissolutionApiClient {
     public constructor(
-        @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
-        @inject(TYPES.CHS_API_KEY) private CHS_API_KEY: string,
-        @inject(TYPES.AxiosInstance) private axios: AxiosInstance
+        @inject(TYPES.DISSOLUTIONS_API_URL) private readonly DISSOLUTIONS_API_URL: string,
+        @inject(TYPES.CHS_API_KEY) private readonly CHS_API_KEY: string,
+        @inject(TYPES.AxiosInstance) private readonly axios: AxiosInstance
     ) {}
 
     public async createDissolution(
@@ -115,6 +118,81 @@ export class DissolutionApiClient {
         );
     }
 
+    public async createDraftDissolution(
+        token: string,
+        companyNumber: string,
+        transactionId: string
+    ): Promise<DissolutionCreateDraftResponse> {
+        const response: AxiosResponse<DissolutionCreateDraftResponse> = await this.axios.post(
+            this.generateTxModelUrl(companyNumber, transactionId),
+            undefined,
+            this.generateConfigForOAuth(token)
+        );
+
+        return response.data;
+    }
+
+    public async initiateDissolution(
+        token: string,
+        companyNumber: string,
+        transactionId: string,
+        body: DissolutionInitiationRequest
+    ): Promise<void> {
+        await this.axios.post(
+            this.generateTxModelUrl(companyNumber, transactionId, "initiation"),
+            body,
+            this.generateConfigForOAuth(token)
+        );
+    }
+
+    public async patchDissolutionApproval(
+        token: string,
+        companyNumber: string,
+        transactionId: string,
+        body: DissolutionPatchRequest
+    ): Promise<void> {
+        await this.axios.patch(
+            this.generateTxModelUrl(companyNumber, transactionId, "approve"),
+            body,
+            this.generateConfigForOAuth(token)
+        );
+    }
+
+    public async resendSignatoryNotification(
+        token: string,
+        companyNumber: string,
+        transactionId: string,
+        officerId: string
+    ): Promise<DissolutionGetResendEmailResponse> {
+        const url = this.generateTxModelUrlForSignatories(
+            companyNumber,
+            transactionId,
+            officerId,
+            "signature-notification"
+        );
+        try {
+            const response: AxiosResponse = await this.axios.post(url, undefined, this.generateConfigForOAuth(token));
+            return { reminderSent: response.status === StatusCodes.OK };
+        } catch (err: any) {
+            console.error(`Failed to resend signatory notification: ${err}`);
+            return { reminderSent: false };
+        }
+    }
+
+    public async updateSignatoryDetails(
+        token: string,
+        companyNumber: string,
+        transactionId: string,
+        officerId: string,
+        body: DissolutionDirectorPatchRequest
+    ): Promise<void> {
+        await this.axios.patch(
+            this.generateTxModelUrlForSignatories(companyNumber, transactionId, officerId),
+            body,
+            this.generateConfigForOAuth(token)
+        );
+    }
+
     private generateConfigForOAuth(token: string): AxiosRequestConfig {
         return {
             headers: {
@@ -141,5 +219,26 @@ export class DissolutionApiClient {
 
     private generateUrlForDirector(companyNumber: string, directorId: string): string {
         return `${this.generateUrl(companyNumber)}/directors/${directorId}`;
+    }
+
+    private generateTxModelUrl(companyNumber: string, transactionId: string, suffix?: string): string {
+        const url = `${this.DISSOLUTIONS_API_URL}/company/${companyNumber}/transactions/${transactionId}/dissolution`;
+        if (suffix) {
+            return `${url}/${suffix}`;
+        }
+        return url;
+    }
+
+    private generateTxModelUrlForSignatories(
+        companyNumber: string,
+        transactionId: string,
+        officerId: string,
+        suffix?: string
+    ): string {
+        const url = this.generateTxModelUrl(companyNumber, transactionId, `signatories/${officerId}`);
+        if (suffix) {
+            return `${url}/${suffix}`;
+        }
+        return url;
     }
 }

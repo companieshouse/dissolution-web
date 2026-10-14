@@ -1,7 +1,7 @@
 import { assert } from "chai";
-import { instance, mock, verify, when } from "ts-mockito";
-import { generateWillSignChangeDetailsFormModel } from "../../fixtures/companyOfficers.fixtures";
-import { TOKEN } from "../../fixtures/session.fixtures";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
+import { generateWillSignChangeDetailsFormModel } from "test/fixtures/companyOfficers.fixtures";
+import { TOKEN } from "test/fixtures/session.fixtures";
 
 import DissolutionDirectorMapper from "app/mappers/dissolution/dissolutionDirector.mapper";
 import DissolutionDirectorPatchRequest from "app/models/dto/dissolutionDirectorPatchRequest";
@@ -19,6 +19,7 @@ import {
     generateGetDirector,
 } from "test/fixtures/dissolutionApi.fixtures";
 import { generateDissolutionSession } from "test/fixtures/session.fixtures";
+import SessionService from "app/services/session/session.service";
 
 describe("DissolutionDirectorService", () => {
     let service: DissolutionDirectorService;
@@ -26,13 +27,20 @@ describe("DissolutionDirectorService", () => {
     let dissolutionService: DissolutionService;
     let mapper: DissolutionDirectorMapper;
     let client: DissolutionApiClient;
+    let sessionService: SessionService;
 
     beforeEach(() => {
         dissolutionService = mock(DissolutionService);
         mapper = mock(DissolutionDirectorMapper);
         client = mock(DissolutionApiClient);
+        sessionService = mock(SessionService);
 
-        service = new DissolutionDirectorService(instance(dissolutionService), instance(mapper), instance(client));
+        service = new DissolutionDirectorService(
+            instance(dissolutionService),
+            instance(mapper),
+            instance(client),
+            instance(sessionService)
+        );
     });
 
     describe("getSignatoryToEdit", () => {
@@ -78,25 +86,81 @@ describe("DissolutionDirectorService", () => {
 
     describe("updateSignatory", () => {
         const COMPANY_NUMBER = "0177777";
+        const TRANSACTION_ID = "111111-222222-333333";
         const SIGNATORY_ID = "abc123";
 
         let dissolutionSession: DissolutionSession;
+        let form: ChangeDetailsFormModel;
+        let body: DissolutionDirectorPatchRequest;
 
         beforeEach(() => {
             dissolutionSession = generateDissolutionSession();
             dissolutionSession.companyNumber = COMPANY_NUMBER;
             dissolutionSession.signatoryIdToEdit = SIGNATORY_ID;
+
+            form = generateWillSignChangeDetailsFormModel();
+            body = generateDissolutionDirectorPatchRequest();
+
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(body);
         });
 
-        it("should map the form data to a director patch request and send it to the API", async () => {
-            const form: ChangeDetailsFormModel = generateWillSignChangeDetailsFormModel();
-            const request: DissolutionDirectorPatchRequest = generateDissolutionDirectorPatchRequest();
+        describe("for a dissolution without a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER } } as any;
 
-            when(mapper.mapToDissolutionDirectorPatchRequest(form)).thenReturn(request);
+            it("should map the form data to a director patch request and send it to the API", async () => {
+                await service.updateSignatory(req, dissolutionSession, form);
 
-            await service.updateSignatory(TOKEN, dissolutionSession, form);
+                verify(client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, SIGNATORY_ID, body)).once();
+                verify(
+                    client.updateSignatoryDetails(anything(), anything(), anything(), anything(), anything())
+                ).never();
+            });
 
-            verify(client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, SIGNATORY_ID, request)).once();
+            it("should propagate errors from the api client", async () => {
+                when(client.patchDissolutionDirector(TOKEN, COMPANY_NUMBER, SIGNATORY_ID, body)).thenReject(
+                    new Error("api failure")
+                );
+
+                try {
+                    await service.updateSignatory(req, dissolutionSession, form);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
+        });
+
+        describe("for a dissolution with a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+
+            it("should map the form data and send the signatory details to the API for the transaction", async () => {
+                await service.updateSignatory(req, dissolutionSession, form);
+
+                const [token, companyNumber, transactionId, signatoryId, sentBody] = capture(
+                    client.updateSignatoryDetails
+                ).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.equal(signatoryId, SIGNATORY_ID);
+                assert.deepEqual(sentBody, body);
+                verify(client.patchDissolutionDirector(anything(), anything(), anything(), anything())).never();
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(
+                    client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, SIGNATORY_ID, body)
+                ).thenReject(new Error("api failure"));
+
+                try {
+                    await service.updateSignatory(req, dissolutionSession, form);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
         });
     });
 });
