@@ -26,7 +26,7 @@ export class DissolutionApiClient {
         @inject(TYPES.DISSOLUTIONS_API_URL) private readonly DISSOLUTIONS_API_URL: string,
         @inject(TYPES.CHS_API_KEY) private readonly CHS_API_KEY: string,
         @inject(TYPES.AxiosInstance) private readonly axios: AxiosInstance,
-        @inject(ApplicationLogger) private logger: ApplicationLogger
+        @inject(ApplicationLogger) private readonly logger: ApplicationLogger
     ) {}
 
     public async createDissolution(
