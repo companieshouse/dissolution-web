@@ -92,8 +92,7 @@ export class ChangeDetailsController extends JourneyBaseController {
             this.updateSignatoryInfoInSession(session, form);
             return this.redirect(this.journeyPath(CHECK_YOUR_ANSWERS_URI));
         } else {
-            const token: string = this.session.getAccessToken(this.httpContext.request);
-            await this.directorService.updateSignatory(token, session, form);
+            await this.directorService.updateSignatory(this.httpContext.request, session, form);
             this.cleanUpSession(session);
             this.session.setDissolutionSession(this.httpContext.request, session);
             return this.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI));

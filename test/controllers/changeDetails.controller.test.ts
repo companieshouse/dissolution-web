@@ -388,7 +388,7 @@ describe("ChangeDetailsController", () => {
 
             verify(
                 directorService.updateSignatory(
-                    TOKEN,
+                    anything(),
                     dissolutionSession,
                     deepEqual({ ...updatedDetails, onBehalfEmail: undefined })
                 )
@@ -419,7 +419,7 @@ describe("ChangeDetailsController", () => {
 
             verify(
                 directorService.updateSignatory(
-                    TOKEN,
+                    anything(),
                     dissolutionSession,
                     deepEqual({ ...updatedDetails, directorEmail: undefined })
                 )
