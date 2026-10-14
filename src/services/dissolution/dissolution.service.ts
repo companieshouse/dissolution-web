@@ -106,7 +106,7 @@ export default class DissolutionService {
             const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
             return this.client.patchDissolutionApproval(token, companyNumber, transactionId, body);
         }
-        await this.client.patchDissolution(token, dissolution.companyNumber!, body);
+        await this.client.patchDissolution(token, dissolution.companyNumber, body);
     }
 
     public async generateDissolutionCertificateUrl(confirmation: DissolutionConfirmation): Promise<string> {

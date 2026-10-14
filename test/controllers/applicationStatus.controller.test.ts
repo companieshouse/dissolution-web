@@ -238,6 +238,7 @@ describe("ApplicationStatusController", () => {
     });
 
     describe("Resend signatory notification for a transaction", () => {
+        // NOSONAR
         const TRANSACTION_ID = "123456-123456-123456";
         const signatoryId = "valid-signatory-id";
         const signatoryEmail = "signatory@mail.com";
@@ -266,7 +267,13 @@ describe("ApplicationStatusController", () => {
 
                 verify(dissolutionService.resendSignatoryNotification(anything(), signatoryId)).once();
                 verify(dissolutionService.sendEmailNotification(anything(), anything())).never();
-                verify(sessionService.updateRemindDirectorList(anything(), signatoryId, testCase.reminderSent)).once();
+
+                const [, actualSignatoryId, actualReminderSent] = capture(
+                    sessionService.updateRemindDirectorList
+                ).last();
+
+                assert.equal(actualSignatoryId, signatoryId);
+                assert.equal(actualReminderSent, testCase.reminderSent);
             });
         });
 

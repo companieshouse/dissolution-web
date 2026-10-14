@@ -230,8 +230,9 @@ describe("RedirectController", () => {
 
             when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
 
-            await request(initApp({ isTransactionsEnabled: true })).get(REDIRECT_GATE_URI);
+            const res = await request(initApp({ isTransactionsEnabled: true })).get(REDIRECT_GATE_URI);
 
+            assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY);
             verify(transactionService.createTransaction(anything(), anything(), anything(), anything())).never();
             verify(service.createDraftDissolution(anything(), anything(), anything())).never();
         });

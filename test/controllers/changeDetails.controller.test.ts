@@ -493,10 +493,19 @@ describe("ChangeDetailsController", () => {
 
                     when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
 
-                    await request(initApp())
+                    const res = await request(initApp())
                         .post(URI)
                         .send(aChangeDetailsFormModel().withDirectorEmail("an invalid email").build())
                         .expect(StatusCodes.BAD_REQUEST);
+
+                    const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
+
+                    assert.isTrue(
+                        htmlAssertHelper.containsText(
+                            ".govuk-error-summary",
+                            "Enter an email address in the correct format, like name@example.com"
+                        )
+                    );
 
                     verify(directorService.updateSignatory(anything(), anything(), anything())).never();
                 });

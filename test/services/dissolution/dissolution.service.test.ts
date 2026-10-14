@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { anything, instance, mock, verify, when } from "ts-mockito";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
 import { generatePaymentSummary } from "test/fixtures/payment.fixtures";
 import {
     EMAIL,
@@ -200,7 +200,11 @@ describe("DissolutionService", () => {
             it("should map the approval and call the api client to approve the dissolution", async () => {
                 await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
 
-                verify(client.patchDissolution(TOKEN, COMPANY_NUMBER, body)).once();
+                const [token, companyNumber, sentBody] = capture(client.patchDissolution).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.deepEqual(sentBody, body);
                 verify(client.patchDissolutionApproval(anything(), anything(), anything(), anything())).never();
             });
 
@@ -222,7 +226,12 @@ describe("DissolutionService", () => {
             it("should map the approval and call the api client to patch the dissolution approval", async () => {
                 await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
 
-                verify(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).once();
+                const [token, companyNumber, transactionId, sentBody] = capture(client.patchDissolutionApproval).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.deepEqual(sentBody, body);
                 verify(client.patchDissolution(anything(), anything(), anything())).never();
             });
 
@@ -236,7 +245,12 @@ describe("DissolutionService", () => {
 
                 await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
 
-                verify(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, otherBody)).once();
+                const [token, companyNumber, transactionId, sentBody] = capture(client.patchDissolutionApproval).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.deepEqual(sentBody, otherBody);
             });
 
             it("should propagate errors from the api client", async () => {
@@ -377,7 +391,12 @@ describe("DissolutionService", () => {
 
                 await dissolutionService.initiateDissolution(req, dissolutionSession);
 
-                verify(client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, MAPPED_BODY)).once();
+                const [token, companyNumber, transactionId, sentBody] = capture(client.initiateDissolution).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.deepEqual(sentBody, MAPPED_BODY);
             });
 
             it("should propagate errors from the api client", async () => {

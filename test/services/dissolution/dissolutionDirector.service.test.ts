@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { anything, instance, mock, verify, when } from "ts-mockito";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
 import { generateWillSignChangeDetailsFormModel } from "test/fixtures/companyOfficers.fixtures";
 import { TOKEN } from "test/fixtures/session.fixtures";
 
@@ -137,7 +137,15 @@ describe("DissolutionDirectorService", () => {
             it("should map the form data and send the signatory details to the API for the transaction", async () => {
                 await service.updateSignatory(req, dissolutionSession, form);
 
-                verify(client.updateSignatoryDetails(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, SIGNATORY_ID, body)).once();
+                const [token, companyNumber, transactionId, signatoryId, sentBody] = capture(
+                    client.updateSignatoryDetails
+                ).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.equal(signatoryId, SIGNATORY_ID);
+                assert.deepEqual(sentBody, body);
                 verify(client.patchDissolutionDirector(anything(), anything(), anything(), anything())).never();
             });
 

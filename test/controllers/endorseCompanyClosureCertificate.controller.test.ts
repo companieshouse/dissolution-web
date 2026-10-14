@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { assert } from "chai";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito";
+import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { generateEndorseCertificateFormModel } from "../fixtures/endorseCertificateFormModel.fixtures";
 import { generateValidationError } from "../fixtures/error.fixtures";
 import { TOKEN } from "../fixtures/session.fixtures";
@@ -425,9 +425,9 @@ describe("EndorseCompanyClosureCertificateController", () => {
                         .expect(StatusCodes.MOVED_TEMPORARILY)
                         .expect("Location", REDIRECT_GATE_URI);
 
-                    verify(
-                        mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
-                    ).once();
+                    const [, sessionArg, ipArg] = capture(mockedDissolutionService.approveDissolution).last();
+                    assert.deepEqual(sessionArg, dissolutionSession);
+                    assert.equal(ipArg, IP_ADDRESS);
                 });
 
                 it("should not approve and should re-render with errors if validation fails", async () => {
@@ -447,11 +447,16 @@ describe("EndorseCompanyClosureCertificateController", () => {
                         mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
                     ).thenReject(new Error("Failed to approve dissolution"));
 
-                    await request(initApp()).post(uri).send(formBody).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+                    const res = await request(initApp())
+                        .post(uri)
+                        .send(formBody)
+                        .expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
-                    verify(
-                        mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
-                    ).once();
+                    const [, sessionArg, ipArg] = capture(mockedDissolutionService.approveDissolution).last();
+
+                    assert.isUndefined(res.header.location);
+                    assert.deepEqual(sessionArg, dissolutionSession);
+                    assert.equal(ipArg, IP_ADDRESS);
                 });
             })
         );

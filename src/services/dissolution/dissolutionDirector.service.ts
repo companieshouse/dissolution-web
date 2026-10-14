@@ -61,6 +61,6 @@ export default class DissolutionDirectorService {
             return this.client.updateSignatoryDetails(token, companyNumber, transactionId, officerId, body);
         }
 
-        return this.client.patchDissolutionDirector(token, session.companyNumber!, officerId, body);
+        return this.client.patchDissolutionDirector(token, session.companyNumber, officerId, body);
     }
 }
