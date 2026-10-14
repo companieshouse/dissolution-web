@@ -282,11 +282,12 @@ describe("ApplicationStatusController", () => {
                 new Error("Failed to resend notification")
             );
 
-            await request(app)
+            const res = await request(app)
                 .post(buildTestUrl(URI, { transactionId: TRANSACTION_ID }))
                 .send({ signatoryId })
                 .expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
+            assert.equal(res.status, StatusCodes.INTERNAL_SERVER_ERROR);
             verify(dissolutionService.resendSignatoryNotification(anything(), signatoryId)).once();
             verify(dissolutionService.sendEmailNotification(anything(), anything())).never();
             verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
@@ -297,11 +298,12 @@ describe("ApplicationStatusController", () => {
                 undefined
             );
 
-            await request(app)
+            const res = await request(app)
                 .post(buildTestUrl(URI, { transactionId: TRANSACTION_ID }))
                 .send({ signatoryId: "unknown-id" })
                 .expect(StatusCodes.NOT_FOUND);
 
+            assert.equal(res.status, StatusCodes.NOT_FOUND);
             verify(dissolutionService.resendSignatoryNotification(anything(), anything())).never();
             verify(sessionService.updateRemindDirectorList(anything(), anything(), anything())).never();
         });
