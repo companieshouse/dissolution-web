@@ -28,14 +28,16 @@ import JourneyPathService, { JourneyPathOptions } from "app/services/session/jou
 import TYPES from "app/types";
 import TransactionService from "app/services/transaction/transaction.service";
 import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
-import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 import DissolutionStatus from "app/models/dto/dissolutionStatus.enum";
 
-type SessionRedirectOptions = {
+type SessionWithJourneyOptions = {
     session: DissolutionSession;
-    redirectUri: string;
     options?: JourneyPathOptions;
 };
+
+type SessionRedirectOptions = {
+    redirectUri: string;
+} & SessionWithJourneyOptions;
 
 @controller(REDIRECT_GATE_URI, TYPES.JourneyIdAuthMiddleware)
 export class RedirectController extends JourneyBaseController {
@@ -93,15 +95,12 @@ export class RedirectController extends JourneyBaseController {
         return this.saveSessionAndRedirect({ session, redirectUri });
     }
 
-    private async handleNewApplication(session: DissolutionSession): Promise<RedirectResult> {
-        const options: JourneyPathOptions = {};
+    private async handleNewApplication(dissolutionSession: DissolutionSession): Promise<RedirectResult> {
         if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED) {
-            const { id: transactionId } = await this.createTransaction(session);
-            session.transactionId = transactionId;
-            options.transactionId = transactionId;
+            const { options, session } = await this.createTransactionAndDraftDissolution(dissolutionSession);
             return this.saveSessionAndRedirect({ session, redirectUri: SELECT_DIRECTOR_URI, options });
         }
-        return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI, options));
+        return this.redirect(this.journeyPath(SELECT_DIRECTOR_URI, {}));
     }
 
     private async handleTransactionModelDissolution(
@@ -228,8 +227,29 @@ export class RedirectController extends JourneyBaseController {
         }
     }
 
-    private async createTransaction({ companyNumber }: DissolutionSession): Promise<Transaction> {
+    private async createTransactionAndDraftDissolution(
+        session: DissolutionSession
+    ): Promise<SessionWithJourneyOptions> {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-        return this.transactionService.createTransaction(token, companyNumber, DESCRIPTION, REFERENCE);
+
+        const { id: transactionId } = await this.transactionService.createTransaction(
+            token,
+            session.companyNumber,
+            DESCRIPTION,
+            REFERENCE
+        );
+
+        if (!transactionId) {
+            throw new Error("No transaction ID");
+        }
+
+        const options: JourneyPathOptions = { transactionId };
+        const updatedSession: DissolutionSession = {
+            ...session,
+            transactionId,
+        };
+
+        await this.service.createDraftDissolution(token, updatedSession.companyNumber, transactionId);
+        return { session: updatedSession, options };
     }
 }

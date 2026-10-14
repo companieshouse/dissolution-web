@@ -133,9 +133,10 @@ describe("RedirectController", () => {
 
             verify(transactionService.createTransaction(TOKEN, anything(), anything(), anything())).never();
             verify(session.setDissolutionSession(anything(), anything())).never();
+            verify(service.createDraftDissolution(anything(), anything(), anything())).never();
         });
 
-        it("should create transaction if feature toggle is enabled and dissolution has not yet been created", async () => {
+        it("should create transaction and draft dissolution if feature toggle is enabled and dissolution has not yet been created", async () => {
             const TRANSACTION_ID = "123456-123456-123456";
             const COMPANY_NUMBER = dissolutionSession.companyNumber;
             const newTx: Transaction = aTransaction()
@@ -149,6 +150,7 @@ describe("RedirectController", () => {
             when(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).thenResolve(
                 newTx
             );
+            when(service.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).thenResolve("dissolution-id");
 
             await request(initApp({ isTransactionsEnabled: true }))
                 .get(REDIRECT_GATE_URI)
@@ -156,6 +158,10 @@ describe("RedirectController", () => {
                 .expect("Location", buildTestUrl(SELECT_DIRECTOR_URI, { transactionId: TRANSACTION_ID }));
 
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
+            verify(service.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).once();
+            verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).calledBefore(
+                service.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)
+            );
             verify(session.setDissolutionSession(anything(), anything())).once();
 
             const updatedSession: DissolutionSession = getSavedSession(session);
@@ -176,6 +182,59 @@ describe("RedirectController", () => {
 
             verify(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).once();
             verify(session.setDissolutionSession(anything(), anything())).never();
+            verify(service.createDraftDissolution(anything(), anything(), anything())).never();
+        });
+
+        it("should throw an error and not create a draft dissolution if the transaction has no id", async () => {
+            const COMPANY_NUMBER = dissolutionSession.companyNumber;
+            const txWithoutId: Transaction = aTransaction().withCompanyNumber(COMPANY_NUMBER).build();
+
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(null);
+            when(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).thenResolve(
+                txWithoutId
+            );
+
+            await request(initApp({ isTransactionsEnabled: true }))
+                .get(REDIRECT_GATE_URI)
+                .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(service.createDraftDissolution(anything(), anything(), anything())).never();
+            verify(session.setDissolutionSession(anything(), anything())).never();
+        });
+
+        it("should return an error and not save the session if creating the draft dissolution fails", async () => {
+            const TRANSACTION_ID = "123456-123456-123456";
+            const COMPANY_NUMBER = dissolutionSession.companyNumber;
+            const newTx: Transaction = aTransaction().withId(TRANSACTION_ID).withCompanyNumber(COMPANY_NUMBER).build();
+
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(null);
+            when(transactionService.createTransaction(TOKEN, COMPANY_NUMBER, DESCRIPTION, REFERENCE)).thenResolve(
+                newTx
+            );
+            when(service.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).thenReject(
+                new Error("Failed to create draft dissolution")
+            );
+
+            await request(initApp({ isTransactionsEnabled: true }))
+                .get(REDIRECT_GATE_URI)
+                .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(service.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).once();
+            verify(session.setDissolutionSession(anything(), anything())).never();
+        });
+
+        it("should not create a transaction or draft dissolution if a dissolution already exists", async () => {
+            const dissolution: DissolutionGetResponse = generateDissolutionGetResponse();
+            dissolution.application_status = ApplicationStatus.PENDING_PAYMENT;
+            dissolution.created_by = USER_EMAIL;
+
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+            const res = await request(initApp({ isTransactionsEnabled: true })).get(REDIRECT_GATE_URI);
+
+            assert.equal(res.status, StatusCodes.MOVED_TEMPORARILY);
+            verify(transactionService.createTransaction(anything(), anything(), anything(), anything())).never();
+            verify(service.createDraftDissolution(anything(), anything(), anything())).never();
         });
 
         describe("Pending Approval", () => {

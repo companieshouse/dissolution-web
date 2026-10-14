@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { assert } from "chai";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { anything, deepEqual, instance, mock, when } from "ts-mockito";
+import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { generateEndorseCertificateFormModel } from "../fixtures/endorseCertificateFormModel.fixtures";
 import { generateValidationError } from "../fixtures/error.fixtures";
 import { TOKEN } from "../fixtures/session.fixtures";
@@ -395,5 +395,70 @@ describe("EndorseCompanyClosureCertificateController", () => {
             assert.isTrue(res.text.includes(CONFIRMATION_ERROR_NON_CORPORATE));
             assert.isTrue(res.text.includes(DECLARATION_ERROR));
         });
+    });
+
+    describe("POST - approve dissolution", () => {
+        const TRANSACTION_ID = "123456-123456-123456";
+        let formBody: EndorseCertificateFormModel;
+
+        beforeEach(() => {
+            formBody = generateEndorseCertificateFormModel();
+
+            when(mockedIpAddressService.getIpAddress(anything())).thenReturn(IP_ADDRESS);
+            when(mockedFormValidator.validate(deepEqual(formBody), anything())).thenReturn(null);
+        });
+
+        const testParams = [
+            { testDesc: "without a transaction", uri: buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI) },
+            {
+                testDesc: "with a transaction",
+                uri: buildTestUrl(ENDORSE_COMPANY_CLOSURE_CERTIFICATE_URI, { transactionId: TRANSACTION_ID }),
+            },
+        ];
+
+        testParams.forEach(({ testDesc, uri }) =>
+            describe(`approving a dissolution ${testDesc}`, () => {
+                it("should approve the dissolution and redirect to the redirect gate", async () => {
+                    await request(initApp())
+                        .post(uri)
+                        .send(formBody)
+                        .expect(StatusCodes.MOVED_TEMPORARILY)
+                        .expect("Location", REDIRECT_GATE_URI);
+
+                    const [, sessionArg, ipArg] = capture(mockedDissolutionService.approveDissolution).last();
+                    assert.deepEqual(sessionArg, dissolutionSession);
+                    assert.equal(ipArg, IP_ADDRESS);
+                });
+
+                it("should not approve and should re-render with errors if validation fails", async () => {
+                    const invalidBody: EndorseCertificateFormModel = { confirmation: "understood" };
+                    const mockError = generateValidationError("declaration", DECLARATION_ERROR);
+
+                    when(mockedFormValidator.validate(deepEqual(invalidBody), anything())).thenReturn(mockError);
+
+                    const res = await request(initApp()).post(uri).send(invalidBody).expect(StatusCodes.BAD_REQUEST);
+
+                    assert.isTrue(res.text.includes(DECLARATION_ERROR));
+                    verify(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).never();
+                });
+
+                it("should return an error and not redirect if approving the dissolution fails", async () => {
+                    when(
+                        mockedDissolutionService.approveDissolution(anything(), dissolutionSession, IP_ADDRESS)
+                    ).thenReject(new Error("Failed to approve dissolution"));
+
+                    const res = await request(initApp())
+                        .post(uri)
+                        .send(formBody)
+                        .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                    const [, sessionArg, ipArg] = capture(mockedDissolutionService.approveDissolution).last();
+
+                    assert.isUndefined(res.header.location);
+                    assert.deepEqual(sessionArg, dissolutionSession);
+                    assert.equal(ipArg, IP_ADDRESS);
+                });
+            })
+        );
     });
 });

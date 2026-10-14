@@ -14,6 +14,7 @@ import TYPES from "app/types";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import resendEmailSchema from "app/schemas/resendEmail.schema";
+import { hasCompanyNumberAndTransactionIdInRequest } from "app/utils/transaction.util";
 
 @controller(APPLICATION_STATUS_URI, TYPES.JourneyIdAuthMiddleware)
 export class ApplicationStatusController extends JourneyBaseController {
@@ -63,13 +64,22 @@ export class ApplicationStatusController extends JourneyBaseController {
             throw new FrontendError("Signatory email not found", StatusCodes.NOT_FOUND);
         }
 
-        const reminderSent: boolean = await this.dissolutionService.sendEmailNotification(
-            companyNumber,
-            signatoryEmail
-        );
+        const reminderSent: boolean = await this.sendEmailNotification(companyNumber, signatoryEmail, signatoryId);
 
         this.sessionService.updateRemindDirectorList(this.httpContext.request, signatoryId, reminderSent);
 
         return super.redirect(this.journeyPath(WAIT_FOR_OTHERS_TO_SIGN_URI));
+    }
+
+    private async sendEmailNotification(
+        companyNumber: string,
+        signatoryEmail: string,
+        signatoryId: string
+    ): Promise<boolean> {
+        if (hasCompanyNumberAndTransactionIdInRequest(this.httpContext.request)) {
+            return this.dissolutionService.resendSignatoryNotification(this.httpContext.request, signatoryId);
+        } else {
+            return this.dissolutionService.sendEmailNotification(companyNumber, signatoryEmail);
+        }
     }
 }

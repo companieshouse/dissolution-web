@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { assert } from "chai";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { anything, instance, mock, verify, when } from "ts-mockito";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
 import { generateCheckYourAnswersDirector } from "../fixtures/checkYourAnswersDirector.fixtures";
 import { TOKEN } from "../fixtures/session.fixtures";
 import HtmlAssertHelper from "./helpers/htmlAssert.helper";
@@ -194,17 +194,61 @@ describe("CheckYourAnswersController", () => {
     });
 
     describe("POST - create dissolution request", () => {
-        it("should create dissolution", async () => {
+        const TRANSACTION_ID = "123456-123456-123456";
+
+        beforeEach(() => {
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+        });
 
-            const app = initApp();
+        describe("when there is no transaction id in the url", () => {
+            it("should create dissolution using the legacy flow", async () => {
+                await request(initApp())
+                    .post(buildTestUrl(CHECK_YOUR_ANSWERS_URI))
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", REDIRECT_GATE_URI);
 
-            await request(app)
-                .post(buildTestUrl(CHECK_YOUR_ANSWERS_URI))
-                .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", REDIRECT_GATE_URI);
+                verify(service.createDissolution(TOKEN, dissolutionSession)).once();
+                verify(service.initiateDissolution(anything(), anything())).never();
+            });
+        });
 
-            verify(service.createDissolution(TOKEN, dissolutionSession)).once();
+        describe("when there is a transaction id in the url", () => {
+            it("should initiate the dissolution and redirect to the redirect gate", async () => {
+                when(service.initiateDissolution(anything(), dissolutionSession)).thenResolve();
+
+                await request(initApp())
+                    .post(buildTestUrl(CHECK_YOUR_ANSWERS_URI, { transactionId: TRANSACTION_ID }))
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", REDIRECT_GATE_URI);
+
+                verify(service.initiateDissolution(anything(), dissolutionSession)).once();
+                verify(service.createDissolution(anything(), anything())).never();
+            });
+
+            it("should remove isFromCheckAnswers from the session before initiating", async () => {
+                dissolutionSession.isFromCheckAnswers = true;
+
+                await request(initApp())
+                    .post(buildTestUrl(CHECK_YOUR_ANSWERS_URI, { transactionId: TRANSACTION_ID }))
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
+
+                verify(session.setDissolutionSession(anything(), anything())).once();
+                const [, savedSession] = capture(session.setDissolutionSession).last();
+                assert.isUndefined((savedSession as DissolutionSession).isFromCheckAnswers);
+            });
+
+            it("should return an error and not redirect if initiating the dissolution fails", async () => {
+                when(service.initiateDissolution(anything(), anything())).thenReject(
+                    new Error("Failed to initiate dissolution")
+                );
+
+                await request(initApp())
+                    .post(buildTestUrl(CHECK_YOUR_ANSWERS_URI, { transactionId: TRANSACTION_ID }))
+                    .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                verify(service.initiateDissolution(anything(), anything())).once();
+                verify(service.createDissolution(anything(), anything())).never();
+            });
         });
     });
 });
