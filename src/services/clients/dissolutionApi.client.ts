@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { inject } from "inversify";
 import { provide } from "inversify-binding-decorators";
 
@@ -18,13 +18,15 @@ import TYPES from "app/types";
 
 import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
 import { StatusCodes } from "http-status-codes";
+import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
 
 @provide(DissolutionApiClient)
 export class DissolutionApiClient {
     public constructor(
         @inject(TYPES.DISSOLUTIONS_API_URL) private readonly DISSOLUTIONS_API_URL: string,
         @inject(TYPES.CHS_API_KEY) private readonly CHS_API_KEY: string,
-        @inject(TYPES.AxiosInstance) private readonly axios: AxiosInstance
+        @inject(TYPES.AxiosInstance) private readonly axios: AxiosInstance,
+        @inject(ApplicationLogger) private readonly logger: ApplicationLogger
     ) {}
 
     public async createDissolution(
@@ -174,7 +176,13 @@ export class DissolutionApiClient {
             const response: AxiosResponse = await this.axios.post(url, undefined, this.generateConfigForOAuth(token));
             return { reminderSent: response.status === StatusCodes.OK };
         } catch (err: any) {
-            console.error(`Failed to resend signatory notification: ${err}`);
+            this.logger.error(
+                `Failed to resend signatory notification: status=${err?.response?.status ?? "none"}, message=${err?.message}`
+            );
+
+            if (this.isNonRetryable(err)) {
+                throw err;
+            }
             return { reminderSent: false };
         }
     }
@@ -222,7 +230,7 @@ export class DissolutionApiClient {
     }
 
     private generateTxModelUrl(companyNumber: string, transactionId: string, suffix?: string): string {
-        const url = `${this.DISSOLUTIONS_API_URL}/company/${companyNumber}/transactions/${transactionId}/dissolution`;
+        const url = `${this.DISSOLUTIONS_API_URL}/company/${encodeURIComponent(companyNumber)}/transactions/${encodeURIComponent(transactionId)}/dissolution`;
         if (suffix) {
             return `${url}/${suffix}`;
         }
@@ -240,5 +248,19 @@ export class DissolutionApiClient {
             return `${url}/${suffix}`;
         }
         return url;
+    }
+
+    // 4xx errors will not be retried, 5xx errors and network errors will be retried
+    private isNonRetryable(err: any): boolean {
+        if (!this.isAxiosError(err)) {
+            return true;
+        }
+
+        const status = err.response?.status;
+        return status !== undefined && status >= StatusCodes.BAD_REQUEST && status < StatusCodes.INTERNAL_SERVER_ERROR;
+    }
+
+    private isAxiosError(err: Error | AxiosError): err is AxiosError {
+        return (err as AxiosError).isAxiosError;
     }
 }
