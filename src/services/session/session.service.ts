@@ -88,11 +88,6 @@ export default class SessionService {
         return transactionId;
     }
 
-    public setTransactionId(req: Request, transactionId: string): void {
-        const session = this.requireDissolutionSession(req);
-        this.setDissolutionSession(req, { ...session, transactionId });
-    }
-
     public getSession(req: Request): Session {
         return req.session!;
     }

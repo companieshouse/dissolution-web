@@ -7,3 +7,5 @@ export interface DirectorRequest {
     email: string;
     on_behalf_name?: string;
 }
+
+export type DissolutionInitiationRequest = DissolutionCreateRequest;

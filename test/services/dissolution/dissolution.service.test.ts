@@ -1,7 +1,12 @@
 import { assert } from "chai";
-import { anything, instance, mock, verify, when } from "ts-mockito";
-import { generatePaymentSummary } from "../../fixtures/payment.fixtures";
-import { EMAIL, TOKEN } from "../../fixtures/session.fixtures";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
+import { generatePaymentSummary } from "test/fixtures/payment.fixtures";
+import {
+    EMAIL,
+    generateDissolutionConfirmation,
+    generateDissolutionSession,
+    TOKEN,
+} from "test/fixtures/session.fixtures";
 
 import DissolutionRequestMapper from "app/mappers/dissolution/dissolutionRequest.mapper";
 import PaymentMapper from "app/mappers/payment/payment.mapper";
@@ -22,6 +27,7 @@ import DissolutionCertificateService from "app/services/dissolution/dissolutionC
 
 import {
     generateApprovalModel,
+    generateDissolutionCreateDraftResponse,
     generateDissolutionCreateRequest,
     generateDissolutionCreateResponse,
     generateDissolutionGetPaymentUIData,
@@ -30,9 +36,10 @@ import {
     generateDissolutionPatchRequest,
     generateDissolutionPaymentPatchRequest,
 } from "test/fixtures/dissolutionApi.fixtures";
-import { generateDissolutionConfirmation, generateDissolutionSession } from "test/fixtures/session.fixtures";
 import { aDissolutionGetResponse } from "test/fixtures/dissolutionGetResponse.builder";
 import { aDissolutionGetDirector } from "test/fixtures/dissolutionGetDirector.builder";
+import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
+import SessionService from "app/services/session/session.service";
 
 describe("DissolutionService", () => {
     let dissolutionService: DissolutionService;
@@ -41,6 +48,7 @@ describe("DissolutionService", () => {
     let client: DissolutionApiClient;
     let certificateService: DissolutionCertificateService;
     let paymentMapper: PaymentMapper;
+    let sessionService: SessionService;
 
     let dissolutionCreateResponse: DissolutionCreateResponse;
     let dissolutionGetResponse: DissolutionGetResponse;
@@ -55,6 +63,7 @@ describe("DissolutionService", () => {
         client = mock(DissolutionApiClient);
         certificateService = mock(DissolutionCertificateService);
         paymentMapper = mock(PaymentMapper);
+        sessionService = mock(SessionService);
 
         dissolutionCreateResponse = generateDissolutionCreateResponse();
         dissolutionGetResponse = generateDissolutionGetResponse();
@@ -64,7 +73,8 @@ describe("DissolutionService", () => {
             instance(dissolutionRequestMapper),
             instance(client),
             instance(certificateService),
-            instance(paymentMapper)
+            instance(paymentMapper),
+            instance(sessionService)
         );
     });
 
@@ -168,18 +178,93 @@ describe("DissolutionService", () => {
     });
 
     describe("approveDissolution", () => {
-        it("should call dissolution api client to approve the dissolution for the provided email", async () => {
-            const officerId: string = "abc123";
-            const ipAddress: string = "127.0.0.1";
-            dissolutionSession.approval = { ...generateApprovalModel(), officerId };
+        const OFFICER_ID = "abc123";
+        const IP_ADDRESS = "127.0.0.1";
+        const COMPANY_NUMBER = "12345678";
+        const TRANSACTION_ID = "111111-222222-333333";
 
-            const body: DissolutionPatchRequest = generateDissolutionPatchRequest();
+        let body: DissolutionPatchRequest;
 
-            when(dissolutionRequestMapper.mapToDissolutionPatchRequest(officerId, ipAddress)).thenReturn(body);
+        beforeEach(() => {
+            dissolutionSession.companyNumber = COMPANY_NUMBER;
+            dissolutionSession.approval = { ...generateApprovalModel(), officerId: OFFICER_ID };
+            body = generateDissolutionPatchRequest();
 
-            await dissolutionService.approveDissolution(TOKEN, dissolutionSession, ipAddress);
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(dissolutionRequestMapper.mapToDissolutionPatchRequest(OFFICER_ID, IP_ADDRESS)).thenReturn(body);
+        });
 
-            verify(client.patchDissolution(TOKEN, dissolutionSession.companyNumber!, body)).once();
+        describe("for a dissolution without a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER } } as any;
+
+            it("should map the approval and call the api client to approve the dissolution", async () => {
+                await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+
+                const [token, companyNumber, sentBody] = capture(client.patchDissolution).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.deepEqual(sentBody, body);
+                verify(client.patchDissolutionApproval(anything(), anything(), anything(), anything())).never();
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(client.patchDissolution(TOKEN, COMPANY_NUMBER, body)).thenReject(new Error("api failure"));
+
+                try {
+                    await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
+        });
+
+        describe("for a dissolution with a transaction", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+
+            it("should map the approval and call the api client to patch the dissolution approval", async () => {
+                await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+
+                const [token, companyNumber, transactionId, sentBody] = capture(client.patchDissolutionApproval).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.deepEqual(sentBody, body);
+                verify(client.patchDissolution(anything(), anything(), anything())).never();
+            });
+
+            it("should use the officer id from the approval model in session", async () => {
+                const otherOfficerId = "another-officer-id";
+                dissolutionSession.approval = { ...generateApprovalModel(), officerId: otherOfficerId };
+                const otherBody = generateDissolutionPatchRequest();
+                when(dissolutionRequestMapper.mapToDissolutionPatchRequest(otherOfficerId, IP_ADDRESS)).thenReturn(
+                    otherBody
+                );
+
+                await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+
+                const [token, companyNumber, transactionId, sentBody] = capture(client.patchDissolutionApproval).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.deepEqual(sentBody, otherBody);
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(client.patchDissolutionApproval(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, body)).thenReject(
+                    new Error("api failure")
+                );
+
+                try {
+                    await dissolutionService.approveDissolution(req, dissolutionSession, IP_ADDRESS);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
         });
     });
 
@@ -256,6 +341,105 @@ describe("DissolutionService", () => {
 
             verify(client.getDissolution(TOKEN, companyNumber)).once();
             assert.isUndefined(res);
+        });
+    });
+
+    describe("transaction dissolution API", () => {
+        const COMPANY_NUMBER = "12345678";
+        const TRANSACTION_ID = "111111-222222-333333";
+        const DISSOLUTION_ID = "123ABC";
+        let dissolutionCreateDraftResponse: DissolutionCreateDraftResponse;
+
+        beforeEach(() => {
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+        });
+
+        describe("createDraftDissolution", () => {
+            beforeEach(() => {
+                dissolutionCreateDraftResponse = generateDissolutionCreateDraftResponse();
+            });
+
+            it("should call dissolution api client and return dissolution id", async () => {
+                when(client.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).thenResolve(
+                    dissolutionCreateDraftResponse
+                );
+                const res = await dissolutionService.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID);
+
+                assert.equal(res, DISSOLUTION_ID);
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(client.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID)).thenReject(
+                    new Error("api failure")
+                );
+
+                try {
+                    await dissolutionService.createDraftDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
+        });
+
+        describe("initiateDissolution", () => {
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+
+            it("should call dissolution api client and initiate dissolution", async () => {
+                when(dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)).thenReturn(MAPPED_BODY);
+                when(client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, MAPPED_BODY)).thenResolve();
+
+                await dissolutionService.initiateDissolution(req, dissolutionSession);
+
+                const [token, companyNumber, transactionId, sentBody] = capture(client.initiateDissolution).last();
+
+                assert.equal(token, TOKEN);
+                assert.equal(companyNumber, COMPANY_NUMBER);
+                assert.equal(transactionId, TRANSACTION_ID);
+                assert.deepEqual(sentBody, MAPPED_BODY);
+            });
+
+            it("should propagate errors from the api client", async () => {
+                when(dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession)).thenReturn(MAPPED_BODY);
+                when(client.initiateDissolution(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, MAPPED_BODY)).thenReject(
+                    new Error("api failure")
+                );
+
+                try {
+                    await dissolutionService.initiateDissolution(req, dissolutionSession);
+                    assert.fail();
+                } catch (e: any) {
+                    assert.equal(e.message, "api failure");
+                }
+            });
+        });
+
+        describe("resendSignatoryNotification", () => {
+            const OFFICER_ID = "officer-1";
+            const req = { params: { companyNumber: COMPANY_NUMBER, transactionId: TRANSACTION_ID } } as any;
+
+            it("should return true when the api client reports the reminder was sent", async () => {
+                when(client.resendSignatoryNotification(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID)).thenResolve(
+                    GET_RESEND_EMAIL_RESPONSE
+                );
+
+                const res: boolean = await dissolutionService.resendSignatoryNotification(req, OFFICER_ID);
+
+                verify(client.resendSignatoryNotification(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID)).once();
+                assert.isTrue(res);
+            });
+
+            it("should return false when the api client reports the reminder was not sent", async () => {
+                when(client.resendSignatoryNotification(TOKEN, COMPANY_NUMBER, TRANSACTION_ID, OFFICER_ID)).thenResolve(
+                    {
+                        reminderSent: false,
+                    }
+                );
+
+                const res: boolean = await dissolutionService.resendSignatoryNotification(req, OFFICER_ID);
+
+                assert.isFalse(res);
+            });
         });
     });
 });

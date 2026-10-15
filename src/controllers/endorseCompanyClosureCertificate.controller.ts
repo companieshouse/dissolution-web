@@ -63,11 +63,10 @@ export class EndorseCompanyClosureCertificateController extends JourneyBaseContr
     }
 
     private async approveDissolution(): Promise<void> {
-        const token: string = this.session.getAccessToken(this.httpContext.request);
         const dissolutionSession: DissolutionSession = this.session.getDissolutionSession(this.httpContext.request)!;
         const ipAddress: string = this.ipAddressService.getIpAddress(this.httpContext.request);
 
-        await this.dissolutionService.approveDissolution(token, dissolutionSession, ipAddress);
+        await this.dissolutionService.approveDissolution(this.httpContext.request, dissolutionSession, ipAddress);
     }
 
     private getBackUri(companyNumber: string): string {

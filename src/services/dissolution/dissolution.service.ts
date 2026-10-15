@@ -6,7 +6,7 @@ import DissolutionCertificateService from "./dissolutionCertificate.service";
 
 import DissolutionRequestMapper from "app/mappers/dissolution/dissolutionRequest.mapper";
 import PaymentMapper from "app/mappers/payment/payment.mapper";
-import { DissolutionCreateRequest } from "app/models/dto/dissolutionCreateRequest";
+import { DissolutionCreateRequest, DissolutionInitiationRequest } from "app/models/dto/dissolutionCreateRequest";
 import DissolutionCreateResponse from "app/models/dto/dissolutionCreateResponse";
 import DissolutionGetPaymentUIData from "app/models/dto/dissolutionGetPaymentUIData";
 import DissolutionGetResendEmailResponse from "app/models/dto/dissolutionGetResendEmailResponse";
@@ -18,14 +18,22 @@ import Optional from "app/models/optional";
 import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import { DissolutionApiClient } from "app/services/clients/dissolutionApi.client";
+import DissolutionCreateDraftResponse from "app/models/dto/dissolutionCreateDraftResponse";
+import { Request } from "express";
+import SessionService from "app/services/session/session.service";
+import {
+    getCompanyNumberAndTransactionIdFromRequest,
+    hasCompanyNumberAndTransactionIdInRequest,
+} from "app/utils/transaction.util";
 
 @provide(DissolutionService)
 export default class DissolutionService {
     public constructor(
-        @inject(DissolutionRequestMapper) private dissolutionRequestMapper: DissolutionRequestMapper,
-        @inject(DissolutionApiClient) private client: DissolutionApiClient,
-        @inject(DissolutionCertificateService) private certificateService: DissolutionCertificateService,
-        @inject(PaymentMapper) private paymentMapper: PaymentMapper
+        @inject(DissolutionRequestMapper) private readonly dissolutionRequestMapper: DissolutionRequestMapper,
+        @inject(DissolutionApiClient) private readonly client: DissolutionApiClient,
+        @inject(DissolutionCertificateService) private readonly certificateService: DissolutionCertificateService,
+        @inject(PaymentMapper) private readonly paymentMapper: PaymentMapper,
+        @inject(SessionService) private readonly session: SessionService
     ) {}
 
     public async createDissolution(token: string, dissolutionSession: DissolutionSession): Promise<string> {
@@ -87,17 +95,53 @@ export default class DissolutionService {
         return await this.client.patchDissolutionPaymentData(applicationReference, dissolutionPaymentPatchRequest);
     }
 
-    public async approveDissolution(token: string, dissolution: DissolutionSession, ipAddress: string): Promise<void> {
+    public async approveDissolution(req: Request, dissolution: DissolutionSession, ipAddress: string): Promise<void> {
+        const token: string = this.session.getAccessToken(req);
         const body: DissolutionPatchRequest = this.dissolutionRequestMapper.mapToDissolutionPatchRequest(
             dissolution.approval!.officerId,
             ipAddress
         );
-        const companyNumber: string = dissolution.companyNumber!;
 
-        await this.client.patchDissolution(token, companyNumber, body);
+        if (hasCompanyNumberAndTransactionIdInRequest(req)) {
+            const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+            return this.client.patchDissolutionApproval(token, companyNumber, transactionId, body);
+        }
+        await this.client.patchDissolution(token, dissolution.companyNumber, body);
     }
 
     public async generateDissolutionCertificateUrl(confirmation: DissolutionConfirmation): Promise<string> {
         return this.certificateService.generateDissolutionCertificateUrl(confirmation);
+    }
+
+    public async createDraftDissolution(token: string, companyNumber: string, transactionId: string): Promise<string> {
+        const response: DissolutionCreateDraftResponse = await this.client.createDraftDissolution(
+            token,
+            companyNumber,
+            transactionId
+        );
+        return response.dissolution_id;
+    }
+
+    public async initiateDissolution(req: Request, dissolutionSession: DissolutionSession): Promise<void> {
+        const token: string = this.session.getAccessToken(req);
+        const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+        const body: DissolutionInitiationRequest =
+            this.dissolutionRequestMapper.mapToDissolutionRequest(dissolutionSession);
+
+        await this.client.initiateDissolution(token, companyNumber, transactionId, body);
+    }
+
+    public async resendSignatoryNotification(req: Request, officerId: string): Promise<boolean> {
+        const token: string = this.session.getAccessToken(req);
+        const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+
+        const response: DissolutionGetResendEmailResponse = await this.client.resendSignatoryNotification(
+            token,
+            companyNumber,
+            transactionId,
+            officerId
+        );
+
+        return response.reminderSent;
     }
 }

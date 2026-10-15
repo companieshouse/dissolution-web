@@ -12,13 +12,20 @@ import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import ChangeDetailsFormModel from "app/models/form/changeDetails.model";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
+import { Request } from "express";
+import {
+    getCompanyNumberAndTransactionIdFromRequest,
+    hasCompanyNumberAndTransactionIdInRequest,
+} from "app/utils/transaction.util";
+import SessionService from "app/services/session/session.service";
 
 @provide(DissolutionDirectorService)
 export default class DissolutionDirectorService {
     public constructor(
         @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
         @inject(DissolutionDirectorMapper) private readonly mapper: DissolutionDirectorMapper,
-        @inject(DissolutionApiClient) private readonly client: DissolutionApiClient
+        @inject(DissolutionApiClient) private readonly client: DissolutionApiClient,
+        @inject(SessionService) private readonly session: SessionService
     ) {}
 
     public async getSignatoryToEdit(token: string, session: DissolutionSession): Promise<DissolutionGetDirector> {
@@ -41,11 +48,19 @@ export default class DissolutionDirectorService {
     }
 
     public async updateSignatory(
-        token: string,
+        req: Request,
         session: DissolutionSession,
         form: ChangeDetailsFormModel
     ): Promise<void> {
-        const request: DissolutionDirectorPatchRequest = this.mapper.mapToDissolutionDirectorPatchRequest(form);
-        return this.client.patchDissolutionDirector(token, session.companyNumber!, session.signatoryIdToEdit!, request);
+        const token: string = this.session.getAccessToken(req);
+        const officerId: string = session.signatoryIdToEdit!;
+        const body: DissolutionDirectorPatchRequest = this.mapper.mapToDissolutionDirectorPatchRequest(form);
+
+        if (hasCompanyNumberAndTransactionIdInRequest(req)) {
+            const { companyNumber, transactionId } = getCompanyNumberAndTransactionIdFromRequest(req);
+            return this.client.updateSignatoryDetails(token, companyNumber, transactionId, officerId, body);
+        }
+
+        return this.client.patchDissolutionDirector(token, session.companyNumber, officerId, body);
     }
 }

@@ -8,3 +8,5 @@ export function generateRequest(): Request {
         params: {},
     } as Request;
 }
+
+export const aRequestWith = (params: Record<string, string>): Request => ({ params }) as any as Request;

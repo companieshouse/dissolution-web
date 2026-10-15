@@ -341,7 +341,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => true;
             configureApprovalModel({ isCorporateOfficer: true });
 
-            when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve();
+            when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve();
             // Dynamic validation schema
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
@@ -362,7 +362,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false;
             configureApprovalModel({ isCorporateOfficer: false });
 
-            when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve();
+            when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve();
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
@@ -383,7 +383,7 @@ describe("EndorseCompanyClosureCertificateController", () => {
             mockedCompanyOfficersService.isCorporateOfficer = async () => false;
             configureApprovalModel({ isCorporateOfficer: false });
 
-            when(mockedDissolutionService.approveDissolution(TOKEN, anything(), anything())).thenResolve();
+            when(mockedDissolutionService.approveDissolution(anything(), anything(), anything())).thenResolve();
             when(mockedFormValidator.validate(deepEqual(testObject), anything())).thenReturn(mockError);
 
             const res = await request(initApp())
