@@ -35,6 +35,40 @@ export default class TransactionApiClient {
         }
         return response.resource;
     }
+
+    public async closeTransaction(token: string, transactionId: string): Promise<void> {
+        const service = this.factory.getTransactionService(token);
+
+        const getResponse: TransactionApiResponse<Transaction> = await service.getTransaction(transactionId);
+
+        if (getResponse.httpStatusCode !== StatusCodes.OK) {
+            throw new TransactionApiError(
+                `Failed to get transaction - invalid HTTP status ${getResponse.httpStatusCode}`,
+                getResponse.httpStatusCode,
+                getResponse.errors
+            );
+        }
+
+        if (!getResponse.resource) {
+            throw new Error("Failed to get transaction - No transaction resource returned");
+        }
+
+        const response: TransactionApiResponse<Transaction> = await service.putTransaction(
+            {
+                ...getResponse.resource,
+                status: "closed",
+            },
+            transactionId
+        );
+
+        if (response.httpStatusCode !== StatusCodes.OK) {
+            throw new TransactionApiError(
+                `Failed to close transaction - invalid HTTP status ${response.httpStatusCode}`,
+                response.httpStatusCode,
+                response.errors
+            );
+        }
+    }
 }
 
 export class TransactionApiError extends Error {

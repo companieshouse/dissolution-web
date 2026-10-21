@@ -15,6 +15,7 @@ import SessionService from "app/services/session/session.service";
 import TYPES from "app/types";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import TransactionService from "app/services/transaction/transaction.service";
 
 interface ViewModel {
     paymentSummary: PaymentSummary;
@@ -26,6 +27,7 @@ export class PaymentReviewController extends JourneyBaseController {
         @inject(SessionService) private sessionService: SessionService,
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(PaymentService) private paymentService: PaymentService,
+        @inject(TransactionService) private transactionService: TransactionService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
@@ -60,6 +62,10 @@ export class PaymentReviewController extends JourneyBaseController {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
             this.httpContext.request
         )!;
+
+        if (dissolutionSession.transactionId) {
+            await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
+        }
 
         const paymentStateUUID: string = uuidv4();
 

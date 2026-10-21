@@ -34,4 +34,15 @@ export default class TransactionService {
             throw new Error(`Failed to create transaction for company number ${companyNumber}`);
         }
     }
+
+    public async closeTransaction(token: string, transactionId: string): Promise<void> {
+        try {
+            await this.client.closeTransaction(token, transactionId);
+        } catch (err: unknown) {
+            this.logger.error(
+                `Failed to close transaction ${transactionId}: ${err instanceof Error ? err.message : JSON.stringify(err)}`
+            );
+            throw new Error(`Failed to close transaction ${transactionId}`);
+        }
+    }
 }
