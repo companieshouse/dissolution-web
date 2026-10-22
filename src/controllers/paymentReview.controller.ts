@@ -28,6 +28,7 @@ export class PaymentReviewController extends JourneyBaseController {
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(PaymentService) private paymentService: PaymentService,
         @inject(TransactionService) private transactionService: TransactionService,
+        @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
@@ -63,7 +64,7 @@ export class PaymentReviewController extends JourneyBaseController {
             this.httpContext.request
         )!;
 
-        if (dissolutionSession.transactionId) {
+        if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
             await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
         }
 
