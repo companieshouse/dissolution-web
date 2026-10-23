@@ -73,6 +73,8 @@ describe("DissolutionService", () => {
             instance(dissolutionRequestMapper),
             instance(client),
             instance(certificateService),
+            "13",
+            "Dissolution of",
             instance(paymentMapper),
             instance(sessionService)
         );
@@ -149,11 +151,28 @@ describe("DissolutionService", () => {
             );
             when(paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)).thenReturn(paymentSummary);
 
-            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(dissolutionSession);
+            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(
+                dissolutionSession,
+                dissolutionGetResponse
+            );
 
             verify(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).once();
 
             assert.equal(response, paymentSummary);
+        });
+
+        it("should use the company name from the dissolution when generating a transaction payment summary", async () => {
+            const transactionSession: DissolutionSession = {
+                ...dissolutionSession,
+                transactionId: "transaction-id",
+            };
+
+            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(
+                transactionSession,
+                dissolutionGetResponse
+            );
+
+            assert.include(response.payments[0].description, dissolutionGetResponse.company_name);
         });
     });
 

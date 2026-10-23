@@ -4,7 +4,7 @@ import { assert } from "chai";
 import { Application } from "express";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { anything, instance, mock, when } from "ts-mockito";
+import { anything, instance, mock, verify, when } from "ts-mockito";
 import { generatePaymentSummary } from "../fixtures/payment.fixtures";
 import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures";
 import { createApp } from "./helpers/application.factory";
@@ -18,6 +18,7 @@ import { HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } fr
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import PaymentService from "app/services/payment/payment.service";
 import SessionService from "app/services/session/session.service";
+import TransactionService from "app/services/transaction/transaction.service";
 import TYPES from "app/types";
 
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures";
@@ -30,6 +31,7 @@ describe("PaymentReviewController", () => {
     let dissolutionService: DissolutionService;
     let sessionService: SessionService;
     let paymentService: PaymentService;
+    let transactionService: TransactionService;
 
     const COMPANY_NUMBER = "ABC123";
     const REDIRECT_URL = "http://some-payment-ui-url";
@@ -42,6 +44,8 @@ describe("PaymentReviewController", () => {
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService));
             container.rebind(SessionService).toConstantValue(instance(sessionService));
             container.rebind(PaymentService).toConstantValue(instance(paymentService));
+            container.rebind(TransactionService).toConstantValue(instance(transactionService));
+            container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(true);
             container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(payByAccountEnabled);
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
@@ -49,10 +53,11 @@ describe("PaymentReviewController", () => {
         });
     }
 
-    before(() => {
+    beforeEach(() => {
         dissolutionService = mock(DissolutionService);
         sessionService = mock(SessionService);
         paymentService = mock(PaymentService);
+        transactionService = mock(TransactionService);
 
         dissolution = generateDissolutionGetResponse();
         dissolutionSession = generateDissolutionSession(COMPANY_NUMBER);
@@ -78,7 +83,7 @@ describe("PaymentReviewController", () => {
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
-            when(dissolutionService.getDissolutionPaymentSummary(dissolutionSession)).thenResolve(
+            when(dissolutionService.getDissolutionPaymentSummary(dissolutionSession, dissolution)).thenResolve(
                 generatePaymentSummary()
             );
 
@@ -99,7 +104,14 @@ describe("PaymentReviewController", () => {
 
     describe("POST - ensure that the payment review page submits successfully", () => {
         it("should redirect to the how do you want to pay page (if the pay by account feature toggle is on)", async () => {
+            dissolution.directors.forEach(director => {
+                director.approved_at = "2026-10-23";
+            });
             const app = initApp();
+
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
 
             await request(app)
                 .post(PAYMENT_REVIEW_URI)
@@ -108,8 +120,13 @@ describe("PaymentReviewController", () => {
         });
 
         it("should redirect to the GOV.UK Pay journey (if the pay by account feature toggle is off)", async () => {
+            dissolution.directors.forEach(director => {
+                director.approved_at = "2026-10-23";
+            });
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+            when(transactionService.closeTransaction(TOKEN, dissolutionSession.transactionId!)).thenResolve();
             when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())).thenResolve(
                 REDIRECT_URL
             );
@@ -121,5 +138,82 @@ describe("PaymentReviewController", () => {
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_URL);
         });
+
+        it("should close transaction before creating payment URL when transactionId exists", async () => {
+            const transactionId = "tx-123";
+            const txSession: DissolutionSession = { ...dissolutionSession, transactionId };
+
+            dissolution.directors.forEach(director => {
+                director.approved_at = "2026-10-23";
+            });
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(txSession);
+            when(dissolutionService.getDissolution(TOKEN, txSession)).thenResolve(dissolution);
+            when(transactionService.closeTransaction(TOKEN, transactionId)).thenResolve();
+            when(paymentService.generatePaymentURL(TOKEN, txSession, anything(), anything())).thenResolve(REDIRECT_URL);
+
+            const app = initApp(0);
+
+            await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.MOVED_TEMPORARILY);
+
+            verify(transactionService.closeTransaction(TOKEN, transactionId)).once();
+            verify(transactionService.closeTransaction(TOKEN, transactionId)).calledBefore(
+                paymentService.generatePaymentURL(TOKEN, txSession, anything(), anything())
+            );
+        });
+
+        it("should allow payment when exactly half of the selected directors have signed", async () => {
+            dissolution.directors[0].approved_at = "2026-10-23";
+            dissolutionSession.directorsToSign = dissolutionSession.directorsToSign!.slice(0, 2);
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+            const app = initApp();
+
+            await request(app)
+                .post(PAYMENT_REVIEW_URI)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", HOW_DO_YOU_WANT_TO_PAY_URI);
+        });
+
+        for (const signedDirectorCount of [0, 1]) {
+            it(`should prevent payment when ${signedDirectorCount} of three selected directors have signed`, async () => {
+                dissolution.directors.slice(0, signedDirectorCount).forEach(director => {
+                    director.approved_at = "2026-10-23";
+                });
+                dissolutionSession.transactionId = "tx-123";
+                when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+                when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+                const app = initApp(0);
+
+                await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
+                verify(transactionService.closeTransaction(anything(), anything())).never();
+            });
+        }
+
+        for (const directorsToSign of [undefined, []]) {
+            it(`should prevent payment when the director selection is ${directorsToSign ? "empty" : "missing"}`, async () => {
+                dissolution.directors.forEach(director => {
+                    director.approved_at = "2026-10-23";
+                });
+                dissolutionSession.directorsToSign = directorsToSign;
+                dissolutionSession.transactionId = "tx-123";
+                when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+                when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+                const app = initApp(0);
+
+                await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
+                verify(transactionService.closeTransaction(anything(), anything())).never();
+            });
+        }
     });
 });
