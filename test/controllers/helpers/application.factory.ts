@@ -24,6 +24,9 @@ const mockEnvVars = (container: Container): void => {
     container.bind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(1);
     container.bind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(false);
     container.bind(TYPES.LLDS01_AND_DS01_FEE).toConstantValue("13");
+    container
+        .bind<string>(TYPES.LLDS01_AND_DS01_PAYMENT_DESCRIPTION)
+        .toConstantValue("Dissolution application to strike off and dissolve a company");
 
     const logger = createLogger(APP_NAME);
     container.bind<ApplicationLogger>(ApplicationLogger).toConstantValue(logger);

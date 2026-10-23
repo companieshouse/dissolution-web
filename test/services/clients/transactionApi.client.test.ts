@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { instance, mock, when } from "ts-mockito";
+import { deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { TOKEN } from "test/fixtures/session.fixtures";
 import { StatusCodes } from "http-status-codes";
 import APIClientFactory from "app/services/clients/apiClient.factory";
@@ -101,6 +101,63 @@ describe("TransactionApiClient", () => {
                 assert.instanceOf(err, Error);
                 assert.equal(err.message, "Failed to post transaction - No transaction resource returned");
             }
+        });
+
+        describe("closeTransaction", () => {
+            it("should close a transaction when API returns 200", async () => {
+                const { createTransactionResponse } = generateCreateTransactionDTOs(COMPANY_NUMBER, TX_DESC, TX_REF);
+                const closedTransaction = {
+                    ...createTransactionResponse.resource!,
+                    status: "closed",
+                };
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.getTransaction("tx-123")).thenResolve({
+                    ...createTransactionResponse,
+                    httpStatusCode: StatusCodes.OK,
+                });
+                when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve({
+                    httpStatusCode: StatusCodes.OK,
+                });
+
+                const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+
+                assert.isUndefined(result);
+                verify(transactionService.getTransaction("tx-123")).once();
+                verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
+            });
+
+            it("Should throw an error when transaction api returns a status other than 200", async () => {
+                const { createTransactionResponse } = generateCreateTransactionDTOs(COMPANY_NUMBER, TX_DESC, TX_REF);
+                const closedTransaction = {
+                    ...createTransactionResponse.resource!,
+                    status: "closed",
+                };
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.getTransaction("tx-123")).thenResolve({
+                    ...createTransactionResponse,
+                    httpStatusCode: StatusCodes.OK,
+                });
+                when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve(
+                    generateTransactionApiError(StatusCodes.BAD_REQUEST)
+                );
+
+                try {
+                    await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+                    assert.fail("Expected TransactionApiError to be thrown");
+                } catch (err) {
+                    assert.instanceOf(err, TransactionApiError);
+                    if (!(err instanceof TransactionApiError)) {
+                        throw err;
+                    }
+                    assert.equal(err.httpStatusCode, StatusCodes.BAD_REQUEST);
+                    assert.equal(
+                        err.message,
+                        `Failed to close transaction - invalid HTTP status ${StatusCodes.BAD_REQUEST}`
+                    );
+                }
+            });
         });
     });
 });

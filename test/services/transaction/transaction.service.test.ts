@@ -69,5 +69,27 @@ describe("TransactionService", () => {
                 assert.equal(err.message, `Failed to create transaction for company number ${COMPANY_NUMBER}`);
             }
         });
+
+        describe("closeTransaction", () => {
+            it("should call the transaction api client to close the transaction", async () => {
+                when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve();
+
+                const result = await service.closeTransaction(TOKEN, TRANSACTION_ID);
+
+                assert.isUndefined(result);
+                verify(client.closeTransaction(TOKEN, TRANSACTION_ID)).once();
+            });
+
+            it("should reject with an error when transaction close failed", async () => {
+                when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenThrow(new Error("Some Client Error"));
+
+                try {
+                    await service.closeTransaction(TOKEN, TRANSACTION_ID);
+                    assert.fail();
+                } catch (err: any) {
+                    assert.equal(err.message, `Failed to close transaction ${TRANSACTION_ID}`);
+                }
+            });
+        });
     });
 });

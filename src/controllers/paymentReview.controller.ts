@@ -15,6 +15,7 @@ import SessionService from "app/services/session/session.service";
 import TYPES from "app/types";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import TransactionService from "app/services/transaction/transaction.service";
 
 interface ViewModel {
     paymentSummary: PaymentSummary;
@@ -26,6 +27,8 @@ export class PaymentReviewController extends JourneyBaseController {
         @inject(SessionService) private sessionService: SessionService,
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(PaymentService) private paymentService: PaymentService,
+        @inject(TransactionService) private readonly transactionService: TransactionService,
+        @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
@@ -40,26 +43,51 @@ export class PaymentReviewController extends JourneyBaseController {
             this.httpContext.request
         )!;
 
-        if (await this.isAlreadyPaid(dissolutionSession, token)) {
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
+
+        if (dissolution!.application_status === ApplicationStatus.PAID) {
             return this.redirect(SEARCH_COMPANY_URI);
         }
 
-        const paymentSummary: PaymentSummary =
-            await this.dissolutionService.getDissolutionPaymentSummary(dissolutionSession);
+        const paymentSummary: PaymentSummary = await this.dissolutionService.getDissolutionPaymentSummary(
+            dissolutionSession,
+            dissolution!
+        );
 
         return this.renderView(paymentSummary);
     }
 
     @httpPost("")
     public async post(): Promise<RedirectResult> {
-        if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-            return this.redirect(this.journeyPath(HOW_DO_YOU_WANT_TO_PAY_URI));
-        }
-
         const token: string = this.sessionService.getAccessToken(this.httpContext.request);
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
             this.httpContext.request
         )!;
+
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
+
+        if (!dissolution) {
+            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
+        }
+
+        const signedDirectorCount = dissolution.directors.filter(director => director.approved_at).length;
+        const directorsToSignCount = dissolutionSession.directorsToSign?.length;
+
+        if (directorsToSignCount === undefined || directorsToSignCount === 0) {
+            throw new Error("Cannot proceed to payment until directors to sign have been selected");
+        }
+
+        if (signedDirectorCount * 2 < directorsToSignCount) {
+            throw new Error("Cannot proceed to payment until at least half of the directors have signed");
+        }
+
+        if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
+            await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
+        }
+
+        if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
+            return this.redirect(this.journeyPath(HOW_DO_YOU_WANT_TO_PAY_URI));
+        }
 
         const paymentStateUUID: string = uuidv4();
 
@@ -92,12 +120,6 @@ export class PaymentReviewController extends JourneyBaseController {
         };
 
         this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession);
-    }
-
-    private async isAlreadyPaid(dissolutionSession: DissolutionSession, token: string): Promise<boolean> {
-        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
-
-        return dissolution!.application_status === ApplicationStatus.PAID;
     }
 
     private async getDissolution(

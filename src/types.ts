@@ -19,6 +19,7 @@ const TYPES = {
     SessionMiddleware: "SessionMiddleware",
     S3: "S3",
     LLDS01_AND_DS01_FEE: "LLDS01_AND_DS01_FEE",
+    LLDS01_AND_DS01_PAYMENT_DESCRIPTION: "LLDS01_AND_DS01_PAYMENTS_DESCRIPTION",
     UuidGenerator: "UuidGenerator",
     JourneyIdAuthMiddleware: "JourneyIdAuthMiddleware",
     JourneyPathService: "JourneyPathService",
