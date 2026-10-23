@@ -120,8 +120,9 @@ describe("TransactionApiClient", () => {
                     httpStatusCode: StatusCodes.OK,
                 });
 
-                await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+                const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
 
+                assert.isUndefined(result);
                 verify(transactionService.getTransaction("tx-123")).once();
                 verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
             });
