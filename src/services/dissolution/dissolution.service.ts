@@ -25,6 +25,8 @@ import {
     getCompanyNumberAndTransactionIdFromRequest,
     hasCompanyNumberAndTransactionIdInRequest,
 } from "app/utils/transaction.util";
+import TYPES from "app/types";
+import convertToCurrency from "app/utils/currencyConverter.util";
 
 @provide(DissolutionService)
 export default class DissolutionService {
@@ -32,6 +34,8 @@ export default class DissolutionService {
         @inject(DissolutionRequestMapper) private readonly dissolutionRequestMapper: DissolutionRequestMapper,
         @inject(DissolutionApiClient) private readonly client: DissolutionApiClient,
         @inject(DissolutionCertificateService) private readonly certificateService: DissolutionCertificateService,
+        @inject(TYPES.LLDS01_AND_DS01_FEE) private readonly fee: string,
+        @inject(TYPES.LLDS01_AND_DS01_PAYMENT_DESCRIPTION) private readonly paymentDescription: string,
         @inject(PaymentMapper) private readonly paymentMapper: PaymentMapper,
         @inject(SessionService) private readonly session: SessionService
     ) {}
@@ -74,7 +78,27 @@ export default class DissolutionService {
         return signatory?.email;
     }
 
-    public async getDissolutionPaymentSummary(dissolutionSession: DissolutionSession): Promise<PaymentSummary> {
+    public async getDissolutionPaymentSummary(
+        dissolutionSession: DissolutionSession,
+        dissolution: DissolutionGetResponse
+    ): Promise<PaymentSummary> {
+        if (dissolutionSession.transactionId) {
+            return {
+                payments: [
+                    {
+                        description:
+                            this.paymentDescription +
+                            " " +
+                            dissolution.company_name +
+                            " (" +
+                            dissolutionSession.companyNumber +
+                            ")",
+                        cost: convertToCurrency(Number(this.fee)),
+                    },
+                ],
+                total_cost: convertToCurrency(Number(this.fee)),
+            };
+        }
         const applicationReference: string = dissolutionSession.applicationReferenceNumber!;
 
         const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData =
