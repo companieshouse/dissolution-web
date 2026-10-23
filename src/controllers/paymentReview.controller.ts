@@ -27,7 +27,7 @@ export class PaymentReviewController extends JourneyBaseController {
         @inject(SessionService) private sessionService: SessionService,
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(PaymentService) private paymentService: PaymentService,
-        @inject(TransactionService) private transactionService: TransactionService,
+        @inject(TransactionService) private readonly transactionService: TransactionService,
         @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
