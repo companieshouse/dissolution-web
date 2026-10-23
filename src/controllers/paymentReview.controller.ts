@@ -55,10 +55,6 @@ export class PaymentReviewController extends JourneyBaseController {
 
     @httpPost("")
     public async post(): Promise<RedirectResult> {
-        if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
-            return this.redirect(this.journeyPath(HOW_DO_YOU_WANT_TO_PAY_URI));
-        }
-
         const token: string = this.sessionService.getAccessToken(this.httpContext.request);
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
             this.httpContext.request
@@ -66,6 +62,10 @@ export class PaymentReviewController extends JourneyBaseController {
 
         if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
             await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
+        }
+
+        if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
+            return this.redirect(this.journeyPath(HOW_DO_YOU_WANT_TO_PAY_URI));
         }
 
         const paymentStateUUID: string = uuidv4();
