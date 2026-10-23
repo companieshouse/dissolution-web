@@ -74,8 +74,9 @@ describe("TransactionService", () => {
             it("should call the transaction api client to close the transaction", async () => {
                 when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve();
 
-                await service.closeTransaction(TOKEN, TRANSACTION_ID);
+                const result = await service.closeTransaction(TOKEN, TRANSACTION_ID);
 
+                assert.isUndefined(result);
                 verify(client.closeTransaction(TOKEN, TRANSACTION_ID)).once();
             });
 

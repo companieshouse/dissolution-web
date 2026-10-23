@@ -122,6 +122,7 @@ describe("TransactionApiClient", () => {
 
                 await transactionApiClient.closeTransaction(TOKEN, "tx-123");
 
+                verify(transactionService.getTransaction("tx-123")).once();
                 verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
             });
 
