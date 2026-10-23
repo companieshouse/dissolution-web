@@ -43,12 +43,16 @@ export class PaymentReviewController extends JourneyBaseController {
             this.httpContext.request
         )!;
 
-        if (await this.isAlreadyPaid(dissolutionSession, token)) {
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
+
+        if (dissolution!.application_status === ApplicationStatus.PAID) {
             return this.redirect(SEARCH_COMPANY_URI);
         }
 
-        const paymentSummary: PaymentSummary =
-            await this.dissolutionService.getDissolutionPaymentSummary(dissolutionSession);
+        const paymentSummary: PaymentSummary = await this.dissolutionService.getDissolutionPaymentSummary(
+            dissolutionSession,
+            dissolution!
+        );
 
         return this.renderView(paymentSummary);
     }
@@ -59,6 +63,23 @@ export class PaymentReviewController extends JourneyBaseController {
         const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
             this.httpContext.request
         )!;
+
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
+
+        if (!dissolution) {
+            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
+        }
+
+        const signedDirectorCount = dissolution.directors.filter(director => director.approved_at).length;
+        const directorsToSignCount = dissolutionSession.directorsToSign?.length;
+
+        if (directorsToSignCount === undefined || directorsToSignCount === 0) {
+            throw new Error("Cannot proceed to payment until directors to sign have been selected");
+        }
+
+        if (signedDirectorCount * 2 < directorsToSignCount) {
+            throw new Error("Cannot proceed to payment until at least half of the directors have signed");
+        }
 
         if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
             await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
@@ -99,12 +120,6 @@ export class PaymentReviewController extends JourneyBaseController {
         };
 
         this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession);
-    }
-
-    private async isAlreadyPaid(dissolutionSession: DissolutionSession, token: string): Promise<boolean> {
-        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
-
-        return dissolution!.application_status === ApplicationStatus.PAID;
     }
 
     private async getDissolution(
