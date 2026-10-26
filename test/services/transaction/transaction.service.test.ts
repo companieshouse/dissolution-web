@@ -90,6 +90,19 @@ describe("TransactionService", () => {
                     assert.equal(err.message, `Failed to close transaction ${TRANSACTION_ID}`);
                 }
             });
+
+            it("should reject with an error when TransactionAPIError is caught", async () => {
+                when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenThrow(
+                    new TransactionApiError("some api error", StatusCodes.INTERNAL_SERVER_ERROR, [])
+                );
+
+                try {
+                    await service.closeTransaction(TOKEN, TRANSACTION_ID);
+                    assert.fail();
+                } catch (err: any) {
+                    assert.equal(err.message, `Failed to close transaction ${TRANSACTION_ID}`);
+                }
+            });
         });
     });
 });
