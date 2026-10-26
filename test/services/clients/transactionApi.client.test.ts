@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { deepEqual, instance, mock, verify, when } from "ts-mockito";
+import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { TOKEN } from "test/fixtures/session.fixtures";
 import { StatusCodes } from "http-status-codes";
 import APIClientFactory from "app/services/clients/apiClient.factory";
@@ -105,6 +105,20 @@ describe("TransactionApiClient", () => {
         });
 
         describe("closeTransaction", () => {
+            it("should return the payment required header", async () => {
+                const paymentRequired = "true";
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.putTransaction(anything(), "tx-123")).thenResolve({
+                    httpStatusCode: StatusCodes.OK,
+                    headers: { "x-payment-required": paymentRequired },
+                });
+
+                const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+
+                assert.equal(result, paymentRequired);
+            });
+
             it("should close a transaction when API returns 200", async () => {
                 const closedTransaction = {
                     id: "tx-123",

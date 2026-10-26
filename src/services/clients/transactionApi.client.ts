@@ -40,7 +40,7 @@ export default class TransactionApiClient {
         return response.resource;
     }
 
-    public async closeTransaction(token: string, transactionId: string): Promise<void> {
+    public async closeTransaction(token: string, transactionId: string): Promise<string | string[] | undefined> {
         const service = this.factory.getTransactionService(token);
         const closedTransaction: Transaction = {
             id: transactionId,
@@ -62,6 +62,8 @@ export default class TransactionApiClient {
                 response.headers?.[PAYMENT_REQUIRED_HEADER]
             );
         }
+
+        return response.headers?.[PAYMENT_REQUIRED_HEADER];
     }
 }
 
