@@ -7,6 +7,7 @@ import TransactionApiClient, { TransactionApiError } from "app/services/clients/
 import TransactionService from "@companieshouse/api-sdk-node/dist/services/transaction/service";
 import { generateCreateTransactionDTOs, generateTransactionApiError } from "test/fixtures/transaction.fixtures";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
+import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
 
 const COMPANY_NUMBER = "12345678";
 const TX_REF = "ABC123";
@@ -105,17 +106,14 @@ describe("TransactionApiClient", () => {
 
         describe("closeTransaction", () => {
             it("should close a transaction when API returns 200", async () => {
-                const { createTransactionResponse } = generateCreateTransactionDTOs(COMPANY_NUMBER, TX_DESC, TX_REF);
                 const closedTransaction = {
-                    ...createTransactionResponse.resource!,
+                    id: "tx-123",
+                    description: DESCRIPTION,
+                    reference: REFERENCE,
                     status: "closed",
                 };
 
                 when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
-                when(transactionService.getTransaction("tx-123")).thenResolve({
-                    ...createTransactionResponse,
-                    httpStatusCode: StatusCodes.OK,
-                });
                 when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve({
                     httpStatusCode: StatusCodes.OK,
                 });
@@ -123,22 +121,18 @@ describe("TransactionApiClient", () => {
                 const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
 
                 assert.isUndefined(result);
-                verify(transactionService.getTransaction("tx-123")).once();
                 verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
             });
 
             it("Should throw an error when transaction api returns a status other than 200", async () => {
-                const { createTransactionResponse } = generateCreateTransactionDTOs(COMPANY_NUMBER, TX_DESC, TX_REF);
                 const closedTransaction = {
-                    ...createTransactionResponse.resource!,
+                    id: "tx-123",
+                    description: DESCRIPTION,
+                    reference: REFERENCE,
                     status: "closed",
                 };
 
                 when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
-                when(transactionService.getTransaction("tx-123")).thenResolve({
-                    ...createTransactionResponse,
-                    httpStatusCode: StatusCodes.OK,
-                });
                 when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve(
                     generateTransactionApiError(StatusCodes.BAD_REQUEST)
                 );
