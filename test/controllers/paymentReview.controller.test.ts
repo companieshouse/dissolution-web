@@ -24,6 +24,8 @@ import TYPES from "app/types";
 import { generateDissolutionGetResponse, generateGetDirector } from "test/fixtures/dissolutionApi.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
+import { generateDirectorDetails } from "../fixtures/companyOfficers.fixtures";
 
 mockCsrfMiddleware.restore();
 
@@ -32,6 +34,7 @@ describe("PaymentReviewController", () => {
     let sessionService: SessionService;
     let paymentService: PaymentService;
     let transactionService: TransactionService;
+    let officerService: CompanyOfficersService;
 
     const COMPANY_NUMBER = "ABC123";
     const REDIRECT_URL = "http://some-payment-ui-url";
@@ -45,6 +48,7 @@ describe("PaymentReviewController", () => {
             container.rebind(SessionService).toConstantValue(instance(sessionService));
             container.rebind(PaymentService).toConstantValue(instance(paymentService));
             container.rebind(TransactionService).toConstantValue(instance(transactionService));
+            container.rebind(CompanyOfficersService).toConstantValue(instance(officerService));
             container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(transactionsEnabled);
             container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(payByAccountEnabled);
             container.rebind(JourneyPathService).toConstantValue({
@@ -58,9 +62,14 @@ describe("PaymentReviewController", () => {
         sessionService = mock(SessionService);
         paymentService = mock(PaymentService);
         transactionService = mock(TransactionService);
+        officerService = mock(CompanyOfficersService);
 
         dissolution = generateDissolutionGetResponse();
         dissolutionSession = generateDissolutionSession(COMPANY_NUMBER);
+        when(officerService.getActiveDirectorsForCompany(TOKEN, dissolution.company_number)).thenResolve([
+            generateDirectorDetails(),
+            generateDirectorDetails(),
+        ]);
     });
 
     describe("GET - ensure that the payment review page loads correctly", () => {
@@ -214,7 +223,7 @@ describe("PaymentReviewController", () => {
             );
         });
 
-        it("should allow payment when exactly half of the persisted signatories have signed", async () => {
+        it("should prevent payment when exactly half of the company directors have signed", async () => {
             dissolution.directors[0].approved_at = "2026-10-23";
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
@@ -222,15 +231,20 @@ describe("PaymentReviewController", () => {
 
             const app = initApp();
 
-            await request(app)
-                .post(PAYMENT_REVIEW_URI)
-                .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", HOW_DO_YOU_WANT_TO_PAY_URI);
+            await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
+            verify(transactionService.closeTransaction(anything(), anything())).never();
         });
 
         for (const signedDirectorCount of [0, 1]) {
             it(`should prevent payment when ${signedDirectorCount} of three persisted signatories have signed`, async () => {
                 dissolution.directors.push(generateGetDirector("Third Director"));
+                when(officerService.getActiveDirectorsForCompany(TOKEN, dissolution.company_number)).thenResolve([
+                    generateDirectorDetails(),
+                    generateDirectorDetails(),
+                    generateDirectorDetails(),
+                ]);
                 dissolution.directors.slice(0, signedDirectorCount).forEach(director => {
                     director.approved_at = "2026-10-23";
                 });
@@ -247,6 +261,60 @@ describe("PaymentReviewController", () => {
                 verify(transactionService.closeTransaction(anything(), anything())).never();
             });
         }
+
+        for (const signedDirectorCount of [2, 3]) {
+            for (const transactionsEnabled of [true, false]) {
+                it(`should ${signedDirectorCount === 3 ? "allow" : "prevent"} payment with ${signedDirectorCount} of three selected signatories signed from five company directors and transactions ${transactionsEnabled}`, async () => {
+                    dissolution.directors.push(generateGetDirector("Third Director"));
+                    dissolution.directors.slice(0, signedDirectorCount).forEach(director => {
+                        director.approved_at = "2026-10-23";
+                    });
+                    dissolutionSession.directorsToSign = undefined;
+                    dissolutionSession.transactionId = transactionsEnabled ? "tx-123" : undefined;
+                    when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+                    when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                    when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+                    when(officerService.getActiveDirectorsForCompany(TOKEN, dissolution.company_number)).thenResolve(
+                        Array.from({ length: 5 }, () => generateDirectorDetails())
+                    );
+                    when(transactionService.closeTransaction(TOKEN, "tx-123")).thenResolve();
+
+                    const app = initApp(1, transactionsEnabled);
+
+                    if (signedDirectorCount === 3) {
+                        await request(app)
+                            .post(PAYMENT_REVIEW_URI)
+                            .expect(StatusCodes.MOVED_TEMPORARILY)
+                            .expect("Location", HOW_DO_YOU_WANT_TO_PAY_URI);
+                        verify(transactionService.closeTransaction(anything(), anything())).times(
+                            transactionsEnabled ? 1 : 0
+                        );
+                    } else {
+                        await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+                        verify(transactionService.closeTransaction(anything(), anything())).never();
+                    }
+                    verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
+                });
+            }
+        }
+
+        it("should allow payment when the sole company director has signed", async () => {
+            dissolution.directors = [generateGetDirector("Sole Director", "2026-10-23")];
+            dissolutionSession.directorsToSign = undefined;
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+            when(officerService.getActiveDirectorsForCompany(TOKEN, dissolution.company_number)).thenResolve([
+                generateDirectorDetails(),
+            ]);
+
+            const app = initApp();
+
+            await request(app)
+                .post(PAYMENT_REVIEW_URI)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", HOW_DO_YOU_WANT_TO_PAY_URI);
+        });
 
         for (const transactionsEnabled of [true, false]) {
             for (const payByAccountEnabled of [1, 0]) {

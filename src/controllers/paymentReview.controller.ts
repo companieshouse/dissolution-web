@@ -16,6 +16,8 @@ import TYPES from "app/types";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import TransactionService from "app/services/transaction/transaction.service";
+import CompanyOfficersService from "app/services/company-officers/companyOfficers.service";
+import SignatoryService from "app/services/signatories/signatory.service";
 
 interface ViewModel {
     paymentSummary: PaymentSummary;
@@ -27,6 +29,8 @@ export class PaymentReviewController extends JourneyBaseController {
         @inject(SessionService) private sessionService: SessionService,
         @inject(DissolutionService) private dissolutionService: DissolutionService,
         @inject(PaymentService) private paymentService: PaymentService,
+        @inject(CompanyOfficersService) private readonly officerService: CompanyOfficersService,
+        @inject(SignatoryService) private readonly signatoryService: SignatoryService,
         @inject(TransactionService) private readonly transactionService: TransactionService,
         @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
@@ -81,8 +85,11 @@ export class PaymentReviewController extends JourneyBaseController {
             throw new Error("Cannot proceed to payment until directors to sign have been selected");
         }
 
-        if (signedDirectorCount * 2 < directorsToSignCount) {
-            throw new Error("Cannot proceed to payment until at least half of the directors have signed");
+        const directors = await this.officerService.getActiveDirectorsForCompany(token, dissolution.company_number);
+        const minimumSignatories = this.signatoryService.getMinimumNumberOfSignatories(directors.length, "other");
+
+        if (signedDirectorCount < minimumSignatories) {
+            throw new Error("Cannot proceed to payment until a majority of all company directors have signed");
         }
 
         if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
