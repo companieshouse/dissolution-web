@@ -7,6 +7,7 @@ import APIClientFactory from "./apiClient.factory";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 import { StatusCodes } from "http-status-codes";
 import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
+import { firstParam } from "app/utils/query.util";
 
 const PAYMENT_REQUIRED_HEADER = "x-payment-required";
 
@@ -58,24 +59,21 @@ export default class TransactionApiClient {
             throw new TransactionApiError(
                 `Failed to close transaction - invalid HTTP status ${response.httpStatusCode}`,
                 response.httpStatusCode,
-                response.errors,
-                response.headers?.[PAYMENT_REQUIRED_HEADER]
+                response.errors
             );
         }
 
-        return response.headers?.[PAYMENT_REQUIRED_HEADER];
+        return firstParam(response.headers?.[PAYMENT_REQUIRED_HEADER]);
     }
 }
 
 export class TransactionApiError extends Error {
     public readonly httpStatusCode?: number;
     public readonly errors: ApiError[];
-    public readonly paymentRequiredHeader?: string | string[];
 
-    constructor(msg: string, statusCode?: number, errors?: ApiError[], paymentRequiredHeader?: string | string[]) {
+    constructor(msg: string, statusCode?: number, errors?: ApiError[]) {
         super(msg);
         this.httpStatusCode = statusCode;
         this.errors = errors ?? [];
-        this.paymentRequiredHeader = paymentRequiredHeader;
     }
 }
