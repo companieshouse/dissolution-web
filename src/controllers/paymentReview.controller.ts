@@ -75,9 +75,9 @@ export class PaymentReviewController extends JourneyBaseController {
         }
 
         const signedDirectorCount = dissolution.directors.filter(director => director.approved_at).length;
-        const directorsToSignCount = dissolutionSession.directorsToSign?.length;
+        const directorsToSignCount = dissolution.directors.length;
 
-        if (directorsToSignCount === undefined || directorsToSignCount === 0) {
+        if (directorsToSignCount === 0) {
             throw new Error("Cannot proceed to payment until directors to sign have been selected");
         }
 

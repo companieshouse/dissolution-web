@@ -21,7 +21,7 @@ import SessionService from "app/services/session/session.service";
 import TransactionService from "app/services/transaction/transaction.service";
 import TYPES from "app/types";
 
-import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures";
+import { generateDissolutionGetResponse, generateGetDirector } from "test/fixtures/dissolutionApi.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
 
@@ -39,13 +39,13 @@ describe("PaymentReviewController", () => {
     let dissolution: DissolutionGetResponse;
     let dissolutionSession: DissolutionSession;
 
-    function initApp(payByAccountEnabled = 1): Application {
+    function initApp(payByAccountEnabled = 1, transactionsEnabled = true): Application {
         return createApp(container => {
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService));
             container.rebind(SessionService).toConstantValue(instance(sessionService));
             container.rebind(PaymentService).toConstantValue(instance(paymentService));
             container.rebind(TransactionService).toConstantValue(instance(transactionService));
-            container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(true);
+            container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(transactionsEnabled);
             container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(payByAccountEnabled);
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
@@ -214,9 +214,8 @@ describe("PaymentReviewController", () => {
             );
         });
 
-        it("should allow payment when exactly half of the selected directors have signed", async () => {
+        it("should allow payment when exactly half of the persisted signatories have signed", async () => {
             dissolution.directors[0].approved_at = "2026-10-23";
-            dissolutionSession.directorsToSign = dissolutionSession.directorsToSign!.slice(0, 2);
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
@@ -230,7 +229,8 @@ describe("PaymentReviewController", () => {
         });
 
         for (const signedDirectorCount of [0, 1]) {
-            it(`should prevent payment when ${signedDirectorCount} of three selected directors have signed`, async () => {
+            it(`should prevent payment when ${signedDirectorCount} of three persisted signatories have signed`, async () => {
+                dissolution.directors.push(generateGetDirector("Third Director"));
                 dissolution.directors.slice(0, signedDirectorCount).forEach(director => {
                     director.approved_at = "2026-10-23";
                 });
@@ -248,24 +248,51 @@ describe("PaymentReviewController", () => {
             });
         }
 
-        for (const directorsToSign of [undefined, []]) {
-            it(`should prevent payment when the director selection is ${directorsToSign ? "empty" : "missing"}`, async () => {
-                dissolution.directors.forEach(director => {
-                    director.approved_at = "2026-10-23";
-                });
-                dissolutionSession.directorsToSign = directorsToSign;
-                dissolutionSession.transactionId = "tx-123";
-                when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
-                when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
-                when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+        for (const transactionsEnabled of [true, false]) {
+            for (const payByAccountEnabled of [1, 0]) {
+                for (const directorsToSign of [undefined, []]) {
+                    it(`should allow returning applicants with ${directorsToSign ? "empty" : "missing"} session selection, transactions ${transactionsEnabled} and pay by account ${payByAccountEnabled}`, async () => {
+                        dissolution.directors.forEach(director => {
+                            director.approved_at = "2026-10-23";
+                        });
+                        dissolutionSession.directorsToSign = directorsToSign;
+                        dissolutionSession.transactionId = transactionsEnabled ? "tx-123" : undefined;
+                        when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+                        when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                        when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+                        when(transactionService.closeTransaction(TOKEN, "tx-123")).thenResolve();
+                        when(
+                            paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())
+                        ).thenResolve(REDIRECT_URL);
 
-                const app = initApp(0);
+                        const app = initApp(payByAccountEnabled, transactionsEnabled);
 
-                await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+                        await request(app)
+                            .post(PAYMENT_REVIEW_URI)
+                            .expect(StatusCodes.MOVED_TEMPORARILY)
+                            .expect("Location", payByAccountEnabled ? HOW_DO_YOU_WANT_TO_PAY_URI : REDIRECT_URL);
 
-                verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
-                verify(transactionService.closeTransaction(anything(), anything())).never();
-            });
+                        verify(transactionService.closeTransaction(anything(), anything())).times(
+                            transactionsEnabled ? 1 : 0
+                        );
+                    });
+                }
+            }
         }
+
+        it("should prevent payment when there are no persisted signatories despite a session selection", async () => {
+            dissolution.directors = [];
+            dissolutionSession.transactionId = "tx-123";
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+
+            const app = initApp(0);
+
+            await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
+            verify(transactionService.closeTransaction(anything(), anything())).never();
+        });
     });
 });
