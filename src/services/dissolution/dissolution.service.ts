@@ -78,27 +78,16 @@ export default class DissolutionService {
         return signatory?.email;
     }
 
-    public async getDissolutionPaymentSummary(
-        dissolutionSession: DissolutionSession,
-        dissolution: DissolutionGetResponse
-    ): Promise<PaymentSummary> {
-        if (dissolutionSession.transactionId) {
-            return {
-                payments: [
-                    {
-                        description:
-                            this.paymentDescription +
-                            " " +
-                            dissolution.company_name +
-                            " (" +
-                            dissolutionSession.companyNumber +
-                            ")",
-                        cost: convertToCurrency(Number(this.fee)),
-                    },
-                ],
-                total_cost: convertToCurrency(Number(this.fee)),
-            };
-        }
+    public getTransactionDissolutionPaymentSummary(companyNumber: string, companyName: string): PaymentSummary {
+        const description = `${this.paymentDescription} ${companyName} (${companyNumber})`;
+        const cost = convertToCurrency(Number(this.fee));
+        return {
+            payments: [{ description, cost }],
+            total_cost: cost,
+        };
+    }
+
+    public async getDissolutionPaymentSummary(dissolutionSession: DissolutionSession): Promise<PaymentSummary> {
         const applicationReference: string = dissolutionSession.applicationReferenceNumber!;
 
         const dissolutionGetPaymentUIData: DissolutionGetPaymentUIData =

@@ -77,13 +77,18 @@ describe("PaymentReviewController", () => {
                 .get(PAYMENT_REVIEW_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", SEARCH_COMPANY_URI);
+
+            verify(dissolutionService.getDissolutionPaymentSummary(anything())).never();
+            verify(dissolutionService.getTransactionDissolutionPaymentSummary(anything(), anything())).never();
         });
 
         it("should redirect to the payment review page if the application has not been paid for", async () => {
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
-            when(dissolutionService.getDissolutionPaymentSummary(dissolutionSession, dissolution)).thenResolve(
+            dissolution.transaction_id = undefined;
+            dissolutionSession.transactionId = "session-transaction-id";
+            when(dissolutionService.getDissolutionPaymentSummary(dissolutionSession)).thenResolve(
                 generatePaymentSummary()
             );
 
@@ -99,6 +104,53 @@ describe("PaymentReviewController", () => {
             assert.isTrue(htmlAssertHelper.hasText("#item-0", "Some payment description"));
             assert.isTrue(htmlAssertHelper.hasText("#amount-to-pay-0", "£13.00"));
             assert.isTrue(htmlAssertHelper.hasText("#total_cost", "£26.00"));
+
+            verify(dissolutionService.getDissolutionPaymentSummary(dissolutionSession)).once();
+            verify(dissolutionService.getTransactionDissolutionPaymentSummary(anything(), anything())).never();
+        });
+
+        it("should use the transaction payment summary when the dissolution has a transaction ID", async () => {
+            dissolution.transaction_id = "transaction-id";
+            dissolution.application_status = ApplicationStatus.PENDING_PAYMENT;
+            dissolutionSession.transactionId = undefined;
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+            when(
+                dissolutionService.getTransactionDissolutionPaymentSummary(
+                    dissolution.company_number,
+                    dissolution.company_name
+                )
+            ).thenReturn(generatePaymentSummary());
+
+            const app = initApp();
+
+            const res = await request(app).get(PAYMENT_REVIEW_URI).expect(StatusCodes.OK);
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
+
+            assert.isTrue(htmlAssertHelper.hasText("#item-0", "Some payment description"));
+            assert.isTrue(htmlAssertHelper.hasText("#amount-to-pay-0", "£13.00"));
+            assert.isTrue(htmlAssertHelper.hasText("#total_cost", "£26.00"));
+            verify(
+                dissolutionService.getTransactionDissolutionPaymentSummary(
+                    dissolution.company_number,
+                    dissolution.company_name
+                )
+            ).once();
+            verify(dissolutionService.getDissolutionPaymentSummary(anything())).never();
+        });
+
+        it("should prevent payment review when the dissolution cannot be retrieved", async () => {
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(null);
+
+            const app = initApp();
+
+            await request(app).get(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(dissolutionService.getDissolutionPaymentSummary(anything())).never();
+            verify(dissolutionService.getTransactionDissolutionPaymentSummary(anything(), anything())).never();
         });
     });
 

@@ -45,14 +45,18 @@ export class PaymentReviewController extends JourneyBaseController {
 
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
 
-        if (dissolution!.application_status === ApplicationStatus.PAID) {
+        if (!dissolution) {
+            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
+        }
+
+        if (dissolution.application_status === ApplicationStatus.PAID) {
             return this.redirect(SEARCH_COMPANY_URI);
         }
 
-        const paymentSummary: PaymentSummary = await this.dissolutionService.getDissolutionPaymentSummary(
-            dissolutionSession,
-            dissolution!
-        );
+        const { transaction_id, company_number, company_name } = dissolution;
+        const paymentSummary: PaymentSummary = transaction_id
+            ? this.dissolutionService.getTransactionDissolutionPaymentSummary(company_number, company_name)
+            : await this.dissolutionService.getDissolutionPaymentSummary(dissolutionSession);
 
         return this.renderView(paymentSummary);
     }

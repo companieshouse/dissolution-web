@@ -151,28 +151,26 @@ describe("DissolutionService", () => {
             );
             when(paymentMapper.mapToPaymentSummary(dissolutionGetPaymentUIData)).thenReturn(paymentSummary);
 
-            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(
-                dissolutionSession,
-                dissolutionGetResponse
-            );
+            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(dissolutionSession);
 
             verify(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).once();
 
             assert.equal(response, paymentSummary);
         });
+    });
 
-        it("should use the company name from the dissolution when generating a transaction payment summary", async () => {
-            const transactionSession: DissolutionSession = {
-                ...dissolutionSession,
-                transactionId: "transaction-id",
-            };
-
-            const response: PaymentSummary = await dissolutionService.getDissolutionPaymentSummary(
-                transactionSession,
-                dissolutionGetResponse
+    describe("getTransactionDissolutionPaymentSummary", () => {
+        it("should generate a payment summary using the supplied company details and configured fee", () => {
+            const response: PaymentSummary = dissolutionService.getTransactionDissolutionPaymentSummary(
+                "12345678",
+                "Test Company"
             );
 
-            assert.include(response.payments[0].description, dissolutionGetResponse.company_name);
+            assert.deepEqual(response, {
+                payments: [{ description: "Dissolution of Test Company (12345678)", cost: "£13.00" }],
+                total_cost: "£13.00",
+            });
+            verify(client.getDissolutionPaymentUIData(anything())).never();
         });
     });
 
