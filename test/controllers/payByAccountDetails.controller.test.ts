@@ -4,7 +4,7 @@ import { assert } from "chai";
 import { Application, Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { anything, capture, deepEqual, instance, mock, when } from "ts-mockito";
+import { anything, capture, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { generateDissolutionGetResponse } from "../fixtures/dissolutionApi.fixtures";
 import { generateValidationError } from "../fixtures/error.fixtures";
 import { generatePayByAccountDetailsForm } from "../fixtures/payment.fixtures";
@@ -38,6 +38,7 @@ import PaymentService from "app/services/payment/payment.service";
 import { ArgCaptor2 } from "ts-mockito/lib/capture/ArgCaptor";
 import PaymentType from "app/models/dto/paymentType.enum";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import TransactionService from "app/services/transaction/transaction.service";
 
 mockCsrfMiddleware.restore();
 
@@ -49,6 +50,7 @@ describe("PayByAccountDetailsController", () => {
     let validator: FormValidator;
     let payByAccountService: PayByAccountService;
     let paymentService: PaymentService;
+    let transactionService: TransactionService;
     let mapper: DissolutionSessionMapper;
     let dissolutionSession: DissolutionSession = generateDissolutionSession();
 
@@ -60,6 +62,8 @@ describe("PayByAccountDetailsController", () => {
             container.rebind(PayByAccountService).toConstantValue(instance(payByAccountService));
             container.rebind(DissolutionSessionMapper).toConstantValue(instance(mapper));
             container.rebind(PaymentService).toConstantValue(instance(paymentService));
+            container.rebind(TransactionService).toConstantValue(instance(transactionService));
+            container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(true);
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
             } as any);
@@ -72,6 +76,7 @@ describe("PayByAccountDetailsController", () => {
         validator = mock(FormValidator);
         payByAccountService = mock(PayByAccountService);
         paymentService = mock(PaymentService);
+        transactionService = mock(TransactionService);
         mapper = mock(DissolutionSessionMapper);
         dissolutionSession = generateDissolutionSession();
         when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
@@ -148,6 +153,23 @@ describe("PayByAccountDetailsController", () => {
 
             assert.equal(updatedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD);
             assert.isDefined(updatedSession.paymentStateUUID);
+        });
+
+        it("should redirect to pay by card without closing the transaction again", async () => {
+            dissolutionSession.transactionId = "transaction-id";
+            const app: Application = initApp();
+            const redirectUrl = "http://card-payment-ui-url";
+            when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())).thenResolve(
+                redirectUrl
+            );
+
+            await request(app)
+                .get(PAY_BY_ACCOUNT_CHANGE_PAYMENT_TYPE_URI)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", redirectUrl);
+
+            verify(transactionService.closeTransaction(anything(), anything())).never();
+            verify(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())).once();
         });
     });
 

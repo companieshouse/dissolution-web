@@ -27,7 +27,6 @@ import PaymentType from "app/models/dto/paymentType.enum";
 import { v4 as uuidv4 } from "uuid";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
-import TransactionService from "app/services/transaction/transaction.service";
 
 interface ViewModel {
     data?: PayByAccountDetailsFormModel;
@@ -46,8 +45,6 @@ export class PayByAccountDetailsController extends JourneyBaseController {
         @inject(DissolutionSessionMapper) private readonly mapper: DissolutionSessionMapper,
         @inject(PayByAccountService) private readonly payByAccountService: PayByAccountService,
         @inject(PaymentService) private readonly paymentService: PaymentService,
-        @inject(TransactionService) private readonly transactionService: TransactionService,
-        @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
@@ -82,9 +79,6 @@ export class PayByAccountDetailsController extends JourneyBaseController {
 
     private async getCreditCardPaymentUrl(dissolutionSession: DissolutionSession): Promise<string> {
         const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-        if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
-            await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
-        }
         dissolutionSession.paymentStateUUID = uuidv4();
 
         const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`;
