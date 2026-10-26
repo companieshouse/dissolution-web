@@ -54,7 +54,7 @@ export default class TransactionApiClient {
             transactionId
         );
 
-        if (response.httpStatusCode !== StatusCodes.OK) {
+        if (response.httpStatusCode !== StatusCodes.ACCEPTED) {
             throw new TransactionApiError(
                 `Failed to close transaction - invalid HTTP status ${response.httpStatusCode}`,
                 response.httpStatusCode,

@@ -110,7 +110,7 @@ describe("TransactionApiClient", () => {
 
                 when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
                 when(transactionService.putTransaction(anything(), "tx-123")).thenResolve({
-                    httpStatusCode: StatusCodes.OK,
+                    httpStatusCode: StatusCodes.ACCEPTED,
                     headers: { "x-payment-required": paymentRequired },
                 });
 
@@ -119,7 +119,7 @@ describe("TransactionApiClient", () => {
                 assert.equal(result, paymentRequired);
             });
 
-            it("should close a transaction when API returns 200", async () => {
+            it("should close a transaction when API returns 202", async () => {
                 const closedTransaction = {
                     id: "tx-123",
                     description: DESCRIPTION,
@@ -129,7 +129,7 @@ describe("TransactionApiClient", () => {
 
                 when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
                 when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve({
-                    httpStatusCode: StatusCodes.OK,
+                    httpStatusCode: StatusCodes.ACCEPTED,
                 });
 
                 const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
@@ -138,7 +138,7 @@ describe("TransactionApiClient", () => {
                 verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
             });
 
-            it("Should throw an error when transaction api returns a status other than 200", async () => {
+            it("Should throw an error when transaction api returns a status other than 202", async () => {
                 const closedTransaction = {
                     id: "tx-123",
                     description: DESCRIPTION,
