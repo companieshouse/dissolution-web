@@ -78,6 +78,11 @@ export function initContainer(): Container {
     // Fee
     container.bind<string>(TYPES.LLDS01_AND_DS01_FEE).toConstantValue(getEnvOrThrow("LLDS01_AND_DS01_FEE"));
 
+    // Payment Description
+    container
+        .bind<string>(TYPES.LLDS01_AND_DS01_PAYMENT_DESCRIPTION)
+        .toConstantValue(getEnvOrThrow("LLDS01_AND_DS01_PAYMENT_DESCRIPTION"));
+
     // Session
     const cookieConfig: CookieConfig = {
         cookieName: getEnvOrThrow("COOKIE_NAME"),

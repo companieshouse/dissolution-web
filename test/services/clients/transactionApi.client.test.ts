@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { instance, mock, when } from "ts-mockito";
+import { anything, deepEqual, instance, mock, verify, when } from "ts-mockito";
 import { TOKEN } from "test/fixtures/session.fixtures";
 import { StatusCodes } from "http-status-codes";
 import APIClientFactory from "app/services/clients/apiClient.factory";
@@ -7,6 +7,7 @@ import TransactionApiClient, { TransactionApiError } from "app/services/clients/
 import TransactionService from "@companieshouse/api-sdk-node/dist/services/transaction/service";
 import { generateCreateTransactionDTOs, generateTransactionApiError } from "test/fixtures/transaction.fixtures";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
+import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
 
 const COMPANY_NUMBER = "12345678";
 const TX_REF = "ABC123";
@@ -101,6 +102,70 @@ describe("TransactionApiClient", () => {
                 assert.instanceOf(err, Error);
                 assert.equal(err.message, "Failed to post transaction - No transaction resource returned");
             }
+        });
+
+        describe("closeTransaction", () => {
+            it("should return the payment required header", async () => {
+                const paymentRequired = "true";
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.putTransaction(anything(), "tx-123")).thenResolve({
+                    httpStatusCode: StatusCodes.ACCEPTED,
+                    headers: { "x-payment-required": paymentRequired },
+                });
+
+                const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+
+                assert.equal(result, paymentRequired);
+            });
+
+            it("should close a transaction when API returns 202", async () => {
+                const closedTransaction = {
+                    id: "tx-123",
+                    description: DESCRIPTION,
+                    reference: REFERENCE,
+                    status: "closed",
+                };
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve({
+                    httpStatusCode: StatusCodes.ACCEPTED,
+                });
+
+                const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+
+                assert.isUndefined(result);
+                verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
+            });
+
+            it("Should throw an error when transaction api returns a status other than 202", async () => {
+                const closedTransaction = {
+                    id: "tx-123",
+                    description: DESCRIPTION,
+                    reference: REFERENCE,
+                    status: "closed",
+                };
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).thenResolve(
+                    generateTransactionApiError(StatusCodes.BAD_REQUEST)
+                );
+
+                try {
+                    await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+                    assert.fail("Expected TransactionApiError to be thrown");
+                } catch (err) {
+                    assert.instanceOf(err, TransactionApiError);
+                    if (!(err instanceof TransactionApiError)) {
+                        throw err;
+                    }
+                    assert.equal(err.httpStatusCode, StatusCodes.BAD_REQUEST);
+                    assert.equal(
+                        err.message,
+                        `Failed to close transaction - invalid HTTP status ${StatusCodes.BAD_REQUEST}`
+                    );
+                }
+            });
         });
     });
 });

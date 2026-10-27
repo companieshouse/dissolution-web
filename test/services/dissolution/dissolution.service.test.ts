@@ -73,6 +73,8 @@ describe("DissolutionService", () => {
             instance(dissolutionRequestMapper),
             instance(client),
             instance(certificateService),
+            "13",
+            "Dissolution of",
             instance(paymentMapper),
             instance(sessionService)
         );
@@ -154,6 +156,21 @@ describe("DissolutionService", () => {
             verify(client.getDissolutionPaymentUIData(dissolutionSession.applicationReferenceNumber!)).once();
 
             assert.equal(response, paymentSummary);
+        });
+    });
+
+    describe("getTransactionDissolutionPaymentSummary", () => {
+        it("should generate a payment summary using the supplied company details and configured fee", () => {
+            const response: PaymentSummary = dissolutionService.getTransactionDissolutionPaymentSummary(
+                "12345678",
+                "Test Company"
+            );
+
+            assert.deepEqual(response, {
+                payments: [{ description: "Dissolution of Test Company (12345678)", cost: "£13.00" }],
+                total_cost: "£13.00",
+            });
+            verify(client.getDissolutionPaymentUIData(anything())).never();
         });
     });
 

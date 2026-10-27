@@ -6,11 +6,16 @@ import { provide } from "inversify-binding-decorators";
 import APIClientFactory from "./apiClient.factory";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 import { StatusCodes } from "http-status-codes";
+import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
+import { firstParam } from "app/utils/query.util";
+
+const PAYMENT_REQUIRED_HEADER = "x-payment-required";
 
 type TransactionApiResponse<T> = {
     httpStatusCode?: number;
     resource?: T;
     errors?: ApiError[];
+    headers?: Record<string, string | string[]>;
 };
 
 @provide(TransactionApiClient)
@@ -34,6 +39,31 @@ export default class TransactionApiClient {
             throw new Error("Failed to post transaction - No transaction resource returned");
         }
         return response.resource;
+    }
+
+    public async closeTransaction(token: string, transactionId: string): Promise<string | string[] | undefined> {
+        const service = this.factory.getTransactionService(token);
+        const closedTransaction: Transaction = {
+            id: transactionId,
+            description: DESCRIPTION,
+            reference: REFERENCE,
+            status: "closed",
+        };
+
+        const response: TransactionApiResponse<Transaction> = await service.putTransaction(
+            closedTransaction,
+            transactionId
+        );
+
+        if (response.httpStatusCode !== StatusCodes.ACCEPTED) {
+            throw new TransactionApiError(
+                `Failed to close transaction - invalid HTTP status ${response.httpStatusCode}`,
+                response.httpStatusCode,
+                response.errors
+            );
+        }
+
+        return firstParam(response.headers?.[PAYMENT_REQUIRED_HEADER]);
     }
 }
 

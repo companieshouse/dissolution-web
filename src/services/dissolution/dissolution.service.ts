@@ -25,6 +25,8 @@ import {
     getCompanyNumberAndTransactionIdFromRequest,
     hasCompanyNumberAndTransactionIdInRequest,
 } from "app/utils/transaction.util";
+import TYPES from "app/types";
+import convertToCurrency from "app/utils/currencyConverter.util";
 
 @provide(DissolutionService)
 export default class DissolutionService {
@@ -32,6 +34,8 @@ export default class DissolutionService {
         @inject(DissolutionRequestMapper) private readonly dissolutionRequestMapper: DissolutionRequestMapper,
         @inject(DissolutionApiClient) private readonly client: DissolutionApiClient,
         @inject(DissolutionCertificateService) private readonly certificateService: DissolutionCertificateService,
+        @inject(TYPES.LLDS01_AND_DS01_FEE) private readonly fee: string,
+        @inject(TYPES.LLDS01_AND_DS01_PAYMENT_DESCRIPTION) private readonly paymentDescription: string,
         @inject(PaymentMapper) private readonly paymentMapper: PaymentMapper,
         @inject(SessionService) private readonly session: SessionService
     ) {}
@@ -72,6 +76,15 @@ export default class DissolutionService {
         const dissolution = await this.client.getDissolution(token, companyNumber);
         const signatory = dissolution?.directors.find(d => d.officer_id === signatoryId);
         return signatory?.email;
+    }
+
+    public getTransactionDissolutionPaymentSummary(companyNumber: string, companyName: string): PaymentSummary {
+        const description = `${this.paymentDescription} ${companyName} (${companyNumber})`;
+        const cost = convertToCurrency(Number(this.fee));
+        return {
+            payments: [{ description, cost }],
+            total_cost: cost,
+        };
     }
 
     public async getDissolutionPaymentSummary(dissolutionSession: DissolutionSession): Promise<PaymentSummary> {
