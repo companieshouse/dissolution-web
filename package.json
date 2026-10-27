@@ -7,7 +7,7 @@
     "node": ">=24.0.0"
   },
   "repository": {
-    "url": "https://github.com/companieshouse/dissolution-web"
+    "url": "https://github.com/companieshox§use/dissolution-web"
   },
   "license": "MIT",
   "scripts": {
@@ -52,7 +52,7 @@
     "@opentelemetry/sdk-node": "^0.221.0",
     "@opentelemetry/sdk-trace-node": "^2.10.0",
     "axios": "^1.18.1",
-    "body-parser": "^1.20.6",
+    "body-parser": "^1.20.9",
     "cookie-parser": "^1.4.7",
     "crypto": "^1.0.1",
     "dashify": "^2.0.0",
