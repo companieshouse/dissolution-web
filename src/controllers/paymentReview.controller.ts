@@ -108,6 +108,7 @@ export class PaymentReviewController extends JourneyBaseController {
         dissolutionSession: DissolutionSession,
         transactionId: string
     ): Promise<RedirectResult> {
+        // todo: handle if already closed
         const paymentSessionUrl: string | undefined = await this.transactionService.closeTransaction(
             token,
             transactionId

@@ -87,13 +87,13 @@ export class RedirectController extends JourneyBaseController {
         const isTransactionPayment: boolean = !!session.transactionId;
 
         if (!isTransactionPayment) {
-            session.applicationReferenceNumber = reference;
+            session.applicationReferenceNumber = reference; // todo could this be the transaction id?
         }
 
         const redirectUri: string = this.getPaymentCallbackRedirectUri(status);
 
         if (redirectUri === VIEW_FINAL_CONFIRMATION_URI) {
-            const dissolution: DissolutionGetResponse = (await this.getDissolution(session))!;
+            const dissolution: DissolutionGetResponse = (await this.getDissolution(session))!; // TODO: get transaction id from get response?
             session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
 
             if (isTransactionPayment) {

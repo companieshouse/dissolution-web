@@ -17,12 +17,12 @@ import TYPES from "app/types";
 @provide(PaymentService)
 export default class PaymentService {
     public constructor(
-        @inject(PaymentMapper) private mapper: PaymentMapper,
-        @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
-        @inject(TYPES.TRANSACTIONS_API_URL) private TRANSACTIONS_API_URL: string,
-        @inject(PaymentApiClient) private client: PaymentApiClient,
-        @inject(ApplicationLogger) private logger: ApplicationLogger,
-        @inject(DissolutionApiClient) private dissolutionClient: DissolutionApiClient
+        @inject(PaymentMapper) private readonly mapper: PaymentMapper,
+        @inject(TYPES.DISSOLUTIONS_API_URL) private readonly DISSOLUTIONS_API_URL: string,
+        @inject(TYPES.TRANSACTIONS_API_URL) private readonly TRANSACTIONS_API_URL: string,
+        @inject(PaymentApiClient) private readonly client: PaymentApiClient,
+        @inject(ApplicationLogger) private readonly logger: ApplicationLogger,
+        @inject(DissolutionApiClient) private readonly dissolutionClient: DissolutionApiClient
     ) {}
 
     public async generatePaymentURL(

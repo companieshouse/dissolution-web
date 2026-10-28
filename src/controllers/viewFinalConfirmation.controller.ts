@@ -23,11 +23,12 @@ interface ViewModel {
     applicationType: ApplicationType;
 }
 
+// TODO: ensure all redirects to this screen for the transaction model journey load the transaction id in the path
 @controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.JourneyIdAuthMiddleware)
 export class ViewFinalConfirmationController extends BaseController {
     public constructor(
-        @inject(SessionService) private sessionService: SessionService,
-        @inject(DissolutionService) private dissolutionService: DissolutionService
+        @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService
     ) {
         super();
     }
