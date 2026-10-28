@@ -19,6 +19,7 @@ export default class PaymentService {
     public constructor(
         @inject(PaymentMapper) private mapper: PaymentMapper,
         @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
+        @inject(TYPES.TRANSACTIONS_API_URL) private TRANSACTIONS_API_URL: string,
         @inject(PaymentApiClient) private client: PaymentApiClient,
         @inject(ApplicationLogger) private logger: ApplicationLogger,
         @inject(DissolutionApiClient) private dissolutionClient: DissolutionApiClient
@@ -55,6 +56,37 @@ export default class PaymentService {
             applicationReferenceNumber,
             dissolutionPaymentPatchRequest
         );
+
+        return `${response.resource!.links.journey}?summary=false`;
+    }
+
+    public async generateTransactionPaymentURL(
+        token: string,
+        paymentSessionUrl: string,
+        transactionId: string,
+        paymentStateUUID: string,
+        paymentRedirectURI: string
+    ): Promise<string> {
+        const paymentResource: string = `${this.TRANSACTIONS_API_URL}/transactions/${transactionId}/payment`;
+
+        const createPaymentRequest: CreatePaymentRequest = this.mapper.mapToCreatePaymentRequest(
+            paymentRedirectURI,
+            transactionId,
+            paymentResource,
+            paymentStateUUID
+        );
+
+        const response: ApiResponse<Payment> = await this.client.createPaymentWithFullUrl(
+            token,
+            paymentSessionUrl,
+            createPaymentRequest
+        );
+
+        if (response.httpStatusCode !== StatusCodes.CREATED) {
+            this.logger.error(JSON.stringify(response));
+
+            return Promise.reject(new Error("Payment session failed to create"));
+        }
 
         return `${response.resource!.links.journey}?summary=false`;
     }

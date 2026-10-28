@@ -4,8 +4,8 @@ import ApplicationLogger from "@companieshouse/structured-logging-node/lib/Appli
 import { assert } from "chai";
 import { StatusCodes } from "http-status-codes";
 import { anything, instance, mock, verify, when } from "ts-mockito";
-import { generateCreatePaymentRequest, generatePaymentResult } from "../../fixtures/payment.fixtures";
-import { TOKEN } from "../../fixtures/session.fixtures";
+import { generateCreatePaymentRequest, generatePaymentResult } from "test/fixtures/payment.fixtures";
+import { TOKEN } from "test/fixtures/session.fixtures";
 
 import PaymentMapper from "app/mappers/payment/payment.mapper";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
@@ -25,6 +25,7 @@ describe("PaymentService", () => {
 
     const CHS_URL = "http://some-ui-url";
     const DISSOLUTIONS_API_URL = "http://some-dissolutions-api-url";
+    const TRANSACTIONS_API_URL = "http://some-transactions-api-url";
 
     beforeEach(() => {
         mapper = mock(PaymentMapper);
@@ -35,6 +36,7 @@ describe("PaymentService", () => {
         service = new PaymentService(
             instance(mapper),
             DISSOLUTIONS_API_URL,
+            TRANSACTIONS_API_URL,
             instance(client),
             instance(logger),
             instance(dissolutionClient)
@@ -100,6 +102,66 @@ describe("PaymentService", () => {
 
             try {
                 await service.generatePaymentURL(TOKEN, dissolutionSession, createPaymentRequest.state, anything());
+                assert.fail();
+            } catch (err: any) {
+                assert.equal(err.message, "Payment session failed to create");
+            }
+        });
+    });
+
+    describe("generateTransactionPaymentURL", () => {
+        const TRANSACTION_ID = "123456-123456-123456";
+        const PAYMENT_SESSION_URL = "http://payments-api/payments";
+        const REDIRECT_URI = `${CHS_URL}/callback`;
+
+        const createPaymentRequest: CreatePaymentRequest = generateCreatePaymentRequest();
+        const paymentResult: ApiResult<ApiResponse<Payment>> = generatePaymentResult();
+
+        let paymentResponse: ApiResponse<Payment>;
+
+        beforeEach(() => {
+            paymentResponse = paymentResult.value as ApiResponse<Payment>;
+            when(
+                mapper.mapToCreatePaymentRequest(
+                    REDIRECT_URI,
+                    TRANSACTION_ID,
+                    `${TRANSACTIONS_API_URL}/transactions/${TRANSACTION_ID}/payment`,
+                    createPaymentRequest.state
+                )
+            ).thenReturn(createPaymentRequest);
+        });
+
+        it("should create the payment session against the supplied URL using the transaction as the reference and resource", async () => {
+            when(client.createPaymentWithFullUrl(TOKEN, PAYMENT_SESSION_URL, createPaymentRequest)).thenResolve(
+                paymentResponse
+            );
+
+            const paymentURL: string = await service.generateTransactionPaymentURL(
+                TOKEN,
+                PAYMENT_SESSION_URL,
+                TRANSACTION_ID,
+                createPaymentRequest.state,
+                REDIRECT_URI
+            );
+
+            assert.equal(paymentURL, `${paymentResponse.resource!.links.journey}?summary=false`);
+            verify(client.createPaymentWithFullUrl(TOKEN, PAYMENT_SESSION_URL, createPaymentRequest)).once();
+        });
+
+        it("should reject with an error if payment session failed to create", async () => {
+            paymentResponse.httpStatusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+            when(client.createPaymentWithFullUrl(TOKEN, PAYMENT_SESSION_URL, createPaymentRequest)).thenResolve(
+                paymentResponse
+            );
+
+            try {
+                await service.generateTransactionPaymentURL(
+                    TOKEN,
+                    PAYMENT_SESSION_URL,
+                    TRANSACTION_ID,
+                    createPaymentRequest.state,
+                    REDIRECT_URI
+                );
                 assert.fail();
             } catch (err: any) {
                 assert.equal(err.message, "Payment session failed to create");

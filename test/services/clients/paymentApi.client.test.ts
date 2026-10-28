@@ -2,8 +2,8 @@ import { CreatePaymentRequest, Payment, PaymentService } from "@companieshouse/a
 import { ApiResponse, ApiResult } from "@companieshouse/api-sdk-node/dist/services/resource";
 import { assert } from "chai";
 import { instance, mock, when } from "ts-mockito";
-import { generateCreatePaymentRequest, generatePaymentResult } from "../../fixtures/payment.fixtures";
-import { TOKEN } from "../../fixtures/session.fixtures";
+import { generateCreatePaymentRequest, generatePaymentResult } from "test/fixtures/payment.fixtures";
+import { TOKEN } from "test/fixtures/session.fixtures";
 
 import APIClientFactory from "app/services/clients/apiClient.factory";
 import PaymentApiClient from "app/services/clients/paymentApi.client";
@@ -31,6 +31,25 @@ describe("PaymentApiClient", () => {
 
             const paymentResponse: ApiResponse<Payment> = await paymentApiClient.createPayment(
                 TOKEN,
+                createPaymentRequest
+            );
+
+            assert.equal(paymentResponse, paymentResult.value);
+        });
+    });
+
+    describe("createPaymentWithFullUrl", () => {
+        it("should create the payment against the supplied URL", async () => {
+            const createPaymentRequest: CreatePaymentRequest = generateCreatePaymentRequest();
+            const paymentResult: ApiResult<ApiResponse<Payment>> = generatePaymentResult();
+            const paymentUrl = "http://payments-api/payments";
+
+            when(factory.getPaymentService(TOKEN, paymentUrl)).thenReturn(instance(paymentService));
+            when(paymentService.createPaymentWithFullUrl(createPaymentRequest)).thenResolve(paymentResult);
+
+            const paymentResponse: ApiResponse<Payment> = await paymentApiClient.createPaymentWithFullUrl(
+                TOKEN,
+                paymentUrl,
                 createPaymentRequest
             );
 

@@ -8,6 +8,7 @@ import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transact
 import { StatusCodes } from "http-status-codes";
 import { DESCRIPTION, REFERENCE } from "app/constants/app.const";
 import { firstParam } from "app/utils/query.util";
+import TransactionStatus from "app/models/dto/transactionStatus.enum";
 
 const PAYMENT_REQUIRED_HEADER = "x-payment-required";
 
@@ -41,13 +42,32 @@ export default class TransactionApiClient {
         return response.resource;
     }
 
-    public async closeTransaction(token: string, transactionId: string): Promise<string | string[] | undefined> {
+    public async getTransaction(token: string, transactionId: string): Promise<Transaction> {
+        const response: TransactionApiResponse<Transaction> = await this.factory
+            .getTransactionService(token)
+            .getTransaction(transactionId);
+
+        if (response.httpStatusCode !== StatusCodes.OK) {
+            throw new TransactionApiError(
+                `Failed to get transaction - invalid HTTP status ${response.httpStatusCode}`,
+                response.httpStatusCode,
+                response.errors
+            );
+        }
+
+        if (!response.resource) {
+            throw new Error("Failed to get transaction - No transaction resource returned");
+        }
+        return response.resource;
+    }
+
+    public async closeTransaction(token: string, transactionId: string): Promise<string | undefined> {
         const service = this.factory.getTransactionService(token);
         const closedTransaction: Transaction = {
             id: transactionId,
             description: DESCRIPTION,
             reference: REFERENCE,
-            status: "closed",
+            status: TransactionStatus.CLOSED,
         };
 
         const response: TransactionApiResponse<Transaction> = await service.putTransaction(

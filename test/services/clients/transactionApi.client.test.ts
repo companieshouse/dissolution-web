@@ -104,9 +104,56 @@ describe("TransactionApiClient", () => {
             }
         });
 
+        describe("getTransaction", () => {
+            it("should return the transaction", async () => {
+                const transaction = { id: "tx-123", status: "closed" } as Transaction;
+
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.getTransaction("tx-123")).thenResolve({
+                    httpStatusCode: StatusCodes.OK,
+                    resource: transaction,
+                });
+
+                const result = await transactionApiClient.getTransaction(TOKEN, "tx-123");
+
+                assert.equal(result, transaction);
+            });
+
+            it("should throw a TransactionApiError when the api returns a non-200 status", async () => {
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.getTransaction("tx-123")).thenResolve(
+                    generateTransactionApiError(StatusCodes.NOT_FOUND)
+                );
+
+                try {
+                    await transactionApiClient.getTransaction(TOKEN, "tx-123");
+                    assert.fail("Expected TransactionApiError to be thrown");
+                } catch (err: any) {
+                    assert.instanceOf(err, TransactionApiError);
+                    assert.equal(err.httpStatusCode, StatusCodes.NOT_FOUND);
+                    assert.equal(
+                        err.message,
+                        `Failed to get transaction - invalid HTTP status ${StatusCodes.NOT_FOUND}`
+                    );
+                }
+            });
+
+            it("should throw an error when no resource is returned", async () => {
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.getTransaction("tx-123")).thenResolve({ httpStatusCode: StatusCodes.OK });
+
+                try {
+                    await transactionApiClient.getTransaction(TOKEN, "tx-123");
+                    assert.fail("Expected an error to be thrown");
+                } catch (err: any) {
+                    assert.equal(err.message, "Failed to get transaction - No transaction resource returned");
+                }
+            });
+        });
+
         describe("closeTransaction", () => {
             it("should return the payment required header", async () => {
-                const paymentRequired = "true";
+                const paymentRequired = "http://payments-api/payments";
 
                 when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
                 when(transactionService.putTransaction(anything(), "tx-123")).thenResolve({

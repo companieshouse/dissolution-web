@@ -8,12 +8,24 @@ import APIClientFactory from "./apiClient.factory";
 
 @provide(PaymentApiClient)
 export default class PaymentApiClient {
-    public constructor(@inject(APIClientFactory) private factory: APIClientFactory) {}
+    public constructor(@inject(APIClientFactory) private readonly factory: APIClientFactory) {}
 
     public async createPayment(token: string, body: CreatePaymentRequest): Promise<ApiResponse<Payment>> {
         const response: ApiResult<ApiResponse<Payment>> = await this.factory
             .getPaymentService(token)
             .createPayment(body);
+
+        return response.value as ApiResponse<Payment>;
+    }
+
+    public async createPaymentWithFullUrl(
+        token: string,
+        paymentUrl: string,
+        body: CreatePaymentRequest
+    ): Promise<ApiResponse<Payment>> {
+        const response: ApiResult<ApiResponse<Payment>> = await this.factory
+            .getPaymentService(token, paymentUrl)
+            .createPaymentWithFullUrl(body);
 
         return response.value as ApiResponse<Payment>;
     }

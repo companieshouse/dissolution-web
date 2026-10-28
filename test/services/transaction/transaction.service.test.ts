@@ -7,6 +7,7 @@ import TransactionApiClient, { TransactionApiError } from "app/services/clients/
 import ApplicationLogger from "@companieshouse/structured-logging-node/lib/ApplicationLogger";
 import { Transaction } from "@companieshouse/api-sdk-node/dist/services/transaction/types";
 import { aTransaction } from "test/fixtures/transaction.builder";
+import TransactionStatus from "app/models/dto/transactionStatus.enum";
 
 const COMPANY_NUMBER = "12345678";
 const TRANSACTION_ID = "123456-123456-123456";
@@ -70,14 +71,54 @@ describe("TransactionService", () => {
             }
         });
 
+        describe("getTransaction / isTransactionClosed", () => {
+            it("should return the transaction from the client", async () => {
+                const tx: Transaction = aTransaction().withId(TRANSACTION_ID).build();
+                when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenResolve(tx);
+
+                assert.equal(await service.getTransaction(TOKEN, TRANSACTION_ID), tx);
+            });
+
+            it("should reject with an error when the client fails", async () => {
+                when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenReject(new Error("Some Client Error"));
+
+                try {
+                    await service.getTransaction(TOKEN, TRANSACTION_ID);
+                    assert.fail();
+                } catch (err: any) {
+                    assert.equal(err.message, `Failed to get transaction ${TRANSACTION_ID}`);
+                }
+            });
+
+            for (const [status, expected] of [
+                [TransactionStatus.CLOSED, true],
+                [TransactionStatus.CLOSED_PENDING_PAYMENT, false],
+                [TransactionStatus.OPEN, false],
+            ] as const) {
+                it(`should return ${expected} when the transaction status is "${status}"`, async () => {
+                    when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenResolve(
+                        aTransaction().withId(TRANSACTION_ID).withStatus(status).build()
+                    );
+
+                    assert.equal(await service.isTransactionClosed(TOKEN, TRANSACTION_ID), expected);
+                });
+            }
+        });
+
         describe("closeTransaction", () => {
-            it("should call the transaction api client to close the transaction", async () => {
-                when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve();
+            it("should call the transaction api client to close the transaction and return the payment url", async () => {
+                when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve("http://payments-api/payments");
 
                 const result = await service.closeTransaction(TOKEN, TRANSACTION_ID);
 
-                assert.isUndefined(result);
+                assert.equal(result, "http://payments-api/payments");
                 verify(client.closeTransaction(TOKEN, TRANSACTION_ID)).once();
+            });
+
+            it("should return undefined when no payment is required", async () => {
+                when(client.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve(undefined);
+
+                assert.isUndefined(await service.closeTransaction(TOKEN, TRANSACTION_ID));
             });
 
             it("should reject with an error when transaction close failed", async () => {
