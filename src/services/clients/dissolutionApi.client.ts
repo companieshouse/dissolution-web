@@ -69,8 +69,8 @@ export class DissolutionApiClient {
             companyNumber,
             this.generateConfigForAPIKey()
         );
-        const dResponse: DissolutionGetResendEmailResponse = { reminderSent: response.status === 200 };
-        return dResponse;
+
+        return { reminderSent: response.status === 200 };
     }
 
     public async getDissolutionPaymentUIData(applicationReference: string): Promise<DissolutionGetPaymentUIData> {
