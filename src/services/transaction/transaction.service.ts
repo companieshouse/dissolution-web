@@ -47,6 +47,9 @@ export default class TransactionService {
         }
     }
 
+    /**
+     * Use to determine if transaction has been paid
+     */
     public async isTransactionClosed(token: string, transactionId: string): Promise<boolean> {
         const { status } = await this.getTransaction(token, transactionId);
         return status === TransactionStatus.CLOSED;

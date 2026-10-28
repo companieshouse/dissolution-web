@@ -109,6 +109,9 @@ export class DissolutionApiClient {
         );
     }
 
+    /**
+     * @deprecated: This method is only used for the legacy dissolution journey and will be removed in the future
+     */
     public async patchDissolutionPaymentData(
         applicationReference: string,
         body: DissolutionPaymentPatchRequest

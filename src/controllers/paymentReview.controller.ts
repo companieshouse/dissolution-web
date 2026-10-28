@@ -22,6 +22,7 @@ import TYPES from "app/types";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import TransactionService from "app/services/transaction/transaction.service";
+import PaymentType from "app/models/dto/paymentType.enum";
 
 interface ViewModel {
     paymentSummary: PaymentSummary;
@@ -129,7 +130,7 @@ export class PaymentReviewController extends JourneyBaseController {
             paymentRedirectURI
         );
 
-        this.updateSession(dissolutionSession, paymentStateUUID);
+        this.updateSession(dissolutionSession, paymentStateUUID, PaymentType.CREDIT_DEBIT_CARD);
 
         return this.redirect(paymentURL);
     }
@@ -150,10 +151,15 @@ export class PaymentReviewController extends JourneyBaseController {
         return super.render("payment-review", viewModel);
     }
 
-    private updateSession(dissolutionSession: DissolutionSession, paymentStateUUID: string): void {
+    private updateSession(
+        dissolutionSession: DissolutionSession,
+        paymentStateUUID: string,
+        paymentType?: PaymentType
+    ): void {
         const updatedSession: DissolutionSession = {
             ...dissolutionSession,
             paymentStateUUID,
+            paymentType,
         };
 
         this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession);

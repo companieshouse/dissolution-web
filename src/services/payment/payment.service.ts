@@ -82,10 +82,10 @@ export default class PaymentService {
             createPaymentRequest
         );
 
+        // Todo: Improve logging?
         if (response.httpStatusCode !== StatusCodes.CREATED) {
             this.logger.error(JSON.stringify(response));
-
-            return Promise.reject(new Error("Payment session failed to create"));
+            throw new Error("Failed to create payment session for transaction: " + transactionId);
         }
 
         return `${response.resource!.links.journey}?summary=false`;
