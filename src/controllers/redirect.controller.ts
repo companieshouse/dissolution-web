@@ -7,6 +7,7 @@ import ApplicationStatus from "app/models/dto/applicationStatus.enum";
 import DissolutionGetDirector from "app/models/dto/dissolutionGetDirector";
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import PaymentStatus from "app/models/dto/paymentStatus.enum";
+import PaymentType from "app/models/dto/paymentType.enum";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model";
@@ -83,16 +84,28 @@ export class RedirectController extends JourneyBaseController {
             return Promise.reject("State value is invalid");
         }
 
-        session.applicationReferenceNumber = reference;
+        const isTransactionPayment: boolean = !!session.transactionId;
+
+        if (!isTransactionPayment) {
+            session.applicationReferenceNumber = reference;
+        }
 
         const redirectUri: string = this.getPaymentCallbackRedirectUri(status);
 
         if (redirectUri === VIEW_FINAL_CONFIRMATION_URI) {
             const dissolution: DissolutionGetResponse = (await this.getDissolution(session))!;
             session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
+
+            if (isTransactionPayment) {
+                session.paymentType = PaymentType.CREDIT_DEBIT_CARD;
+            }
         }
 
-        return this.saveSessionAndRedirect({ session, redirectUri });
+        const options: Optional<JourneyPathOptions> = isTransactionPayment
+            ? { transactionId: session.transactionId }
+            : undefined;
+
+        return this.saveSessionAndRedirect({ session, redirectUri, options });
     }
 
     private async handleNewApplication(dissolutionSession: DissolutionSession): Promise<RedirectResult> {
@@ -119,10 +132,33 @@ export class RedirectController extends JourneyBaseController {
                     options,
                 };
             case DissolutionStatus.SUBMITTED:
-                return { ...this.handlePendingPaymentRedirect(dissolution, session), options };
+                return { ...(await this.handleSubmittedRedirect(dissolution, session)), options };
             default:
                 throw new Error(`Unexpected dissolution status received ${dissolution.dissolution_status}`);
         }
+    }
+
+    private async handleSubmittedRedirect(
+        dissolution: DissolutionGetResponse,
+        session: DissolutionSession
+    ): Promise<SessionRedirectOptions> {
+        const userEmail: string = this.sessionService.getUserEmail(this.httpContext.request)!;
+
+        if (this.isApplicant(dissolution, userEmail)) {
+            const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+            const isPaid: boolean = await this.transactionService.isTransactionClosed(
+                token,
+                dissolution.transaction_id!
+            );
+
+            if (isPaid) {
+                session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
+                session.paymentType = PaymentType.CREDIT_DEBIT_CARD;
+                return { session, redirectUri: VIEW_FINAL_CONFIRMATION_URI };
+            }
+        }
+
+        return this.handlePendingPaymentRedirect(dissolution, session);
     }
 
     private async handleDissolutionApplication(

@@ -18,6 +18,7 @@ import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import PaymentStatus from "app/models/dto/paymentStatus.enum";
 import DissolutionApprovalModel from "app/models/form/dissolutionApproval.model";
 import DissolutionConfirmation from "app/models/session/dissolutionConfirmation.model";
+import PaymentType from "app/models/dto/paymentType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import {
     CERTIFICATE_SIGNED_URI,
@@ -556,8 +557,9 @@ describe("RedirectController", () => {
                             dissolution.dissolution_status = DissolutionStatus.SUBMITTED;
                         });
 
-                        it("should redirect to payment review if user is the applicant", async () => {
+                        it("should redirect to payment review if user is the applicant and the transaction is not closed", async () => {
                             dissolution.created_by = USER_EMAIL;
+                            when(transactionService.isTransactionClosed(TOKEN, TX_ID)).thenResolve(false);
 
                             // PAYMENT_REVIEW_URI has no transaction segment yet, so the transaction id is not in the path
                             await request(app())
@@ -566,6 +568,32 @@ describe("RedirectController", () => {
                                 .expect("Location", buildTestUrl(PAYMENT_REVIEW_URI));
 
                             assert.equal(getSavedSession(session).transactionId, TX_ID);
+                        });
+
+                        it("should prepare a confirmation session and redirect to the confirmation page if user is the applicant and the transaction is closed", async () => {
+                            const confirmation: DissolutionConfirmation = generateDissolutionConfirmation();
+                            dissolution.created_by = USER_EMAIL;
+                            when(transactionService.isTransactionClosed(TOKEN, TX_ID)).thenResolve(true);
+                            when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation);
+
+                            await request(app())
+                                .get(REDIRECT_GATE_URI)
+                                .expect(StatusCodes.MOVED_TEMPORARILY)
+                                .expect("Location", withTransactionIdInPath(VIEW_FINAL_CONFIRMATION_URI));
+
+                            const savedSession: DissolutionSession = getSavedSession(session);
+                            assert.equal(savedSession.confirmation, confirmation);
+                            assert.equal(savedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD);
+                        });
+
+                        it("should not check the transaction status if user is not the applicant", async () => {
+                            dissolution.directors = [
+                                { ...generateGetDirector(), email: USER_EMAIL, approved_at: "2020-07-01" },
+                            ];
+
+                            await request(app()).get(REDIRECT_GATE_URI).expect(StatusCodes.MOVED_TEMPORARILY);
+
+                            verify(transactionService.isTransactionClosed(anything(), anything())).never();
                         });
 
                         it("should redirect to certificate signed page with transaction id if user is not the applicant but is a signatory", async () => {
@@ -724,6 +752,50 @@ describe("RedirectController", () => {
                 })
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", SEARCH_COMPANY_URI);
+        });
+
+        describe("transaction model payment", () => {
+            const TX_ID = "123456-123456-123456";
+
+            beforeEach(() => {
+                dissolutionSession.transactionId = TX_ID;
+            });
+
+            it("should prepare a confirmation session and redirect to confirmation page with the transaction id if status is paid", async () => {
+                const dissolution: DissolutionGetResponse = generateDissolutionGetResponse();
+                const confirmation: DissolutionConfirmation = generateDissolutionConfirmation();
+
+                when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+                when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation);
+
+                await request(initApp())
+                    .get(PAYMENT_CALLBACK_URI)
+                    .query({ state: STATE, status: PaymentStatus.PAID, ref: TX_ID })
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", buildTestUrl(VIEW_FINAL_CONFIRMATION_URI, { transactionId: TX_ID }));
+
+                const updatedSession: DissolutionSession = getSavedSession(session);
+
+                assert.equal(updatedSession.confirmation, confirmation);
+                assert.equal(updatedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD);
+                assert.isUndefined(updatedSession.applicationReferenceNumber);
+            });
+
+            it("should redirect to payment review if status is failed", async () => {
+                await request(initApp())
+                    .get(PAYMENT_CALLBACK_URI)
+                    .query({ state: STATE, status: PaymentStatus.FAILED, ref: TX_ID })
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", buildTestUrl(PAYMENT_REVIEW_URI, { transactionId: TX_ID }));
+            });
+
+            it("should redirect to search company if status is cancelled", async () => {
+                await request(initApp())
+                    .get(PAYMENT_CALLBACK_URI)
+                    .query({ state: STATE, status: PaymentStatus.CANCELLED, ref: TX_ID })
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", SEARCH_COMPANY_URI);
+            });
         });
     });
 });

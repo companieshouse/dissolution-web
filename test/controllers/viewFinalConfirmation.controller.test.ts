@@ -88,6 +88,15 @@ describe("ViewFinalConfirmationController", () => {
             assert.isTrue(htmlAssertHelper.containsText(".govuk-panel__body", APPLICATION_REFERENCE_NUMBER));
         });
 
+        it("should render the transaction id as the reference for a transaction model dissolution", async () => {
+            dissolution!.transaction_id = "123456-123456-123456";
+
+            const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
+
+            const htmlAssertHelper: HtmlAssertHelper = new HtmlAssertHelper(res.text);
+            assert.isTrue(htmlAssertHelper.containsText(".govuk-panel__body", "123456-123456-123456"));
+        });
+
         it("should render the ViewFinalConfirmation page with company number and name in summary list", async () => {
             const res = await request(app).get(buildTestUrl(VIEW_FINAL_CONFIRMATION_URI)).expect(StatusCodes.OK);
 

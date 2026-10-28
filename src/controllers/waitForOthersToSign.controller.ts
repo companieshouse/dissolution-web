@@ -3,6 +3,7 @@ import { controller, httpGet } from "inversify-express-utils";
 import { RedirectResult } from "inversify-express-utils/lib/results";
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper";
 import ApplicationStatus from "app/models/dto/applicationStatus.enum";
+import DissolutionStatus from "app/models/dto/dissolutionStatus.enum";
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import OfficerType from "app/models/dto/officerType.enum";
 import Optional from "app/models/optional";
@@ -42,11 +43,19 @@ export class WaitForOthersToSignController extends JourneyBaseController {
             dissolutionSession
         );
 
-        if (dissolution?.application_status === ApplicationStatus.PENDING_PAYMENT) {
+        if (this.isPendingPayment(dissolution)) {
             return this.redirect(this.journeyPath(PAYMENT_REVIEW_URI));
         }
 
         return this.renderView(dissolutionSession.officerType!, dissolution!);
+    }
+
+    private isPendingPayment(dissolution: Optional<DissolutionGetResponse>): boolean {
+        if (dissolution?.transaction_id) {
+            return dissolution.dissolution_status === DissolutionStatus.SUBMITTED;
+        }
+
+        return dissolution?.application_status === ApplicationStatus.PENDING_PAYMENT;
     }
 
     private async renderView(officerType: OfficerType, dissolution: DissolutionGetResponse): Promise<string> {

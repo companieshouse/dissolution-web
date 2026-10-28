@@ -45,7 +45,7 @@ export class ViewFinalConfirmationController extends BaseController {
         );
 
         const viewModel: ViewModel = {
-            applicationReferenceNumber: this.getApplicationReferenceNumber(),
+            applicationReferenceNumber: dissolution!.transaction_id ?? this.getApplicationReferenceNumber(),
             companyNumber: dissolution!.company_number,
             companyName: dissolution!.company_name,
             officerType: dissolutionSession.officerType!,

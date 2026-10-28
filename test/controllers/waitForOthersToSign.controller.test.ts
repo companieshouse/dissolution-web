@@ -17,6 +17,7 @@ import HtmlAssertHelper from "./helpers/htmlAssert.helper";
 import "app/controllers/waitForOthersToSign.controller";
 import ViewApplicationStatusMapper from "app/mappers/view-application-status/viewApplicationStatus.mapper";
 import ApplicationStatus from "app/models/dto/applicationStatus.enum";
+import DissolutionStatus from "app/models/dto/dissolutionStatus.enum";
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import OfficerType from "app/models/dto/officerType.enum";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
@@ -175,6 +176,27 @@ describe("WaitForOthersToSignController", () => {
                 .get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI))
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", PAYMENT_REVIEW_URI);
+        });
+
+        it("should redirect applicant to the Payment Review page for a submitted transaction model dissolution", async () => {
+            dissolution.transaction_id = "123456-123456-123456";
+            dissolution.dissolution_status = DissolutionStatus.SUBMITTED;
+            dissolution.application_status = ApplicationStatus.PENDING_APPROVAL;
+
+            await request(app)
+                .get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI))
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", PAYMENT_REVIEW_URI);
+        });
+
+        it("should not redirect to payment for a pending transaction model dissolution", async () => {
+            dissolution.transaction_id = "123456-123456-123456";
+            dissolution.dissolution_status = DissolutionStatus.PENDING;
+            dissolution.application_status = ApplicationStatus.PENDING_PAYMENT;
+
+            const res = await request(app).get(buildTestUrl(WAIT_FOR_OTHERS_TO_SIGN_URI));
+
+            assert.equal(res.status, StatusCodes.OK);
         });
 
         describe("View Application Status", () => {
