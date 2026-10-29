@@ -26,8 +26,8 @@ interface ViewModel {
 @controller(VIEW_FINAL_CONFIRMATION_URI, TYPES.JourneyIdAuthMiddleware)
 export class ViewFinalConfirmationController extends BaseController {
     public constructor(
-        @inject(SessionService) private sessionService: SessionService,
-        @inject(DissolutionService) private dissolutionService: DissolutionService
+        @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService
     ) {
         super();
     }
@@ -45,7 +45,7 @@ export class ViewFinalConfirmationController extends BaseController {
         );
 
         const viewModel: ViewModel = {
-            applicationReferenceNumber: this.getApplicationReferenceNumber(),
+            applicationReferenceNumber: dissolution!.transaction_id ?? this.getApplicationReferenceNumber(),
             companyNumber: dissolution!.company_number,
             companyName: dissolution!.company_name,
             officerType: dissolutionSession.officerType!,

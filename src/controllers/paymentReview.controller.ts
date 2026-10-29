@@ -8,7 +8,13 @@ import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import PaymentSummary from "app/models/dto/paymentSummary";
 import Optional from "app/models/optional";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import { HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_CALLBACK_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from "app/paths";
+import {
+    HOW_DO_YOU_WANT_TO_PAY_URI,
+    PAYMENT_CALLBACK_URI,
+    PAYMENT_REVIEW_URI,
+    REDIRECT_GATE_URI,
+    SEARCH_COMPANY_URI,
+} from "app/paths";
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import PaymentService from "app/services/payment/payment.service";
 import SessionService from "app/services/session/session.service";
@@ -16,6 +22,7 @@ import TYPES from "app/types";
 import JourneyBaseController from "app/controllers/JourneyBase.controller";
 import JourneyPathService from "app/services/session/journeyPath.service";
 import TransactionService from "app/services/transaction/transaction.service";
+import PaymentType from "app/models/dto/paymentType.enum";
 
 interface ViewModel {
     paymentSummary: PaymentSummary;
@@ -24,11 +31,10 @@ interface ViewModel {
 @controller(PAYMENT_REVIEW_URI, TYPES.JourneyIdAuthMiddleware)
 export class PaymentReviewController extends JourneyBaseController {
     public constructor(
-        @inject(SessionService) private sessionService: SessionService,
-        @inject(DissolutionService) private dissolutionService: DissolutionService,
-        @inject(PaymentService) private paymentService: PaymentService,
+        @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+        @inject(PaymentService) private readonly paymentService: PaymentService,
         @inject(TransactionService) private readonly transactionService: TransactionService,
-        @inject(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED) private readonly FEATURE_FLAG_TRANSACTIONS_ENABLED: boolean,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
         @inject(JourneyPathService) readonly journeyPathService: JourneyPathService
@@ -38,18 +44,9 @@ export class PaymentReviewController extends JourneyBaseController {
 
     @httpGet("")
     public async get(): Promise<RedirectResult | string> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
-            this.httpContext.request
-        )!;
+        const { dissolution, dissolutionSession, hasAlreadyPaid } = await this.initPaymentContext();
 
-        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
-
-        if (!dissolution) {
-            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
-        }
-
-        if (dissolution.application_status === ApplicationStatus.PAID) {
+        if (hasAlreadyPaid) {
             return this.redirect(SEARCH_COMPANY_URI);
         }
 
@@ -63,19 +60,14 @@ export class PaymentReviewController extends JourneyBaseController {
 
     @httpPost("")
     public async post(): Promise<RedirectResult> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
-            this.httpContext.request
-        )!;
+        const { token, dissolution, dissolutionSession, hasAlreadyPaid } = await this.initPaymentContext();
 
-        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
-
-        if (!dissolution) {
-            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
+        if (hasAlreadyPaid) {
+            return this.redirect(SEARCH_COMPANY_URI);
         }
 
-        if (this.FEATURE_FLAG_TRANSACTIONS_ENABLED && dissolutionSession.transactionId) {
-            await this.transactionService.closeTransaction(token, dissolutionSession.transactionId);
+        if (dissolution.transaction_id) {
+            return this.startTransactionPayment(token, dissolutionSession, dissolution.transaction_id);
         }
 
         if (this.PAY_BY_ACCOUNT_FEATURE_ENABLED) {
@@ -98,6 +90,46 @@ export class PaymentReviewController extends JourneyBaseController {
         return this.redirect(paymentURL);
     }
 
+    private async startTransactionPayment(
+        token: string,
+        dissolutionSession: DissolutionSession,
+        transactionId: string
+    ): Promise<RedirectResult> {
+        // Safe to call again if the transaction is "closed pending payment" (resume / retry), each call starts a new payment session.
+        // A paid ("closed") transaction is guarded against before this point.
+        const paymentSessionUrl: string | undefined = await this.transactionService.closeTransaction(
+            token,
+            transactionId
+        );
+
+        if (!paymentSessionUrl) {
+            return this.redirect(this.journeyPath(REDIRECT_GATE_URI));
+        }
+
+        const paymentStateUUID: string = uuidv4();
+        const paymentRedirectURI = `${this.CHS_URL}${this.journeyPath(PAYMENT_CALLBACK_URI)}`;
+
+        const paymentURL: string = await this.paymentService.generateTransactionPaymentURL(
+            token,
+            paymentSessionUrl,
+            transactionId,
+            paymentStateUUID,
+            paymentRedirectURI
+        );
+
+        this.updateSession(dissolutionSession, paymentStateUUID, PaymentType.CREDIT_DEBIT_CARD);
+
+        return this.redirect(paymentURL);
+    }
+
+    private async isAlreadyPaid(dissolution: DissolutionGetResponse, token: string): Promise<boolean> {
+        if (dissolution.transaction_id) {
+            return this.transactionService.isTransactionPaid(token, dissolution.transaction_id);
+        }
+
+        return dissolution.application_status === ApplicationStatus.PAID;
+    }
+
     private async renderView(paymentSummary: PaymentSummary): Promise<string> {
         const viewModel: ViewModel = {
             paymentSummary,
@@ -106,10 +138,37 @@ export class PaymentReviewController extends JourneyBaseController {
         return super.render("payment-review", viewModel);
     }
 
-    private updateSession(dissolutionSession: DissolutionSession, paymentStateUUID: string): void {
+    private async initPaymentContext(): Promise<{
+        token: string;
+        dissolutionSession: DissolutionSession;
+        dissolution: DissolutionGetResponse;
+        hasAlreadyPaid: boolean;
+    }> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
+            this.httpContext.request
+        )!;
+
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
+
+        if (!dissolution) {
+            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
+        }
+
+        const hasAlreadyPaid: boolean = await this.isAlreadyPaid(dissolution, token);
+
+        return { token, dissolutionSession, dissolution, hasAlreadyPaid };
+    }
+
+    private updateSession(
+        dissolutionSession: DissolutionSession,
+        paymentStateUUID: string,
+        paymentType?: PaymentType
+    ): void {
         const updatedSession: DissolutionSession = {
             ...dissolutionSession,
             paymentStateUUID,
+            paymentType,
         };
 
         this.sessionService.setDissolutionSession(this.httpContext.request, updatedSession);

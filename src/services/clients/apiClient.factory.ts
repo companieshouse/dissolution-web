@@ -26,8 +26,8 @@ export default class APIClientFactory {
         return createApiClient(undefined, token).companyOfficers;
     }
 
-    public getPaymentService(token: string): PaymentService {
-        return createApiClient(undefined, token, this.PAYMENTS_API_URL).payment;
+    public getPaymentService(token: string, baseUrl: string = this.PAYMENTS_API_URL): PaymentService {
+        return createApiClient(undefined, token, baseUrl).payment;
     }
 
     public getTransactionService(token: string): TransactionService {

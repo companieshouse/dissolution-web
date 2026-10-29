@@ -1,10 +1,10 @@
 import "reflect-metadata";
 
 import { assert } from "chai";
-import { Application } from "express";
+import { Application, Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
-import { anything, instance, mock, verify, when } from "ts-mockito";
+import { anything, capture, instance, mock, verify, when } from "ts-mockito";
 import { generatePaymentSummary } from "../fixtures/payment.fixtures";
 import { generateDissolutionSession, TOKEN } from "../fixtures/session.fixtures";
 import { createApp } from "./helpers/application.factory";
@@ -14,7 +14,13 @@ import "app/controllers/paymentReview.controller";
 import ApplicationStatus from "app/models/dto/applicationStatus.enum";
 import DissolutionGetResponse from "app/models/dto/dissolutionGetResponse";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
-import { HOW_DO_YOU_WANT_TO_PAY_URI, PAYMENT_REVIEW_URI, SEARCH_COMPANY_URI } from "app/paths";
+import {
+    HOW_DO_YOU_WANT_TO_PAY_URI,
+    PAYMENT_CALLBACK_URI,
+    PAYMENT_REVIEW_URI,
+    REDIRECT_GATE_URI,
+    SEARCH_COMPANY_URI,
+} from "app/paths";
 import DissolutionService from "app/services/dissolution/dissolution.service";
 import PaymentService from "app/services/payment/payment.service";
 import SessionService from "app/services/session/session.service";
@@ -24,6 +30,8 @@ import TYPES from "app/types";
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import PaymentType from "app/models/dto/paymentType.enum";
+import { getSavedSession } from "test/controllers/helpers/session.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -39,13 +47,12 @@ describe("PaymentReviewController", () => {
     let dissolution: DissolutionGetResponse;
     let dissolutionSession: DissolutionSession;
 
-    function initApp(payByAccountEnabled = 1, transactionsEnabled = true): Application {
+    function initApp(payByAccountEnabled = 1): Application {
         return createApp(container => {
             container.rebind(DissolutionService).toConstantValue(instance(dissolutionService));
             container.rebind(SessionService).toConstantValue(instance(sessionService));
             container.rebind(PaymentService).toConstantValue(instance(paymentService));
             container.rebind(TransactionService).toConstantValue(instance(transactionService));
-            container.rebind(TYPES.FEATURE_FLAG_TRANSACTIONS_ENABLED).toConstantValue(transactionsEnabled);
             container.rebind(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED).toConstantValue(payByAccountEnabled);
             container.rebind(JourneyPathService).toConstantValue({
                 journeyPath: (_req: any, pathTemplate: string) => pathTemplate,
@@ -113,6 +120,7 @@ describe("PaymentReviewController", () => {
             dissolution.transaction_id = "transaction-id";
             dissolution.application_status = ApplicationStatus.PENDING_PAYMENT;
             dissolutionSession.transactionId = undefined;
+            when(transactionService.isTransactionPaid(TOKEN, "transaction-id")).thenResolve(false);
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
@@ -138,6 +146,22 @@ describe("PaymentReviewController", () => {
                 )
             ).once();
             verify(dissolutionService.getDissolutionPaymentSummary(anything())).never();
+        });
+
+        it("should redirect to the search company page if the transaction has already been paid for", async () => {
+            dissolution.transaction_id = "transaction-id";
+            dissolution.application_status = ApplicationStatus.PENDING_APPROVAL;
+            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+            when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+            when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+            when(transactionService.isTransactionPaid(TOKEN, "transaction-id")).thenResolve(true);
+
+            await request(initApp())
+                .get(PAYMENT_REVIEW_URI)
+                .expect(StatusCodes.MOVED_TEMPORARILY)
+                .expect("Location", SEARCH_COMPANY_URI);
+
+            verify(dissolutionService.getTransactionDissolutionPaymentSummary(anything(), anything())).never();
         });
 
         it("should prevent payment review when the dissolution cannot be retrieved", async () => {
@@ -185,7 +209,6 @@ describe("PaymentReviewController", () => {
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
-            when(transactionService.closeTransaction(TOKEN, dissolutionSession.transactionId!)).thenResolve();
             when(paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())).thenResolve(
                 REDIRECT_URL
             );
@@ -196,26 +219,126 @@ describe("PaymentReviewController", () => {
                 .post(PAYMENT_REVIEW_URI)
                 .expect(StatusCodes.MOVED_TEMPORARILY)
                 .expect("Location", REDIRECT_URL);
+
+            verify(transactionService.closeTransaction(anything(), anything())).never();
         });
 
-        it("should close transaction before creating payment URL when transactionId exists", async () => {
-            const transactionId = "tx-123";
-            const txSession: DissolutionSession = { ...dissolutionSession, transactionId };
+        describe("transaction model dissolution", () => {
+            const TRANSACTION_ID = "tx-123";
+            const PAYMENT_SESSION_URL = "http://payments-api/payments";
 
-            when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
-            when(sessionService.getDissolutionSession(anything())).thenReturn(txSession);
-            when(dissolutionService.getDissolution(TOKEN, txSession)).thenResolve(dissolution);
-            when(transactionService.closeTransaction(TOKEN, transactionId)).thenResolve();
-            when(paymentService.generatePaymentURL(TOKEN, txSession, anything(), anything())).thenResolve(REDIRECT_URL);
+            beforeEach(() => {
+                dissolution.transaction_id = TRANSACTION_ID;
+                when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+                when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+            });
 
-            const app = initApp(0);
+            for (const payByAccountEnabled of [1, 0]) {
+                it(`should close the transaction then start the payment session, bypassing pay by account (pay by account ${payByAccountEnabled})`, async () => {
+                    when(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve(PAYMENT_SESSION_URL);
+                    when(
+                        paymentService.generateTransactionPaymentURL(
+                            TOKEN,
+                            PAYMENT_SESSION_URL,
+                            TRANSACTION_ID,
+                            anything(),
+                            anything()
+                        )
+                    ).thenResolve(REDIRECT_URL);
 
-            await request(app).post(PAYMENT_REVIEW_URI).expect(StatusCodes.MOVED_TEMPORARILY);
+                    await request(initApp(payByAccountEnabled))
+                        .post(PAYMENT_REVIEW_URI)
+                        .expect(StatusCodes.MOVED_TEMPORARILY)
+                        .expect("Location", REDIRECT_URL);
 
-            verify(transactionService.closeTransaction(TOKEN, transactionId)).once();
-            verify(transactionService.closeTransaction(TOKEN, transactionId)).calledBefore(
-                paymentService.generatePaymentURL(TOKEN, txSession, anything(), anything())
-            );
+                    verify(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).once();
+                    verify(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).calledBefore(
+                        paymentService.generateTransactionPaymentURL(
+                            TOKEN,
+                            PAYMENT_SESSION_URL,
+                            TRANSACTION_ID,
+                            anything(),
+                            anything()
+                        )
+                    );
+                    verify(paymentService.generatePaymentURL(anything(), anything(), anything(), anything())).never();
+                });
+            }
+
+            it("should save the payment state in the session and use the payment callback as the redirect", async () => {
+                when(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve(PAYMENT_SESSION_URL);
+                when(
+                    paymentService.generateTransactionPaymentURL(
+                        TOKEN,
+                        PAYMENT_SESSION_URL,
+                        TRANSACTION_ID,
+                        anything(),
+                        anything()
+                    )
+                ).thenResolve(REDIRECT_URL);
+
+                await request(initApp()).post(PAYMENT_REVIEW_URI).expect(StatusCodes.MOVED_TEMPORARILY);
+
+                const [, , , stateUUID, redirectUri] = capture(paymentService.generateTransactionPaymentURL).last();
+                const savedSession: DissolutionSession = getSavedSession(sessionService);
+
+                assert.equal(savedSession.paymentStateUUID, stateUUID);
+                assert.equal(savedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD);
+                assert.include(redirectUri, PAYMENT_CALLBACK_URI);
+            });
+
+            it("should redirect to the redirect gate without starting a payment session if no payment is required", async () => {
+                when(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve(undefined);
+
+                await request(initApp())
+                    .post(PAYMENT_REVIEW_URI)
+                    .expect(StatusCodes.MOVED_TEMPORARILY)
+                    .expect("Location", REDIRECT_GATE_URI);
+
+                verify(
+                    paymentService.generateTransactionPaymentURL(
+                        anything(),
+                        anything(),
+                        anything(),
+                        anything(),
+                        anything()
+                    )
+                ).never();
+            });
+
+            it("should not start a payment session if closing the transaction fails", async () => {
+                when(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).thenReject(
+                    new Error("Failed to close transaction")
+                );
+
+                await request(initApp()).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+                verify(
+                    paymentService.generateTransactionPaymentURL(
+                        anything(),
+                        anything(),
+                        anything(),
+                        anything(),
+                        anything()
+                    )
+                ).never();
+            });
+
+            it("should return an error if the payment session fails to create", async () => {
+                when(transactionService.closeTransaction(TOKEN, TRANSACTION_ID)).thenResolve(PAYMENT_SESSION_URL);
+                when(
+                    paymentService.generateTransactionPaymentURL(
+                        TOKEN,
+                        PAYMENT_SESSION_URL,
+                        TRANSACTION_ID,
+                        anything(),
+                        anything()
+                    )
+                ).thenReject(new Error("Payment session failed to create"));
+
+                await request(initApp()).post(PAYMENT_REVIEW_URI).expect(StatusCodes.INTERNAL_SERVER_ERROR);
+            });
         });
 
         it("should allow payment without checking director signatures", async () => {
@@ -231,32 +354,22 @@ describe("PaymentReviewController", () => {
                 .expect("Location", HOW_DO_YOU_WANT_TO_PAY_URI);
         });
 
-        for (const transactionsEnabled of [true, false]) {
-            for (const payByAccountEnabled of [1, 0]) {
-                for (const directorsToSign of [undefined, []]) {
-                    it(`should allow returning applicants with ${directorsToSign ? "empty" : "missing"} session selection, transactions ${transactionsEnabled} and pay by account ${payByAccountEnabled}`, async () => {
-                        dissolutionSession.directorsToSign = directorsToSign;
-                        dissolutionSession.transactionId = transactionsEnabled ? "tx-123" : undefined;
-                        when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
-                        when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
-                        when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
-                        when(transactionService.closeTransaction(TOKEN, "tx-123")).thenResolve();
-                        when(
-                            paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())
-                        ).thenResolve(REDIRECT_URL);
+        for (const payByAccountEnabled of [1, 0]) {
+            for (const directorsToSign of [undefined, []]) {
+                it(`should allow returning applicants with ${directorsToSign ? "empty" : "missing"} session selection and pay by account ${payByAccountEnabled}`, async () => {
+                    dissolutionSession.directorsToSign = directorsToSign;
+                    when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
+                    when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+                    when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
+                    when(
+                        paymentService.generatePaymentURL(TOKEN, dissolutionSession, anything(), anything())
+                    ).thenResolve(REDIRECT_URL);
 
-                        const app = initApp(payByAccountEnabled, transactionsEnabled);
-
-                        await request(app)
-                            .post(PAYMENT_REVIEW_URI)
-                            .expect(StatusCodes.MOVED_TEMPORARILY)
-                            .expect("Location", payByAccountEnabled ? HOW_DO_YOU_WANT_TO_PAY_URI : REDIRECT_URL);
-
-                        verify(transactionService.closeTransaction(anything(), anything())).times(
-                            transactionsEnabled ? 1 : 0
-                        );
-                    });
-                }
+                    await request(initApp(payByAccountEnabled))
+                        .post(PAYMENT_REVIEW_URI)
+                        .expect(StatusCodes.MOVED_TEMPORARILY)
+                        .expect("Location", payByAccountEnabled ? HOW_DO_YOU_WANT_TO_PAY_URI : REDIRECT_URL);
+                });
             }
         }
 

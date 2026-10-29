@@ -10,6 +10,7 @@ import { DissolutionApiClient } from "../clients/dissolutionApi.client";
 import PaymentApiClient from "../clients/paymentApi.client";
 
 import PaymentMapper from "app/mappers/payment/payment.mapper";
+import { TRANSACTION_PAYMENT_REFERENCE_PREFIX } from "app/constants/app.const";
 import DissolutionPaymentPatchRequest from "app/models/dto/dissolutionPaymentPatchRequest";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import TYPES from "app/types";
@@ -17,11 +18,12 @@ import TYPES from "app/types";
 @provide(PaymentService)
 export default class PaymentService {
     public constructor(
-        @inject(PaymentMapper) private mapper: PaymentMapper,
-        @inject(TYPES.DISSOLUTIONS_API_URL) private DISSOLUTIONS_API_URL: string,
-        @inject(PaymentApiClient) private client: PaymentApiClient,
-        @inject(ApplicationLogger) private logger: ApplicationLogger,
-        @inject(DissolutionApiClient) private dissolutionClient: DissolutionApiClient
+        @inject(PaymentMapper) private readonly mapper: PaymentMapper,
+        @inject(TYPES.DISSOLUTIONS_API_URL) private readonly DISSOLUTIONS_API_URL: string,
+        @inject(TYPES.TRANSACTIONS_API_URL) private readonly TRANSACTIONS_API_URL: string,
+        @inject(PaymentApiClient) private readonly client: PaymentApiClient,
+        @inject(ApplicationLogger) private readonly logger: ApplicationLogger,
+        @inject(DissolutionApiClient) private readonly dissolutionClient: DissolutionApiClient
     ) {}
 
     public async generatePaymentURL(
@@ -55,6 +57,37 @@ export default class PaymentService {
             applicationReferenceNumber,
             dissolutionPaymentPatchRequest
         );
+
+        return `${response.resource!.links.journey}?summary=false`;
+    }
+
+    public async generateTransactionPaymentURL(
+        token: string,
+        paymentSessionUrl: string,
+        transactionId: string,
+        paymentStateUUID: string,
+        paymentRedirectURI: string
+    ): Promise<string> {
+        const paymentResource: string = `${this.TRANSACTIONS_API_URL}/transactions/${transactionId}/payment`;
+
+        const createPaymentRequest: CreatePaymentRequest = this.mapper.mapToCreatePaymentRequest(
+            paymentRedirectURI,
+            `${TRANSACTION_PAYMENT_REFERENCE_PREFIX}_${transactionId}`,
+            paymentResource,
+            paymentStateUUID
+        );
+
+        const response: ApiResponse<Payment> = await this.client.createPaymentWithFullUrl(
+            token,
+            paymentSessionUrl,
+            createPaymentRequest
+        );
+
+        if (response.httpStatusCode !== StatusCodes.CREATED) {
+            const errMsg = `Failed to create transaction payment session for transaction ${transactionId}`;
+            this.logger.error(`${errMsg}, received status=${response.httpStatusCode}`);
+            throw new Error(errMsg);
+        }
 
         return `${response.resource!.links.journey}?summary=false`;
     }
