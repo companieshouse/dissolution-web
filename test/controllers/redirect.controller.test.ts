@@ -768,7 +768,10 @@ describe("RedirectController", () => {
 
         it("should not retrieve the dissolution if status is failed or cancelled", async () => {
             for (const status of [PaymentStatus.FAILED, PaymentStatus.CANCELLED]) {
-                await request(initApp()).get(PAYMENT_CALLBACK_URI).query({ state: STATE, status, ref: REF });
+                await request(initApp())
+                    .get(PAYMENT_CALLBACK_URI)
+                    .query({ state: STATE, status, ref: REF })
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
             }
 
             verify(service.getDissolution(anything(), anything())).never();
