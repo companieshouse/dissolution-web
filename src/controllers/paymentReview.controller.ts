@@ -80,6 +80,10 @@ export class PaymentReviewController extends JourneyBaseController {
             throw new Error("Unable to retrieve the dissolution before proceeding to payment");
         }
 
+        if (await this.isAlreadyPaid(dissolution, token)) {
+            return this.redirect(this.journeyPath(SEARCH_COMPANY_URI));
+        }
+
         if (dissolution.transaction_id) {
             return this.startTransactionPayment(token, dissolutionSession, dissolution.transaction_id);
         }
