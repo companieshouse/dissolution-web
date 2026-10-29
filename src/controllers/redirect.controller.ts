@@ -79,12 +79,15 @@ export class RedirectController extends JourneyBaseController {
         const session: DissolutionSession = this.sessionService.getDissolutionSession(this.httpContext.request)!;
 
         if (session.paymentStateUUID !== state) {
-            console.log(session.paymentStateUUID);
-            console.log(state);
-            return Promise.reject("State value is invalid");
+            throw new Error("State value is invalid");
         }
 
-        const dissolution: DissolutionGetResponse = (await this.getDissolution(session))!;
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session);
+
+        if (!dissolution) {
+            throw new Error("Unable to retrieve the dissolution while handling the payment callback");
+        }
+
         const { transaction_id: transactionId } = dissolution;
 
         if (!transactionId) {
@@ -96,7 +99,7 @@ export class RedirectController extends JourneyBaseController {
             session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
         }
 
-        const options: Optional<JourneyPathOptions> = Object.assign({}, { transactionId });
+        const options: JourneyPathOptions = { transactionId };
         return this.saveSessionAndRedirect({ session, redirectUri, options });
     }
 
@@ -138,10 +141,7 @@ export class RedirectController extends JourneyBaseController {
 
         if (this.isApplicant(dissolution, userEmail)) {
             const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-            const isPaid: boolean = await this.transactionService.isTransactionClosed(
-                token,
-                dissolution.transaction_id!
-            );
+            const isPaid: boolean = await this.transactionService.isTransactionPaid(token, dissolution.transaction_id!);
 
             if (isPaid) {
                 session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);

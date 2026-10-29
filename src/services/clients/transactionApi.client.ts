@@ -75,7 +75,8 @@ export default class TransactionApiClient {
             transactionId
         );
 
-        if (response.httpStatusCode !== StatusCodes.ACCEPTED) {
+        // 202 = payment required (header holds the payment session URL), 204 = closed with no payment needed
+        if (response.httpStatusCode !== StatusCodes.ACCEPTED && response.httpStatusCode !== StatusCodes.NO_CONTENT) {
             throw new TransactionApiError(
                 `Failed to close transaction - invalid HTTP status ${response.httpStatusCode}`,
                 response.httpStatusCode,

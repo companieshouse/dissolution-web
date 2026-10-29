@@ -48,15 +48,17 @@ export default class TransactionService {
     }
 
     /**
-     * Use to determine if transaction has been paid
+     * Use to determine if transaction has been paid. A transaction that is "closed pending payment" is not paid.
      */
-    public async isTransactionClosed(token: string, transactionId: string): Promise<boolean> {
+    public async isTransactionPaid(token: string, transactionId: string): Promise<boolean> {
         const { status } = await this.getTransaction(token, transactionId);
         return status === TransactionStatus.CLOSED;
     }
 
     /**
      * Closes the transaction, returning the payments session URL if the transaction requires payment.
+     * Closing a transaction that is already "closed pending payment" is allowed by transactions-api and returns
+     * the payment session URL again, which is what lets a user retry after a cancelled or failed payment.
      */
     public async closeTransaction(token: string, transactionId: string): Promise<string | undefined> {
         try {

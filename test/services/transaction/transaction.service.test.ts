@@ -71,7 +71,7 @@ describe("TransactionService", () => {
             }
         });
 
-        describe("getTransaction / isTransactionClosed", () => {
+        describe("getTransaction / isTransactionPaid", () => {
             it("should return the transaction from the client", async () => {
                 const tx: Transaction = aTransaction().withId(TRANSACTION_ID).build();
                 when(client.getTransaction(TOKEN, TRANSACTION_ID)).thenResolve(tx);
@@ -100,7 +100,7 @@ describe("TransactionService", () => {
                         aTransaction().withId(TRANSACTION_ID).withStatus(status).build()
                     );
 
-                    assert.equal(await service.isTransactionClosed(TOKEN, TRANSACTION_ID), expected);
+                    assert.equal(await service.isTransactionPaid(TOKEN, TRANSACTION_ID), expected);
                 });
             }
         });

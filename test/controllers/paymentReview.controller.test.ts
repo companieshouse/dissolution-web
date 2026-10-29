@@ -120,7 +120,7 @@ describe("PaymentReviewController", () => {
             dissolution.transaction_id = "transaction-id";
             dissolution.application_status = ApplicationStatus.PENDING_PAYMENT;
             dissolutionSession.transactionId = undefined;
-            when(transactionService.isTransactionClosed(TOKEN, "transaction-id")).thenResolve(false);
+            when(transactionService.isTransactionPaid(TOKEN, "transaction-id")).thenResolve(false);
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
@@ -154,7 +154,7 @@ describe("PaymentReviewController", () => {
             when(sessionService.getAccessToken(anything())).thenReturn(TOKEN);
             when(sessionService.getDissolutionSession(anything())).thenReturn(dissolutionSession);
             when(dissolutionService.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
-            when(transactionService.isTransactionClosed(TOKEN, "transaction-id")).thenResolve(true);
+            when(transactionService.isTransactionPaid(TOKEN, "transaction-id")).thenResolve(true);
 
             await request(initApp())
                 .get(PAYMENT_REVIEW_URI)

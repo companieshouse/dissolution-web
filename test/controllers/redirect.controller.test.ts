@@ -559,7 +559,7 @@ describe("RedirectController", () => {
 
                         it("should redirect to payment review if user is the applicant and the transaction is not closed", async () => {
                             dissolution.created_by = USER_EMAIL;
-                            when(transactionService.isTransactionClosed(TOKEN, TX_ID)).thenResolve(false);
+                            when(transactionService.isTransactionPaid(TOKEN, TX_ID)).thenResolve(false);
 
                             // PAYMENT_REVIEW_URI has no transaction segment yet, so the transaction id is not in the path
                             await request(app())
@@ -573,7 +573,7 @@ describe("RedirectController", () => {
                         it("should prepare a confirmation session and redirect to the confirmation page if user is the applicant and the transaction is closed", async () => {
                             const confirmation: DissolutionConfirmation = generateDissolutionConfirmation();
                             dissolution.created_by = USER_EMAIL;
-                            when(transactionService.isTransactionClosed(TOKEN, TX_ID)).thenResolve(true);
+                            when(transactionService.isTransactionPaid(TOKEN, TX_ID)).thenResolve(true);
                             when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation);
 
                             await request(app())
@@ -593,7 +593,7 @@ describe("RedirectController", () => {
 
                             await request(app()).get(REDIRECT_GATE_URI).expect(StatusCodes.MOVED_TEMPORARILY);
 
-                            verify(transactionService.isTransactionClosed(anything(), anything())).never();
+                            verify(transactionService.isTransactionPaid(anything(), anything())).never();
                         });
 
                         it("should redirect to certificate signed page with transaction id if user is not the applicant but is a signatory", async () => {
@@ -683,6 +683,17 @@ describe("RedirectController", () => {
                     ref: "123456",
                 })
                 .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+        });
+
+        it("should return an error and not save the session if the dissolution cannot be retrieved", async () => {
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(undefined);
+
+            await request(initApp())
+                .get(PAYMENT_CALLBACK_URI)
+                .query({ state: STATE, status: PaymentStatus.CANCELLED, ref: REF })
+                .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+            verify(session.setDissolutionSession(anything(), anything())).never();
         });
 
         it("should update dissolution session with reference number", async () => {

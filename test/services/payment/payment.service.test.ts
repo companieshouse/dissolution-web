@@ -124,14 +124,14 @@ describe("PaymentService", () => {
             when(
                 mapper.mapToCreatePaymentRequest(
                     REDIRECT_URI,
-                    TRANSACTION_ID,
+                    `Dissolution_${TRANSACTION_ID}`,
                     `${TRANSACTIONS_API_URL}/transactions/${TRANSACTION_ID}/payment`,
                     createPaymentRequest.state
                 )
             ).thenReturn(createPaymentRequest);
         });
 
-        it("should create the payment session against the supplied URL using the transaction as the reference and resource", async () => {
+        it("should create the payment session against the supplied URL using the prefixed transaction ID as the reference", async () => {
             when(client.createPaymentWithFullUrl(TOKEN, PAYMENT_SESSION_URL, createPaymentRequest)).thenResolve(
                 paymentResponse
             );

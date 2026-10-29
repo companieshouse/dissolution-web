@@ -185,7 +185,18 @@ describe("TransactionApiClient", () => {
                 verify(transactionService.putTransaction(deepEqual(closedTransaction), "tx-123")).once();
             });
 
-            it("Should throw an error when transaction api returns a status other than 202", async () => {
+            it("should return undefined when API returns 204 because no payment is required", async () => {
+                when(factory.getTransactionService(TOKEN)).thenReturn(instance(transactionService));
+                when(transactionService.putTransaction(anything(), "tx-123")).thenResolve({
+                    httpStatusCode: StatusCodes.NO_CONTENT,
+                });
+
+                const result = await transactionApiClient.closeTransaction(TOKEN, "tx-123");
+
+                assert.isUndefined(result);
+            });
+
+            it("Should throw an error when transaction api returns a status other than 202 or 204", async () => {
                 const closedTransaction = {
                     id: "tx-123",
                     description: DESCRIPTION,

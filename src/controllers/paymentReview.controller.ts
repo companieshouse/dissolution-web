@@ -95,6 +95,8 @@ export class PaymentReviewController extends JourneyBaseController {
         dissolutionSession: DissolutionSession,
         transactionId: string
     ): Promise<RedirectResult> {
+        // Safe to call again if the transaction is "closed pending payment" (resume / retry), each call starts a new payment session.
+        // A paid ("closed") transaction is guarded against before this point.
         const paymentSessionUrl: string | undefined = await this.transactionService.closeTransaction(
             token,
             transactionId
@@ -122,7 +124,7 @@ export class PaymentReviewController extends JourneyBaseController {
 
     private async isAlreadyPaid(dissolution: DissolutionGetResponse, token: string): Promise<boolean> {
         if (dissolution.transaction_id) {
-            return this.transactionService.isTransactionClosed(token, dissolution.transaction_id);
+            return this.transactionService.isTransactionPaid(token, dissolution.transaction_id);
         }
 
         return dissolution.application_status === ApplicationStatus.PAID;

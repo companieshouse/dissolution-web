@@ -11,6 +11,7 @@ export const CONFIRMATION_FEEDBACK_LINK = "https://www.smartsurvey.co.uk/s/closi
 export const CSRF_ENABLED = true;
 export const DESCRIPTION = "Dissolution Transaction";
 export const REFERENCE = "DissolutionReference";
+export const TRANSACTION_PAYMENT_REFERENCE_PREFIX = "Dissolution";
 export const MAX_OFFICERS_FOR_DISSOLUTION_SERVICE = 150;
 export const MAX_OFFICERS_PER_PAGE = 151;
 export const ROUTE_PARAM_TRANSACTION_ID = "transactionId";

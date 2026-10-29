@@ -10,6 +10,7 @@ import { DissolutionApiClient } from "../clients/dissolutionApi.client";
 import PaymentApiClient from "../clients/paymentApi.client";
 
 import PaymentMapper from "app/mappers/payment/payment.mapper";
+import { TRANSACTION_PAYMENT_REFERENCE_PREFIX } from "app/constants/app.const";
 import DissolutionPaymentPatchRequest from "app/models/dto/dissolutionPaymentPatchRequest";
 import DissolutionSession from "app/models/session/dissolutionSession.model";
 import TYPES from "app/types";
@@ -71,7 +72,7 @@ export default class PaymentService {
 
         const createPaymentRequest: CreatePaymentRequest = this.mapper.mapToCreatePaymentRequest(
             paymentRedirectURI,
-            transactionId,
+            `${TRANSACTION_PAYMENT_REFERENCE_PREFIX}_${transactionId}`,
             paymentResource,
             paymentStateUUID
         );
