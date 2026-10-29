@@ -768,10 +768,15 @@ describe("RedirectController", () => {
 
         it("should not retrieve the dissolution if status is failed or cancelled", async () => {
             for (const status of [PaymentStatus.FAILED, PaymentStatus.CANCELLED]) {
-                await request(initApp())
+                const response = await request(initApp())
                     .get(PAYMENT_CALLBACK_URI)
-                    .query({ state: STATE, status, ref: REF })
-                    .expect(StatusCodes.MOVED_TEMPORARILY);
+                    .query({ state: STATE, status, ref: REF });
+
+                assert.equal(response.status, StatusCodes.MOVED_TEMPORARILY);
+                assert.equal(
+                    response.headers.location,
+                    buildTestUrl(status === PaymentStatus.FAILED ? PAYMENT_REVIEW_URI : SEARCH_COMPANY_URI)
+                );
             }
 
             verify(service.getDissolution(anything(), anything())).never();
