@@ -82,6 +82,12 @@ export class RedirectController extends JourneyBaseController {
             throw new Error("State value is invalid");
         }
 
+        const redirectUri: string = this.getPaymentCallbackRedirectUri(status);
+
+        if (redirectUri !== VIEW_FINAL_CONFIRMATION_URI) {
+            return this.saveSessionAndRedirect({ session, redirectUri, options: {} });
+        }
+
         const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(session);
 
         if (!dissolution) {
@@ -90,14 +96,13 @@ export class RedirectController extends JourneyBaseController {
 
         const { transaction_id: transactionId } = dissolution;
 
-        if (!transactionId) {
+        if (transactionId) {
+            session.transactionId = transactionId;
+        } else {
             session.applicationReferenceNumber = reference;
         }
 
-        const redirectUri: string = this.getPaymentCallbackRedirectUri(status);
-        if (redirectUri === VIEW_FINAL_CONFIRMATION_URI) {
-            session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
-        }
+        session.confirmation = this.mapper.mapToDissolutionConfirmation(dissolution);
 
         const options: JourneyPathOptions = { transactionId };
         return this.saveSessionAndRedirect({ session, redirectUri, options });

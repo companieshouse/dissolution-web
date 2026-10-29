@@ -690,7 +690,7 @@ describe("RedirectController", () => {
 
             await request(initApp())
                 .get(PAYMENT_CALLBACK_URI)
-                .query({ state: STATE, status: PaymentStatus.CANCELLED, ref: REF })
+                .query({ state: STATE, status: PaymentStatus.PAID, ref: REF })
                 .expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
             verify(session.setDissolutionSession(anything(), anything())).never();
@@ -766,6 +766,14 @@ describe("RedirectController", () => {
                 .expect("Location", buildTestUrl(SEARCH_COMPANY_URI));
         });
 
+        it("should not retrieve the dissolution if status is failed or cancelled", async () => {
+            for (const status of [PaymentStatus.FAILED, PaymentStatus.CANCELLED]) {
+                await request(initApp()).get(PAYMENT_CALLBACK_URI).query({ state: STATE, status, ref: REF });
+            }
+
+            verify(service.getDissolution(anything(), anything())).never();
+        });
+
         describe("transaction model payment", () => {
             const TX_ID = "123456-123456-123456";
 
@@ -792,6 +800,17 @@ describe("RedirectController", () => {
                 assert.equal(updatedSession.confirmation, confirmation);
                 assert.equal(updatedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD);
                 assert.isUndefined(updatedSession.applicationReferenceNumber);
+            });
+
+            it("should refresh the session transaction id from the dissolution if status is paid", async () => {
+                dissolutionSession.transactionId = "stale-transaction-id";
+
+                await request(initApp())
+                    .get(PAYMENT_CALLBACK_URI)
+                    .query({ state: STATE, status: PaymentStatus.PAID, ref: TX_ID })
+                    .expect(StatusCodes.MOVED_TEMPORARILY);
+
+                assert.equal(getSavedSession(session).transactionId, TX_ID);
             });
 
             it("should redirect to payment review if status is failed", async () => {
