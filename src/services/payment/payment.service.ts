@@ -83,10 +83,9 @@ export default class PaymentService {
         );
 
         if (response.httpStatusCode !== StatusCodes.CREATED) {
-            this.logger.error(
-                `Failed to create transaction payment session: transactionId=${transactionId}, status=${response.httpStatusCode}`
-            );
-            throw new Error(`Failed to create payment session for transaction: ${transactionId}`);
+            const errMsg = `Failed to create transaction payment session for transaction ${transactionId}`;
+            this.logger.error(`${errMsg}, received status=${response.httpStatusCode}`);
+            throw new Error(errMsg);
         }
 
         return `${response.resource!.links.journey}?summary=false`;

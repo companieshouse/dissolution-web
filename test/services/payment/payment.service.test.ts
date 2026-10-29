@@ -164,7 +164,10 @@ describe("PaymentService", () => {
                 );
                 assert.fail();
             } catch (err: any) {
-                assert.equal(err.message, "Payment session failed to create");
+                assert.equal(
+                    err.message,
+                    "Failed to create transaction payment session for transaction " + TRANSACTION_ID
+                );
             }
         });
     });

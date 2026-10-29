@@ -662,12 +662,16 @@ describe("RedirectController", () => {
         const REF: string = "ABC123";
 
         let dissolutionSession: DissolutionSession = generateDissolutionSession();
+        let dissolution: DissolutionGetResponse = generateDissolutionGetResponse();
 
         beforeEach(() => {
             dissolutionSession = generateDissolutionSession();
             dissolutionSession.paymentStateUUID = STATE;
 
             when(session.getDissolutionSession(anything())).thenReturn(dissolutionSession);
+
+            dissolution = generateDissolutionGetResponse();
+            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
         });
 
         it("should throw an error if GovPay state is invalid", async () => {
@@ -690,7 +694,7 @@ describe("RedirectController", () => {
                     ref: REF,
                 })
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", VIEW_FINAL_CONFIRMATION_URI);
+                .expect("Location", buildTestUrl(VIEW_FINAL_CONFIRMATION_URI));
 
             verify(session.setDissolutionSession(anything(), anything())).once();
 
@@ -703,10 +707,7 @@ describe("RedirectController", () => {
         });
 
         it("should prepare a confirmation session and redirect to confirmation page if status is paid", async () => {
-            const dissolution: DissolutionGetResponse = generateDissolutionGetResponse();
             const confirmation: DissolutionConfirmation = generateDissolutionConfirmation();
-
-            when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
             when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation);
 
             await request(initApp())
@@ -717,7 +718,7 @@ describe("RedirectController", () => {
                     ref: REF,
                 })
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", VIEW_FINAL_CONFIRMATION_URI);
+                .expect("Location", buildTestUrl(VIEW_FINAL_CONFIRMATION_URI));
 
             verify(mapper.mapToDissolutionConfirmation(dissolution)).once();
             verify(session.setDissolutionSession(anything(), anything())).once();
@@ -739,7 +740,7 @@ describe("RedirectController", () => {
                     ref: REF,
                 })
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", PAYMENT_REVIEW_URI);
+                .expect("Location", buildTestUrl(PAYMENT_REVIEW_URI));
         });
 
         it("should redirect to search company if status is cancelled", async () => {
@@ -751,7 +752,7 @@ describe("RedirectController", () => {
                     ref: REF,
                 })
                 .expect(StatusCodes.MOVED_TEMPORARILY)
-                .expect("Location", SEARCH_COMPANY_URI);
+                .expect("Location", buildTestUrl(SEARCH_COMPANY_URI));
         });
 
         describe("transaction model payment", () => {
@@ -759,13 +760,14 @@ describe("RedirectController", () => {
 
             beforeEach(() => {
                 dissolutionSession.transactionId = TX_ID;
+
+                dissolution = generateDissolutionGetResponse();
+                dissolution.transaction_id = TX_ID;
+                when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
             });
 
             it("should prepare a confirmation session and redirect to confirmation page with the transaction id if status is paid", async () => {
-                const dissolution: DissolutionGetResponse = generateDissolutionGetResponse();
                 const confirmation: DissolutionConfirmation = generateDissolutionConfirmation();
-
-                when(service.getDissolution(TOKEN, dissolutionSession)).thenResolve(dissolution);
                 when(mapper.mapToDissolutionConfirmation(dissolution)).thenReturn(confirmation);
 
                 await request(initApp())
