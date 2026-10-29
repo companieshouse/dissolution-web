@@ -31,9 +31,9 @@ interface ViewModel {
 @controller(PAYMENT_REVIEW_URI, TYPES.JourneyIdAuthMiddleware)
 export class PaymentReviewController extends JourneyBaseController {
     public constructor(
-        @inject(SessionService) private sessionService: SessionService,
-        @inject(DissolutionService) private dissolutionService: DissolutionService,
-        @inject(PaymentService) private paymentService: PaymentService,
+        @inject(SessionService) private readonly sessionService: SessionService,
+        @inject(DissolutionService) private readonly dissolutionService: DissolutionService,
+        @inject(PaymentService) private readonly paymentService: PaymentService,
         @inject(TransactionService) private readonly transactionService: TransactionService,
         @inject(TYPES.PAY_BY_ACCOUNT_FEATURE_ENABLED) private readonly PAY_BY_ACCOUNT_FEATURE_ENABLED: number,
         @inject(TYPES.CHS_URL) private readonly CHS_URL: string,
@@ -44,18 +44,9 @@ export class PaymentReviewController extends JourneyBaseController {
 
     @httpGet("")
     public async get(): Promise<RedirectResult | string> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
-            this.httpContext.request
-        )!;
+        const { dissolution, dissolutionSession, hasAlreadyPaid } = await this.initPaymentContext();
 
-        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
-
-        if (!dissolution) {
-            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
-        }
-
-        if (await this.isAlreadyPaid(dissolution, token)) {
+        if (hasAlreadyPaid) {
             return this.redirect(SEARCH_COMPANY_URI);
         }
 
@@ -69,19 +60,10 @@ export class PaymentReviewController extends JourneyBaseController {
 
     @httpPost("")
     public async post(): Promise<RedirectResult> {
-        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
-        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
-            this.httpContext.request
-        )!;
+        const { token, dissolution, dissolutionSession, hasAlreadyPaid } = await this.initPaymentContext();
 
-        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
-
-        if (!dissolution) {
-            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
-        }
-
-        if (await this.isAlreadyPaid(dissolution, token)) {
-            return this.redirect(this.journeyPath(SEARCH_COMPANY_URI));
+        if (hasAlreadyPaid) {
+            return this.redirect(SEARCH_COMPANY_URI);
         }
 
         if (dissolution.transaction_id) {
@@ -113,10 +95,6 @@ export class PaymentReviewController extends JourneyBaseController {
         dissolutionSession: DissolutionSession,
         transactionId: string
     ): Promise<RedirectResult> {
-        if (await this.transactionService.isTransactionClosed(token, transactionId)) {
-            return this.redirect(this.journeyPath(REDIRECT_GATE_URI));
-        }
-
         const paymentSessionUrl: string | undefined = await this.transactionService.closeTransaction(
             token,
             transactionId
@@ -156,6 +134,28 @@ export class PaymentReviewController extends JourneyBaseController {
         };
 
         return super.render("payment-review", viewModel);
+    }
+
+    private async initPaymentContext(): Promise<{
+        token: string;
+        dissolutionSession: DissolutionSession;
+        dissolution: DissolutionGetResponse;
+        hasAlreadyPaid: boolean;
+    }> {
+        const token: string = this.sessionService.getAccessToken(this.httpContext.request);
+        const dissolutionSession: DissolutionSession = this.sessionService.getDissolutionSession(
+            this.httpContext.request
+        )!;
+
+        const dissolution: Optional<DissolutionGetResponse> = await this.getDissolution(dissolutionSession, token);
+
+        if (!dissolution) {
+            throw new Error("Unable to retrieve the dissolution before proceeding to payment");
+        }
+
+        const hasAlreadyPaid: boolean = await this.isAlreadyPaid(dissolution, token);
+
+        return { token, dissolutionSession, dissolution, hasAlreadyPaid };
     }
 
     private updateSession(

@@ -30,6 +30,8 @@ import TYPES from "app/types";
 import { generateDissolutionGetResponse } from "test/fixtures/dissolutionApi.fixtures";
 import mockCsrfMiddleware from "test/__mocks__/csrfProtectionMiddleware.mock";
 import JourneyPathService from "app/services/session/journeyPath.service";
+import PaymentType from "app/models/dto/paymentType.enum";
+import { getSavedSession } from "test/controllers/helpers/session.helper";
 
 mockCsrfMiddleware.restore();
 
@@ -279,11 +281,10 @@ describe("PaymentReviewController", () => {
                 await request(initApp()).post(PAYMENT_REVIEW_URI).expect(StatusCodes.MOVED_TEMPORARILY);
 
                 const [, , , stateUUID, redirectUri] = capture(paymentService.generateTransactionPaymentURL).last();
-                const [, savedSession] = capture<Request, DissolutionSession>(
-                    sessionService.setDissolutionSession
-                ).last();
+                const savedSession: DissolutionSession = getSavedSession(sessionService);
 
                 assert.equal(savedSession.paymentStateUUID, stateUUID);
+                assert.equal(savedSession.paymentType, PaymentType.CREDIT_DEBIT_CARD);
                 assert.include(redirectUri, PAYMENT_CALLBACK_URI);
             });
 
